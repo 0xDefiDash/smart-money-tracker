@@ -84,8 +84,8 @@ export function Sidebar() {
             <Activity className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">Smart Money</h1>
-            <p className="text-xs text-muted-foreground">Tracker</p>
+            <h1 className="text-sm font-bold text-foreground">Defidash</h1>
+            <p className="text-xs text-muted-foreground">Smart Money Tracker</p>
           </div>
         </div>
       </div>
