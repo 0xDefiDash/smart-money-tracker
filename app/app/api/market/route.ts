@@ -1,21 +1,31 @@
 
 import { NextResponse } from 'next/server'
-import { CoinGeckoAPI } from '@/lib/api-clients'
+import { TokenMetricsAPI, CoinGeckoAPI } from '@/lib/api-clients'
 import { prisma } from '@/lib/db'
 
 export const dynamic = "force-dynamic"
 
-const coinGecko = new CoinGeckoAPI()
+const tokenMetrics = new TokenMetricsAPI()
+const coinGecko = new CoinGeckoAPI() // Fallback
 
 export async function GET() {
   try {
-    // Fetch top cryptocurrencies from CoinGecko
-    const cryptos = await coinGecko.getTopCryptocurrencies(20)
+    console.log('Starting market data fetch with TokenMetrics API...')
+    
+    // Fetch top cryptocurrencies from TokenMetrics (primary) with CoinGecko fallback
+    let cryptos = await tokenMetrics.getTopCryptocurrencies(20)
+    console.log(`TokenMetrics returned ${cryptos.length} cryptocurrencies`)
+    
+    // If TokenMetrics fails or returns empty, fallback to CoinGecko
+    if (cryptos.length === 0) {
+      console.log('TokenMetrics API returned no data, falling back to CoinGecko...')
+      cryptos = await coinGecko.getTopCryptocurrencies(20)
+    }
     
     if (cryptos.length === 0) {
       return NextResponse.json({
         status: 'error',
-        error: 'Failed to fetch market data'
+        error: 'Failed to fetch market data from both TokenMetrics and CoinGecko APIs'
       }, { status: 500 })
     }
 
@@ -83,7 +93,9 @@ export async function GET() {
     return NextResponse.json({
       status: 'success',
       data: formattedData,
-      timestamp: new Date().toISOString()
+      source: cryptos.length > 0 && cryptos[0].id ? 'TokenMetrics' : 'CoinGecko',
+      timestamp: new Date().toISOString(),
+      count: formattedData.length
     })
 
   } catch (error) {
