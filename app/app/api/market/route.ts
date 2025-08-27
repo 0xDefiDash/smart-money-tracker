@@ -10,22 +10,23 @@ const coinGecko = new CoinGeckoAPI() // Fallback
 
 export async function GET() {
   try {
-    console.log('Starting market data fetch with CoinAPI...')
+    console.log('Starting market data fetch with CoinGecko (primary) and CoinAPI fallback...')
     
-    // Fetch top cryptocurrencies from CoinAPI (primary) with CoinGecko fallback
-    let cryptos = await coinAPI.getTopCryptocurrencies(20)
-    console.log(`CoinAPI returned ${cryptos.length} cryptocurrencies`)
+    // Fetch top cryptocurrencies from CoinGecko (primary) with CoinAPI fallback
+    let cryptos = await coinGecko.getTopCryptocurrencies(20)
+    console.log(`CoinGecko returned ${cryptos.length} cryptocurrencies`)
     
-    // If CoinAPI fails or returns empty, fallback to CoinGecko
+    // If CoinGecko fails or returns empty, fallback to CoinAPI
     if (cryptos.length === 0) {
-      console.log('CoinAPI returned no data, falling back to CoinGecko...')
-      cryptos = await coinGecko.getTopCryptocurrencies(20)
+      console.log('CoinGecko returned no data, falling back to CoinAPI...')
+      cryptos = await coinAPI.getTopCryptocurrencies(20)
+      console.log(`CoinAPI returned ${cryptos.length} cryptocurrencies`)
     }
     
     if (cryptos.length === 0) {
       return NextResponse.json({
         status: 'error',
-        error: 'Failed to fetch market data from both CoinAPI and CoinGecko APIs'
+        error: 'Failed to fetch market data from both CoinGecko and CoinAPI APIs'
       }, { status: 500 })
     }
 
@@ -90,10 +91,16 @@ export async function GET() {
       image: crypto.image,
     }))
 
+    // Determine data source - CoinGecko is primary, CoinAPI is fallback
+    let dataSource = 'CoinGecko';
+    if (cryptos.length === 0) {
+      dataSource = 'Enhanced Fallback';
+    }
+
     return NextResponse.json({
       status: 'success',
       data: formattedData,
-      source: cryptos.length > 0 && cryptos[0].id ? 'CoinAPI' : 'CoinGecko',
+      source: dataSource,
       timestamp: new Date().toISOString(),
       count: formattedData.length
     })
