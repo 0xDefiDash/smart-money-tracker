@@ -7,23 +7,23 @@ import { TrendingUp, ArrowUpIcon, ArrowDownIcon } from 'lucide-react'
 import { formatCurrency, formatPercent } from '@/lib/utils'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts'
 
-// Mock market data
+// Mock market data with current August 2025 prices
 const mockMarketData = [
-  { time: '00:00', btc: 42000, eth: 2500, total: 2.4 },
-  { time: '04:00', btc: 42150, eth: 2520, total: 2.42 },
-  { time: '08:00', btc: 41900, eth: 2480, total: 2.38 },
-  { time: '12:00', btc: 42300, eth: 2540, total: 2.45 },
-  { time: '16:00', btc: 42500, eth: 2580, total: 2.48 },
-  { time: '20:00', btc: 42450, eth: 2560, total: 2.47 },
-  { time: '24:00', btc: 42600, eth: 2590, total: 2.49 },
+  { time: '00:00', btc: 110500, eth: 4580, total: 2.45 },
+  { time: '04:00', btc: 110850, eth: 4620, total: 2.47 },
+  { time: '08:00', btc: 110200, eth: 4540, total: 2.43 },
+  { time: '12:00', btc: 111200, eth: 4640, total: 2.49 },
+  { time: '16:00', btc: 111600, eth: 4680, total: 2.52 },
+  { time: '20:00', btc: 111400, eth: 4660, total: 2.51 },
+  { time: '24:00', btc: 111915, eth: 4654, total: 2.53 },
 ]
 
 const topCryptos = [
-  { symbol: 'BTC', name: 'Bitcoin', price: 42600, change: 1.2, volume: 28500000000 },
-  { symbol: 'ETH', name: 'Ethereum', price: 2590, change: -0.8, volume: 12300000000 },
-  { symbol: 'BNB', name: 'BNB', price: 310, change: 2.4, volume: 1200000000 },
-  { symbol: 'SOL', name: 'Solana', price: 98, change: 5.6, volume: 2100000000 },
-  { symbol: 'ADA', name: 'Cardano', price: 0.52, change: -1.2, volume: 890000000 },
+  { symbol: 'BTC', name: 'Bitcoin', price: 111915, change: 2.06, volume: 36186852922 },
+  { symbol: 'ETH', name: 'Ethereum', price: 4654, change: 2.95, volume: 35700514440 },
+  { symbol: 'XRP', name: 'XRP', price: 3.01, change: 2.86, volume: 6166406385 },
+  { symbol: 'BNB', name: 'BNB', price: 595, change: 1.9, volume: 2100000000 },
+  { symbol: 'SOL', name: 'Solana', price: 158, change: 5.2, volume: 4200000000 },
 ]
 
 export function MarketOverview() {

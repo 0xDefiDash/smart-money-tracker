@@ -8,17 +8,17 @@ import { ArrowUpIcon, ArrowDownIcon, TrendingUp, DollarSign } from 'lucide-react
 import { formatCurrency, formatPercent, getChangeColor } from '@/lib/utils'
 import Image from 'next/image'
 
-// Mock live market data
+// Mock live market data with current August 2025 prices
 const mockMarketData = [
   {
     id: 'bitcoin',
     symbol: 'BTC',
     name: 'Bitcoin',
-    price: 42650.50,
-    change24h: 2.45,
-    changePercent24h: 2.45,
-    marketCap: 836000000000,
-    volume24h: 28500000000,
+    price: 111915.50,
+    change24h: 2267.74,
+    changePercent24h: 2.06,
+    marketCap: 2228169833151,
+    volume24h: 36186852922,
     rank: 1,
     image: 'https://assets.coingecko.com/coins/images/1/thumb/bitcoin.png',
   },
@@ -26,11 +26,11 @@ const mockMarketData = [
     id: 'ethereum',
     symbol: 'ETH',
     name: 'Ethereum',
-    price: 2590.75,
-    change24h: -32.15,
-    changePercent24h: -1.23,
-    marketCap: 311000000000,
-    volume24h: 12300000000,
+    price: 4653.63,
+    change24h: 133.28,
+    changePercent24h: 2.95,
+    marketCap: 561452136761,
+    volume24h: 35700514440,
     rank: 2,
     image: 'https://assets.coingecko.com/coins/images/279/thumb/ethereum.png',
   },

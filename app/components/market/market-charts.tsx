@@ -20,22 +20,22 @@ const marketCapData = [
 
 const priceData = {
   btc: [
-    { time: '00:00', price: 42000 },
-    { time: '04:00', price: 42150 },
-    { time: '08:00', price: 41900 },
-    { time: '12:00', price: 42300 },
-    { time: '16:00', price: 42500 },
-    { time: '20:00', price: 42450 },
-    { time: '24:00', price: 42650 },
+    { time: '00:00', price: 110500 },
+    { time: '04:00', price: 110850 },
+    { time: '08:00', price: 110200 },
+    { time: '12:00', price: 111200 },
+    { time: '16:00', price: 111600 },
+    { time: '20:00', price: 111400 },
+    { time: '24:00', price: 111915 },
   ],
   eth: [
-    { time: '00:00', price: 2500 },
-    { time: '04:00', price: 2520 },
-    { time: '08:00', price: 2480 },
-    { time: '12:00', price: 2540 },
-    { time: '16:00', price: 2580 },
-    { time: '20:00', price: 2560 },
-    { time: '24:00', price: 2590 },
+    { time: '00:00', price: 4580 },
+    { time: '04:00', price: 4620 },
+    { time: '08:00', price: 4540 },
+    { time: '12:00', price: 4640 },
+    { time: '16:00', price: 4680 },
+    { time: '20:00', price: 4660 },
+    { time: '24:00', price: 4654 },
   ]
 }
 
