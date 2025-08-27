@@ -6,7 +6,8 @@ import { Activity, ExternalLink, ArrowRightIcon } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
-// Mock whale transaction data
+// Mock whale transaction data with deterministic timestamps
+const baseTimestamp = new Date('2025-08-27T15:30:00Z').getTime();
 const mockWhaleTransactions = [
   {
     id: '1',
@@ -16,7 +17,7 @@ const mockWhaleTransactions = [
     value: '2,450.65',
     valueUsd: 2450650,
     cryptocurrency: 'BTC',
-    timestamp: new Date(Date.now() - 1200000), // 20 minutes ago
+    timestamp: new Date(baseTimestamp - 1200000), // 20 minutes ago
     blockchain: 'bitcoin',
     isAlert: true,
   },
@@ -28,7 +29,7 @@ const mockWhaleTransactions = [
     value: '1,285.34',
     valueUsd: 3325884,
     cryptocurrency: 'ETH',
-    timestamp: new Date(Date.now() - 2400000), // 40 minutes ago
+    timestamp: new Date(baseTimestamp - 2400000), // 40 minutes ago
     blockchain: 'ethereum',
     isAlert: true,
   },
@@ -40,7 +41,7 @@ const mockWhaleTransactions = [
     value: '50,000',
     valueUsd: 1550000,
     cryptocurrency: 'SOL',
-    timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
     blockchain: 'solana',
     isAlert: false,
   },
@@ -52,7 +53,7 @@ const mockWhaleTransactions = [
     value: '125,430.50',
     valueUsd: 1880457,
     cryptocurrency: 'BNB',
-    timestamp: new Date(Date.now() - 4800000), // 80 minutes ago
+    timestamp: new Date(baseTimestamp - 4800000), // 80 minutes ago
     blockchain: 'bsc',
     isAlert: false,
   },

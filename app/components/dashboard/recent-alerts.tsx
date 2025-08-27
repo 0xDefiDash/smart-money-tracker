@@ -6,7 +6,8 @@ import { Zap, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
-// Mock alerts data
+// Mock alerts data with deterministic timestamps
+const baseTimestamp = new Date('2025-08-27T15:30:00Z').getTime();
 const mockAlerts = [
   {
     id: '1',
@@ -15,7 +16,7 @@ const mockAlerts = [
     message: 'Transaction worth $2.45M detected from unknown wallet',
     amount: 2450000,
     cryptocurrency: 'BTC',
-    timestamp: new Date(Date.now() - 900000), // 15 minutes ago
+    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
     severity: 'high',
     isRead: false,
   },
@@ -26,7 +27,7 @@ const mockAlerts = [
     message: 'Significant ETH outflow detected from Coinbase Pro',
     amount: 3325000,
     cryptocurrency: 'ETH',
-    timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
+    timestamp: new Date(baseTimestamp - 1800000), // 30 minutes ago
     severity: 'medium',
     isRead: false,
   },
@@ -37,7 +38,7 @@ const mockAlerts = [
     message: 'Known whale wallet showing unusual activity patterns',
     amount: 1850000,
     cryptocurrency: 'SOL',
-    timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
     severity: 'medium',
     isRead: true,
   },
@@ -48,7 +49,7 @@ const mockAlerts = [
     message: 'Large institutional purchase detected via OTC desk',
     amount: 5200000,
     cryptocurrency: 'BTC',
-    timestamp: new Date(Date.now() - 5400000), // 1.5 hours ago
+    timestamp: new Date(baseTimestamp - 5400000), // 1.5 hours ago
     severity: 'high',
     isRead: true,
   },

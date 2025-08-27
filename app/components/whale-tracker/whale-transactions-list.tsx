@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Activity, ExternalLink, ArrowRightIcon, AlertTriangle, Copy, Eye } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 
-// Mock whale transactions data
+// Mock whale transactions data with deterministic timestamps
+const baseTimestamp = new Date('2025-08-27T15:30:00Z').getTime();
 const mockTransactions = [
   {
     id: '1',
@@ -18,7 +19,7 @@ const mockTransactions = [
     value: '2,450.65',
     valueUsd: 2450650,
     cryptocurrency: 'BTC',
-    timestamp: new Date(Date.now() - 1200000),
+    timestamp: new Date(baseTimestamp - 1200000),
     blockchain: 'Bitcoin',
     gasUsed: null,
     gasPrice: null,
@@ -35,7 +36,7 @@ const mockTransactions = [
     value: '1,285.34',
     valueUsd: 3325884,
     cryptocurrency: 'ETH',
-    timestamp: new Date(Date.now() - 2400000),
+    timestamp: new Date(baseTimestamp - 2400000),
     blockchain: 'Ethereum',
     gasUsed: '21000',
     gasPrice: '25',
@@ -52,7 +53,7 @@ const mockTransactions = [
     value: '50,000',
     valueUsd: 1550000,
     cryptocurrency: 'SOL',
-    timestamp: new Date(Date.now() - 3600000),
+    timestamp: new Date(baseTimestamp - 3600000),
     blockchain: 'Solana',
     gasUsed: null,
     gasPrice: null,
@@ -69,7 +70,7 @@ const mockTransactions = [
     value: '125,430.50',
     valueUsd: 1880457,
     cryptocurrency: 'BNB',
-    timestamp: new Date(Date.now() - 4800000),
+    timestamp: new Date(baseTimestamp - 4800000),
     blockchain: 'BSC',
     gasUsed: '21000',
     gasPrice: '5',
@@ -86,7 +87,7 @@ const mockTransactions = [
     value: '2,890.75',
     valueUsd: 7485950,
     cryptocurrency: 'ETH',
-    timestamp: new Date(Date.now() - 6000000),
+    timestamp: new Date(baseTimestamp - 6000000),
     blockchain: 'Ethereum',
     gasUsed: '150000',
     gasPrice: '35',

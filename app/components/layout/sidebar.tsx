@@ -3,6 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Activity,
@@ -66,6 +67,15 @@ const sidebarItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [whaleCount, setWhaleCount] = useState(175) // Default deterministic value
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+    // Set a deterministic but varying count based on current time
+    const baseCount = 150 + (Math.floor(Date.now() / 1000 / 3600) % 50)
+    setWhaleCount(baseCount)
+  }, [])
 
   return (
     <div className="w-64 bg-card border-r border-border">
@@ -117,7 +127,7 @@ export function Sidebar() {
             <span className="text-xs font-medium text-foreground">Real-time Updates</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Monitoring {Math.floor(Math.random() * 50 + 150)} whale addresses
+            Monitoring {whaleCount} whale addresses
           </p>
         </div>
       </div>
