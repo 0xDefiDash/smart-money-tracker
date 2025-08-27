@@ -160,18 +160,18 @@ export default function WalletMonitor() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center space-x-2">
-            <Wallet className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground flex items-center space-x-2">
+            <Wallet className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
             <span>Wallet Monitor</span>
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 text-sm lg:text-base">
             Analyze any wallet's token holdings, transaction history, and NFT collection
           </p>
         </div>
-        <Badge variant="outline" className="text-primary border-primary">
+        <Badge variant="outline" className="text-primary border-primary self-start sm:self-auto">
           <Eye className="w-3 h-3 mr-1" />
           Real-time Data
         </Badge>

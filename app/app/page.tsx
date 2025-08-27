@@ -11,16 +11,16 @@ export const dynamic = "force-dynamic"
 
 export default function DashboardPage() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Smart Money Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground">Smart Money Dashboard</h1>
+          <p className="text-muted-foreground mt-1 text-sm lg:text-base">
             Track whale transactions and institutional flows in real-time
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 self-start sm:self-auto">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           <span className="text-sm text-muted-foreground">Live</span>
         </div>

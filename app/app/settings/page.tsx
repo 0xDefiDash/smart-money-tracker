@@ -161,57 +161,59 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6 pb-20 lg:pb-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center space-x-2">
-            <Settings className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground flex items-center space-x-2">
+            <Settings className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
             <span>Settings</span>
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 text-sm lg:text-base">
             Configure your Smart Money Tracker preferences and display options
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
           {lastSaved && (
             <Badge variant="secondary" className="text-xs">
               <CheckCircle className="w-3 h-3 mr-1" />
               Last saved: {lastSaved.toLocaleTimeString()}
             </Badge>
           )}
-          <Button 
-            onClick={resetSettings}
-            variant="outline"
-            size="sm"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Reset
-          </Button>
-          <Button 
-            onClick={saveSettings}
-            disabled={isSaving || !hasChanges}
-            size="sm"
-          >
-            {isSaving ? (
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
-            )}
-            Save Changes
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              onClick={resetSettings}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reset
+            </Button>
+            <Button 
+              onClick={saveSettings}
+              disabled={isSaving || !hasChanges}
+              size="sm"
+            >
+              {isSaving ? (
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              Save Changes
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Settings Tabs */}
-      <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Alerts</TabsTrigger>
-          <TabsTrigger value="display">Display</TabsTrigger>
-          <TabsTrigger value="apis">APIs</TabsTrigger>
-          <TabsTrigger value="privacy">Privacy</TabsTrigger>
-          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+      <Tabs defaultValue="general" className="space-y-4 lg:space-y-6">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
+          <TabsTrigger value="general" className="text-xs lg:text-sm">General</TabsTrigger>
+          <TabsTrigger value="notifications" className="text-xs lg:text-sm">Alerts</TabsTrigger>
+          <TabsTrigger value="display" className="text-xs lg:text-sm">Display</TabsTrigger>
+          <TabsTrigger value="apis" className="text-xs lg:text-sm">APIs</TabsTrigger>
+          <TabsTrigger value="privacy" className="text-xs lg:text-sm">Privacy</TabsTrigger>
+          <TabsTrigger value="advanced" className="text-xs lg:text-sm">Advanced</TabsTrigger>
         </TabsList>
 
         {/* General Settings */}
@@ -780,12 +782,12 @@ export default function SettingsPage() {
 
       {/* Save Button (Sticky) */}
       {hasChanges && (
-        <div className="fixed bottom-6 right-6">
+        <div className="fixed bottom-4 left-4 right-4 lg:bottom-6 lg:left-auto lg:right-6 lg:w-auto z-50">
           <Button 
             onClick={saveSettings}
             disabled={isSaving}
             size="lg"
-            className="shadow-lg"
+            className="w-full lg:w-auto shadow-lg touch-manipulation"
           >
             {isSaving ? (
               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
