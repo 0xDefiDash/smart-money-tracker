@@ -1,0 +1,136 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/smart_money_tracker/app/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Cryptocurrency {
+  id                String             @id @default(cuid())
+  symbol            String             @unique
+  name              String
+  coinGeckoId       String             @unique
+  marketCap         BigInt?
+  price             Float?
+  volume24h         Float?
+  priceChange24h    Float?
+  rank              Int?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  priceHistories    PriceHistory[]
+  whaleTransactions WhaleTransaction[]
+
+  @@map("cryptocurrencies")
+}
+
+model PriceHistory {
+  id             String         @id @default(cuid())
+  cryptoId       String
+  price          Float
+  marketCap      BigInt?
+  volume         Float?
+  timestamp      DateTime
+  
+  cryptocurrency Cryptocurrency @relation(fields: [cryptoId], references: [id], onDelete: Cascade)
+  
+  @@map("price_histories")
+  @@index([cryptoId, timestamp])
+}
+
+model WhaleTransaction {
+  id                String         @id @default(cuid())
+  txHash            String         @unique
+  blockNumber       BigInt?
+  cryptoId          String
+  fromAddress       String
+  toAddress         String
+  value             String         // Store as string to handle large numbers
+  valueUsd          Float
+  gasUsed           BigInt?
+  gasPrice          BigInt?
+  timestamp         DateTime
+  blockchain        String
+  isAlert           Boolean        @default(false)
+  alertThreshold    Float?         // USD threshold that triggered alert
+  
+  cryptocurrency    Cryptocurrency @relation(fields: [cryptoId], references: [id], onDelete: Cascade)
+  
+  @@map("whale_transactions")
+  @@index([cryptoId, timestamp])
+  @@index([valueUsd, timestamp])
+  @@index([fromAddress])
+  @@index([toAddress])
+}
+
+model ExchangeFlow {
+  id              String   @id @default(cuid())
+  exchangeName    String
+  cryptocurrency  String
+  flowType        String   // "inflow" or "outflow"
+  amount          String   // Store as string to handle large numbers
+  amountUsd       Float
+  timestamp       DateTime
+  
+  @@map("exchange_flows")
+  @@index([exchangeName, cryptocurrency, timestamp])
+  @@index([flowType, timestamp])
+}
+
+model WalletWatch {
+  id          String   @id @default(cuid())
+  address     String   @unique
+  label       String?
+  blockchain  String
+  isWhale     Boolean  @default(false)
+  balance     String?  // Current balance as string
+  balanceUsd  Float?
+  lastActive  DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@map("wallet_watches")
+  @@index([blockchain, isWhale])
+}
+
+model DailyReport {
+  id                    String   @id @default(cuid())
+  date                  DateTime @unique @db.Date
+  totalWhaleTransactions Int      @default(0)
+  totalWhaleVolumeUsd   Float    @default(0)
+  topCryptoByVolume     String?
+  largestTransactionUsd Float?
+  topExchangeInflow     String?
+  topExchangeOutflow    String?
+  marketSentiment       String?  // "bullish", "bearish", "neutral"
+  reportData            Json?    // Store detailed report data
+  createdAt             DateTime @default(now())
+  
+  @@map("daily_reports")
+}
+
+model AlertSubscription {
+  id              String   @id @default(cuid())
+  email           String
+  alertType       String   // "whale_transaction", "exchange_flow", "daily_report"
+  thresholdUsd    Float?   // Alert threshold in USD
+  cryptocurrencies String[] // Array of crypto symbols to monitor
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  @@map("alert_subscriptions")
+}
