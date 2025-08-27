@@ -29,9 +29,18 @@ export default function RootLayout({
         >
           <div className="flex h-screen bg-background">
             <Sidebar />
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
+            <div className="flex-1 flex flex-col">
+              <main className="flex-1 overflow-auto">
+                {children}
+              </main>
+              <footer className="border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="px-6 py-3 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    © 2025 Defidash. All rights reserved.
+                  </p>
+                </div>
+              </footer>
+            </div>
           </div>
           <Toaster />
         </ThemeProvider>
