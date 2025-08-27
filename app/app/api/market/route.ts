@@ -8,7 +8,18 @@ export const dynamic = "force-dynamic"
 const coinAPI = new CoinAPIClient()
 const coinGecko = new CoinGeckoAPI() // Fallback
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Add aggressive cache control headers for frequent updates
+  const headers = new Headers({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  })
+  
   try {
     console.log('Starting market data fetch with CoinGecko (primary) and CoinAPI fallback...')
     
@@ -27,7 +38,7 @@ export async function GET() {
       return NextResponse.json({
         status: 'error',
         error: 'Failed to fetch market data from both CoinGecko and CoinAPI APIs'
-      }, { status: 500 })
+      }, { status: 500, headers })
     }
 
     // Update database with current prices
@@ -103,13 +114,13 @@ export async function GET() {
       source: dataSource,
       timestamp: new Date().toISOString(),
       count: formattedData.length
-    })
+    }, { headers })
 
   } catch (error) {
     console.error('Market API error:', error)
     return NextResponse.json({
       status: 'error',
       error: 'Internal server error'
-    }, { status: 500 })
+    }, { status: 500, headers })
   }
 }

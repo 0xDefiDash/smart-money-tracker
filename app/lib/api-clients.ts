@@ -18,7 +18,7 @@ export class CoinAPIClient {
       // Get list of assets first to understand the format
       const assetsResponse = await fetch(`${this.baseURL}/assets?filter_asset_type_id=crypto`, { 
         headers,
-        next: { revalidate: 300 }
+        next: { revalidate: 0 } // No caching for real-time data
       });
       
       if (!assetsResponse.ok) {
@@ -333,7 +333,7 @@ export class CoinGeckoAPI {
       
       const response = await fetch(url, { 
         headers,
-        next: { revalidate: 300 } // Cache for 5 minutes
+        next: { revalidate: 0 } // No caching for real-time data
       });
       
       if (!response.ok) throw new Error(`CoinGecko API error: ${response.status}`);

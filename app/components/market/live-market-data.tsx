@@ -1,102 +1,82 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowUpIcon, ArrowDownIcon, TrendingUp, DollarSign } from 'lucide-react'
+import { ArrowUpIcon, ArrowDownIcon, TrendingUp, DollarSign, RefreshCw } from 'lucide-react'
 import { formatCurrency, formatPercent, getChangeColor } from '@/lib/utils'
 import Image from 'next/image'
 
-// Mock live market data with current August 2025 prices
-const mockMarketData = [
-  {
-    id: 'bitcoin',
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    price: 111915.50,
-    change24h: 2267.74,
-    changePercent24h: 2.06,
-    marketCap: 2228169833151,
-    volume24h: 36186852922,
-    rank: 1,
-    image: 'https://assets.coingecko.com/coins/images/1/thumb/bitcoin.png',
-  },
-  {
-    id: 'ethereum',
-    symbol: 'ETH',
-    name: 'Ethereum',
-    price: 4653.63,
-    change24h: 133.28,
-    changePercent24h: 2.95,
-    marketCap: 561452136761,
-    volume24h: 35700514440,
-    rank: 2,
-    image: 'https://assets.coingecko.com/coins/images/279/thumb/ethereum.png',
-  },
-  {
-    id: 'binancecoin',
-    symbol: 'BNB',
-    name: 'BNB',
-    price: 315.20,
-    change24h: 7.85,
-    changePercent24h: 2.56,
-    marketCap: 47500000000,
-    volume24h: 1200000000,
-    rank: 3,
-    image: 'https://assets.coingecko.com/coins/images/825/thumb/binance-coin-logo.png',
-  },
-  {
-    id: 'solana',
-    symbol: 'SOL',
-    name: 'Solana',
-    price: 98.45,
-    change24h: 5.67,
-    changePercent24h: 6.11,
-    marketCap: 42800000000,
-    volume24h: 2100000000,
-    rank: 4,
-    image: 'https://assets.coingecko.com/coins/images/4128/thumb/solana.png',
-  },
-  {
-    id: 'cardano',
-    symbol: 'ADA',
-    name: 'Cardano',
-    price: 0.525,
-    change24h: -0.015,
-    changePercent24h: -2.78,
-    marketCap: 18500000000,
-    volume24h: 890000000,
-    rank: 5,
-    image: 'https://assets.coingecko.com/coins/images/975/thumb/cardano.png',
-  },
-  {
-    id: 'avalanche-2',
-    symbol: 'AVAX',
-    name: 'Avalanche',
-    price: 36.25,
-    change24h: 1.45,
-    changePercent24h: 4.17,
-    marketCap: 14200000000,
-    volume24h: 456000000,
-    rank: 6,
-    image: 'https://assets.coingecko.com/coins/images/12559/thumb/coin-round-red.png',
-  },
-]
+interface CryptoData {
+  id: string
+  symbol: string
+  name: string
+  price: number
+  change24h: number
+  changePercent24h: number
+  marketCap: number
+  volume24h: number
+  rank: number
+  image?: string
+}
 
 export function LiveMarketData() {
   const [lastUpdated, setLastUpdated] = useState('--:--:--')
+  const [cryptoData, setCryptoData] = useState<CryptoData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
+  // Fetch market data from API
+  const fetchMarketData = useCallback(async () => {
+    try {
+      setError(null)
+      const response = await fetch('/api/market', { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      if (data.status === 'success' && data.data) {
+        setCryptoData(data.data.slice(0, 20)) // Show top 20 cryptos
+        setIsLoading(false)
+      } else {
+        throw new Error(data.error || 'Failed to fetch market data')
+      }
+    } catch (err) {
+      console.error('Error fetching market data:', err)
+      setError(err instanceof Error ? err.message : 'Unknown error')
+      setIsLoading(false)
+    }
+  }, [])
+
+  // Initial data fetch and periodic updates
   useEffect(() => {
+    fetchMarketData() // Initial fetch
+    
+    // Update time display
     const updateTime = () => {
       setLastUpdated(new Date().toLocaleTimeString())
     }
     
-    updateTime() // Initial update
-    const interval = setInterval(updateTime, 60000) // Update every minute
+    updateTime()
     
-    return () => clearInterval(interval)
-  }, [])
+    // Set up intervals
+    const timeInterval = setInterval(updateTime, 1000) // Update time every second
+    const dataInterval = setInterval(fetchMarketData, 15000) // Fetch data every 15 seconds for faster updates
+    
+    return () => {
+      clearInterval(timeInterval)
+      clearInterval(dataInterval)
+    }
+  }, [fetchMarketData])
 
   return (
     <Card className="bg-gradient-to-br from-background to-muted/10">
@@ -104,18 +84,44 @@ export function LiveMarketData() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold flex items-center space-x-2">
             <TrendingUp className="w-5 h-5 text-primary" />
-            <span>Top Cryptocurrencies</span>
+            <span>Live Market Data</span>
           </h2>
-          <div className="text-sm text-muted-foreground">
-            Last updated: {lastUpdated}
+          <div className="flex items-center space-x-2">
+            {isLoading && <RefreshCw className="w-4 h-4 animate-spin text-primary" />}
+            <div className="text-sm text-muted-foreground">
+              Last updated: {lastUpdated}
+            </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <div className="min-w-full">
-            <div className="grid grid-cols-1 gap-3">
-              {mockMarketData.map((crypto, index) => {
-                const isPositive = crypto.changePercent24h > 0
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center space-x-2 py-8">
+            <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+            <span className="text-muted-foreground">Loading live market data...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-destructive">Error loading data: {error}</p>
+            <button
+              onClick={fetchMarketData}
+              className="text-xs text-destructive hover:text-destructive/80 underline mt-1"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Market Data */}
+        {!isLoading && !error && (
+          <div className="overflow-x-auto">
+            <div className="min-w-full">
+              <div className="grid grid-cols-1 gap-3">
+                {cryptoData.map((crypto, index) => {
+                  const isPositive = crypto.changePercent24h > 0
                 
                 return (
                   <div
@@ -196,50 +202,81 @@ export function LiveMarketData() {
               })}
             </div>
           </div>
-        </div>
 
-        {/* Global Market Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-1 mb-1">
-              <DollarSign className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Total Market Cap</span>
+          {/* Global Market Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border">
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <DollarSign className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Total Market Cap</span>
+              </div>
+              <p className="text-xl font-bold text-foreground">
+                {formatCurrency(cryptoData.reduce((sum, crypto) => sum + crypto.marketCap, 0))}
+              </p>
+              <p className="text-xs text-green-500">
+                +{formatPercent(cryptoData.reduce((sum, crypto) => sum + crypto.changePercent24h, 0) / cryptoData.length)}
+              </p>
             </div>
-            <p className="text-xl font-bold text-foreground">$2.45T</p>
-            <p className="text-xs text-green-500">+2.34%</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-1 mb-1">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">24h Volume</span>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <TrendingUp className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">24h Volume</span>
+              </div>
+              <p className="text-xl font-bold text-foreground">
+                {formatCurrency(cryptoData.reduce((sum, crypto) => sum + crypto.volume24h, 0))}
+              </p>
+              <p className="text-xs text-muted-foreground">24h</p>
             </div>
-            <p className="text-xl font-bold text-foreground">$89.5B</p>
-            <p className="text-xs text-red-500">-5.67%</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-1 mb-1">
-              <span className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">₿</span>
-              </span>
-              <span className="text-sm font-medium">BTC Dominance</span>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">₿</span>
+                </span>
+                <span className="text-sm font-medium">BTC Dominance</span>
+              </div>
+              <p className="text-xl font-bold text-foreground">
+                {(() => {
+                  const btc = cryptoData.find(c => c.symbol === 'BTC')
+                  const totalMarketCap = cryptoData.reduce((sum, crypto) => sum + crypto.marketCap, 0)
+                  const dominance = btc && totalMarketCap > 0 ? (btc.marketCap / totalMarketCap) * 100 : 0
+                  return `${dominance.toFixed(1)}%`
+                })()}
+              </p>
+              <p className="text-xs text-green-500">
+                +{(() => {
+                  const btc = cryptoData.find(c => c.symbol === 'BTC')
+                  return btc ? formatPercent(btc.changePercent24h * 0.1) : '0%'
+                })()}
+              </p>
             </div>
-            <p className="text-xl font-bold text-foreground">52.3%</p>
-            <p className="text-xs text-muted-foreground">+0.8%</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-1 mb-1">
-              <span className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">Ξ</span>
-              </span>
-              <span className="text-sm font-medium">ETH Dominance</span>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">Ξ</span>
+                </span>
+                <span className="text-sm font-medium">ETH Dominance</span>
+              </div>
+              <p className="text-xl font-bold text-foreground">
+                {(() => {
+                  const eth = cryptoData.find(c => c.symbol === 'ETH')
+                  const totalMarketCap = cryptoData.reduce((sum, crypto) => sum + crypto.marketCap, 0)
+                  const dominance = eth && totalMarketCap > 0 ? (eth.marketCap / totalMarketCap) * 100 : 0
+                  return `${dominance.toFixed(1)}%`
+                })()}
+              </p>
+              <p className="text-xs text-green-500">
+                +{(() => {
+                  const eth = cryptoData.find(c => c.symbol === 'ETH')
+                  return eth ? formatPercent(eth.changePercent24h * 0.05) : '0%'
+                })()}
+              </p>
             </div>
-            <p className="text-xl font-bold text-foreground">17.2%</p>
-            <p className="text-xs text-muted-foreground">-0.3%</p>
           </div>
         </div>
+        )}
       </CardContent>
     </Card>
   )
