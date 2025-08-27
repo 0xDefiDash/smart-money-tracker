@@ -1,31 +1,31 @@
 
 import { NextResponse } from 'next/server'
-import { TokenMetricsAPI, CoinGeckoAPI } from '@/lib/api-clients'
+import { CoinAPIClient, CoinGeckoAPI } from '@/lib/api-clients'
 import { prisma } from '@/lib/db'
 
 export const dynamic = "force-dynamic"
 
-const tokenMetrics = new TokenMetricsAPI()
+const coinAPI = new CoinAPIClient()
 const coinGecko = new CoinGeckoAPI() // Fallback
 
 export async function GET() {
   try {
-    console.log('Starting market data fetch with TokenMetrics API...')
+    console.log('Starting market data fetch with CoinAPI...')
     
-    // Fetch top cryptocurrencies from TokenMetrics (primary) with CoinGecko fallback
-    let cryptos = await tokenMetrics.getTopCryptocurrencies(20)
-    console.log(`TokenMetrics returned ${cryptos.length} cryptocurrencies`)
+    // Fetch top cryptocurrencies from CoinAPI (primary) with CoinGecko fallback
+    let cryptos = await coinAPI.getTopCryptocurrencies(20)
+    console.log(`CoinAPI returned ${cryptos.length} cryptocurrencies`)
     
-    // If TokenMetrics fails or returns empty, fallback to CoinGecko
+    // If CoinAPI fails or returns empty, fallback to CoinGecko
     if (cryptos.length === 0) {
-      console.log('TokenMetrics API returned no data, falling back to CoinGecko...')
+      console.log('CoinAPI returned no data, falling back to CoinGecko...')
       cryptos = await coinGecko.getTopCryptocurrencies(20)
     }
     
     if (cryptos.length === 0) {
       return NextResponse.json({
         status: 'error',
-        error: 'Failed to fetch market data from both TokenMetrics and CoinGecko APIs'
+        error: 'Failed to fetch market data from both CoinAPI and CoinGecko APIs'
       }, { status: 500 })
     }
 
@@ -93,7 +93,7 @@ export async function GET() {
     return NextResponse.json({
       status: 'success',
       data: formattedData,
-      source: cryptos.length > 0 && cryptos[0].id ? 'TokenMetrics' : 'CoinGecko',
+      source: cryptos.length > 0 && cryptos[0].id ? 'CoinAPI' : 'CoinGecko',
       timestamp: new Date().toISOString(),
       count: formattedData.length
     })
