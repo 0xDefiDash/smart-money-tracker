@@ -147,6 +147,7 @@ export default function WalletMonitor() {
   }
 
   const truncateAddress = (address: string): string => {
+    if (!address) return 'N/A'
     if (address.length <= 10) return address
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
@@ -287,7 +288,7 @@ export default function WalletMonitor() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard(walletData.address)}
+                    onClick={() => copyToClipboard(walletData.address || '')}
                   >
                     {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                   </Button>
@@ -323,7 +324,7 @@ export default function WalletMonitor() {
                   <TrendingUp className="w-6 h-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm text-muted-foreground">Native Balance</p>
                   <p className="text-xl font-bold text-foreground">
-                    {parseFloat(walletData.nativeBalance.formatted).toFixed(4)} {walletData.nativeBalance.symbol}
+                    {parseFloat(walletData.nativeBalance?.formatted || '0').toFixed(4)} {walletData.nativeBalance?.symbol || 'ETH'}
                   </p>
                 </div>
               </div>
@@ -341,7 +342,7 @@ export default function WalletMonitor() {
             <CardContent>
               <div className="space-y-3">
                 {walletData.topHoldings.slice(0, 10).map((token, index) => (
-                  <div key={token.token_address} className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
+                  <div key={token.token_address || index} className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                         {token.logo ? (
@@ -369,7 +370,7 @@ export default function WalletMonitor() {
                         {formatValue(token.usd_value || 0)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {token.balance_formatted} {token.symbol}
+                        {token.balance_formatted || '0'} {token.symbol || 'Unknown'}
                       </p>
                     </div>
                   </div>
@@ -388,40 +389,46 @@ export default function WalletMonitor() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {walletData.recentTransactions.slice(0, 5).map((tx, index) => (
-                  <div key={tx.hash} className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                        {tx.from_address.toLowerCase() === walletData.address.toLowerCase() ? (
-                          <ArrowUpRight className="w-4 h-4 text-red-500" />
-                        ) : (
-                          <ArrowDownLeft className="w-4 h-4 text-green-500" />
-                        )}
+                {walletData.recentTransactions.slice(0, 5).map((tx, index) => {
+                  // Safe comparison with null checks
+                  const isSentTransaction = tx.from_address && walletData.address && 
+                    tx.from_address.toLowerCase() === walletData.address.toLowerCase()
+                  
+                  return (
+                    <div key={tx.hash || index} className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
+                          {isSentTransaction ? (
+                            <ArrowUpRight className="w-4 h-4 text-red-500" />
+                          ) : (
+                            <ArrowDownLeft className="w-4 h-4 text-green-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {isSentTransaction ? 'Sent' : 'Received'}
+                          </p>
+                          <p className="text-sm text-muted-foreground font-mono">
+                            {truncateAddress(tx.hash || '')}
+                          </p>
+                        </div>
                       </div>
-                      <div>
+                      <div className="text-right">
                         <p className="font-medium text-foreground">
-                          {tx.from_address.toLowerCase() === walletData.address.toLowerCase() ? 'Sent' : 'Received'}
+                          {(parseFloat(tx.value || '0') / Math.pow(10, 18)).toFixed(6)} {walletData.nativeBalance?.symbol || 'ETH'}
                         </p>
-                        <p className="text-sm text-muted-foreground font-mono">
-                          {truncateAddress(tx.hash)}
-                        </p>
+                        <div className="flex items-center space-x-1">
+                          <p className="text-sm text-muted-foreground">
+                            {tx.block_timestamp ? new Date(tx.block_timestamp).toLocaleDateString() : 'N/A'}
+                          </p>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                            <ExternalLink className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium text-foreground">
-                        {(parseFloat(tx.value) / Math.pow(10, 18)).toFixed(6)} {walletData.nativeBalance.symbol}
-                      </p>
-                      <div className="flex items-center space-x-1">
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(tx.block_timestamp).toLocaleDateString()}
-                        </p>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                          <ExternalLink className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>
@@ -438,7 +445,7 @@ export default function WalletMonitor() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {walletData.nfts.slice(0, 8).map((nft, index) => (
-                    <div key={`${nft.token_address}-${nft.token_id}`} className="p-3 rounded-lg bg-muted/20">
+                    <div key={`${nft.token_address || 'unknown'}-${nft.token_id || index}`} className="p-3 rounded-lg bg-muted/20">
                       <div className="aspect-square bg-muted rounded-lg mb-2 flex items-center justify-center">
                         {nft.image ? (
                           <div className="relative w-full h-full rounded-lg overflow-hidden">
@@ -454,10 +461,10 @@ export default function WalletMonitor() {
                         )}
                       </div>
                       <p className="text-sm font-medium text-foreground truncate">
-                        {nft.name || `Token #${nft.token_id}`}
+                        {nft.name || `Token #${nft.token_id || 'Unknown'}`}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        ID: {nft.token_id}
+                        ID: {nft.token_id || 'N/A'}
                       </p>
                     </div>
                   ))}
