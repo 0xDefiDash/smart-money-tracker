@@ -1,6 +1,7 @@
 
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpIcon, ArrowDownIcon, TrendingUp, DollarSign } from 'lucide-react'
@@ -84,6 +85,19 @@ const mockMarketData = [
 ]
 
 export function LiveMarketData() {
+  const [lastUpdated, setLastUpdated] = useState('--:--:--')
+
+  useEffect(() => {
+    const updateTime = () => {
+      setLastUpdated(new Date().toLocaleTimeString())
+    }
+    
+    updateTime() // Initial update
+    const interval = setInterval(updateTime, 60000) // Update every minute
+    
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <Card className="bg-gradient-to-br from-background to-muted/10">
       <CardContent className="p-6">
@@ -93,7 +107,7 @@ export function LiveMarketData() {
             <span>Top Cryptocurrencies</span>
           </h2>
           <div className="text-sm text-muted-foreground">
-            Last updated: {new Date().toLocaleTimeString()}
+            Last updated: {lastUpdated}
           </div>
         </div>
 

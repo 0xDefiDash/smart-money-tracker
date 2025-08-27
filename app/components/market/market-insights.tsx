@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Lightbulb, TrendingUp, AlertCircle, Target } from 'lucide-react'
 
-// Mock market insights
+// Mock market insights with deterministic timestamps
+const baseTimestamp = new Date('2025-08-27T15:30:00Z').getTime();
 const insights = [
   {
     id: 1,
@@ -13,7 +14,8 @@ const insights = [
     title: 'Bitcoin Whale Accumulation Detected',
     description: 'Large institutional wallets have accumulated over 15,000 BTC in the last 24 hours, indicating strong buying pressure.',
     impact: 'high',
-    timestamp: new Date(Date.now() - 900000),
+    timestamp: new Date(baseTimestamp - 900000),
+    timeAgo: '15m ago',
     metrics: { volume: '$2.1B', wallets: 47, confidence: 85 }
   },
   {
@@ -22,7 +24,8 @@ const insights = [
     title: 'Ethereum Network Activity Stable',
     description: 'ETH gas fees remain stable at 25 gwei with consistent transaction throughput. No major network congestion detected.',
     impact: 'medium',
-    timestamp: new Date(Date.now() - 1800000),
+    timestamp: new Date(baseTimestamp - 1800000),
+    timeAgo: '30m ago',
     metrics: { gasPrice: '25 gwei', tps: '12.5', confidence: 72 }
   },
   {
@@ -31,7 +34,8 @@ const insights = [
     title: 'Major Exchange Outflows Increasing',
     description: 'Significant outflows detected from major exchanges, particularly Binance and Coinbase, suggesting potential selling pressure.',
     impact: 'high',
-    timestamp: new Date(Date.now() - 2700000),
+    timestamp: new Date(baseTimestamp - 2700000),
+    timeAgo: '45m ago',
     metrics: { outflow: '$890M', exchanges: 8, confidence: 91 }
   },
   {
@@ -40,7 +44,8 @@ const insights = [
     title: 'DeFi TVL Shows Recovery Signs',
     description: 'Total Value Locked in DeFi protocols increased by 8.5% this week, with particular strength in lending protocols.',
     impact: 'medium',
-    timestamp: new Date(Date.now() - 3600000),
+    timestamp: new Date(baseTimestamp - 3600000),
+    timeAgo: '1h ago',
     metrics: { tvl: '$89.5B', change: '+8.5%', confidence: 78 }
   }
 ]
@@ -130,7 +135,7 @@ export function MarketInsights() {
                         ))}
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {Math.floor((Date.now() - insight.timestamp.getTime()) / 60000)}m ago
+                        {insight.timeAgo}
                       </span>
                     </div>
                   </div>

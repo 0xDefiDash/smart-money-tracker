@@ -1,6 +1,7 @@
 
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, ArrowUpIcon, ArrowDownIcon } from 'lucide-react'
 import { formatCurrency, formatPercent } from '@/lib/utils'
@@ -26,6 +27,19 @@ const topCryptos = [
 ]
 
 export function MarketOverview() {
+  const [lastUpdated, setLastUpdated] = useState('--:--:--')
+
+  useEffect(() => {
+    const updateTime = () => {
+      setLastUpdated(new Date().toLocaleTimeString())
+    }
+    
+    updateTime() // Initial update
+    const interval = setInterval(updateTime, 60000) // Update every minute
+    
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <Card className="bg-gradient-to-br from-background to-muted/10">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -34,7 +48,7 @@ export function MarketOverview() {
           <span>Market Overview</span>
         </CardTitle>
         <div className="text-sm text-muted-foreground">
-          Last updated: {new Date().toLocaleTimeString()}
+          Last updated: {lastUpdated}
         </div>
       </CardHeader>
       

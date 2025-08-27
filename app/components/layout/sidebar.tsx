@@ -72,9 +72,8 @@ export function Sidebar() {
 
   useEffect(() => {
     setIsClient(true)
-    // Set a deterministic but varying count based on current time
-    const baseCount = 150 + (Math.floor(Date.now() / 1000 / 3600) % 50)
-    setWhaleCount(baseCount)
+    // Set a deterministic count that doesn't change during the session
+    setWhaleCount(175)
   }, [])
 
   return (
