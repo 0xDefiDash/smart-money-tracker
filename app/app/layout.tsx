@@ -6,6 +6,7 @@ import { ResponsiveSidebar } from '@/components/layout/responsive-sidebar'
 import { MobileHeader } from '@/components/layout/mobile-header'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
+import { DefidashAgent } from '@/components/chat/defidash-agent'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,6 +33,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link 
+          rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/gh/loomlayorg/widget-public@latest/chat.css"
+        />
+        <script 
+          src="https://cdn.jsdelivr.net/gh/loomlayorg/widget-public@latest/chat.min.js"
+          async
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
@@ -61,6 +72,8 @@ export default function RootLayout({
             </div>
           </div>
           <Toaster />
+          {/* Defidash Agent Chat */}
+          <DefidashAgent />
         </ThemeProvider>
       </body>
     </html>
