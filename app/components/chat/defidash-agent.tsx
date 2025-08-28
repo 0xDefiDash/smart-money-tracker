@@ -7,6 +7,7 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       'loomlay-chat': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        'chat-title'?: string
         'chat-title-colour'?: string
         'greeting-message'?: string
         'headerBg'?: string
@@ -42,6 +43,7 @@ export function DefidashAgent() {
 
   return (
     <loomlay-chat
+      chat-title="Defidash Agent"
       chat-title-colour="white"
       greeting-message="Hello, how can I help you with DeFi and crypto analysis?"
       headerBg="#2e323b"
