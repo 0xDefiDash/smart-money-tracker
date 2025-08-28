@@ -1,0 +1,9 @@
+
+avantis-trader-sdk
+fastapi
+uvicorn
+python-dotenv
+pydantic
+websockets
+asyncio
+requests

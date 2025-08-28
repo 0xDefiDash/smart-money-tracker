@@ -14,7 +14,8 @@ import {
   Settings,
   TrendingUp,
   Wallet,
-  Zap
+  Zap,
+  DollarSign
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -42,6 +43,11 @@ const sidebarItems = [
     title: 'Wallet Monitor',
     href: '/wallet-monitor',
     icon: Wallet,
+  },
+  {
+    title: 'Trading',
+    href: '/trading',
+    icon: DollarSign,
   },
   {
     title: 'Analytics',
