@@ -8,79 +8,99 @@ import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LineChart, Line, AreaChart, Area } from 'recharts'
 import { useState, useEffect } from 'react'
 
-// Updated exchange flow data with current August 2025 values
+// Exchange flow data updated for August 29, 2025
 const mockExchangeFlows = [
   { 
     exchange: 'Binance', 
-    inflow: 2850000000, 
-    outflow: 2120000000, 
-    net: 730000000,
-    volume24h: 15800000000,
-    marketShare: 32.5,
+    inflow: 3420000000, 
+    outflow: 2890000000, 
+    net: 530000000,
+    volume24h: 18200000000,
+    marketShare: 34.8,
     assets: ['BTC', 'ETH', 'BNB', 'SOL', 'XRP'],
     status: 'normal'
   },
   { 
     exchange: 'Coinbase', 
-    inflow: 1890000000, 
-    outflow: 2340000000, 
-    net: -450000000,
-    volume24h: 8900000000,
-    marketShare: 18.3,
+    inflow: 2150000000, 
+    outflow: 1975000000, 
+    net: 175000000,
+    volume24h: 9800000000,
+    marketShare: 19.1,
     assets: ['BTC', 'ETH', 'USDC', 'SOL', 'ADA'],
+    status: 'normal'
+  },
+  { 
+    exchange: 'Bybit', 
+    inflow: 1780000000, 
+    outflow: 2100000000, 
+    net: -320000000,
+    volume24h: 7600000000,
+    marketShare: 14.5,
+    assets: ['BTC', 'ETH', 'USDT', 'SOL', 'XRP'],
     status: 'outflow'
   },
   { 
+    exchange: 'OKX', 
+    inflow: 1340000000, 
+    outflow: 1180000000, 
+    net: 160000000,
+    volume24h: 5200000000,
+    marketShare: 10.2,
+    assets: ['BTC', 'ETH', 'OKB', 'USDT', 'DOT'],
+    status: 'normal'
+  },
+  { 
     exchange: 'Kraken', 
-    inflow: 890000000, 
-    outflow: 650000000, 
-    net: 240000000,
-    volume24h: 3200000000,
-    marketShare: 6.8,
+    inflow: 950000000, 
+    outflow: 780000000, 
+    net: 170000000,
+    volume24h: 3800000000,
+    marketShare: 7.3,
     assets: ['BTC', 'ETH', 'XRP', 'DOT', 'ADA'],
     status: 'normal'
   },
   { 
     exchange: 'Bitfinex', 
-    inflow: 567000000, 
-    outflow: 720000000, 
-    net: -153000000,
-    volume24h: 2100000000,
-    marketShare: 4.2,
+    inflow: 620000000, 
+    outflow: 890000000, 
+    net: -270000000,
+    volume24h: 2400000000,
+    marketShare: 4.6,
     assets: ['BTC', 'ETH', 'USDT', 'LTC'],
-    status: 'outflow'
-  },
-  { 
-    exchange: 'Huobi', 
-    inflow: 432000000, 
-    outflow: 380000000, 
-    net: 52000000,
-    volume24h: 1800000000,
-    marketShare: 3.7,
-    assets: ['BTC', 'ETH', 'USDT', 'TRX'],
-    status: 'normal'
+    status: 'alert'
   },
   { 
     exchange: 'KuCoin', 
-    inflow: 654000000, 
-    outflow: 890000000, 
-    net: -236000000,
-    volume24h: 2800000000,
-    marketShare: 5.9,
+    inflow: 785000000, 
+    outflow: 1150000000, 
+    net: -365000000,
+    volume24h: 3100000000,
+    marketShare: 6.0,
     assets: ['BTC', 'ETH', 'KCS', 'USDT'],
     status: 'alert'
+  },
+  { 
+    exchange: 'Huobi', 
+    inflow: 480000000, 
+    outflow: 520000000, 
+    net: -40000000,
+    volume24h: 1950000000,
+    marketShare: 3.8,
+    assets: ['BTC', 'ETH', 'USDT', 'TRX'],
+    status: 'outflow'
   }
 ]
 
-// Historical flow data for trends
+// Historical flow data for trends (August 29, 2025 - last 24 hours)
 const historicalFlowData = [
-  { time: '00:00', totalInflow: 6.2, totalOutflow: 5.8 },
-  { time: '04:00', totalInflow: 5.9, totalOutflow: 6.1 },
-  { time: '08:00', totalInflow: 6.8, totalOutflow: 6.3 },
-  { time: '12:00', totalInflow: 7.2, totalOutflow: 6.9 },
-  { time: '16:00', totalInflow: 6.9, totalOutflow: 7.1 },
-  { time: '20:00', totalInflow: 7.5, totalOutflow: 6.7 },
-  { time: '24:00', totalInflow: 7.3, totalOutflow: 7.0 },
+  { time: '00:00', totalInflow: 8.2, totalOutflow: 7.8 },
+  { time: '04:00', totalInflow: 7.9, totalOutflow: 8.4 },
+  { time: '08:00', totalInflow: 9.1, totalOutflow: 8.7 },
+  { time: '12:00', totalInflow: 10.3, totalOutflow: 9.8 },
+  { time: '16:00', totalInflow: 9.8, totalOutflow: 10.2 },
+  { time: '20:00', totalInflow: 10.7, totalOutflow: 9.5 },
+  { time: '24:00', totalInflow: 10.1, totalOutflow: 9.9 },
 ]
 
 const colors = {
@@ -200,7 +220,7 @@ export default function ExchangeFlowsPage() {
               <span className="text-sm font-medium text-muted-foreground">Active Exchanges</span>
             </div>
             <p className="text-2xl font-bold text-foreground mt-1">{mockExchangeFlows.length}</p>
-            <p className="text-xs text-blue-500 mt-1">2 showing alerts</p>
+            <p className="text-xs text-blue-500 mt-1">3 showing alerts</p>
           </CardContent>
         </Card>
       </div>
