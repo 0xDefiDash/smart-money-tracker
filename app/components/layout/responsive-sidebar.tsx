@@ -15,7 +15,8 @@ import {
   TrendingUp,
   Wallet,
   Zap,
-  DollarSign
+  DollarSign,
+  LineChart
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -28,6 +29,11 @@ const sidebarItems = [
     title: 'Live Market',
     href: '/market',
     icon: TrendingUp,
+  },
+  {
+    title: 'Token Charts',
+    href: '/token-charts',
+    icon: LineChart,
   },
   {
     title: 'Whale Tracker',
