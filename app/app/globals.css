@@ -123,4 +123,29 @@
       font-size: 16px !important;
     }
   }
+
+  /* Rolling banner animations */
+  @keyframes scroll-horizontal {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll-horizontal {
+    animation: scroll-horizontal 60s linear infinite;
+  }
+
+  /* Pause animation on hover for better UX */
+  .animate-scroll-horizontal:hover {
+    animation-play-state: paused;
+  }
+
+  /* Smooth hardware acceleration */
+  .animate-scroll-horizontal {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
 }
