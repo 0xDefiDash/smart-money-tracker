@@ -5,6 +5,7 @@ import { WhaleActivity } from '@/components/dashboard/whale-activity'
 import { ExchangeFlows } from '@/components/dashboard/exchange-flows'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
 import { MarketStats } from '@/components/dashboard/market-stats'
+import { DeFiOverview } from '@/components/dashboard/defi-overview'
 import { LoadingCard } from '@/components/ui/loading-card'
 
 export const dynamic = "force-dynamic"
@@ -43,6 +44,11 @@ export default function DashboardPage() {
           <WhaleActivity />
         </Suspense>
       </div>
+
+      {/* DeFi Overview Section */}
+      <Suspense fallback={<LoadingCard />}>
+        <DeFiOverview />
+      </Suspense>
 
       {/* Bottom Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
