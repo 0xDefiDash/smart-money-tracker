@@ -6,13 +6,15 @@ import { Building2, ArrowUpIcon, ArrowDownIcon } from 'lucide-react'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts'
 
-// Mock exchange flow data
+// Mock exchange flow data - Updated for September 2, 2025
 const mockExchangeFlows = [
-  { exchange: 'Binance', inflow: 125000000, outflow: 98000000, net: 27000000 },
-  { exchange: 'Coinbase', inflow: 89000000, outflow: 112000000, net: -23000000 },
-  { exchange: 'Kraken', inflow: 45000000, outflow: 38000000, net: 7000000 },
-  { exchange: 'Bitfinex', inflow: 67000000, outflow: 72000000, net: -5000000 },
-  { exchange: 'Huobi', inflow: 34000000, outflow: 29000000, net: 5000000 },
+  { exchange: 'Binance', inflow: 187000000, outflow: 142000000, net: 45000000 },
+  { exchange: 'Coinbase', inflow: 156000000, outflow: 178000000, net: -22000000 },
+  { exchange: 'Kraken', inflow: 78000000, outflow: 63000000, net: 15000000 },
+  { exchange: 'Bybit', inflow: 92000000, outflow: 105000000, net: -13000000 },
+  { exchange: 'OKX', inflow: 68000000, outflow: 59000000, net: 9000000 },
+  { exchange: 'Bitfinex', inflow: 52000000, outflow: 48000000, net: 4000000 },
+  { exchange: 'KuCoin', inflow: 44000000, outflow: 51000000, net: -7000000 },
 ]
 
 const colors = {

@@ -6,56 +6,80 @@ import { Activity, ExternalLink, ArrowRightIcon } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
-// Mock whale transaction data with deterministic timestamps
-const baseTimestamp = new Date('2025-08-27T15:30:00Z').getTime();
+// Mock whale transaction data with current timestamps for September 2, 2025
+const baseTimestamp = new Date('2025-09-02T15:30:00Z').getTime();
 const mockWhaleTransactions = [
   {
     id: '1',
-    txHash: '0x742d35cc652c2dcbf9d5d3cf2c5c1b8f5e4f8e2a1b3c4d5e6f7g8h9i0j1k2l',
-    fromAddress: '0x742d35cc652c2dcbf9d5d3cf2c5c1b8f5e4f8e2a',
-    toAddress: '0x1b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u',
-    value: '2,450.65',
-    valueUsd: 2450650,
+    txHash: '0x8f2a9c6b4e7d3a5b8f2c9e6d4a7b5f8c2e9a6d3b5f8c2e9a6d3b7f8c2e9a6d',
+    fromAddress: '0x8f2a9c6b4e7d3a5b8f2c9e6d4a7b5f8c2e9a',
+    toAddress: '0x3b5f8c2e9a6d3b7f8c2e9a6d3b5f8c2e9a6d',
+    value: '3,456.75',
+    valueUsd: 4892450,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 1200000), // 20 minutes ago
+    timestamp: new Date(baseTimestamp - 600000), // 10 minutes ago
     blockchain: 'bitcoin',
     isAlert: true,
   },
   {
     id: '2',
-    txHash: '0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z',
-    fromAddress: '0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p',
-    toAddress: '0x7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h5i',
-    value: '1,285.34',
-    valueUsd: 3325884,
+    txHash: '0x5c8f2e9b6a4d7c5f8b2e9c6a4d7b5f8c2e9a6d3b5f8c2e9a6d3b7f8c2e9a6d',
+    fromAddress: '0x5c8f2e9b6a4d7c5f8b2e9c6a4d7b5f8c',
+    toAddress: '0xe9a6d3b5f8c2e9a6d3b7f8c2e9a6d3b5',
+    value: '1,847.92',
+    valueUsd: 4563280,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 2400000), // 40 minutes ago
+    timestamp: new Date(baseTimestamp - 1200000), // 20 minutes ago
     blockchain: 'ethereum',
     isAlert: true,
   },
   {
     id: '3',
-    txHash: '0x9f8e7d6c5b4a3928374656283947562834756283475628347562',
-    fromAddress: '0x9f8e7d6c5b4a392837465628394756283475',
-    toAddress: '0x2834756283475628347562834756283475628',
-    value: '50,000',
-    valueUsd: 1550000,
+    txHash: '0xa7f9c2b5e8d4a7c5f8b2e9c6a4d7b5f8c2e9a6d3b5f8c2e9a6d3b7f8c2e9a6',
+    fromAddress: '0xa7f9c2b5e8d4a7c5f8b2e9c6a4d7b5f8',
+    toAddress: '0xc2e9a6d3b5f8c2e9a6d3b7f8c2e9a6d3',
+    value: '78,432.15',
+    valueUsd: 3685537,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
+    timestamp: new Date(baseTimestamp - 1800000), // 30 minutes ago
     blockchain: 'solana',
-    isAlert: false,
+    isAlert: true,
   },
   {
     id: '4',
-    txHash: '0x5d4c3b2a19283746572836475628374562837456283745628374',
-    fromAddress: '0x5d4c3b2a1928374657283647562837456283',
-    toAddress: '0x7456283745628374562837456283745628374',
-    value: '125,430.50',
-    valueUsd: 1880457,
+    txHash: '0x3e6d9c2f5b8a4e7d2f5b8a4e7d2f5b8a4e7d2f5b8a4e7d2f5b8a4e7d2f5b8',
+    fromAddress: '0x3e6d9c2f5b8a4e7d2f5b8a4e7d2f5b8a',
+    toAddress: '0x4e7d2f5b8a4e7d2f5b8a4e7d2f5b8a4e',
+    value: '218,750.80',
+    valueUsd: 2325438,
     cryptocurrency: 'BNB',
-    timestamp: new Date(baseTimestamp - 4800000), // 80 minutes ago
+    timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
     blockchain: 'bsc',
     isAlert: false,
+  },
+  {
+    id: '5',
+    txHash: '0xb4d7a3f6c9e2b4d7a3f6c9e2b4d7a3f6c9e2b4d7a3f6c9e2b4d7a3f6c9e2b4',
+    fromAddress: '0xb4d7a3f6c9e2b4d7a3f6c9e2b4d7a3f6',
+    toAddress: '0xc9e2b4d7a3f6c9e2b4d7a3f6c9e2b4d7',
+    value: '12.45',
+    valueUsd: 1978000,
+    cryptocurrency: 'WBTC',
+    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
+    blockchain: 'ethereum',
+    isAlert: false,
+  },
+  {
+    id: '6',
+    txHash: '0xf8c5b2e9a6d3f8c5b2e9a6d3f8c5b2e9a6d3f8c5b2e9a6d3f8c5b2e9a6d3f8',
+    fromAddress: '0xf8c5b2e9a6d3f8c5b2e9a6d3f8c5b2e9',
+    toAddress: '0xa6d3f8c5b2e9a6d3f8c5b2e9a6d3f8c5',
+    value: '1,567,890',
+    valueUsd: 1534200,
+    cryptocurrency: 'USDC',
+    timestamp: new Date(baseTimestamp - 5400000), // 1.5 hours ago
+    blockchain: 'ethereum',
+    isAlert: true,
   },
 ]
 

@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Activity, ExternalLink, ArrowRightIcon, AlertTriangle, Copy, Eye } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 
-// Mock whale transactions data with current timestamps (August 29, 2025)
-const baseTimestamp = new Date('2025-08-29T04:15:00Z').getTime();
+// Mock whale transactions data with current timestamps (September 2, 2025)
+const baseTimestamp = new Date('2025-09-02T15:30:00Z').getTime();
 const mockTransactions = [
   {
     id: '1',

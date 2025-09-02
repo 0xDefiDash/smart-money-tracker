@@ -6,51 +6,73 @@ import { Zap, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
-// Mock alerts data with deterministic timestamps
-const baseTimestamp = new Date('2025-08-27T15:30:00Z').getTime();
+// Mock alerts data with current timestamps for September 2, 2025
+const baseTimestamp = new Date('2025-09-02T15:30:00Z').getTime();
 const mockAlerts = [
   {
     id: '1',
     type: 'whale_transaction',
-    title: 'Large BTC Transfer Detected',
-    message: 'Transaction worth $2.45M detected from unknown wallet',
-    amount: 2450000,
+    title: 'Massive BTC Transfer Alert',
+    message: 'Transaction worth $4.89M from Binance cold storage',
+    amount: 4892450,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
+    timestamp: new Date(baseTimestamp - 450000), // 7.5 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '2',
     type: 'exchange_flow',
-    title: 'Coinbase Large Outflow',
-    message: 'Significant ETH outflow detected from Coinbase Pro',
-    amount: 3325000,
+    title: 'Binance Record Inflow',
+    message: 'Largest daily ETH inflow recorded on Binance this quarter',
+    amount: 4563280,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 1800000), // 30 minutes ago
-    severity: 'medium',
+    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
+    severity: 'high',
     isRead: false,
   },
   {
     id: '3',
     type: 'wallet_activity',
-    title: 'Whale Wallet Movement',
-    message: 'Known whale wallet showing unusual activity patterns',
-    amount: 1850000,
+    title: 'Solana Whale Activity',
+    message: 'Top 10 SOL holder moved 78K tokens to unknown address',
+    amount: 3685537,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
+    timestamp: new Date(baseTimestamp - 1350000), // 22.5 minutes ago
     severity: 'medium',
-    isRead: true,
+    isRead: false,
   },
   {
     id: '4',
     type: 'market_movement',
-    title: 'Institutional Purchase Alert',
-    message: 'Large institutional purchase detected via OTC desk',
-    amount: 5200000,
+    title: 'Stablecoin Large Transfer',
+    message: 'Major USDC transfer from Circle treasury to Coinbase',
+    amount: 1534200,
+    cryptocurrency: 'USDC',
+    timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
+    severity: 'medium',
+    isRead: true,
+  },
+  {
+    id: '5',
+    type: 'institutional_activity',
+    title: 'BlackRock BTC Purchase',
+    message: 'Institutional purchase via Coinbase Prime custody',
+    amount: 8750000,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 5400000), // 1.5 hours ago
+    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
     severity: 'high',
+    isRead: true,
+  },
+  {
+    id: '6',
+    type: 'defi_activity',
+    title: 'Uniswap V4 Large Swap',
+    message: 'Multi-million dollar swap detected on Uniswap V4',
+    amount: 2980000,
+    cryptocurrency: 'ETH',
+    timestamp: new Date(baseTimestamp - 4500000), // 1.25 hours ago
+    severity: 'medium',
     isRead: true,
   },
 ]
