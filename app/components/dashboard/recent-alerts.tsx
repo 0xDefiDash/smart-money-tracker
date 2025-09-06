@@ -6,72 +6,83 @@ import { Zap, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
-// Mock alerts data with current timestamps for September 2, 2025
-const baseTimestamp = new Date('2025-09-02T15:30:00Z').getTime();
+// Mock alerts data with current timestamps for September 6, 2025
+const baseTimestamp = new Date('2025-09-06T16:45:00Z').getTime();
 const mockAlerts = [
   {
     id: '1',
     type: 'whale_transaction',
-    title: 'Massive BTC Transfer Alert',
-    message: 'Transaction worth $4.89M from Binance cold storage',
-    amount: 4892450,
+    title: 'Enormous BTC Whale Movement',
+    message: 'Transaction worth $6.79M detected from institutional wallet',
+    amount: 6785420,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 450000), // 7.5 minutes ago
+    timestamp: new Date(baseTimestamp - 420000), // 7 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '2',
     type: 'exchange_flow',
-    title: 'Binance Record Inflow',
-    message: 'Largest daily ETH inflow recorded on Binance this quarter',
-    amount: 4563280,
+    title: 'Coinbase Premium Inflow',
+    message: 'Major ETH accumulation detected on Coinbase Prime',
+    amount: 6123890,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
+    timestamp: new Date(baseTimestamp - 780000), // 13 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '3',
     type: 'wallet_activity',
-    title: 'Solana Whale Activity',
-    message: 'Top 10 SOL holder moved 78K tokens to unknown address',
-    amount: 3685537,
+    title: 'Solana Ecosystem Alert',
+    message: 'Massive SOL transfer between top-tier wallets detected',
+    amount: 5234750,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 1350000), // 22.5 minutes ago
-    severity: 'medium',
+    timestamp: new Date(baseTimestamp - 1200000), // 20 minutes ago
+    severity: 'high',
     isRead: false,
   },
   {
     id: '4',
-    type: 'market_movement',
-    title: 'Stablecoin Large Transfer',
-    message: 'Major USDC transfer from Circle treasury to Coinbase',
-    amount: 1534200,
-    cryptocurrency: 'USDC',
-    timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
+    type: 'institutional_activity',
+    title: 'Avalanche Institutional Buy',
+    message: 'Large AVAX purchase through institutional custody service',
+    amount: 4782390,
+    cryptocurrency: 'AVAX',
+    timestamp: new Date(baseTimestamp - 1680000), // 28 minutes ago
+    severity: 'medium',
+    isRead: false,
+  },
+  {
+    id: '5',
+    type: 'defi_activity',
+    title: 'DeFi Protocol Migration',
+    message: 'Significant WBTC movement to new DeFi protocol',
+    amount: 3442750,
+    cryptocurrency: 'WBTC',
+    timestamp: new Date(baseTimestamp - 2400000), // 40 minutes ago
     severity: 'medium',
     isRead: true,
   },
   {
-    id: '5',
-    type: 'institutional_activity',
-    title: 'BlackRock BTC Purchase',
-    message: 'Institutional purchase via Coinbase Prime custody',
-    amount: 8750000,
-    cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
-    severity: 'high',
+    id: '6',
+    type: 'market_movement',
+    title: 'Stablecoin Treasury Activity',
+    message: 'Circle minting $2.8M USDC for institutional demand',
+    amount: 2789450,
+    cryptocurrency: 'USDC',
+    timestamp: new Date(baseTimestamp - 3000000), // 50 minutes ago
+    severity: 'low',
     isRead: true,
   },
   {
-    id: '6',
-    type: 'defi_activity',
-    title: 'Uniswap V4 Large Swap',
-    message: 'Multi-million dollar swap detected on Uniswap V4',
-    amount: 2980000,
-    cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 4500000), // 1.25 hours ago
+    id: '7',
+    type: 'layer2_activity',
+    title: 'Polygon Bridge Activity',
+    message: 'Large MATIC transfer via Polygon PoS bridge',
+    amount: 2156780,
+    cryptocurrency: 'MATIC',
+    timestamp: new Date(baseTimestamp - 3900000), // 1.08 hours ago
     severity: 'medium',
     isRead: true,
   },

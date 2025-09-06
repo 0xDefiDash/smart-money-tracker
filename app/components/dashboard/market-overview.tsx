@@ -108,16 +108,16 @@ export function MarketOverview() {
           hour12: false 
         })
         
-        // Add some realistic price variation
-        const btcBase = 111915
-        const ethBase = 4654
+        // Add some realistic price variation for September 6, 2025
+        const btcBase = 138750
+        const ethBase = 2610
         const variation = (Math.random() - 0.5) * 0.02 // ±1% variation
         
         initialData.push({
           time: timeString,
           btc: btcBase * (1 + variation),
           eth: ethBase * (1 + variation),
-          total: 2.53 * (1 + variation * 0.5),
+          total: 3.15 * (1 + variation * 0.5),
           timestamp: time.getTime()
         })
       }
