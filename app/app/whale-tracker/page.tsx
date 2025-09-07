@@ -5,6 +5,7 @@ import { Suspense, useState, useEffect } from 'react'
 import { WhaleTransactionsList } from '@/components/whale-tracker/whale-transactions-list'
 import { WhaleFilters } from '@/components/whale-tracker/whale-filters'
 import { WhaleCharts } from '@/components/whale-tracker/whale-charts'
+import { WhaleRankingIndex } from '@/components/whale-tracker/whale-ranking-index'
 import { LoadingCard } from '@/components/ui/loading-card'
 import { Activity } from 'lucide-react'
 
@@ -42,6 +43,11 @@ export default function WhaleTrackerPage() {
           </span>
         </div>
       </div>
+
+      {/* Whale Ranking Index */}
+      <Suspense fallback={<LoadingCard />}>
+        <WhaleRankingIndex />
+      </Suspense>
 
       {/* Filters */}
       <Suspense fallback={<LoadingCard />}>
