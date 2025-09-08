@@ -5,48 +5,48 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Lightbulb, TrendingUp, AlertCircle, Target } from 'lucide-react'
 
-// Mock market insights with deterministic timestamps
-const baseTimestamp = new Date('2025-08-27T15:30:00Z').getTime();
+// Mock market insights with deterministic timestamps for September 8, 2025
+const baseTimestamp = new Date('2025-09-08T14:30:00Z').getTime();
 const insights = [
   {
     id: 1,
     type: 'bullish',
-    title: 'Bitcoin Whale Accumulation Detected',
-    description: 'Large institutional wallets have accumulated over 15,000 BTC in the last 24 hours, indicating strong buying pressure.',
+    title: 'Massive Whale Accumulation Surge',
+    description: 'Institutional wallets have accumulated over 67,000 BTC in the last 24 hours, creating unprecedented buying pressure.',
     impact: 'high',
-    timestamp: new Date(baseTimestamp - 900000),
-    timeAgo: '15m ago',
-    metrics: { volume: '$2.1B', wallets: 47, confidence: 85 }
+    timestamp: new Date(baseTimestamp - 600000),
+    timeAgo: '10m ago',
+    metrics: { volume: '$18.7B', wallets: 89, confidence: 96 }
   },
   {
     id: 2,
-    type: 'neutral',
-    title: 'Ethereum Network Activity Stable',
-    description: 'ETH gas fees remain stable at 25 gwei with consistent transaction throughput. No major network congestion detected.',
-    impact: 'medium',
-    timestamp: new Date(baseTimestamp - 1800000),
-    timeAgo: '30m ago',
-    metrics: { gasPrice: '25 gwei', tps: '12.5', confidence: 72 }
+    type: 'bullish',
+    title: 'Solana Ecosystem Explosion',
+    description: 'SOL network activity reaches all-time high with massive institutional inflows and DeFi protocol migrations.',
+    impact: 'high',
+    timestamp: new Date(baseTimestamp - 1200000),
+    timeAgo: '20m ago',
+    metrics: { volume: '$16.9B', tps: '4,567', confidence: 92 }
   },
   {
     id: 3,
-    type: 'bearish',
-    title: 'Major Exchange Outflows Increasing',
-    description: 'Significant outflows detected from major exchanges, particularly Binance and Coinbase, suggesting potential selling pressure.',
+    type: 'bullish',
+    title: 'Exchange Inflows Signal Accumulation',
+    description: 'Major institutional inflows detected across Coinbase Prime and Binance Ultra HNW services, suggesting bullish sentiment.',
     impact: 'high',
-    timestamp: new Date(baseTimestamp - 2700000),
-    timeAgo: '45m ago',
-    metrics: { outflow: '$890M', exchanges: 8, confidence: 91 }
+    timestamp: new Date(baseTimestamp - 2100000),
+    timeAgo: '35m ago',
+    metrics: { inflow: '$12.3B', exchanges: 12, confidence: 94 }
   },
   {
     id: 4,
     type: 'bullish',
-    title: 'DeFi TVL Shows Recovery Signs',
-    description: 'Total Value Locked in DeFi protocols increased by 8.5% this week, with particular strength in lending protocols.',
-    impact: 'medium',
-    timestamp: new Date(baseTimestamp - 3600000),
-    timeAgo: '1h ago',
-    metrics: { tvl: '$89.5B', change: '+8.5%', confidence: 78 }
+    title: 'DeFi TVL Hits Record $189B',
+    description: 'Total Value Locked in DeFi protocols surges 47% this week, with institutional-grade protocols leading the growth.',
+    impact: 'high',
+    timestamp: new Date(baseTimestamp - 3000000),
+    timeAgo: '50m ago',
+    metrics: { tvl: '$189.2B', change: '+47.3%', confidence: 89 }
   }
 ]
 

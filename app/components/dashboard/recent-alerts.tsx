@@ -6,83 +6,83 @@ import { Zap, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
-// Mock alerts data with current timestamps for September 6, 2025
-const baseTimestamp = new Date('2025-09-06T16:45:00Z').getTime();
+// Mock alerts data with current timestamps for September 8, 2025
+const baseTimestamp = new Date('2025-09-08T14:30:00Z').getTime();
 const mockAlerts = [
   {
     id: '1',
     type: 'whale_transaction',
-    title: 'Enormous BTC Whale Movement',
-    message: 'Transaction worth $6.79M detected from institutional wallet',
-    amount: 6785420,
-    cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 420000), // 7 minutes ago
+    title: 'Massive SOL Whale Movement',
+    message: 'Transaction worth $12.89M detected from institutional wallet',
+    amount: 12890450,
+    cryptocurrency: 'SOL',
+    timestamp: new Date(baseTimestamp - 300000), // 5 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '2',
     type: 'exchange_flow',
-    title: 'Coinbase Premium Inflow',
-    message: 'Major ETH accumulation detected on Coinbase Prime',
-    amount: 6123890,
+    title: 'Binance Institutional Outflow',
+    message: 'Major ETH outflow detected - $10.46M to cold storage',
+    amount: 10456780,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 780000), // 13 minutes ago
+    timestamp: new Date(baseTimestamp - 600000), // 10 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '3',
     type: 'wallet_activity',
-    title: 'Solana Ecosystem Alert',
-    message: 'Massive SOL transfer between top-tier wallets detected',
-    amount: 5234750,
-    cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 1200000), // 20 minutes ago
+    title: 'Bitcoin Whale Accumulation',
+    message: 'Massive BTC transfer between top institutional wallets',
+    amount: 8945670,
+    cryptocurrency: 'BTC',
+    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '4',
     type: 'institutional_activity',
-    title: 'Avalanche Institutional Buy',
-    message: 'Large AVAX purchase through institutional custody service',
-    amount: 4782390,
+    title: 'Avalanche DeFi Protocol Buy',
+    message: 'Large AVAX purchase for DeFi protocol treasury',
+    amount: 7234590,
     cryptocurrency: 'AVAX',
-    timestamp: new Date(baseTimestamp - 1680000), // 28 minutes ago
-    severity: 'medium',
+    timestamp: new Date(baseTimestamp - 1500000), // 25 minutes ago
+    severity: 'high',
     isRead: false,
   },
   {
     id: '5',
     type: 'defi_activity',
-    title: 'DeFi Protocol Migration',
-    message: 'Significant WBTC movement to new DeFi protocol',
-    amount: 3442750,
+    title: 'WBTC Liquidity Migration',
+    message: 'Significant WBTC movement to Uniswap V3 pool',
+    amount: 6789320,
     cryptocurrency: 'WBTC',
-    timestamp: new Date(baseTimestamp - 2400000), // 40 minutes ago
+    timestamp: new Date(baseTimestamp - 2100000), // 35 minutes ago
     severity: 'medium',
-    isRead: true,
+    isRead: false,
   },
   {
     id: '6',
     type: 'market_movement',
-    title: 'Stablecoin Treasury Activity',
-    message: 'Circle minting $2.8M USDC for institutional demand',
-    amount: 2789450,
+    title: 'Stablecoin Institutional Mint',
+    message: 'Circle minting $4.57M USDC for corporate treasury',
+    amount: 4567890,
     cryptocurrency: 'USDC',
-    timestamp: new Date(baseTimestamp - 3000000), // 50 minutes ago
-    severity: 'low',
+    timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
+    severity: 'medium',
     isRead: true,
   },
   {
     id: '7',
     type: 'layer2_activity',
-    title: 'Polygon Bridge Activity',
-    message: 'Large MATIC transfer via Polygon PoS bridge',
-    amount: 2156780,
+    title: 'Polygon Enterprise Activity',
+    message: 'Large MATIC transfer for enterprise partnership',
+    amount: 3456890,
     cryptocurrency: 'MATIC',
-    timestamp: new Date(baseTimestamp - 3900000), // 1.08 hours ago
+    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
     severity: 'medium',
     isRead: true,
   },
