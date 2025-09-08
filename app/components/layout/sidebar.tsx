@@ -9,7 +9,6 @@ import {
   Activity,
   BarChart3,
   Building2,
-  FileText,
   Home,
   Settings,
   TrendingUp,
@@ -53,11 +52,7 @@ const sidebarItems = [
     href: '/alerts',
     icon: Zap,
   },
-  {
-    title: 'Reports',
-    href: '/reports',
-    icon: FileText,
-  },
+
   {
     title: 'Settings',
     href: '/settings',
