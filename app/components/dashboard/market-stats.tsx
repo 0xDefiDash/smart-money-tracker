@@ -3,16 +3,16 @@ import { Card } from '@/components/ui/card'
 import { ArrowUpIcon, ArrowDownIcon, Activity, TrendingUp, DollarSign, Users } from 'lucide-react'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 
-// Mock data - Updated for September 8, 2025
+// Mock data - Updated for September 9, 2025
 const mockStats = {
-  totalMarketCap: 3890000000000, // $3.89T
-  totalVolume: 189700000000, // $189.7B
-  whaleTransactions: 1247,
-  averageTransactionSize: 7340000, // $7.34M
-  marketCapChange: 23.5,
-  volumeChange: 33.3,
-  whaleActivityChange: 100.2,
-  avgTransactionChange: 75.6,
+  totalMarketCap: 4190000000000, // $4.19T (increased)
+  totalVolume: 234500000000, // $234.5B (increased)
+  whaleTransactions: 1456, // increased
+  averageTransactionSize: 8940000, // $8.94M (increased)
+  marketCapChange: 27.8, // higher growth
+  volumeChange: 38.7, // higher volume
+  whaleActivityChange: 134.8, // significant increase
+  avgTransactionChange: 89.3, // larger transactions
 }
 
 export async function MarketStats() {
@@ -82,3 +82,4 @@ export async function MarketStats() {
     </div>
   )
 }
+

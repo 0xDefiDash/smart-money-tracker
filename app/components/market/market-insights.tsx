@@ -1,52 +1,53 @@
 
+
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Lightbulb, TrendingUp, AlertCircle, Target } from 'lucide-react'
 
-// Mock market insights with deterministic timestamps for September 8, 2025
-const baseTimestamp = new Date('2025-09-08T14:30:00Z').getTime();
+// Mock market insights with deterministic timestamps for September 9, 2025
+const baseTimestamp = new Date('2025-09-09T15:45:00Z').getTime();
 const insights = [
   {
     id: 1,
     type: 'bullish',
-    title: 'Massive Whale Accumulation Surge',
-    description: 'Institutional wallets have accumulated over 67,000 BTC in the last 24 hours, creating unprecedented buying pressure.',
+    title: 'Institutional Bitcoin Accumulation Surge',
+    description: 'Major institutional wallets have accumulated over 89,000 BTC today, creating massive buying pressure across all exchanges.',
     impact: 'high',
-    timestamp: new Date(baseTimestamp - 600000),
-    timeAgo: '10m ago',
-    metrics: { volume: '$18.7B', wallets: 89, confidence: 96 }
+    timestamp: new Date(baseTimestamp - 420000),
+    timeAgo: '7m ago',
+    metrics: { volume: '$26.8B', wallets: 112, confidence: 98 }
   },
   {
     id: 2,
     type: 'bullish',
-    title: 'Solana Ecosystem Explosion',
-    description: 'SOL network activity reaches all-time high with massive institutional inflows and DeFi protocol migrations.',
+    title: 'Solana Ecosystem Institutional Adoption',
+    description: 'SOL network sees record institutional activity with $24.89M in strategic protocol deployments and liquidity provisions.',
     impact: 'high',
-    timestamp: new Date(baseTimestamp - 1200000),
-    timeAgo: '20m ago',
-    metrics: { volume: '$16.9B', tps: '4,567', confidence: 92 }
+    timestamp: new Date(baseTimestamp - 840000),
+    timeAgo: '14m ago',
+    metrics: { volume: '$24.9B', tps: '6,234', confidence: 95 }
   },
   {
     id: 3,
     type: 'bullish',
-    title: 'Exchange Inflows Signal Accumulation',
-    description: 'Major institutional inflows detected across Coinbase Prime and Binance Ultra HNW services, suggesting bullish sentiment.',
+    title: 'Ethereum Corporate Treasury Inflows',
+    description: 'BlackRock and Grayscale lead massive ETH accumulation with over $22.7M in institutional inflows within 24 hours.',
     impact: 'high',
-    timestamp: new Date(baseTimestamp - 2100000),
-    timeAgo: '35m ago',
-    metrics: { inflow: '$12.3B', exchanges: 12, confidence: 94 }
+    timestamp: new Date(baseTimestamp - 1320000),
+    timeAgo: '22m ago',
+    metrics: { inflow: '$22.7B', exchanges: 18, confidence: 97 }
   },
   {
     id: 4,
     type: 'bullish',
-    title: 'DeFi TVL Hits Record $189B',
-    description: 'Total Value Locked in DeFi protocols surges 47% this week, with institutional-grade protocols leading the growth.',
+    title: 'DeFi TVL Reaches New Peak $234B',
+    description: 'Total Value Locked in DeFi protocols surges 67% this week, with institutional-grade protocols driving unprecedented growth.',
     impact: 'high',
-    timestamp: new Date(baseTimestamp - 3000000),
-    timeAgo: '50m ago',
-    metrics: { tvl: '$189.2B', change: '+47.3%', confidence: 89 }
+    timestamp: new Date(baseTimestamp - 2100000),
+    timeAgo: '35m ago',
+    metrics: { tvl: '$234.2B', change: '+67.8%', confidence: 93 }
   }
 ]
 
@@ -154,3 +155,4 @@ export function MarketInsights() {
     </Card>
   )
 }
+

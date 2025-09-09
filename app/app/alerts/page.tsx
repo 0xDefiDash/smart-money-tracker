@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useState } from 'react'
@@ -21,48 +22,57 @@ export default function AlertsPage() {
   const [alerts] = useState<Alert[]>([
     {
       id: '1',
-      title: 'SOL Whale Movement Alert',
-      description: 'Massive 234,567 SOL transfer detected - $16.89M',
+      title: 'SOL Institutional Movement Alert',
+      description: 'Jump Trading moved 389,567 SOL - $24.89M to DeFi protocols',
       type: 'whale',
       status: 'triggered',
-      createdAt: '2025-09-08',
-      condition: 'SOL transfer > $15M'
+      createdAt: '2025-09-09',
+      condition: 'SOL transfer > $20M'
     },
     {
       id: '2',
-      title: 'BTC Institutional Alert',
-      description: 'BlackRock Digital Assets moved 6,789 BTC - $18.69M',
+      title: 'BTC Grayscale Holdings Alert',
+      description: 'Grayscale moved 9,876 BTC to Trust Portfolio - $26.89M',
       type: 'whale',
       status: 'triggered',
-      createdAt: '2025-09-08',
-      condition: 'BTC transfer > $15M'
+      createdAt: '2025-09-09',
+      condition: 'BTC transfer > $25M'
     },
     {
       id: '3',
-      title: 'ETH Volume Spike',
-      description: 'Unusual ETH trading volume surge - 467% above average',
+      title: 'ETH Institutional Volume Spike',
+      description: 'BlackRock Digital Assets volume surge - 534% above average',
       type: 'volume',
       status: 'triggered',
-      createdAt: '2025-09-08',
-      condition: 'ETH volume > 400% average'
+      createdAt: '2025-09-09',
+      condition: 'ETH volume > 500% average'
     },
     {
       id: '4',
-      title: 'WBTC Liquidity Alert',
-      description: 'Large WBTC movement to Uniswap V3 - $12.34M',
+      title: 'WBTC Liquidity Pool Alert',
+      description: 'Large WBTC-USDC pool addition - $19.34M liquidity added',
       type: 'whale',
       status: 'active',
-      createdAt: '2025-09-08',
-      condition: 'WBTC transfer > $10M'
+      createdAt: '2025-09-09',
+      condition: 'WBTC pool > $15M'
     },
     {
       id: '5',
-      title: 'AVAX Institution Alert',
-      description: 'Kraken Institutional moved 156,789 AVAX - $8.23M',
+      title: 'AVAX Fidelity Digital Alert',
+      description: 'Fidelity Digital moved 198,734 AVAX - $14.23M',
       type: 'whale',
       status: 'active',
-      createdAt: '2025-09-08',
-      condition: 'AVAX transfer > $5M'
+      createdAt: '2025-09-09',
+      condition: 'AVAX transfer > $10M'
+    },
+    {
+      id: '6',
+      title: 'USDC Corporate Mint Alert',
+      description: 'Circle minted $12.79M USDC for enterprise settlements',
+      type: 'whale',
+      status: 'triggered',
+      createdAt: '2025-09-09',
+      condition: 'USDC mint > $10M'
     }
   ])
 
@@ -111,8 +121,8 @@ export default function AlertsPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Alerts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">5</div>
-            <p className="text-xs text-green-600 mt-1">+3 from yesterday</p>
+            <div className="text-2xl font-bold text-foreground">6</div>
+            <p className="text-xs text-green-600 mt-1">+2 from yesterday</p>
           </CardContent>
         </Card>
         <Card>
@@ -120,8 +130,8 @@ export default function AlertsPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Triggered Today</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">3</div>
-            <p className="text-xs text-muted-foreground mt-1">60% of total</p>
+            <div className="text-2xl font-bold text-foreground">4</div>
+            <p className="text-xs text-muted-foreground mt-1">67% of total</p>
           </CardContent>
         </Card>
         <Card>
@@ -129,7 +139,7 @@ export default function AlertsPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Alerts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">5</div>
+            <div className="text-2xl font-bold text-foreground">6</div>
             <p className="text-xs text-muted-foreground mt-1">All time</p>
           </CardContent>
         </Card>
@@ -177,3 +187,4 @@ export default function AlertsPage() {
     </div>
   )
 }
+

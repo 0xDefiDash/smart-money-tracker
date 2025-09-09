@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,90 +7,90 @@ import { Activity, ExternalLink, ArrowRightIcon } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
-// Mock whale transaction data with current timestamps for September 8, 2025
-const baseTimestamp = new Date('2025-09-08T14:30:00Z').getTime();
+// Mock whale transaction data with current timestamps for September 9, 2025
+const baseTimestamp = new Date('2025-09-09T15:45:00Z').getTime();
 const mockWhaleTransactions = [
   {
     id: '1',
-    txHash: '0x2f8a7d9b4e3c1a6f8d2b9e5c7f1a4d6b8c3e9f2a5d7c1e8b4f9a2d6c8e5b3f',
-    fromAddress: '0x2f8a7d9b4e3c1a6f8d2b9e5c7f1a4d6b',
-    toAddress: '0x8c3e9f2a5d7c1e8b4f9a2d6c8e5b3f1a',
-    value: '3,247.89',
-    valueUsd: 8945670,
+    txHash: '0x3f9a8d2c5e7b1f4a6d9c3e8b2f5a7d1c4e9b6f2a8d5c1e7b3f9a6d2c8e4b7f',
+    fromAddress: '0x3f9a8d2c5e7b1f4a6d9c3e8b2f5a7d1c',
+    toAddress: '0x4e9b6f2a8d5c1e7b3f9a6d2c8e4b7f1a',
+    value: '4,567.23',
+    valueUsd: 12847590,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 360000), // 6 minutes ago
+    timestamp: new Date(baseTimestamp - 240000), // 4 minutes ago
     blockchain: 'bitcoin',
     isAlert: true,
   },
   {
     id: '2',
-    txHash: '0xa7c5f1d8b2e6a9c4f7d1b8e5c2f9a6d3b7e1c8f4a2d9b6e3c1f7a5d8b4e2c6f',
-    fromAddress: '0xa7c5f1d8b2e6a9c4f7d1b8e5c2f9a6d3',
-    toAddress: '0xb7e1c8f4a2d9b6e3c1f7a5d8b4e2c6f9',
-    value: '3,892.14',
-    valueUsd: 10456780,
+    txHash: '0x8c4f7a1e5d9b3f6a2d8c5e1b7f4a9d3c6e2f8a5d1c9b4e7f2a6d8c3e5b9f1a4',
+    fromAddress: '0x8c4f7a1e5d9b3f6a2d8c5e1b7f4a9d3c',
+    toAddress: '0x6e2f8a5d1c9b4e7f2a6d8c3e5b9f1a4d',
+    value: '5,123.89',
+    valueUsd: 13759820,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 720000), // 12 minutes ago
+    timestamp: new Date(baseTimestamp - 540000), // 9 minutes ago
     blockchain: 'ethereum',
     isAlert: true,
   },
   {
     id: '3',
-    txHash: '0xd4b8e7a3f9c2d6a1e8b5c9f3a7d2b6e4c1f8a5d9b3e7c2f6a4d1b8e5c9f2a7d',
-    fromAddress: '0xd4b8e7a3f9c2d6a1e8b5c9f3a7d2b6e4',
-    toAddress: '0xc1f8a5d9b3e7c2f6a4d1b8e5c9f2a7d3',
-    value: '234,560.75',
-    valueUsd: 12890450,
+    txHash: '0xa2d6c9e4b1f7a5d8c3e6b9f2a4d7c1e8b5f3a9d6c2e4b7f1a8d5c9e3b6f2a7d',
+    fromAddress: '0xa2d6c9e4b1f7a5d8c3e6b9f2a4d7c1e8',
+    toAddress: '0xb5f3a9d6c2e4b7f1a8d5c9e3b6f2a7d1',
+    value: '278,934.56',
+    valueUsd: 17890450,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 1080000), // 18 minutes ago
+    timestamp: new Date(baseTimestamp - 780000), // 13 minutes ago
     blockchain: 'solana',
     isAlert: true,
   },
   {
     id: '4',
-    txHash: '0x9e6c2f5a8d1b7e4c3f9a2d6b8e5c1f7a4d3b9e6c2f8a5d1b7e4c9f2a6d8b5e3',
-    fromAddress: '0x9e6c2f5a8d1b7e4c3f9a2d6b8e5c1f7a',
-    toAddress: '0x4d3b9e6c2f8a5d1b7e4c9f2a6d8b5e3c',
-    value: '89,345.20',
-    valueUsd: 7234590,
+    txHash: '0x5e8b1f4a9d6c2e8f5a3d7b1e9c4f2a8d6c5e1b9f3a7d4c2e8b5f1a6d9c3e8b',
+    fromAddress: '0x5e8b1f4a9d6c2e8f5a3d7b1e9c4f2a8d',
+    toAddress: '0x6c5e1b9f3a7d4c2e8b5f1a6d9c3e8b2f',
+    value: '124,567.80',
+    valueUsd: 9234570,
     cryptocurrency: 'AVAX',
-    timestamp: new Date(baseTimestamp - 1800000), // 30 minutes ago
+    timestamp: new Date(baseTimestamp - 1320000), // 22 minutes ago
     blockchain: 'avalanche',
     isAlert: true,
   },
   {
     id: '5',
-    txHash: '0x5c8a3f6d1b9e7c4a2f8d5b1e9c6a3f7d2b8e5c1a9f6d3b7e4c2a8f5d1b9e6c3',
-    fromAddress: '0x5c8a3f6d1b9e7c4a2f8d5b1e9c6a3f7d',
-    toAddress: '0x2b8e5c1a9f6d3b7e4c2a8f5d1b9e6c3a',
-    value: '45.67',
-    valueUsd: 6789320,
+    txHash: '0x7f2a9d5c8e1b6f3a2d9c4e7b1f5a8d6c3e9b2f4a7d1c5e8b9f3a6d2c4e7b1f8',
+    fromAddress: '0x7f2a9d5c8e1b6f3a2d9c4e7b1f5a8d6c',
+    toAddress: '0x3e9b2f4a7d1c5e8b9f3a6d2c4e7b1f8a',
+    value: '67.89',
+    valueUsd: 9789540,
     cryptocurrency: 'WBTC',
-    timestamp: new Date(baseTimestamp - 2400000), // 40 minutes ago
+    timestamp: new Date(baseTimestamp - 1800000), // 30 minutes ago
     blockchain: 'ethereum',
     isAlert: true,
   },
   {
     id: '6',
-    txHash: '0x8f2d6a9c5e1b8f3d7a2c6e9b4f1d8a3c7e2b6f9a5d1c8e4b7f2a9d6c3e8b5f1',
-    fromAddress: '0x8f2d6a9c5e1b8f3d7a2c6e9b4f1d8a3c',
-    toAddress: '0x7e2b6f9a5d1c8e4b7f2a9d6c3e8b5f1a',
-    value: '4,567,890',
-    valueUsd: 4567890,
+    txHash: '0x9b4e7c2f5a8d1e6b3f9a4d7c2e5b8f1a6d9c3e4b7f2a5d8c1e9b6f3a7d4c2e8',
+    fromAddress: '0x9b4e7c2f5a8d1e6b3f9a4d7c2e5b8f1a',
+    toAddress: '0x6d9c3e4b7f2a5d8c1e9b6f3a7d4c2e8b',
+    value: '6,789,012',
+    valueUsd: 6789012,
     cryptocurrency: 'USDC',
-    timestamp: new Date(baseTimestamp - 3000000), // 50 minutes ago
+    timestamp: new Date(baseTimestamp - 2400000), // 40 minutes ago
     blockchain: 'ethereum',
     isAlert: false,
   },
   {
     id: '7',
-    txHash: '0x6b9e4c2f7a5d1b8e3c9f6a2d7b4e1c8f5a3d9b6e2c7f4a1d8b5e9c3f7a2d6b',
-    fromAddress: '0x6b9e4c2f7a5d1b8e3c9f6a2d7b4e1c8f',
-    toAddress: '0x5a3d9b6e2c7f4a1d8b5e9c3f7a2d6b1e',
-    value: '89,450.30',
-    valueUsd: 3456890,
+    txHash: '0x4c7b2e9f6a3d1c8e5b9f4a2d7c1e6b8f3a5d9c2e4b7f1a8d6c9e3b4f7a2d1c5',
+    fromAddress: '0x4c7b2e9f6a3d1c8e5b9f4a2d7c1e6b8f',
+    toAddress: '0x3a5d9c2e4b7f1a8d6c9e3b4f7a2d1c5e',
+    value: '156,780.45',
+    valueUsd: 4567890,
     cryptocurrency: 'MATIC',
-    timestamp: new Date(baseTimestamp - 4200000), // 1.17 hours ago
+    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
     blockchain: 'polygon',
     isAlert: false,
   },
@@ -180,3 +181,4 @@ export function WhaleActivity() {
     </Card>
   )
 }
+

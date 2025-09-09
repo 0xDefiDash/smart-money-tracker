@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,83 +7,83 @@ import { Zap, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
-// Mock alerts data with current timestamps for September 8, 2025
-const baseTimestamp = new Date('2025-09-08T14:30:00Z').getTime();
+// Mock alerts data with current timestamps for September 9, 2025
+const baseTimestamp = new Date('2025-09-09T15:45:00Z').getTime();
 const mockAlerts = [
   {
     id: '1',
     type: 'whale_transaction',
-    title: 'Massive SOL Whale Movement',
-    message: 'Transaction worth $12.89M detected from institutional wallet',
-    amount: 12890450,
-    cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 300000), // 5 minutes ago
+    title: 'Major Bitcoin Whale Movement',
+    message: 'Transaction worth $17.89M detected from BlackRock Digital wallet',
+    amount: 17890450,
+    cryptocurrency: 'BTC',
+    timestamp: new Date(baseTimestamp - 180000), // 3 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '2',
     type: 'exchange_flow',
-    title: 'Binance Institutional Outflow',
-    message: 'Major ETH outflow detected - $10.46M to cold storage',
-    amount: 10456780,
+    title: 'Coinbase Prime Massive Outflow',
+    message: 'Huge ETH outflow detected - $13.76M to institutional custody',
+    amount: 13759820,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 600000), // 10 minutes ago
+    timestamp: new Date(baseTimestamp - 420000), // 7 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '3',
     type: 'wallet_activity',
-    title: 'Bitcoin Whale Accumulation',
-    message: 'Massive BTC transfer between top institutional wallets',
-    amount: 8945670,
-    cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
+    title: 'Solana Whale Accumulation Spree',
+    message: 'Massive SOL transfer from Jump Trading to DeFi protocols',
+    amount: 12847590,
+    cryptocurrency: 'SOL',
+    timestamp: new Date(baseTimestamp - 720000), // 12 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '4',
     type: 'institutional_activity',
-    title: 'Avalanche DeFi Protocol Buy',
-    message: 'Large AVAX purchase for DeFi protocol treasury',
-    amount: 7234590,
-    cryptocurrency: 'AVAX',
-    timestamp: new Date(baseTimestamp - 1500000), // 25 minutes ago
+    title: 'Wrapped Bitcoin Large Purchase',
+    message: 'WBTC accumulation for institutional DeFi strategy',
+    amount: 9789540,
+    cryptocurrency: 'WBTC',
+    timestamp: new Date(baseTimestamp - 1080000), // 18 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '5',
     type: 'defi_activity',
-    title: 'WBTC Liquidity Migration',
-    message: 'Significant WBTC movement to Uniswap V3 pool',
-    amount: 6789320,
-    cryptocurrency: 'WBTC',
-    timestamp: new Date(baseTimestamp - 2100000), // 35 minutes ago
-    severity: 'medium',
+    title: 'Avalanche Protocol Treasury Fill',
+    message: 'Large AVAX purchase for cross-chain liquidity pools',
+    amount: 9234570,
+    cryptocurrency: 'AVAX',
+    timestamp: new Date(baseTimestamp - 1560000), // 26 minutes ago
+    severity: 'high',
     isRead: false,
   },
   {
     id: '6',
     type: 'market_movement',
-    title: 'Stablecoin Institutional Mint',
-    message: 'Circle minting $4.57M USDC for corporate treasury',
-    amount: 4567890,
+    title: 'USDC Institutional Mint Activity',
+    message: 'Circle minting $6.79M USDC for enterprise settlements',
+    amount: 6789012,
     cryptocurrency: 'USDC',
-    timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
+    timestamp: new Date(baseTimestamp - 2100000), // 35 minutes ago
     severity: 'medium',
     isRead: true,
   },
   {
     id: '7',
     type: 'layer2_activity',
-    title: 'Polygon Enterprise Activity',
-    message: 'Large MATIC transfer for enterprise partnership',
-    amount: 3456890,
+    title: 'Polygon Enterprise Deployment',
+    message: 'Large MATIC movement for institutional scaling solution',
+    amount: 4567890,
     cryptocurrency: 'MATIC',
-    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
+    timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
     severity: 'medium',
     isRead: true,
   },
@@ -191,3 +192,4 @@ export function RecentAlerts() {
     </Card>
   )
 }
+
