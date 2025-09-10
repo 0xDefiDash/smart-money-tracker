@@ -26,6 +26,7 @@ import {
   Clock,
 } from 'lucide-react'
 import Image from 'next/image'
+import { formatDistanceToNow } from 'date-fns'
 
 interface PumpFunToken {
   tokenAddress: string
@@ -44,6 +45,7 @@ interface PumpFunToken {
   formattedFDV: string
   priceUsdFormatted: string
   bondingProgressFormatted: string
+  createdAt?: string
 }
 
 interface PumpFunResponse {
@@ -65,6 +67,7 @@ export default function PumpFunPage() {
     avgProgress: 0,
     totalLiquidity: 0,
   })
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   const fetchTokens = async (showRefreshing = false) => {
     try {
@@ -94,6 +97,7 @@ export default function PumpFunPage() {
         avgProgress,
         totalLiquidity,
       })
+      setLastUpdated(new Date())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -206,7 +210,15 @@ export default function PumpFunPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Pump.fun Tracker</h1>
-          <p className="text-muted-foreground">Track bonding curve tokens on Pump.fun</p>
+          <div className="flex items-center gap-4">
+            <p className="text-muted-foreground">Track bonding curve tokens on Pump.fun</p>
+            {lastUpdated && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Clock className="w-3 h-3 mr-1" />
+                Updated {formatDistanceToNow(lastUpdated)} ago
+              </div>
+            )}
+          </div>
         </div>
         <Button 
           onClick={() => fetchTokens(true)} 
@@ -395,6 +407,14 @@ export default function PumpFunPage() {
                   />
                 </div>
               </div>
+              
+              {/* Creation Time */}
+              {token.createdAt && (
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Created {formatDistanceToNow(new Date(token.createdAt))} ago
+                </div>
+              )}
               
               {/* Action Buttons */}
               <div className="flex space-x-2 pt-2">
