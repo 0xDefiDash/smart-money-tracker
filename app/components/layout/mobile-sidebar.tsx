@@ -15,7 +15,8 @@ import {
   Wallet,
   Zap,
   LineChart,
-  Target
+  Target,
+  Globe
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -48,6 +49,11 @@ const sidebarItems = [
     title: 'Pump.fun Tracker',
     href: '/pumpfun',
     icon: Target,
+  },
+  {
+    title: 'ZORA Tracker',
+    href: '/zora',
+    icon: Globe,
   },
   {
     title: 'Wallet Monitor',
