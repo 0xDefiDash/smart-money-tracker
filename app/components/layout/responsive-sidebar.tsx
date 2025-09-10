@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Wallet,
   Zap,
-  DollarSign,
   LineChart,
   Target
 } from 'lucide-react'
@@ -55,11 +54,7 @@ const sidebarItems = [
     href: '/wallet-monitor',
     icon: Wallet,
   },
-  {
-    title: 'Trading',
-    href: '/trading',
-    icon: DollarSign,
-  },
+
   {
     title: 'Analytics',
     href: '/analytics',
