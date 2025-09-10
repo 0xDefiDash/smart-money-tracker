@@ -14,7 +14,8 @@ import {
   TrendingUp,
   Wallet,
   Zap,
-  Target
+  Target,
+  Rocket
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -42,6 +43,11 @@ const sidebarItems = [
     title: 'Pump.fun Tracker',
     href: '/pumpfun',
     icon: Target,
+  },
+  {
+    title: 'Bonk.fun Tracker',
+    href: '/bonkfun',
+    icon: Rocket,
   },
   {
     title: 'Wallet Monitor',
