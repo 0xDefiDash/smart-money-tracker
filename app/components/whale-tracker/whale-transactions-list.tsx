@@ -7,20 +7,20 @@ import { Badge } from '@/components/ui/badge'
 import { Activity, ExternalLink, ArrowRightIcon, AlertTriangle, Copy, Eye } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 
-// Mock whale transactions data with current timestamps (September 9, 2025)
-const baseTimestamp = new Date('2025-09-09T15:45:00Z').getTime();
+// Updated whale transactions data for September 11, 2025
+const baseTimestamp = new Date('2025-09-11T18:15:00Z').getTime();
 const mockTransactions = [
   {
     id: '1',
-    txHash: '0x6e9a4d2f8c5b1e7a3d6c9e2b5f8a1d4c7e3b9f6a2d5c8e1b4f7a9d3c6e8b5f1a',
-    fromAddress: '0x6e9a4d2f8c5b1e7a3d6c9e2b5f8a1d4c',
-    toAddress: '0x7e3b9f6a2d5c8e1b4f7a9d3c6e8b5f1a',
-    fromLabel: 'BlackRock Digital Assets',
-    toLabel: 'Strategic Reserve Vault',
-    value: '7,234.89',
-    valueUsd: 19456780,
+    txHash: '0x8a2f5d7c9e4b1f6a8d3c5e7b2f9a6d4c1e8b3f7a5d2c9e6b4f1a8d7c2e5b9f3',
+    fromAddress: '0x8a2f5d7c9e4b1f6a8d3c5e7b2f9a6d4c',
+    toAddress: '0x1e8b3f7a5d2c9e6b4f1a8d7c2e5b9f3',
+    fromLabel: 'BlackRock Digital Assets Ultra',
+    toLabel: 'MicroStrategy Corporate Treasury',
+    value: '9,876.45',
+    valueUsd: 28945600,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 300000), // 5 minutes ago
+    timestamp: new Date(baseTimestamp - 180000), // 3 minutes ago
     blockchain: 'Bitcoin',
     gasUsed: null,
     gasPrice: null,
@@ -29,32 +29,32 @@ const mockTransactions = [
   },
   {
     id: '2',
-    txHash: '0x8f3c6a9d2e5b8f1a4d7c3e9b6f2a5d8c1e4b7f9a3d6c2e5b8f1a7d4c9e6b3f2a',
-    fromAddress: '0x8f3c6a9d2e5b8f1a4d7c3e9b6f2a5d8c',
-    toAddress: '0x1e4b7f9a3d6c2e5b8f1a7d4c9e6b3f2a',
+    txHash: '0xb5f8a3d6c1e9b4f7a2d5c8e3b6f9a1d4c7e2b5f8a3d6c9e1b4f7a2d5c8e3b6f9',
+    fromAddress: '0xb5f8a3d6c1e9b4f7a2d5c8e3b6f9a1d4',
+    toAddress: '0xc7e2b5f8a3d6c9e1b4f7a2d5c8e3b6f9',
     fromLabel: 'Coinbase Custody Prime',
-    toLabel: 'Whale Address #9876',
-    value: '8,456.12',
-    valueUsd: 22709340,
+    toLabel: 'Ethereum Foundation Treasury',
+    value: '12,389.67',
+    valueUsd: 32145780,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 600000), // 10 minutes ago
+    timestamp: new Date(baseTimestamp - 420000), // 7 minutes ago
     blockchain: 'Ethereum',
     gasUsed: '21000',
-    gasPrice: '35',
+    gasPrice: '42',
     isAlert: true,
     status: 'confirmed',
   },
   {
     id: '3',
-    txHash: '0xa5d8c2e6b9f3a7d1c4e8b5f2a9d6c3e1b7f4a8d2c5e9b6f3a1d4c7e2b8f5a9d6',
-    fromAddress: '0xa5d8c2e6b9f3a7d1c4e8b5f2a9d6c3e1',
-    toAddress: '0xb7f4a8d2c5e9b6f3a1d4c7e2b8f5a9d6',
-    fromLabel: 'Jump Trading Alpha',
-    toLabel: 'Solana DeFi Protocols',
-    value: '389,567.23',
-    valueUsd: 24890340,
+    txHash: '0xd3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9',
+    fromAddress: '0xd3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2',
+    toAddress: '0xf5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9',
+    fromLabel: 'Jump Trading Sigma',
+    toLabel: 'Alameda Reserve Fund',
+    value: '567,890.12',
+    valueUsd: 34256700,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 960000), // 16 minutes ago
+    timestamp: new Date(baseTimestamp - 840000), // 14 minutes ago
     blockchain: 'Solana',
     gasUsed: null,
     gasPrice: null,
@@ -63,18 +63,18 @@ const mockTransactions = [
   },
   {
     id: '4',
-    txHash: '0xc2e5b8f1a6d9c3e4b7f2a8d5c1e9b6f3a2d7c4e1b8f5a9d6c3e7b2f4a1d8c5e9',
-    fromAddress: '0xc2e5b8f1a6d9c3e4b7f2a8d5c1e9b6f3',
-    toAddress: '0xa2d7c4e1b8f5a9d6c3e7b2f4a1d8c5e9',
-    fromLabel: 'Fidelity Digital Treasury',
+    txHash: '0xe6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3',
+    fromAddress: '0xe6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1',
+    toAddress: '0xd4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3',
+    fromLabel: 'Grayscale Holdings Prime',
     toLabel: 'Institutional Cold Storage',
-    value: '198,734.56',
-    valueUsd: 14234560,
-    cryptocurrency: 'AVAX',
-    timestamp: new Date(baseTimestamp - 1440000), // 24 minutes ago
-    blockchain: 'Avalanche',
+    value: '234,567.89',
+    valueUsd: 18967340,
+    cryptocurrency: 'TON',
+    timestamp: new Date(baseTimestamp - 1260000), // 21 minutes ago
+    blockchain: 'TON',
     gasUsed: '21000',
-    gasPrice: '28',
+    gasPrice: '15',
     isAlert: true,
     status: 'confirmed',
   },

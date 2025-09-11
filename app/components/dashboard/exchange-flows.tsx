@@ -6,16 +6,16 @@ import { Building2, ArrowUpIcon, ArrowDownIcon } from 'lucide-react'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts'
 
-// Mock exchange flow data - Updated for September 6, 2025
+// Updated exchange flow data for September 11, 2025
 const mockExchangeFlows = [
-  { exchange: 'Binance', inflow: 245000000, outflow: 198000000, net: 47000000 },
-  { exchange: 'Coinbase', inflow: 189000000, outflow: 167000000, net: 22000000 },
-  { exchange: 'Bybit', inflow: 134000000, outflow: 156000000, net: -22000000 },
-  { exchange: 'OKX', inflow: 98000000, outflow: 76000000, net: 22000000 },
-  { exchange: 'Kraken', inflow: 87000000, outflow: 74000000, net: 13000000 },
-  { exchange: 'Gate.io', inflow: 76000000, outflow: 82000000, net: -6000000 },
-  { exchange: 'KuCoin', inflow: 62000000, outflow: 69000000, net: -7000000 },
-  { exchange: 'Bitfinex', inflow: 58000000, outflow: 45000000, net: 13000000 },
+  { exchange: 'Binance', inflow: 378000000, outflow: 289000000, net: 89000000 },
+  { exchange: 'Coinbase', inflow: 267000000, outflow: 234000000, net: 33000000 },
+  { exchange: 'Bybit', inflow: 198000000, outflow: 245000000, net: -47000000 },
+  { exchange: 'OKX', inflow: 145000000, outflow: 112000000, net: 33000000 },
+  { exchange: 'Kraken', inflow: 123000000, outflow: 98000000, net: 25000000 },
+  { exchange: 'Gate.io', inflow: 89000000, outflow: 106000000, net: -17000000 },
+  { exchange: 'KuCoin', inflow: 78000000, outflow: 95000000, net: -17000000 },
+  { exchange: 'HTX', inflow: 67000000, outflow: 54000000, net: 13000000 },
 ]
 
 const colors = {

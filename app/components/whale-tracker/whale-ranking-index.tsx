@@ -10,19 +10,19 @@ import { Copy, Crown, TrendingUp, TrendingDown, ExternalLink, Wallet, Activity, 
 import { formatCurrency, formatNumber, truncateAddress } from '@/lib/utils'
 import { toast } from 'react-hot-toast'
 
-// Mock whale ranking data for September 9, 2025
+// Updated whale ranking data for September 11, 2025
 const topWhales = [
   {
     rank: 1,
     walletAddress: '0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503',
     label: 'BlackRock Digital Assets Ultra',
-    totalBalance: 3450000000, // $3.45B (increased)
-    balanceChange24h: 12.4, // significant increase
+    totalBalance: 3890000000, // $3.89B (massive increase)
+    balanceChange24h: 8.7, // continued growth
     dominantAssets: ['BTC', 'ETH', 'USDC'],
-    lastTxAmount: 134000000,
-    lastTxTime: '5 minutes ago',
-    totalTxCount: 1347,
-    avgTxSize: 11200000,
+    lastTxAmount: 156000000,
+    lastTxTime: '3 minutes ago',
+    totalTxCount: 1398,
+    avgTxSize: 12400000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 99
@@ -31,13 +31,13 @@ const topWhales = [
     rank: 2,
     walletAddress: '0x73BCEb1Cd57C711feaC4224D062b0F6ff338aA6c',
     label: 'Sovereign Wealth Fund Omega',
-    totalBalance: 3180000000, // $3.18B (increased)
-    balanceChange24h: 15.7,
+    totalBalance: 3560000000, // $3.56B (continued growth)
+    balanceChange24h: 6.2,
     dominantAssets: ['BTC', 'ETH', 'SOL'],
-    lastTxAmount: 189000000,
-    lastTxTime: '12 minutes ago',
-    totalTxCount: 1098,
-    avgTxSize: 16800000,
+    lastTxAmount: 234000000,
+    lastTxTime: '7 minutes ago',
+    totalTxCount: 1156,
+    avgTxSize: 18900000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 98
@@ -46,13 +46,13 @@ const topWhales = [
     rank: 3,
     walletAddress: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
     label: 'Grayscale Holdings Prime',
-    totalBalance: 2890000000, // $2.89B (increased)
-    balanceChange24h: 23.6,
+    totalBalance: 3120000000, // $3.12B (strong growth)
+    balanceChange24h: 4.9,
     dominantAssets: ['BTC', 'ETH', 'WBTC'],
-    lastTxAmount: 267000000,
-    lastTxTime: '8 minutes ago',
-    totalTxCount: 1689,
-    avgTxSize: 9200000,
+    lastTxAmount: 189000000,
+    lastTxTime: '15 minutes ago',
+    totalTxCount: 1745,
+    avgTxSize: 10600000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 97
