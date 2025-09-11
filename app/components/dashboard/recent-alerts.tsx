@@ -184,9 +184,9 @@ export function RecentAlerts() {
         </div>
         
         <div className="mt-4 pt-4 border-t border-border">
-          <button className="w-full text-sm text-primary hover:text-primary/80 transition-colors font-medium">
-            View All Alerts →
-          </button>
+          <p className="text-xs text-muted-foreground text-center">
+            Latest activity updates from your monitored wallets and markets
+          </p>
         </div>
       </CardContent>
     </Card>

@@ -67,12 +67,6 @@ const sidebarItems = [
     icon: BarChart3,
   },
   {
-    title: 'Alerts',
-    href: '/alerts',
-    icon: Zap,
-  },
-
-  {
     title: 'Settings',
     href: '/settings',
     icon: Settings,
