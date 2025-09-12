@@ -15,7 +15,8 @@ import {
   Wallet,
   Zap,
   Target,
-  Rocket
+  Rocket,
+  Percent
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -28,6 +29,11 @@ const sidebarItems = [
     title: 'Live Market',
     href: '/market',
     icon: TrendingUp,
+  },
+  {
+    title: 'Yields & APR',
+    href: '/yields',
+    icon: Percent,
   },
   {
     title: 'Whale Tracker',
