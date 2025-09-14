@@ -167,40 +167,46 @@ export default function BlockWarsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [timeUntilSpawn, setTimeUntilSpawn] = useState(120)
   const [isInitialized, setIsInitialized] = useState(false)
-  const [lastLocalSpawn, setLastLocalSpawn] = useState(Date.now() - 15000) // Allow initial spawn after 15 seconds
 
   // Initialize game state from localStorage or API
   useEffect(() => {
     loadGameData()
   }, [])
 
-  // Load global blocks and set up polling
+  // Load initial blocks when game initializes
   useEffect(() => {
     if (!isInitialized) return
 
-    // Initial load
+    // Initial load and start the spawn timer
     fetchGlobalBlocks()
     
-    // Poll global blocks every 5 seconds for real-time updates
-    const globalBlocksTimer = setInterval(() => {
-      fetchGlobalBlocks()
-    }, 5000)
-
-    return () => clearInterval(globalBlocksTimer)
+    // Set initial timer value - start counting down from 2 minutes for first regular spawn
+    setTimeUntilSpawn(120)
+    
   }, [isInitialized])
 
-  // Timer for updating time until spawn (purely cosmetic now)
+  // Timer for updating time until spawn and triggering actual spawns
   useEffect(() => {
     if (!isInitialized) return
 
     const timer = setInterval(() => {
-      // fetchGlobalBlocks will handle the actual timing from the server
-      // This is just for smooth countdown display
-      setTimeUntilSpawn(prev => Math.max(0, prev - 1))
+      setTimeUntilSpawn(prev => {
+        const newTime = prev - 1
+        
+        // When timer reaches 0, trigger spawn and reset
+        if (newTime <= 0 && spawnedBlocks.length < 12) {
+          const newBlocksCount = Math.floor(Math.random() * 2) + 2 // 2-3 blocks
+          generateLocalBlocks(newBlocksCount)
+          setBattleLog(prevLog => [...prevLog, `🎁 ${newBlocksCount} new blocks spawned in the global arena! Timer reset to 2 minutes.`])
+          return 120 // Reset to 2 minutes
+        }
+        
+        return Math.max(0, newTime)
+      })
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isInitialized])
+  }, [isInitialized, spawnedBlocks.length])
 
   // Passive money generation - update money every 5 seconds based on owned blocks
   useEffect(() => {
@@ -311,26 +317,13 @@ export default function BlockWarsPage() {
     }
   }
 
-  // Generate blocks locally for a faster gaming experience
+  // Generate initial blocks if needed
   const fetchGlobalBlocks = async () => {
     try {
-      // Check if we need to generate new blocks
-      const now = Date.now()
-      
-      // Generate initial blocks if none exist
-      if (spawnedBlocks.length === 0 && now - lastLocalSpawn > 10000) {
+      // Generate initial blocks if none exist and game is initialized
+      if (spawnedBlocks.length === 0) {
         generateLocalBlocks(3)
-        setLastLocalSpawn(now)
         setBattleLog(prev => [...prev, '🎁 Initial blocks have spawned in the global arena!'])
-        return
-      }
-      
-      // Regular spawning logic - spawn new blocks every 2 minutes if under limit
-      if (spawnedBlocks.length < 12 && now - lastLocalSpawn > 120000) { // 2 minutes
-        const newBlocksCount = Math.floor(Math.random() * 2) + 2 // 2-3 blocks
-        generateLocalBlocks(newBlocksCount)
-        setLastLocalSpawn(now)
-        setBattleLog(prev => [...prev, `🎁 ${newBlocksCount} new blocks spawned in the global arena!`])
       }
     } catch (error) {
       console.error('Error in local block generation:', error)
