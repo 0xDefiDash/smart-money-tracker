@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { DefidashAgent } from '@/components/chat/defidash-agent'
 import { RollingBanner } from '@/components/ui/rolling-banner'
+import { AuthProvider } from '@/components/auth/auth-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -45,9 +46,10 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
@@ -82,6 +84,7 @@ export default function RootLayout({
           {/* Defidash Agent Chat */}
           <DefidashAgent />
         </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

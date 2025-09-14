@@ -2,6 +2,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,13 +22,15 @@ import {
   Target,
   Star,
   TrendingUp,
-  Users
+  Users,
+  Loader2
 } from 'lucide-react'
 import { BlockCharacter } from '@/components/game/block-character'
 import { GameStats } from '@/components/game/game-stats'
 import { BlockCollection } from '@/components/game/block-collection'
 import { BattleArena } from '@/components/game/battle-arena'
 import { SpawnArea } from '@/components/game/spawn-area'
+import { UserBoard } from '@/components/game/user-board'
 
 interface GameState {
   playerId: string
@@ -111,12 +115,41 @@ const calculateAccumulatedMoney = (ownedBlocks: Block[], lastUpdate: number): nu
 }
 
 export default function BlockWarsPage() {
+  const { data: session, status } = useSession() || {}
+  const router = useRouter()
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (status === 'loading') return // Still loading
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+  }, [status, router])
+
+  // Show loading while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
+          <p className="text-slate-300">Loading Block Wars...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect if not authenticated
+  if (status === 'unauthenticated' || !session?.user) {
+    return null // Will redirect via useEffect
+  }
+
   const [gameState, setGameState] = useState<GameState>({
-    playerId: 'player_' + Math.random().toString(36).substr(2, 9),
-    coins: 1000,
+    playerId: session.user.id,
+    coins: session.user.gameCoins || 1000,
     money: 0,
-    level: 1,
-    experience: 0,
+    level: session.user.gameLevel || 1,
+    experience: session.user.gameExp || 0,
     ownedBlocks: [],
     defenseStrength: 100,
     attackPower: 50,
@@ -126,7 +159,7 @@ export default function BlockWarsPage() {
     secretBlockSpawns: 0,
     lastSecretSpawn: 0,
     nextSecretSpawn: Date.now() + Math.random() * 12 * 60 * 60 * 1000, // Random time within 12 hours
-    isAdmin: false
+    isAdmin: session.user.isAdmin || false
   })
 
   const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
@@ -586,8 +619,13 @@ export default function BlockWarsPage() {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Game Stats */}
-          <div className="lg:col-span-1">
+          {/* User Profile & Game Stats */}
+          <div className="lg:col-span-1 space-y-4">
+            <UserBoard 
+              gameCoins={gameState.coins}
+              gameLevel={gameState.level}
+              gameExp={gameState.experience}
+            />
             <GameStats gameState={gameState} />
           </div>
 

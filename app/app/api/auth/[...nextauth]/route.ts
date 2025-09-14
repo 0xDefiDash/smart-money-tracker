@@ -11,17 +11,17 @@ const authOptions = {
     CredentialsProvider({
       name: 'credentials',
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null
         }
 
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email
+            username: credentials.username
           }
         })
 
@@ -29,17 +29,53 @@ const authOptions = {
           return null
         }
 
-        // For now, accept any password (in production, use bcrypt.compare)
+        // Compare hashed password
+        const isValidPassword = await bcrypt.compare(credentials.password, user.password)
+        if (!isValidPassword) {
+          return null
+        }
+
         return {
           id: user.id,
-          email: user.email,
-          name: user.name,
+          username: user.username,
+          name: user.name || user.username,
+          email: user.email || '',
+          profileImage: user.profileImage || undefined,
+          gameCoins: user.gameCoins,
+          gameLevel: user.gameLevel,
+          gameExp: user.gameExp,
+          isAdmin: user.isAdmin
         }
       }
     })
   ],
   session: {
     strategy: 'jwt' as const
+  },
+  callbacks: {
+    async jwt({ token, user }: any) {
+      if (user) {
+        token.username = user.username
+        token.profileImage = user.profileImage
+        token.gameCoins = user.gameCoins
+        token.gameLevel = user.gameLevel
+        token.gameExp = user.gameExp
+        token.isAdmin = user.isAdmin
+      }
+      return token
+    },
+    async session({ session, token }: any) {
+      if (token) {
+        session.user.id = token.sub
+        session.user.username = token.username as string
+        session.user.profileImage = token.profileImage as string
+        session.user.gameCoins = token.gameCoins as number
+        session.user.gameLevel = token.gameLevel as number
+        session.user.gameExp = token.gameExp as number
+        session.user.isAdmin = token.isAdmin as boolean
+      }
+      return session
+    }
   },
   pages: {
     signIn: '/auth/signin',
