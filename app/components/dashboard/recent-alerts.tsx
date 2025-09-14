@@ -1,5 +1,6 @@
 
 
+
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,17 +8,17 @@ import { Zap, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
-// Mock alerts data with current timestamps for September 9, 2025
-const baseTimestamp = new Date('2025-09-09T15:45:00Z').getTime();
+// Mock alerts data with current timestamps for September 14, 2025
+const baseTimestamp = new Date('2025-09-14T16:30:00Z').getTime();
 const mockAlerts = [
   {
     id: '1',
     type: 'whale_transaction',
     title: 'Major Bitcoin Whale Movement',
-    message: 'Transaction worth $17.89M detected from BlackRock Digital wallet',
-    amount: 17890450,
+    message: 'Transaction worth $24.78M detected from BlackRock Ultra Digital wallet',
+    amount: 24789340,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 180000), // 3 minutes ago
+    timestamp: new Date(baseTimestamp - 240000), // 4 minutes ago
     severity: 'high',
     isRead: false,
   },
@@ -25,10 +26,10 @@ const mockAlerts = [
     id: '2',
     type: 'exchange_flow',
     title: 'Coinbase Prime Massive Outflow',
-    message: 'Huge ETH outflow detected - $13.76M to institutional custody',
-    amount: 13759820,
+    message: 'Huge ETH outflow detected - $27.89M to institutional custody',
+    amount: 27890540,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 420000), // 7 minutes ago
+    timestamp: new Date(baseTimestamp - 480000), // 8 minutes ago
     severity: 'high',
     isRead: false,
   },
@@ -37,9 +38,9 @@ const mockAlerts = [
     type: 'wallet_activity',
     title: 'Solana Whale Accumulation Spree',
     message: 'Massive SOL transfer from Jump Trading to DeFi protocols',
-    amount: 12847590,
+    amount: 35890650,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 720000), // 12 minutes ago
+    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
     severity: 'high',
     isRead: false,
   },
@@ -48,20 +49,20 @@ const mockAlerts = [
     type: 'institutional_activity',
     title: 'Wrapped Bitcoin Large Purchase',
     message: 'WBTC accumulation for institutional DeFi strategy',
-    amount: 9789540,
+    amount: 28934560,
     cryptocurrency: 'WBTC',
-    timestamp: new Date(baseTimestamp - 1080000), // 18 minutes ago
+    timestamp: new Date(baseTimestamp - 2100000), // 35 minutes ago
     severity: 'high',
     isRead: false,
   },
   {
     id: '5',
     type: 'defi_activity',
-    title: 'Avalanche Protocol Treasury Fill',
-    message: 'Large AVAX purchase for cross-chain liquidity pools',
-    amount: 9234570,
-    cryptocurrency: 'AVAX',
-    timestamp: new Date(baseTimestamp - 1560000), // 26 minutes ago
+    title: 'TON Network Treasury Fill',
+    message: 'Large TON purchase for cross-chain liquidity expansion',
+    amount: 28456780,
+    cryptocurrency: 'TON',
+    timestamp: new Date(baseTimestamp - 1440000), // 24 minutes ago
     severity: 'high',
     isRead: false,
   },
@@ -69,21 +70,21 @@ const mockAlerts = [
     id: '6',
     type: 'market_movement',
     title: 'USDC Institutional Mint Activity',
-    message: 'Circle minting $6.79M USDC for enterprise settlements',
-    amount: 6789012,
+    message: 'Circle minting $12.5M USDC for enterprise settlements',
+    amount: 12500000,
     cryptocurrency: 'USDC',
-    timestamp: new Date(baseTimestamp - 2100000), // 35 minutes ago
+    timestamp: new Date(baseTimestamp - 2880000), // 48 minutes ago
     severity: 'medium',
     isRead: true,
   },
   {
     id: '7',
     type: 'layer2_activity',
-    title: 'Polygon Enterprise Deployment',
-    message: 'Large MATIC movement for institutional scaling solution',
-    amount: 4567890,
-    cryptocurrency: 'MATIC',
-    timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
+    title: 'Base Network Large Transfer',
+    message: 'Major BASE movement for institutional scaling solution',
+    amount: 8900123,
+    cryptocurrency: 'BASE',
+    timestamp: new Date(baseTimestamp - 4200000), // 1.2 hours ago
     severity: 'medium',
     isRead: true,
   },

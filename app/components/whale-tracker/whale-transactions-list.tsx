@@ -1,5 +1,6 @@
 
 
+
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,20 +8,20 @@ import { Badge } from '@/components/ui/badge'
 import { Activity, ExternalLink, ArrowRightIcon, AlertTriangle, Copy, Eye } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 
-// Updated whale transactions data for September 11, 2025
-const baseTimestamp = new Date('2025-09-11T18:15:00Z').getTime();
+// Updated whale transactions data for September 14, 2025
+const baseTimestamp = new Date('2025-09-14T16:30:00Z').getTime();
 const mockTransactions = [
   {
     id: '1',
-    txHash: '0x8a2f5d7c9e4b1f6a8d3c5e7b2f9a6d4c1e8b3f7a5d2c9e6b4f1a8d7c2e5b9f3',
-    fromAddress: '0x8a2f5d7c9e4b1f6a8d3c5e7b2f9a6d4c',
+    txHash: '0x9a2f5d7c9e4b1f6a8d3c5e7b2f9a6d4c1e8b3f7a5d2c9e6b4f1a8d7c2e5b9f3a6',
+    fromAddress: '0x9a2f5d7c9e4b1f6a8d3c5e7b2f9a6d4c',
     toAddress: '0x1e8b3f7a5d2c9e6b4f1a8d7c2e5b9f3',
-    fromLabel: 'BlackRock Digital Assets Ultra',
-    toLabel: 'MicroStrategy Corporate Treasury',
-    value: '9,876.45',
-    valueUsd: 28945600,
+    fromLabel: 'BlackRock Ultra Digital Vault',
+    toLabel: 'MicroStrategy Treasury Prime',
+    value: '12,456.78',
+    valueUsd: 36789450,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 180000), // 3 minutes ago
+    timestamp: new Date(baseTimestamp - 240000), // 4 minutes ago
     blockchain: 'Bitcoin',
     gasUsed: null,
     gasPrice: null,
@@ -29,32 +30,32 @@ const mockTransactions = [
   },
   {
     id: '2',
-    txHash: '0xb5f8a3d6c1e9b4f7a2d5c8e3b6f9a1d4c7e2b5f8a3d6c9e1b4f7a2d5c8e3b6f9',
-    fromAddress: '0xb5f8a3d6c1e9b4f7a2d5c8e3b6f9a1d4',
+    txHash: '0xc5f8a3d6c1e9b4f7a2d5c8e3b6f9a1d4c7e2b5f8a3d6c9e1b4f7a2d5c8e3b6f9d2',
+    fromAddress: '0xc5f8a3d6c1e9b4f7a2d5c8e3b6f9a1d4',
     toAddress: '0xc7e2b5f8a3d6c9e1b4f7a2d5c8e3b6f9',
-    fromLabel: 'Coinbase Custody Prime',
-    toLabel: 'Ethereum Foundation Treasury',
-    value: '12,389.67',
-    valueUsd: 32145780,
+    fromLabel: 'Coinbase Prime Ultra Custody',
+    toLabel: 'Ethereum Foundation Strategic',
+    value: '15,678.90',
+    valueUsd: 42890780,
     cryptocurrency: 'ETH',
-    timestamp: new Date(baseTimestamp - 420000), // 7 minutes ago
+    timestamp: new Date(baseTimestamp - 480000), // 8 minutes ago
     blockchain: 'Ethereum',
     gasUsed: '21000',
-    gasPrice: '42',
+    gasPrice: '45',
     isAlert: true,
     status: 'confirmed',
   },
   {
     id: '3',
-    txHash: '0xd3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9',
-    fromAddress: '0xd3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2',
+    txHash: '0xe3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9e6',
+    fromAddress: '0xe3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2',
     toAddress: '0xf5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9',
-    fromLabel: 'Jump Trading Sigma',
-    toLabel: 'Alameda Reserve Fund',
-    value: '567,890.12',
-    valueUsd: 34256700,
+    fromLabel: 'Jump Trading Alpha Fund',
+    toLabel: 'Solana Foundation Reserve',
+    value: '678,901.23',
+    valueUsd: 45678900,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 840000), // 14 minutes ago
+    timestamp: new Date(baseTimestamp - 900000), // 15 minutes ago
     blockchain: 'Solana',
     gasUsed: null,
     gasPrice: null,
@@ -63,47 +64,47 @@ const mockTransactions = [
   },
   {
     id: '4',
-    txHash: '0xe6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3',
-    fromAddress: '0xe6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1',
+    txHash: '0xa6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1d4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3f7',
+    fromAddress: '0xa6b2f5a8d3c7e1b4f9a6d2c5e8b3f7a1',
     toAddress: '0xd4c9e6b2f5a8d3c7e1b4f9a6d2c5e8b3',
-    fromLabel: 'Grayscale Holdings Prime',
-    toLabel: 'Institutional Cold Storage',
-    value: '234,567.89',
-    valueUsd: 18967340,
+    fromLabel: 'Grayscale Ultra Holdings',
+    toLabel: 'Institutional Multi-Sig Vault',
+    value: '345,678.90',
+    valueUsd: 28456780,
     cryptocurrency: 'TON',
-    timestamp: new Date(baseTimestamp - 1260000), // 21 minutes ago
+    timestamp: new Date(baseTimestamp - 1440000), // 24 minutes ago
     blockchain: 'TON',
     gasUsed: '21000',
-    gasPrice: '15',
+    gasPrice: '18',
     isAlert: true,
     status: 'confirmed',
   },
   {
     id: '5',
-    txHash: '0xe4b7f2a9d5c8e1b6f3a4d7c2e8b5f1a9d6c3e2b7f4a1d8c5e9b3f6a2d4c7e8b',
-    fromAddress: '0xe4b7f2a9d5c8e1b6f3a4d7c2e8b5f1a9',
+    txHash: '0xf4b7f2a9d5c8e1b6f3a4d7c2e8b5f1a9d6c3e2b7f4a1d8c5e9b3f6a2d4c7e8b1f5',
+    fromAddress: '0xf4b7f2a9d5c8e1b6f3a4d7c2e8b5f1a9',
     toAddress: '0xd6c3e2b7f4a1d8c5e9b3f6a2d4c7e8b1',
-    fromLabel: 'Uniswap V3: WBTC-USDC',
-    toLabel: 'Liquidity Provider Alpha',
-    value: '134.67',
-    valueUsd: 19340560,
+    fromLabel: 'Uniswap V4: WBTC-USDC Pool',
+    toLabel: 'DeFi Yield Farming Protocol',
+    value: '189.45',
+    valueUsd: 28934560,
     cryptocurrency: 'WBTC',
     timestamp: new Date(baseTimestamp - 2100000), // 35 minutes ago
     blockchain: 'Ethereum',
-    gasUsed: '295000',
-    gasPrice: '38',
+    gasUsed: '315000',
+    gasPrice: '42',
     isAlert: true,
     status: 'confirmed',
   },
   {
     id: '6',
-    txHash: '0xf6a3d8c5e2b9f4a7d1c6e9b2f5a8d4c1e7b3f9a6d2c5e8b1f4a7d9c3e6b8f2a5',
-    fromAddress: '0xf6a3d8c5e2b9f4a7d1c6e9b2f5a8d4c1',
+    txHash: '0xb6a3d8c5e2b9f4a7d1c6e9b2f5a8d4c1e7b3f9a6d2c5e8b1f4a7d9c3e6b8f2a5d1',
+    fromAddress: '0xb6a3d8c5e2b9f4a7d1c6e9b2f5a8d4c1',
     toAddress: '0xe7b3f9a6d2c5e8b1f4a7d9c3e6b8f2a5',
-    fromLabel: 'Grayscale Holdings Vault',
-    toLabel: 'Trust Portfolio Rebalance',
-    value: '9,876.54',
-    valueUsd: 26890450,
+    fromLabel: 'Fidelity Digital Asset Vault',
+    toLabel: 'Corporate Treasury Rebalancing',
+    value: '13,456.78',
+    valueUsd: 41234560,
     cryptocurrency: 'BTC',
     timestamp: new Date(baseTimestamp - 2700000), // 45 minutes ago
     blockchain: 'Bitcoin',
@@ -114,15 +115,15 @@ const mockTransactions = [
   },
   {
     id: '7',
-    txHash: '0x3a7d4c1e8b5f2a9d6c3e5b8f1a4d7c2e9b6f3a1d5c8e4b7f2a6d9c8e5b3f1a7d',
-    fromAddress: '0x3a7d4c1e8b5f2a9d6c3e5b8f1a4d7c2e',
+    txHash: '0xc3a7d4c1e8b5f2a9d6c3e5b8f1a4d7c2e9b6f3a1d5c8e4b7f2a6d9c8e5b3f1a7d4',
+    fromAddress: '0xc3a7d4c1e8b5f2a9d6c3e5b8f1a4d7c2e',
     toAddress: '0x9b6f3a1d5c8e4b7f2a6d9c8e5b3f1a7d',
     fromLabel: 'Binance Ultra HNW Custody',
-    toLabel: 'Enterprise Treasury Fund',
-    value: '234,567.89',
-    valueUsd: 12890340,
+    toLabel: 'Enterprise Portfolio Manager',
+    value: '456,789.12',
+    valueUsd: 19876540,
     cryptocurrency: 'SOL',
-    timestamp: new Date(baseTimestamp - 3600000), // 1 hour ago
+    timestamp: new Date(baseTimestamp - 4200000), // 1.2 hours ago
     blockchain: 'Solana',
     gasUsed: null,
     gasPrice: null,
@@ -284,7 +285,7 @@ export function WhaleTransactionsList() {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            Showing {mockTransactions.length} of 2,847 transactions
+            Showing {mockTransactions.length} of 3,247 transactions
           </p>
           <div className="flex items-center space-x-2">
             <button className="px-3 py-1 text-sm border border-border rounded hover:bg-muted transition-colors">

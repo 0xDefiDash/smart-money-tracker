@@ -1,5 +1,6 @@
 
 
+
 'use client'
 
 import { useState } from 'react'
@@ -10,19 +11,19 @@ import { Copy, Crown, TrendingUp, TrendingDown, ExternalLink, Wallet, Activity, 
 import { formatCurrency, formatNumber, truncateAddress } from '@/lib/utils'
 import { toast } from 'react-hot-toast'
 
-// Updated whale ranking data for September 11, 2025
+// Updated whale ranking data for September 14, 2025
 const topWhales = [
   {
     rank: 1,
     walletAddress: '0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503',
-    label: 'BlackRock Digital Assets Ultra',
-    totalBalance: 3890000000, // $3.89B (massive increase)
-    balanceChange24h: 8.7, // continued growth
+    label: 'BlackRock Ultra Digital Vault',
+    totalBalance: 4120000000, // $4.12B (continued massive growth)
+    balanceChange24h: 12.3, // higher growth
     dominantAssets: ['BTC', 'ETH', 'USDC'],
-    lastTxAmount: 156000000,
-    lastTxTime: '3 minutes ago',
-    totalTxCount: 1398,
-    avgTxSize: 12400000,
+    lastTxAmount: 178000000,
+    lastTxTime: '4 minutes ago',
+    totalTxCount: 1456,
+    avgTxSize: 14200000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 99
@@ -30,14 +31,14 @@ const topWhales = [
   {
     rank: 2,
     walletAddress: '0x73BCEb1Cd57C711feaC4224D062b0F6ff338aA6c',
-    label: 'Sovereign Wealth Fund Omega',
-    totalBalance: 3560000000, // $3.56B (continued growth)
-    balanceChange24h: 6.2,
+    label: 'Sovereign Wealth Fund Alpha',
+    totalBalance: 3780000000, // $3.78B (strong growth)
+    balanceChange24h: 8.9,
     dominantAssets: ['BTC', 'ETH', 'SOL'],
-    lastTxAmount: 234000000,
-    lastTxTime: '7 minutes ago',
-    totalTxCount: 1156,
-    avgTxSize: 18900000,
+    lastTxAmount: 267000000,
+    lastTxTime: '8 minutes ago',
+    totalTxCount: 1234,
+    avgTxSize: 21600000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 98
@@ -45,14 +46,14 @@ const topWhales = [
   {
     rank: 3,
     walletAddress: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
-    label: 'Grayscale Holdings Prime',
-    totalBalance: 3120000000, // $3.12B (strong growth)
-    balanceChange24h: 4.9,
+    label: 'Grayscale Ultra Holdings Prime',
+    totalBalance: 3340000000, // $3.34B (continued growth)
+    balanceChange24h: 6.7,
     dominantAssets: ['BTC', 'ETH', 'WBTC'],
-    lastTxAmount: 189000000,
-    lastTxTime: '15 minutes ago',
-    totalTxCount: 1745,
-    avgTxSize: 10600000,
+    lastTxAmount: 212000000,
+    lastTxTime: '18 minutes ago',
+    totalTxCount: 1876,
+    avgTxSize: 12800000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 97
@@ -60,14 +61,14 @@ const topWhales = [
   {
     rank: 4,
     walletAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    label: 'Coinbase Custody Ultra Prime',
-    totalBalance: 2340000000, // $2.34B (increased)
-    balanceChange24h: 18.9,
+    label: 'Coinbase Prime Ultra Custody',
+    totalBalance: 2890000000, // $2.89B (significant increase)
+    balanceChange24h: 23.4,
     dominantAssets: ['ETH', 'USDC', 'WETH'],
-    lastTxAmount: 227000000,
-    lastTxTime: '3 minutes ago',
-    totalTxCount: 2567,
-    avgTxSize: 5890000,
+    lastTxAmount: 289000000,
+    lastTxTime: '4 minutes ago',
+    totalTxCount: 2789,
+    avgTxSize: 6890000,
     whaleType: 'exchange',
     riskLevel: 'low',
     influence: 95
@@ -75,14 +76,14 @@ const topWhales = [
   {
     rank: 5,
     walletAddress: '0x2F0b23f53734252Bda2277357e97e1517d6B042A',
-    label: 'Fidelity Digital Treasury',
-    totalBalance: 2120000000, // $2.12B (increased)
-    balanceChange24h: 25.8,
+    label: 'Fidelity Digital Asset Vault',
+    totalBalance: 2560000000, // $2.56B (strong growth)
+    balanceChange24h: 31.2,
     dominantAssets: ['BTC', 'ETH', 'AVAX'],
-    lastTxAmount: 142000000,
-    lastTxTime: '24 minutes ago',
-    totalTxCount: 1456,
-    avgTxSize: 7800000,
+    lastTxAmount: 167000000,
+    lastTxTime: '28 minutes ago',
+    totalTxCount: 1567,
+    avgTxSize: 9200000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 94
@@ -90,14 +91,14 @@ const topWhales = [
   {
     rank: 6,
     walletAddress: '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
-    label: 'Binance Ultra High Net Worth',
-    totalBalance: 1890000000, // $1.89B (increased)
-    balanceChange24h: 21.3,
+    label: 'Binance Ultra HNW Custody',
+    totalBalance: 2230000000, // $2.23B (strong growth)
+    balanceChange24h: 28.7,
     dominantAssets: ['BTC', 'BNB', 'SOL'],
-    lastTxAmount: 156000000,
-    lastTxTime: '16 minutes ago',
-    totalTxCount: 3897,
-    avgTxSize: 3890000,
+    lastTxAmount: 189000000,
+    lastTxTime: '19 minutes ago',
+    totalTxCount: 4123,
+    avgTxSize: 4890000,
     whaleType: 'exchange',
     riskLevel: 'medium',
     influence: 92
@@ -105,14 +106,14 @@ const topWhales = [
   {
     rank: 7,
     walletAddress: '0xDF9Eb223bAFBE5c5271415C75aeCD68C21fE3D7F',
-    label: 'Jump Trading Crypto Alpha',
-    totalBalance: 1670000000, // $1.67B (increased)
-    balanceChange24h: 34.2,
+    label: 'Jump Trading Alpha Fund',
+    totalBalance: 1980000000, // $1.98B (strong growth)
+    balanceChange24h: 42.8,
     dominantAssets: ['SOL', 'BTC', 'ETH'],
-    lastTxAmount: 249000000,
-    lastTxTime: '35 minutes ago',
-    totalTxCount: 1234,
-    avgTxSize: 10900000,
+    lastTxAmount: 278000000,
+    lastTxTime: '41 minutes ago',
+    totalTxCount: 1345,
+    avgTxSize: 12900000,
     whaleType: 'trading_firm',
     riskLevel: 'medium',
     influence: 89
@@ -120,14 +121,14 @@ const topWhales = [
   {
     rank: 8,
     walletAddress: '0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296',
-    label: 'Kraken Institution Services',
-    totalBalance: 1450000000, // $1.45B (increased)
-    balanceChange24h: 28.4,
+    label: 'Kraken Institution Prime Services',
+    totalBalance: 1720000000, // $1.72B (increased)
+    balanceChange24h: 35.6,
     dominantAssets: ['BTC', 'ETH', 'USDT'],
-    lastTxAmount: 167000000,
-    lastTxTime: '1.2 hours ago',
-    totalTxCount: 2134,
-    avgTxSize: 6200000,
+    lastTxAmount: 198000000,
+    lastTxTime: '1.4 hours ago',
+    totalTxCount: 2456,
+    avgTxSize: 7800000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 87
@@ -136,13 +137,13 @@ const topWhales = [
     rank: 9,
     walletAddress: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
     label: 'Whale Alpha #3847',
-    totalBalance: 1280000000, // $1.28B (increased)
-    balanceChange24h: 41.7,
+    totalBalance: 1540000000, // $1.54B (strong growth)
+    balanceChange24h: 48.9,
     dominantAssets: ['BTC', 'ETH', 'SOL'],
-    lastTxAmount: 198000000,
-    lastTxTime: '2.3 hours ago',
-    totalTxCount: 1087,
-    avgTxSize: 9800000,
+    lastTxAmount: 234000000,
+    lastTxTime: '2.6 hours ago',
+    totalTxCount: 1189,
+    avgTxSize: 11800000,
     whaleType: 'individual',
     riskLevel: 'medium',
     influence: 85
@@ -151,13 +152,13 @@ const topWhales = [
     rank: 10,
     walletAddress: '0x28C6c06298d514Db089934071355E5743bf21d60',
     label: 'Galaxy Digital Ventures',
-    totalBalance: 1120000000, // $1.12B (increased)
-    balanceChange24h: 32.6,
+    totalBalance: 1340000000, // $1.34B (increased)
+    balanceChange24h: 39.2,
     dominantAssets: ['BTC', 'ETH', 'AVAX'],
-    lastTxAmount: 223000000,
-    lastTxTime: '45 minutes ago',
-    totalTxCount: 2789,
-    avgTxSize: 4200000,
+    lastTxAmount: 256000000,
+    lastTxTime: '52 minutes ago',
+    totalTxCount: 3012,
+    avgTxSize: 5200000,
     whaleType: 'fund',
     riskLevel: 'medium',
     influence: 84

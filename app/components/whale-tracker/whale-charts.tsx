@@ -1,36 +1,37 @@
 
+
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, PieChart, Pie, Cell } from 'recharts'
 import { TrendingUp, Activity, PieChart as PieChartIcon } from 'lucide-react'
 
-// Updated whale activity data for September 11, 2025
+// Updated whale activity data for September 14, 2025
 const volumeData = [
-  { time: '00:00', volume: 67, count: 18 },
-  { time: '04:00', volume: 52, count: 14 },
-  { time: '08:00', volume: 134, count: 31 },
-  { time: '12:00', volume: 189, count: 42 },
-  { time: '16:00', volume: 156, count: 38 },
-  { time: '20:00', volume: 98, count: 24 },
-  { time: '24:00', volume: 112, count: 28 },
+  { time: '00:00', volume: 78, count: 22 },
+  { time: '04:00', volume: 64, count: 18 },
+  { time: '08:00', volume: 156, count: 38 },
+  { time: '12:00', volume: 234, count: 52 },
+  { time: '16:00', volume: 189, count: 45 },
+  { time: '20:00', volume: 123, count: 31 },
+  { time: '24:00', volume: 145, count: 36 },
 ]
 
 const blockchainData = [
-  { name: 'Bitcoin', value: 42, color: '#F7931A' },
-  { name: 'Ethereum', value: 31, color: '#627EEA' },
-  { name: 'Solana', value: 15, color: '#9945FF' },
-  { name: 'Base', value: 6, color: '#0052FF' },
-  { name: 'TON', value: 3, color: '#0088CC' },
-  { name: 'Other', value: 3, color: '#6B7280' },
+  { name: 'Bitcoin', value: 44, color: '#F7931A' },
+  { name: 'Ethereum', value: 33, color: '#627EEA' },
+  { name: 'Solana', value: 16, color: '#9945FF' },
+  { name: 'Base', value: 4, color: '#0052FF' },
+  { name: 'TON', value: 2, color: '#0088CC' },
+  { name: 'Other', value: 1, color: '#6B7280' },
 ]
 
 const transactionSizeData = [
-  { range: '$1M-5M', count: 187 },
-  { range: '$5M-10M', count: 124 },
-  { range: '$10M-50M', count: 89 },
-  { range: '$50M-100M', count: 34 },
-  { range: '$100M+', count: 28 },
+  { range: '$1M-5M', count: 216 },
+  { range: '$5M-10M', count: 145 },
+  { range: '$10M-50M', count: 102 },
+  { range: '$50M-100M', count: 41 },
+  { range: '$100M+', count: 34 },
 ]
 
 export function WhaleCharts() {
