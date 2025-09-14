@@ -31,7 +31,7 @@ import { SpawnArea } from '@/components/game/spawn-area'
 interface GameState {
   playerId: string
   coins: number
-  points: number
+  money: number
   level: number
   experience: number
   ownedBlocks: Block[]
@@ -39,7 +39,7 @@ interface GameState {
   attackPower: number
   lastSpawn: number
   nextSpawn: number
-  lastPointsUpdate: number // Track when points were last calculated
+  lastMoneyUpdate: number // Track when money was last calculated
 }
 
 interface Block {
@@ -59,12 +59,12 @@ interface Block {
   traits: string[]
 }
 
-// Point production rates per minute based on rarity
-const POINT_PRODUCTION_RATES = {
-  common: 1,      // 1 point per minute
-  rare: 3,        // 3 points per minute
-  epic: 8,        // 8 points per minute
-  legendary: 20   // 20 points per minute
+// Money production rates per minute based on rarity
+const MONEY_PRODUCTION_RATES = {
+  common: 50,      // $50 per minute
+  rare: 150,       // $150 per minute
+  epic: 400,       // $400 per minute
+  legendary: 1000  // $1000 per minute
 }
 
 const BLOCK_TYPES = [
@@ -90,25 +90,25 @@ const BLOCK_TYPES = [
   { name: 'Dogecoin Block', type: 'doge', color: '#C2A633', emoji: '🐕' }
 ]
 
-// Helper function to calculate total points per minute from owned blocks
-const calculatePointsPerMinute = (ownedBlocks: Block[]): number => {
+// Helper function to calculate total money per minute from owned blocks
+const calculateMoneyPerMinute = (ownedBlocks: Block[]): number => {
   return ownedBlocks.reduce((total, block) => {
-    return total + POINT_PRODUCTION_RATES[block.rarity]
+    return total + MONEY_PRODUCTION_RATES[block.rarity]
   }, 0)
 }
 
-// Helper function to calculate accumulated points since last update
-const calculateAccumulatedPoints = (ownedBlocks: Block[], lastUpdate: number): number => {
+// Helper function to calculate accumulated money since last update
+const calculateAccumulatedMoney = (ownedBlocks: Block[], lastUpdate: number): number => {
   const minutesElapsed = (Date.now() - lastUpdate) / 60000 // Convert to minutes
-  const pointsPerMinute = calculatePointsPerMinute(ownedBlocks)
-  return Math.floor(pointsPerMinute * minutesElapsed)
+  const moneyPerMinute = calculateMoneyPerMinute(ownedBlocks)
+  return Math.floor(moneyPerMinute * minutesElapsed)
 }
 
 export default function BlockBattlesPage() {
   const [gameState, setGameState] = useState<GameState>({
     playerId: 'player_' + Math.random().toString(36).substr(2, 9),
     coins: 1000,
-    points: 0,
+    money: 0,
     level: 1,
     experience: 0,
     ownedBlocks: [],
@@ -116,7 +116,7 @@ export default function BlockBattlesPage() {
     attackPower: 50,
     lastSpawn: Date.now(),
     nextSpawn: Date.now() + 120000, // 2 minutes
-    lastPointsUpdate: Date.now()
+    lastMoneyUpdate: Date.now()
   })
 
   const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
@@ -158,19 +158,19 @@ export default function BlockBattlesPage() {
     return () => clearInterval(timer)
   }, [gameState.nextSpawn, isInitialized])
 
-  // Passive point generation - update points every 5 seconds based on owned blocks
+  // Passive money generation - update money every 5 seconds based on owned blocks
   useEffect(() => {
     if (!isInitialized || gameState.ownedBlocks.length === 0) return
 
-    const pointTimer = setInterval(() => {
+    const moneyTimer = setInterval(() => {
       setGameState(prev => {
-        const accumulatedPoints = calculateAccumulatedPoints(prev.ownedBlocks, prev.lastPointsUpdate)
+        const accumulatedMoney = calculateAccumulatedMoney(prev.ownedBlocks, prev.lastMoneyUpdate)
         
-        if (accumulatedPoints > 0) {
+        if (accumulatedMoney > 0) {
           return {
             ...prev,
-            points: prev.points + accumulatedPoints,
-            lastPointsUpdate: Date.now()
+            money: prev.money + accumulatedMoney,
+            lastMoneyUpdate: Date.now()
           }
         }
         
@@ -178,7 +178,7 @@ export default function BlockBattlesPage() {
       })
     }, 5000) // Update every 5 seconds
 
-    return () => clearInterval(pointTimer)
+    return () => clearInterval(moneyTimer)
   }, [isInitialized, gameState.ownedBlocks.length])
 
   // Save game state to localStorage whenever it changes
@@ -198,17 +198,23 @@ export default function BlockBattlesPage() {
       if (savedState) {
         const parsedState = JSON.parse(savedState)
         
-        // Handle legacy saves that don't have lastPointsUpdate
-        if (!parsedState.lastPointsUpdate) {
-          parsedState.lastPointsUpdate = Date.now()
+        // Migrate legacy saves from points to money system
+        if (parsedState.points !== undefined && parsedState.money === undefined) {
+          parsedState.money = parsedState.points * 50 // Convert points to money (generous conversion)
+          delete parsedState.points
         }
         
-        // Calculate and add accumulated points from passive generation
-        const accumulatedPoints = calculateAccumulatedPoints(parsedState.ownedBlocks, parsedState.lastPointsUpdate)
-        if (accumulatedPoints > 0) {
-          parsedState.points = (parsedState.points || 0) + accumulatedPoints
-          parsedState.lastPointsUpdate = Date.now()
-          setBattleLog(prev => [...prev, `💰 You earned ${accumulatedPoints} points while away from your blocks!`])
+        // Handle legacy saves that don't have lastMoneyUpdate
+        if (!parsedState.lastMoneyUpdate) {
+          parsedState.lastMoneyUpdate = parsedState.lastPointsUpdate || Date.now()
+        }
+        
+        // Calculate and add accumulated money from passive generation
+        const accumulatedMoney = calculateAccumulatedMoney(parsedState.ownedBlocks, parsedState.lastMoneyUpdate)
+        if (accumulatedMoney > 0) {
+          parsedState.money = (parsedState.money || 0) + accumulatedMoney
+          parsedState.lastMoneyUpdate = Date.now()
+          setBattleLog(prev => [...prev, `💰 You earned $${accumulatedMoney.toLocaleString()} while away from your blocks!`])
         }
         
         setGameState(parsedState)
@@ -227,9 +233,14 @@ export default function BlockBattlesPage() {
       const response = await fetch('/api/game/state')
       if (response.ok) {
         const data = await response.json()
+        // Migrate from points to money if needed
+        if (data.points !== undefined && data.money === undefined) {
+          data.money = data.points * 50
+          delete data.points
+        }
         // Ensure new field exists
-        if (!data.lastPointsUpdate) {
-          data.lastPointsUpdate = Date.now()
+        if (!data.lastMoneyUpdate) {
+          data.lastMoneyUpdate = data.lastPointsUpdate || Date.now()
         }
         setGameState(data)
       }
@@ -249,7 +260,7 @@ export default function BlockBattlesPage() {
     setGameState({
       playerId: 'player_' + Math.random().toString(36).substr(2, 9),
       coins: 1000,
-      points: 0,
+      money: 0,
       level: 1,
       experience: 0,
       ownedBlocks: [],
@@ -257,7 +268,7 @@ export default function BlockBattlesPage() {
       attackPower: 50,
       lastSpawn: Date.now(),
       nextSpawn: Date.now() + 120000,
-      lastPointsUpdate: Date.now()
+      lastMoneyUpdate: Date.now()
     })
     
     setSpawnedBlocks([])
@@ -414,18 +425,18 @@ export default function BlockBattlesPage() {
         ...prev,
         ownedBlocks: [...prev.ownedBlocks, { ...block, owner: prev.playerId }],
         coins: prev.coins + block.value,
-        // Removed immediate points reward - blocks will earn points passively!
+        // Removed immediate money reward - blocks will earn money passively!
         experience: newExperience,
         level: newLevel,
         attackPower: prev.attackPower + (leveledUp ? 5 : 0),
         defenseStrength: prev.defenseStrength + (leveledUp ? 10 : 0),
-        lastPointsUpdate: Date.now() // Reset the points update timer
+        lastMoneyUpdate: Date.now() // Reset the money update timer
       }
     })
     
     setSpawnedBlocks(prev => prev.filter(b => b.id !== block.id))
-    const pointsPerMinute = POINT_PRODUCTION_RATES[block.rarity]
-    setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins! This ${block.rarity} block will earn ${pointsPerMinute} points per minute! (+${block.rarity === 'legendary' ? 50 : block.rarity === 'epic' ? 30 : block.rarity === 'rare' ? 20 : 10} XP)`])
+    const moneyPerMinute = MONEY_PRODUCTION_RATES[block.rarity]
+    setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins! This ${block.rarity} block will earn $${moneyPerMinute}/minute! (+${block.rarity === 'legendary' ? 50 : block.rarity === 'epic' ? 30 : block.rarity === 'rare' ? 20 : 10} XP)`])
   }
 
   const stealBlock = async (targetBlock: Block) => {
@@ -445,13 +456,13 @@ export default function BlockBattlesPage() {
         ...prev,
         ownedBlocks: [...prev.ownedBlocks, { ...targetBlock, owner: prev.playerId }],
         coins: prev.coins - cost + targetBlock.value,
-        // Removed immediate points - stolen blocks will earn passively
+        // Removed immediate money reward - stolen blocks will earn passively
         experience: prev.experience + 15,
-        lastPointsUpdate: Date.now()
+        lastMoneyUpdate: Date.now()
       }))
       
-      const pointsPerMinute = POINT_PRODUCTION_RATES[targetBlock.rarity]
-      setBattleLog(prev => [...prev, `🎯 Successfully stole ${targetBlock.name}! Gained ${targetBlock.value} value and it will earn ${pointsPerMinute} points/min!`])
+      const moneyPerMinute = MONEY_PRODUCTION_RATES[targetBlock.rarity]
+      setBattleLog(prev => [...prev, `🎯 Successfully stole ${targetBlock.name}! Gained ${targetBlock.value} value and it will earn $${moneyPerMinute}/min!`])
     } else {
       setGameState(prev => ({
         ...prev,
@@ -507,8 +518,8 @@ export default function BlockBattlesPage() {
                     <span className="font-bold text-yellow-500">{gameState.coins.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Trophy className="w-4 h-4 text-purple-500" />
-                    <span className="font-bold text-purple-500">{gameState.points.toLocaleString()}</span>
+                    <Trophy className="w-4 h-4 text-green-500" />
+                    <span className="font-bold text-green-500">${gameState.money.toLocaleString()}</span>
                   </div>
                 </div>
                 
@@ -597,7 +608,7 @@ export default function BlockBattlesPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-yellow-500">2,847,392 pts</p>
+                          <p className="font-bold text-yellow-500">$2,847,392</p>
                           <p className="text-sm text-muted-foreground">834 blocks</p>
                         </div>
                       </div>
@@ -611,7 +622,7 @@ export default function BlockBattlesPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-slate-400">1,923,847 pts</p>
+                          <p className="font-bold text-slate-400">$1,923,847</p>
                           <p className="text-sm text-muted-foreground">567 blocks</p>
                         </div>
                       </div>
@@ -625,7 +636,7 @@ export default function BlockBattlesPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-orange-500">1,456,291 pts</p>
+                          <p className="font-bold text-orange-500">$1,456,291</p>
                           <p className="text-sm text-muted-foreground">412 blocks</p>
                         </div>
                       </div>
@@ -639,7 +650,7 @@ export default function BlockBattlesPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-blue-500">{gameState.points.toLocaleString()} pts</p>
+                          <p className="font-bold text-blue-500">${gameState.money.toLocaleString()}</p>
                           <p className="text-sm text-muted-foreground">{gameState.ownedBlocks.length} blocks</p>
                         </div>
                       </div>

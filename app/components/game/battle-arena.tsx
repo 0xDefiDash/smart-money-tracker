@@ -21,7 +21,7 @@ import {
 interface GameState {
   playerId: string
   coins: number
-  points: number
+  money: number
   level: number
   experience: number
   ownedBlocks: any[]
@@ -29,6 +29,7 @@ interface GameState {
   attackPower: number
   lastSpawn: number
   nextSpawn: number
+  lastMoneyUpdate: number
 }
 
 interface BattleArenaProps {

@@ -16,12 +16,12 @@ import {
   TrendingUp
 } from 'lucide-react'
 
-// Point production rates per minute based on rarity
-const POINT_PRODUCTION_RATES = {
-  common: 1,      // 1 point per minute
-  rare: 3,        // 3 points per minute
-  epic: 8,        // 8 points per minute
-  legendary: 20   // 20 points per minute
+// Money production rates per minute based on rarity
+const MONEY_PRODUCTION_RATES = {
+  common: 50,      // $50 per minute
+  rare: 150,       // $150 per minute
+  epic: 400,       // $400 per minute
+  legendary: 1000  // $1000 per minute
 }
 
 interface Block {
@@ -79,7 +79,7 @@ export function BlockCharacter({
   isLoading = false
 }: BlockCharacterProps) {
   const timeAgo = Math.floor((Date.now() - block.spawnTime) / 1000 / 60)
-  const pointsPerMinute = POINT_PRODUCTION_RATES[block.rarity]
+  const moneyPerMinute = MONEY_PRODUCTION_RATES[block.rarity]
 
   return (
     <Card className={cn("relative overflow-hidden transition-all duration-300 hover:scale-105", getRarityColor(block.rarity))}>
@@ -113,11 +113,11 @@ export function BlockCharacter({
             <p className="text-xs text-muted-foreground">{block.description}</p>
           </div>
 
-          {/* Point Production Display */}
-          <div className="flex items-center justify-center space-x-1 bg-purple-500/10 border border-purple-500/20 rounded-lg p-2">
-            <TrendingUp className="w-3 h-3 text-purple-500" />
-            <span className="text-xs font-bold text-purple-500">
-              +{pointsPerMinute} pts/min
+          {/* Money Production Display */}
+          <div className="flex items-center justify-center space-x-1 bg-green-500/10 border border-green-500/20 rounded-lg p-2">
+            <TrendingUp className="w-3 h-3 text-green-500" />
+            <span className="text-xs font-bold text-green-500">
+              +${moneyPerMinute}/min
             </span>
           </div>
 

@@ -14,18 +14,18 @@ import {
   Target
 } from 'lucide-react'
 
-// Point production rates per minute based on rarity
-const POINT_PRODUCTION_RATES = {
-  common: 1,      // 1 point per minute
-  rare: 3,        // 3 points per minute
-  epic: 8,        // 8 points per minute
-  legendary: 20   // 20 points per minute
+// Money production rates per minute based on rarity
+const MONEY_PRODUCTION_RATES = {
+  common: 50,      // $50 per minute
+  rare: 150,       // $150 per minute
+  epic: 400,       // $400 per minute
+  legendary: 1000  // $1000 per minute
 }
 
 interface GameState {
   playerId: string
   coins: number
-  points: number
+  money: number
   level: number
   experience: number
   ownedBlocks: any[]
@@ -33,7 +33,7 @@ interface GameState {
   attackPower: number
   lastSpawn: number
   nextSpawn: number
-  lastPointsUpdate: number
+  lastMoneyUpdate: number
 }
 
 interface GameStatsProps {
@@ -44,12 +44,12 @@ export function GameStats({ gameState }: GameStatsProps) {
   const experienceToNextLevel = gameState.level * 100
   const experienceProgress = (gameState.experience % experienceToNextLevel) / experienceToNextLevel * 100
 
-  // Calculate point production rate
-  const totalPointsPerMinute = gameState.ownedBlocks.reduce((total, block) => {
-    return total + POINT_PRODUCTION_RATES[block.rarity as keyof typeof POINT_PRODUCTION_RATES]
+  // Calculate money production rate
+  const totalMoneyPerMinute = gameState.ownedBlocks.reduce((total, block) => {
+    return total + MONEY_PRODUCTION_RATES[block.rarity as keyof typeof MONEY_PRODUCTION_RATES]
   }, 0)
-  const pointsPerHour = totalPointsPerMinute * 60
-  const pointsPerDay = pointsPerHour * 24
+  const moneyPerHour = totalMoneyPerMinute * 60
+  const moneyPerDay = moneyPerHour * 24
 
   return (
     <div className="space-y-4">
@@ -154,57 +154,57 @@ export function GameStats({ gameState }: GameStatsProps) {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center space-x-2">
-            <TrendingUp className="w-5 h-5 text-purple-500" />
+            <TrendingUp className="w-5 h-5 text-green-500" />
             <span>Passive Income</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm">Points/Minute</span>
-            <span className="font-bold text-purple-500">
-              {totalPointsPerMinute.toLocaleString()}
+            <span className="text-sm">Money/Minute</span>
+            <span className="font-bold text-green-500">
+              ${totalMoneyPerMinute.toLocaleString()}
             </span>
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-sm">Points/Hour</span>
-            <span className="font-bold text-purple-400">
-              {pointsPerHour.toLocaleString()}
+            <span className="text-sm">Money/Hour</span>
+            <span className="font-bold text-green-400">
+              ${moneyPerHour.toLocaleString()}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm">Points/Day</span>
-            <span className="font-bold text-purple-300">
-              {pointsPerDay.toLocaleString()}
+            <span className="text-sm">Money/Day</span>
+            <span className="font-bold text-green-300">
+              ${moneyPerDay.toLocaleString()}
             </span>
           </div>
 
-          {totalPointsPerMinute === 0 && (
+          {totalMoneyPerMinute === 0 && (
             <p className="text-xs text-muted-foreground text-center py-2">
-              Claim blocks to start earning passive points!
+              Claim blocks to start earning passive money!
             </p>
           )}
 
-          {totalPointsPerMinute > 0 && (
+          {totalMoneyPerMinute > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground">Income Breakdown:</p>
               <div className="grid grid-cols-2 gap-1 text-xs">
                 <div className="flex justify-between">
                   <span>Common:</span>
-                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'common').length}x = {gameState.ownedBlocks.filter(b => b.rarity === 'common').length * POINT_PRODUCTION_RATES.common}/min</span>
+                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'common').length}x = ${gameState.ownedBlocks.filter(b => b.rarity === 'common').length * MONEY_PRODUCTION_RATES.common}/min</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Rare:</span>
-                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'rare').length}x = {gameState.ownedBlocks.filter(b => b.rarity === 'rare').length * POINT_PRODUCTION_RATES.rare}/min</span>
+                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'rare').length}x = ${gameState.ownedBlocks.filter(b => b.rarity === 'rare').length * MONEY_PRODUCTION_RATES.rare}/min</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Epic:</span>
-                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'epic').length}x = {gameState.ownedBlocks.filter(b => b.rarity === 'epic').length * POINT_PRODUCTION_RATES.epic}/min</span>
+                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'epic').length}x = ${gameState.ownedBlocks.filter(b => b.rarity === 'epic').length * MONEY_PRODUCTION_RATES.epic}/min</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Legendary:</span>
-                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'legendary').length}x = {gameState.ownedBlocks.filter(b => b.rarity === 'legendary').length * POINT_PRODUCTION_RATES.legendary}/min</span>
+                  <span>{gameState.ownedBlocks.filter(b => b.rarity === 'legendary').length}x = ${gameState.ownedBlocks.filter(b => b.rarity === 'legendary').length * MONEY_PRODUCTION_RATES.legendary}/min</span>
                 </div>
               </div>
             </div>
@@ -222,11 +222,11 @@ export function GameStats({ gameState }: GameStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-xs text-muted-foreground">
-            <p>• Blocks earn points automatically based on rarity</p>
-            <p>• Legendary blocks earn 20 points/min!</p>
+            <p>• Blocks earn money automatically based on rarity</p>
+            <p>• Legendary blocks earn $1,000/min!</p>
             <p>• New blocks spawn every 2 minutes</p>
             <p>• Higher rarity = more value & passive income</p>
-            <p>• Points accumulate even when offline!</p>
+            <p>• Money accumulates even when offline!</p>
             <p>• Steal attempts cost 10% of block value</p>
           </div>
         </CardContent>
