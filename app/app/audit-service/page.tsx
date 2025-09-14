@@ -59,6 +59,8 @@ interface AuditResult {
     lowIssues: number
   }
   lastUpdated: string
+  bevorAuditId?: string
+  processingTime?: number | null
 }
 
 export default function AuditServicePage() {
@@ -66,6 +68,7 @@ export default function AuditServicePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [loadingMessage, setLoadingMessage] = useState('Starting audit...')
 
   const handleAudit = async () => {
     if (!contractId.trim()) {
@@ -76,8 +79,26 @@ export default function AuditServicePage() {
     setIsLoading(true)
     setError(null)
     setAuditResult(null)
+    setLoadingMessage('Initializing smart contract audit...')
 
     try {
+      // Simulate different loading stages for better UX
+      const loadingStages = [
+        'Scanning contract address...',
+        'Retrieving source code...',
+        'Running security analysis...',
+        'Analyzing vulnerabilities...',
+        'Generating report...'
+      ]
+      
+      let currentStage = 0
+      const progressInterval = setInterval(() => {
+        if (currentStage < loadingStages.length - 1) {
+          currentStage++
+          setLoadingMessage(loadingStages[currentStage])
+        }
+      }, 3000)
+
       const response = await fetch('/api/audit', {
         method: 'POST',
         headers: {
@@ -85,6 +106,8 @@ export default function AuditServicePage() {
         },
         body: JSON.stringify({ contractId: contractId.trim() }),
       })
+
+      clearInterval(progressInterval)
 
       if (!response.ok) {
         throw new Error('Failed to audit contract')
@@ -96,6 +119,7 @@ export default function AuditServicePage() {
       setError(err instanceof Error ? err.message : 'An error occurred during audit')
     } finally {
       setIsLoading(false)
+      setLoadingMessage('Starting audit...')
     }
   }
 
@@ -151,7 +175,7 @@ export default function AuditServicePage() {
                 <Label htmlFor="contract-id">Smart Contract Address</Label>
                 <Input
                   id="contract-id"
-                  placeholder="0x... (Ethereum, BSC, Polygon, Base, Arbitrum, Optimism supported)"
+                  placeholder="0x... (Powered by BevorAI - Multi-chain support: Ethereum, BSC, Polygon, Base, Arbitrum, etc.)"
                   value={contractId}
                   onChange={(e) => setContractId(e.target.value)}
                   disabled={isLoading}
@@ -194,8 +218,11 @@ export default function AuditServicePage() {
                 <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                 <h3 className="text-lg font-semibold">Analyzing Smart Contract</h3>
                 <p className="text-muted-foreground text-center">
-                  Running comprehensive security checks, vulnerability scans, and gas analysis...
+                  {loadingMessage}
                 </p>
+                <div className="text-xs text-muted-foreground text-center max-w-md">
+                  This may take 1-5 minutes depending on contract complexity and verification status.
+                </div>
                 <Progress value={33} className="w-full max-w-md" />
               </div>
             </CardContent>
@@ -213,12 +240,27 @@ export default function AuditServicePage() {
                     <FileText className="w-5 h-5" />
                     <span>Audit Summary</span>
                   </CardTitle>
-                  <Badge variant="outline" className={getRiskLevelColor(auditResult.riskLevel)}>
-                    {auditResult.riskLevel} RISK
-                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    {auditResult.bevorAuditId ? (
+                      <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                        <Shield className="w-3 h-3 mr-1" />
+                        BevorAI Powered
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">
+                        Fallback Analysis
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className={getRiskLevelColor(auditResult.riskLevel)}>
+                      {auditResult.riskLevel} RISK
+                    </Badge>
+                  </div>
                 </div>
                 <CardDescription>
                   Contract: {auditResult.contractName} • Network: {auditResult.network} • Score: {auditResult.totalScore}/100
+                  {auditResult.processingTime && (
+                    <span> • Processing Time: {auditResult.processingTime}s</span>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -397,8 +439,15 @@ export default function AuditServicePage() {
                     }
                   </p>
                 </div>
-                <div className="text-xs text-muted-foreground mt-4">
-                  Last updated: {auditResult.lastUpdated}
+                <div className="flex justify-between items-center mt-4">
+                  <div className="text-xs text-muted-foreground">
+                    Last updated: {auditResult.lastUpdated}
+                  </div>
+                  {!auditResult.bevorAuditId && (
+                    <div className="text-xs text-muted-foreground">
+                      💡 Configure BevorAI API key for real-time analysis
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
