@@ -19,7 +19,7 @@ import {
   Target,
   Rocket,
   Globe,
-  Shield,
+
   Percent
 } from 'lucide-react'
 
@@ -74,11 +74,7 @@ const sidebarItems = [
     href: '/yields',
     icon: Percent,
   },
-  {
-    title: 'Audit Service',
-    href: '/audit-service',
-    icon: Shield,
-  },
+
   {
     title: 'Analytics',
     href: '/analytics',
