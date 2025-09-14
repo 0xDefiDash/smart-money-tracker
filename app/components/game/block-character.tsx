@@ -21,14 +21,15 @@ const MONEY_PRODUCTION_RATES = {
   common: 50,      // $50 per minute
   rare: 150,       // $150 per minute
   epic: 400,       // $400 per minute
-  legendary: 1000  // $1000 per minute
+  legendary: 1000, // $1000 per minute
+  secret: 5000     // $5000 per minute - The ultimate block!
 }
 
 interface Block {
   id: string
   name: string
   type: string
-  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'secret'
   value: number
   power: number
   defense: number
@@ -53,6 +54,7 @@ interface BlockCharacterProps {
 
 const getRarityColor = (rarity: Block['rarity']) => {
   switch (rarity) {
+    case 'secret': return 'border-gradient-to-r from-yellow-500 to-orange-500 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 shadow-lg shadow-yellow-500/20'
     case 'legendary': return 'border-yellow-500 bg-yellow-500/10'
     case 'epic': return 'border-purple-500 bg-purple-500/10'
     case 'rare': return 'border-blue-500 bg-blue-500/10'
@@ -62,6 +64,7 @@ const getRarityColor = (rarity: Block['rarity']) => {
 
 const getRarityIcon = (rarity: Block['rarity']) => {
   switch (rarity) {
+    case 'secret': return <div className="w-4 h-4 text-yellow-500 animate-pulse">🚀</div>
     case 'legendary': return <Crown className="w-4 h-4 text-yellow-500" />
     case 'epic': return <Star className="w-4 h-4 text-purple-500" />
     case 'rare': return <Zap className="w-4 h-4 text-blue-500" />
@@ -104,10 +107,21 @@ export function BlockCharacter({
           {/* Character Visual */}
           <div className="text-center">
             <div 
-              className="w-16 h-16 mx-auto rounded-xl flex items-center justify-center text-3xl font-bold"
+              className="w-16 h-16 mx-auto rounded-xl flex items-center justify-center text-3xl font-bold relative overflow-hidden"
               style={{ backgroundColor: `${block.color}20`, color: block.color }}
             >
-              {block.image}
+              {block.rarity === 'secret' && block.image.includes('.jpg') ? (
+                <img 
+                  src={block.image} 
+                  alt={block.name}
+                  className="w-full h-full object-cover rounded-xl"
+                />
+              ) : (
+                block.image
+              )}
+              {block.rarity === 'secret' && (
+                <div className="absolute -top-1 -right-1 text-xs animate-bounce">✨</div>
+              )}
             </div>
             <h3 className="font-bold text-sm mt-2">{block.name}</h3>
             <p className="text-xs text-muted-foreground">{block.description}</p>

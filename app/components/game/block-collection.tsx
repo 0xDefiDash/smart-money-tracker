@@ -11,7 +11,7 @@ interface Block {
   id: string
   name: string
   type: string
-  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'secret'
   value: number
   power: number
   defense: number
@@ -35,11 +35,12 @@ export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
     common: ownedBlocks.filter(b => b.rarity === 'common').length,
     rare: ownedBlocks.filter(b => b.rarity === 'rare').length,
     epic: ownedBlocks.filter(b => b.rarity === 'epic').length,
-    legendary: ownedBlocks.filter(b => b.rarity === 'legendary').length
+    legendary: ownedBlocks.filter(b => b.rarity === 'legendary').length,
+    secret: ownedBlocks.filter(b => b.rarity === 'secret').length
   }
 
   const sortedBlocks = [...ownedBlocks].sort((a, b) => {
-    const rarityOrder = { legendary: 4, epic: 3, rare: 2, common: 1 }
+    const rarityOrder = { secret: 5, legendary: 4, epic: 3, rare: 2, common: 1 }
     return rarityOrder[b.rarity] - rarityOrder[a.rarity]
   })
 
@@ -73,9 +74,9 @@ export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
         
         <Card>
           <CardContent className="p-4 text-center">
-            <Star className="w-8 h-8 mx-auto mb-2 text-purple-500" />
-            <p className="text-2xl font-bold">{rarityStats.epic}</p>
-            <p className="text-sm text-muted-foreground">Epic</p>
+            <div className="w-8 h-8 mx-auto mb-2 text-yellow-500 text-2xl animate-pulse">🚀</div>
+            <p className="text-2xl font-bold text-yellow-500">{rarityStats.secret}</p>
+            <p className="text-sm text-muted-foreground">Secret</p>
           </CardContent>
         </Card>
       </div>
@@ -86,7 +87,11 @@ export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
           <CardTitle>Collection Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="text-center">
+              <Badge className="mb-2 bg-gradient-to-r from-yellow-500 to-orange-500 animate-pulse">🚀 Secret</Badge>
+              <p className="text-2xl font-bold text-yellow-500">{rarityStats.secret}</p>
+            </div>
             <div className="text-center">
               <Badge className="mb-2 bg-yellow-500">Legendary</Badge>
               <p className="text-2xl font-bold">{rarityStats.legendary}</p>

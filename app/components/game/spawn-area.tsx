@@ -11,7 +11,7 @@ interface Block {
   id: string
   name: string
   type: string
-  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'secret'
   value: number
   power: number
   defense: number

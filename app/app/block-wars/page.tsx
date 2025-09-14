@@ -40,13 +40,17 @@ interface GameState {
   lastSpawn: number
   nextSpawn: number
   lastMoneyUpdate: number // Track when money was last calculated
+  secretBlockSpawns: number // Track secret blocks spawned today
+  lastSecretSpawn: number // Last secret block spawn time
+  nextSecretSpawn: number // Next scheduled secret block spawn
+  isAdmin?: boolean // Admin privileges for manual spawning
 }
 
 interface Block {
   id: string
   name: string
   type: string
-  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'secret'
   value: number
   power: number
   defense: number
@@ -64,7 +68,8 @@ const MONEY_PRODUCTION_RATES = {
   common: 50,      // $50 per minute
   rare: 150,       // $150 per minute
   epic: 400,       // $400 per minute
-  legendary: 1000  // $1000 per minute
+  legendary: 1000, // $1000 per minute
+  secret: 5000     // $5000 per minute - The ultimate block!
 }
 
 const BLOCK_TYPES = [
@@ -87,7 +92,8 @@ const BLOCK_TYPES = [
   { name: 'Filecoin Block', type: 'fil', color: '#0090FF', emoji: '💾' },
   { name: 'Polkadot Block', type: 'dot', color: '#E6007A', emoji: '●' },
   { name: 'Cosmos Block', type: 'atom', color: '#2E3148', emoji: '🌌' },
-  { name: 'Dogecoin Block', type: 'doge', color: '#C2A633', emoji: '🐕' }
+  { name: 'Dogecoin Block', type: 'doge', color: '#C2A633', emoji: '🐕' },
+  { name: 'Secret Block', type: 'secret', color: '#FFD700', emoji: '🚀', isSecret: true }
 ]
 
 // Helper function to calculate total money per minute from owned blocks
@@ -116,7 +122,11 @@ export default function BlockWarsPage() {
     attackPower: 50,
     lastSpawn: Date.now(),
     nextSpawn: Date.now() + 120000, // 2 minutes
-    lastMoneyUpdate: Date.now()
+    lastMoneyUpdate: Date.now(),
+    secretBlockSpawns: 0,
+    lastSecretSpawn: 0,
+    nextSecretSpawn: Date.now() + Math.random() * 12 * 60 * 60 * 1000, // Random time within 12 hours
+    isAdmin: false
   })
 
   const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
@@ -153,10 +163,15 @@ export default function BlockWarsPage() {
       if (timeLeft === 0) {
         spawnNewBlocks()
       }
+      
+      // Check for secret block spawning every minute
+      if (timeLeft % 60 === 0) {
+        checkSecretBlockSpawn()
+      }
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [gameState.nextSpawn, isInitialized])
+  }, [gameState.nextSpawn, gameState.nextSecretSpawn, gameState.secretBlockSpawns, isInitialized])
 
   // Passive money generation - update money every 5 seconds based on owned blocks
   useEffect(() => {
@@ -284,7 +299,11 @@ export default function BlockWarsPage() {
       attackPower: 50,
       lastSpawn: Date.now(),
       nextSpawn: Date.now() + 120000,
-      lastMoneyUpdate: Date.now()
+      lastMoneyUpdate: Date.now(),
+      secretBlockSpawns: 0,
+      lastSecretSpawn: 0,
+      nextSecretSpawn: Date.now() + Math.random() * 12 * 60 * 60 * 1000,
+      isAdmin: false
     })
     
     setSpawnedBlocks([])
@@ -330,6 +349,80 @@ export default function BlockWarsPage() {
       generateLocalBlocks()
     }
   }, [spawnedBlocks.length])
+
+  // Function to spawn a secret block
+  const spawnSecretBlock = (isAdminSpawn = false) => {
+    const secretBlockType = BLOCK_TYPES.find(type => type.isSecret)
+    if (!secretBlockType) return
+
+    const secretBlock: Block = {
+      id: `secret_block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: secretBlockType.name,
+      type: secretBlockType.type,
+      rarity: 'secret',
+      value: 10000, // Very high value
+      power: 500, // Maximum power
+      defense: 400, // High defense
+      image: '/secret-block-astronaut.jpg', // Use the uploaded astronaut image
+      color: secretBlockType.color,
+      description: 'The ultimate Secret Block! An astronaut from the crypto cosmos with unimaginable power. Earns $5,000 per minute!',
+      isStealable: true,
+      spawnTime: Date.now(),
+      traits: ['Ultra Rare', 'Secret Rarity', 'Cosmic Power', 'Astronaut']
+    }
+
+    setSpawnedBlocks(prev => [...prev, secretBlock])
+    
+    if (!isAdminSpawn) {
+      // Update secret spawn tracking for natural spawns
+      const now = Date.now()
+      const tomorrow = new Date()
+      tomorrow.setHours(24, 0, 0, 0)
+      const timeUntilReset = tomorrow.getTime() - now
+      const timeUntilNextSpawn = Math.random() * timeUntilReset // Random time before daily reset
+      
+      setGameState(prev => ({
+        ...prev,
+        secretBlockSpawns: prev.secretBlockSpawns + 1,
+        lastSecretSpawn: now,
+        nextSecretSpawn: prev.secretBlockSpawns >= 1 ? now + timeUntilNextSpawn : now + (6 * 60 * 60 * 1000) // 6 hours if this is the first spawn
+      }))
+    }
+
+    setBattleLog(prev => [...prev, `🌟 ✨ LEGENDARY SECRET BLOCK HAS APPEARED! ✨ The cosmic astronaut has entered the arena! This is your chance!`])
+  }
+
+  // Check if a secret block should spawn naturally
+  const checkSecretBlockSpawn = () => {
+    const now = Date.now()
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayStart = today.getTime()
+    
+    // Reset daily counter if it's a new day
+    if (gameState.lastSecretSpawn < todayStart) {
+      setGameState(prev => ({
+        ...prev,
+        secretBlockSpawns: 0
+      }))
+    }
+    
+    // Check if it's time for a secret spawn and we haven't hit the daily limit
+    if (now >= gameState.nextSecretSpawn && gameState.secretBlockSpawns < 2) {
+      spawnSecretBlock(false)
+    }
+  }
+
+  // Admin function to manually spawn secret block
+  const adminSpawnSecretBlock = () => {
+    if (!gameState.isAdmin) {
+      setBattleLog(prev => [...prev, `❌ Access denied! Only admins can manually spawn Secret Blocks.`])
+      return
+    }
+    
+    spawnSecretBlock(true)
+    setBattleLog(prev => [...prev, `🔧 Admin spawned a Secret Block!`])
+  }
 
   const generateLocalBlocks = () => {
     // Don't spawn if we already have too many blocks (limit to 12 total)
@@ -508,6 +601,14 @@ export default function BlockWarsPage() {
     setBattleLog(prev => [...prev, `🛡️ Defense upgraded! +20 defense strength for 100 coins.`])
   }
 
+  const toggleAdminMode = () => {
+    setGameState(prev => ({
+      ...prev,
+      isAdmin: !prev.isAdmin
+    }))
+    setBattleLog(prev => [...prev, `🔧 Admin mode ${!gameState.isAdmin ? 'enabled' : 'disabled'}!`])
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -561,7 +662,7 @@ export default function BlockWarsPage() {
           {/* Main Game Area */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="arena" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="arena" className="flex items-center space-x-2">
                   <Target className="w-4 h-4" />
                   <span>Arena</span>
@@ -577,6 +678,10 @@ export default function BlockWarsPage() {
                 <TabsTrigger value="leaderboard" className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
                   <span>Leaderboard</span>
+                </TabsTrigger>
+                <TabsTrigger value="admin" className="flex items-center space-x-2">
+                  <Star className="w-4 h-4" />
+                  <span>Admin</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -673,6 +778,103 @@ export default function BlockWarsPage() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="admin">
+                <div className="space-y-6">
+                  <Card className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border-purple-500/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Star className="w-5 h-5 text-purple-500" />
+                        <span>Admin Panel</span>
+                        {gameState.isAdmin && <Badge className="bg-green-500">Active</Badge>}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Admin Mode</p>
+                          <p className="text-sm text-muted-foreground">Enable admin privileges to spawn Secret Blocks</p>
+                        </div>
+                        <Button 
+                          onClick={toggleAdminMode}
+                          variant={gameState.isAdmin ? "destructive" : "default"}
+                          size="sm"
+                        >
+                          {gameState.isAdmin ? "Disable" : "Enable"}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
+                          🚀
+                        </div>
+                        <span>Secret Block Controls</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Today's Spawns</p>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline">{gameState.secretBlockSpawns}/2</Badge>
+                            <span className="text-sm text-muted-foreground">Daily Limit</span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Next Natural Spawn</p>
+                          <div className="text-sm text-muted-foreground">
+                            {gameState.secretBlockSpawns >= 2 ? (
+                              "All spawns used today"
+                            ) : (
+                              Math.floor((gameState.nextSecretSpawn - Date.now()) / 1000 / 60 / 60) > 0 ? (
+                                `In ${Math.floor((gameState.nextSecretSpawn - Date.now()) / 1000 / 60 / 60)}h ${Math.floor(((gameState.nextSecretSpawn - Date.now()) / 1000 / 60) % 60)}m`
+                              ) : (
+                                "Soon"
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg p-4 border border-yellow-500/20">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <p className="font-medium">Secret Block Astronaut</p>
+                            <p className="text-sm text-muted-foreground">
+                              The ultimate block worth $5,000/minute!
+                            </p>
+                            <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                              <span>Value: 10,000 coins</span>
+                              <span>Power: 500</span>
+                              <span>Defense: 400</span>
+                            </div>
+                          </div>
+                          <Button 
+                            onClick={adminSpawnSecretBlock}
+                            disabled={!gameState.isAdmin || isLoading}
+                            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                          >
+                            🚀 Spawn Secret Block
+                          </Button>
+                        </div>
+                      </div>
+
+                      {!gameState.isAdmin && (
+                        <div className="text-center p-4 bg-muted/50 rounded-lg border border-muted">
+                          <p className="text-sm text-muted-foreground">
+                            Enable Admin Mode to access Secret Block spawning controls
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
           </div>

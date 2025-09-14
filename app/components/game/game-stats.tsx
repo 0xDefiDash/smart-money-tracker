@@ -19,7 +19,8 @@ const MONEY_PRODUCTION_RATES = {
   common: 50,      // $50 per minute
   rare: 150,       // $150 per minute
   epic: 400,       // $400 per minute
-  legendary: 1000  // $1000 per minute
+  legendary: 1000, // $1000 per minute
+  secret: 5000     // $5000 per minute - The ultimate block!
 }
 
 interface GameState {
@@ -144,6 +145,10 @@ export function GameStats({ gameState }: GameStatsProps) {
                   <span>Legendary:</span>
                   <span>{gameState.ownedBlocks.filter(b => b.rarity === 'legendary').length}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>🚀 Secret:</span>
+                  <span className="text-yellow-500 font-bold">{gameState.ownedBlocks.filter(b => b.rarity === 'secret').length}</span>
+                </div>
               </div>
             </div>
           )}
@@ -205,6 +210,10 @@ export function GameStats({ gameState }: GameStatsProps) {
                 <div className="flex justify-between">
                   <span>Legendary:</span>
                   <span>{gameState.ownedBlocks.filter(b => b.rarity === 'legendary').length}x = ${gameState.ownedBlocks.filter(b => b.rarity === 'legendary').length * MONEY_PRODUCTION_RATES.legendary}/min</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>🚀 Secret:</span>
+                  <span className="text-yellow-500 font-bold">{gameState.ownedBlocks.filter(b => b.rarity === 'secret').length}x = ${gameState.ownedBlocks.filter(b => b.rarity === 'secret').length * MONEY_PRODUCTION_RATES.secret}/min</span>
                 </div>
               </div>
             </div>
