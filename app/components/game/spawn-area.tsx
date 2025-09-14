@@ -53,19 +53,22 @@ export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoadi
           </div>
           <Progress value={spawnProgress} className="h-2" />
           <p className="text-xs text-muted-foreground text-center">
-            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning!' : '2-3 blocks spawn every 2 minutes (max 12 total)'}
+            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning globally!' : '🌍 Global spawn: 2-3 blocks every 2 minutes (max 12 total) - All players compete!'}
           </p>
         </CardContent>
       </Card>
 
-      {/* Spawned Blocks */}
+      {/* Global Spawned Blocks */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Gift className="w-5 h-5 text-purple-500" />
-            <span>Available Blocks ({spawnedBlocks.length})</span>
+            <span>🌍 Global Arena - Available Blocks ({spawnedBlocks.length})</span>
             <Sparkles className="w-4 h-4 text-yellow-500" />
           </CardTitle>
+          <div className="text-sm text-muted-foreground">
+            🏃‍♂️ All players compete for these blocks! First to claim wins!
+          </div>
         </CardHeader>
         <CardContent>
           {spawnedBlocks.length > 0 ? (
@@ -86,12 +89,15 @@ export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoadi
               <div className="w-16 h-16 bg-gray-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Gift className="w-8 h-8 text-gray-500" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">No Blocks Available</h3>
+              <h3 className="font-semibold text-lg mb-2">🌍 Global Arena Empty</h3>
               <p className="text-muted-foreground mb-4">
-                Waiting for new blocks to spawn...
+                All blocks have been claimed by players! New ones will spawn soon...
               </p>
               <div className="text-sm text-muted-foreground">
-                Next spawn: {Math.floor(timeUntilSpawn / 60)}:{(timeUntilSpawn % 60).toString().padStart(2, '0')}
+                Next global spawn: {Math.floor(timeUntilSpawn / 60)}:{(timeUntilSpawn % 60).toString().padStart(2, '0')}
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                🏃‍♂️ Be ready to claim blocks before other players!
               </div>
             </div>
           )}
