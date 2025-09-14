@@ -19,7 +19,7 @@ import {
   Target,
   Rocket,
   Globe,
-
+  Gamepad2,
   Percent
 } from 'lucide-react'
 
@@ -74,7 +74,11 @@ const sidebarItems = [
     href: '/yields',
     icon: Percent,
   },
-
+  {
+    title: 'Block Battles',
+    href: '/block-battles',
+    icon: Gamepad2,
+  },
   {
     title: 'Analytics',
     href: '/analytics',
