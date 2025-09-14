@@ -70,7 +70,7 @@ function generateMockAudit(contractId: string): AuditResult {
   const contractName = contractNames[Math.abs(hash) % contractNames.length]
 
   // Generate network based on contract ID prefix
-  const networks = ['Ethereum', 'BSC', 'Polygon', 'Arbitrum', 'Optimism']
+  const networks = ['Ethereum', 'BSC', 'Polygon', 'Base', 'Arbitrum', 'Optimism']
   const network = networks[Math.abs(hash) % networks.length]
 
   // Generate vulnerabilities based on risk level
@@ -249,7 +249,7 @@ export async function GET() {
   return NextResponse.json({
     message: 'Smart Contract Audit API',
     version: '1.0.0',
-    supportedNetworks: ['Ethereum', 'BSC', 'Polygon', 'Arbitrum', 'Optimism'],
+    supportedNetworks: ['Ethereum', 'BSC', 'Polygon', 'Base', 'Arbitrum', 'Optimism'],
     features: [
       'Vulnerability Detection',
       'Security Analysis',

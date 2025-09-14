@@ -151,7 +151,7 @@ export default function AuditServicePage() {
                 <Label htmlFor="contract-id">Smart Contract Address</Label>
                 <Input
                   id="contract-id"
-                  placeholder="0x... (Ethereum, BSC, Polygon supported)"
+                  placeholder="0x... (Ethereum, BSC, Polygon, Base, Arbitrum, Optimism supported)"
                   value={contractId}
                   onChange={(e) => setContractId(e.target.value)}
                   disabled={isLoading}
