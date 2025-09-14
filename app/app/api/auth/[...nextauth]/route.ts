@@ -19,13 +19,14 @@ const authOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
           where: {
-            username: credentials.username
+            username: credentials.username,
+            password: { not: null }
           }
         })
 
-        if (!user) {
+        if (!user || !user.password || !user.username) {
           return null
         }
 

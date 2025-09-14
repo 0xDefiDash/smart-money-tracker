@@ -15,9 +15,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if username already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { username: username }
+    // Check if username already exists (only check if username is not null)
+    const existingUser = await prisma.user.findFirst({
+      where: { 
+        username: username,
+        NOT: {
+          username: null
+        }
+      }
     })
 
     if (existingUser) {
@@ -25,6 +30,25 @@ export async function POST(request: NextRequest) {
         { error: 'Username already exists' },
         { status: 400 }
       )
+    }
+
+    // Also check if email exists and has a username (to prevent duplicate accounts)
+    if (email) {
+      const existingEmailUser = await prisma.user.findFirst({
+        where: { 
+          email: email,
+          username: {
+            not: null
+          }
+        }
+      })
+
+      if (existingEmailUser) {
+        return NextResponse.json(
+          { error: 'Email already registered with an account' },
+          { status: 400 }
+        )
+      }
     }
 
     // Hash password
