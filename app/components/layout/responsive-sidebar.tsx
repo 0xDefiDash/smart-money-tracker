@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import Link from 'next/link'
@@ -17,7 +18,9 @@ import {
   LineChart,
   Target,
   Rocket,
-  Globe
+  Globe,
+  Shield,
+  Percent
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -66,7 +69,16 @@ const sidebarItems = [
     href: '/wallet-monitor',
     icon: Wallet,
   },
-
+  {
+    title: 'Yields & APR',
+    href: '/yields',
+    icon: Percent,
+  },
+  {
+    title: 'Audit Service',
+    href: '/audit-service',
+    icon: Shield,
+  },
   {
     title: 'Analytics',
     href: '/analytics',
