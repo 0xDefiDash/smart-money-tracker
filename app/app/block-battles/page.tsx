@@ -39,6 +39,7 @@ interface GameState {
   attackPower: number
   lastSpawn: number
   nextSpawn: number
+  lastPointsUpdate: number // Track when points were last calculated
 }
 
 interface Block {
@@ -56,6 +57,14 @@ interface Block {
   isStealable: boolean
   spawnTime: number
   traits: string[]
+}
+
+// Point production rates per minute based on rarity
+const POINT_PRODUCTION_RATES = {
+  common: 1,      // 1 point per minute
+  rare: 3,        // 3 points per minute
+  epic: 8,        // 8 points per minute
+  legendary: 20   // 20 points per minute
 }
 
 const BLOCK_TYPES = [
@@ -81,6 +90,20 @@ const BLOCK_TYPES = [
   { name: 'Dogecoin Block', type: 'doge', color: '#C2A633', emoji: '🐕' }
 ]
 
+// Helper function to calculate total points per minute from owned blocks
+const calculatePointsPerMinute = (ownedBlocks: Block[]): number => {
+  return ownedBlocks.reduce((total, block) => {
+    return total + POINT_PRODUCTION_RATES[block.rarity]
+  }, 0)
+}
+
+// Helper function to calculate accumulated points since last update
+const calculateAccumulatedPoints = (ownedBlocks: Block[], lastUpdate: number): number => {
+  const minutesElapsed = (Date.now() - lastUpdate) / 60000 // Convert to minutes
+  const pointsPerMinute = calculatePointsPerMinute(ownedBlocks)
+  return Math.floor(pointsPerMinute * minutesElapsed)
+}
+
 export default function BlockBattlesPage() {
   const [gameState, setGameState] = useState<GameState>({
     playerId: 'player_' + Math.random().toString(36).substr(2, 9),
@@ -92,7 +115,8 @@ export default function BlockBattlesPage() {
     defenseStrength: 100,
     attackPower: 50,
     lastSpawn: Date.now(),
-    nextSpawn: Date.now() + 120000 // 2 minutes
+    nextSpawn: Date.now() + 120000, // 2 minutes
+    lastPointsUpdate: Date.now()
   })
 
   const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
@@ -134,6 +158,29 @@ export default function BlockBattlesPage() {
     return () => clearInterval(timer)
   }, [gameState.nextSpawn, isInitialized])
 
+  // Passive point generation - update points every 5 seconds based on owned blocks
+  useEffect(() => {
+    if (!isInitialized || gameState.ownedBlocks.length === 0) return
+
+    const pointTimer = setInterval(() => {
+      setGameState(prev => {
+        const accumulatedPoints = calculateAccumulatedPoints(prev.ownedBlocks, prev.lastPointsUpdate)
+        
+        if (accumulatedPoints > 0) {
+          return {
+            ...prev,
+            points: prev.points + accumulatedPoints,
+            lastPointsUpdate: Date.now()
+          }
+        }
+        
+        return prev
+      })
+    }, 5000) // Update every 5 seconds
+
+    return () => clearInterval(pointTimer)
+  }, [isInitialized, gameState.ownedBlocks.length])
+
   // Save game state to localStorage whenever it changes
   useEffect(() => {
     if (isInitialized) {
@@ -150,6 +197,20 @@ export default function BlockBattlesPage() {
       
       if (savedState) {
         const parsedState = JSON.parse(savedState)
+        
+        // Handle legacy saves that don't have lastPointsUpdate
+        if (!parsedState.lastPointsUpdate) {
+          parsedState.lastPointsUpdate = Date.now()
+        }
+        
+        // Calculate and add accumulated points from passive generation
+        const accumulatedPoints = calculateAccumulatedPoints(parsedState.ownedBlocks, parsedState.lastPointsUpdate)
+        if (accumulatedPoints > 0) {
+          parsedState.points = (parsedState.points || 0) + accumulatedPoints
+          parsedState.lastPointsUpdate = Date.now()
+          setBattleLog(prev => [...prev, `💰 You earned ${accumulatedPoints} points while away from your blocks!`])
+        }
+        
         setGameState(parsedState)
         
         if (savedLog) {
@@ -166,6 +227,10 @@ export default function BlockBattlesPage() {
       const response = await fetch('/api/game/state')
       if (response.ok) {
         const data = await response.json()
+        // Ensure new field exists
+        if (!data.lastPointsUpdate) {
+          data.lastPointsUpdate = Date.now()
+        }
         setGameState(data)
       }
     } catch (error) {
@@ -191,7 +256,8 @@ export default function BlockBattlesPage() {
       defenseStrength: 100,
       attackPower: 50,
       lastSpawn: Date.now(),
-      nextSpawn: Date.now() + 120000
+      nextSpawn: Date.now() + 120000,
+      lastPointsUpdate: Date.now()
     })
     
     setSpawnedBlocks([])
@@ -348,16 +414,18 @@ export default function BlockBattlesPage() {
         ...prev,
         ownedBlocks: [...prev.ownedBlocks, { ...block, owner: prev.playerId }],
         coins: prev.coins + block.value,
-        points: prev.points + block.value * 2,
+        // Removed immediate points reward - blocks will earn points passively!
         experience: newExperience,
         level: newLevel,
         attackPower: prev.attackPower + (leveledUp ? 5 : 0),
-        defenseStrength: prev.defenseStrength + (leveledUp ? 10 : 0)
+        defenseStrength: prev.defenseStrength + (leveledUp ? 10 : 0),
+        lastPointsUpdate: Date.now() // Reset the points update timer
       }
     })
     
     setSpawnedBlocks(prev => prev.filter(b => b.id !== block.id))
-    setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins! (+${block.rarity === 'legendary' ? 50 : block.rarity === 'epic' ? 30 : block.rarity === 'rare' ? 20 : 10} XP)`])
+    const pointsPerMinute = POINT_PRODUCTION_RATES[block.rarity]
+    setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins! This ${block.rarity} block will earn ${pointsPerMinute} points per minute! (+${block.rarity === 'legendary' ? 50 : block.rarity === 'epic' ? 30 : block.rarity === 'rare' ? 20 : 10} XP)`])
   }
 
   const stealBlock = async (targetBlock: Block) => {
@@ -377,11 +445,13 @@ export default function BlockBattlesPage() {
         ...prev,
         ownedBlocks: [...prev.ownedBlocks, { ...targetBlock, owner: prev.playerId }],
         coins: prev.coins - cost + targetBlock.value,
-        points: prev.points + targetBlock.value,
-        experience: prev.experience + 15
+        // Removed immediate points - stolen blocks will earn passively
+        experience: prev.experience + 15,
+        lastPointsUpdate: Date.now()
       }))
       
-      setBattleLog(prev => [...prev, `🎯 Successfully stole ${targetBlock.name}! Gained ${targetBlock.value} value!`])
+      const pointsPerMinute = POINT_PRODUCTION_RATES[targetBlock.rarity]
+      setBattleLog(prev => [...prev, `🎯 Successfully stole ${targetBlock.name}! Gained ${targetBlock.value} value and it will earn ${pointsPerMinute} points/min!`])
     } else {
       setGameState(prev => ({
         ...prev,

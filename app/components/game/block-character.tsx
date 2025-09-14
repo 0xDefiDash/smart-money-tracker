@@ -12,8 +12,17 @@ import {
   Crown, 
   Zap,
   Coins,
-  Timer
+  Timer,
+  TrendingUp
 } from 'lucide-react'
+
+// Point production rates per minute based on rarity
+const POINT_PRODUCTION_RATES = {
+  common: 1,      // 1 point per minute
+  rare: 3,        // 3 points per minute
+  epic: 8,        // 8 points per minute
+  legendary: 20   // 20 points per minute
+}
 
 interface Block {
   id: string
@@ -70,6 +79,7 @@ export function BlockCharacter({
   isLoading = false
 }: BlockCharacterProps) {
   const timeAgo = Math.floor((Date.now() - block.spawnTime) / 1000 / 60)
+  const pointsPerMinute = POINT_PRODUCTION_RATES[block.rarity]
 
   return (
     <Card className={cn("relative overflow-hidden transition-all duration-300 hover:scale-105", getRarityColor(block.rarity))}>
@@ -101,6 +111,14 @@ export function BlockCharacter({
             </div>
             <h3 className="font-bold text-sm mt-2">{block.name}</h3>
             <p className="text-xs text-muted-foreground">{block.description}</p>
+          </div>
+
+          {/* Point Production Display */}
+          <div className="flex items-center justify-center space-x-1 bg-purple-500/10 border border-purple-500/20 rounded-lg p-2">
+            <TrendingUp className="w-3 h-3 text-purple-500" />
+            <span className="text-xs font-bold text-purple-500">
+              +{pointsPerMinute} pts/min
+            </span>
           </div>
 
           {/* Stats */}
