@@ -134,6 +134,7 @@ export default function BlockWarsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [timeUntilSpawn, setTimeUntilSpawn] = useState(120)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [lastLocalSpawn, setLastLocalSpawn] = useState(Date.now() - 15000) // Allow initial spawn after 15 seconds
 
   // Initialize game state from localStorage or API
   useEffect(() => {
@@ -277,35 +278,75 @@ export default function BlockWarsPage() {
     }
   }
 
-  // Fetch global blocks from the shared API
+  // Generate blocks locally for a faster gaming experience
   const fetchGlobalBlocks = async () => {
     try {
-      const response = await fetch('/api/game/global-blocks')
-      if (response.ok) {
-        const data = await response.json()
-        
-        // Update spawned blocks if they changed
-        if (JSON.stringify(data.blocks) !== JSON.stringify(spawnedBlocks)) {
-          setSpawnedBlocks(data.blocks)
-          
-          // If blocks were added, log it
-          if (data.blocks.length > spawnedBlocks.length) {
-            const newCount = data.blocks.length - spawnedBlocks.length
-            setBattleLog(prev => [...prev, `🎁 ${newCount} new blocks appeared in the global arena!`])
-          }
-          
-          // If blocks were removed (claimed by others), log it
-          if (data.blocks.length < spawnedBlocks.length) {
-            const claimedCount = spawnedBlocks.length - data.blocks.length
-            setBattleLog(prev => [...prev, `⚡ ${claimedCount} blocks were claimed by other players!`])
-          }
-        }
-        
-        // Update spawn timer from server
-        setTimeUntilSpawn(data.timeUntilSpawn)
+      // Check if we need to generate new blocks
+      const now = Date.now()
+      
+      // Generate initial blocks if none exist
+      if (spawnedBlocks.length === 0 && now - lastLocalSpawn > 10000) {
+        generateLocalBlocks(3)
+        setLastLocalSpawn(now)
+        setBattleLog(prev => [...prev, '🎁 Initial blocks have spawned in the global arena!'])
+        return
+      }
+      
+      // Regular spawning logic - spawn new blocks every 2 minutes if under limit
+      if (spawnedBlocks.length < 12 && now - lastLocalSpawn > 120000) { // 2 minutes
+        const newBlocksCount = Math.floor(Math.random() * 2) + 2 // 2-3 blocks
+        generateLocalBlocks(newBlocksCount)
+        setLastLocalSpawn(now)
+        setBattleLog(prev => [...prev, `🎁 ${newBlocksCount} new blocks spawned in the global arena!`])
       }
     } catch (error) {
-      console.log('Failed to fetch global blocks:', error)
+      console.error('Error in local block generation:', error)
+    }
+  }
+
+  // Local block generation function
+  const generateLocalBlocks = (count: number) => {
+    const newBlocks: Block[] = []
+    
+    for (let i = 0; i < count && spawnedBlocks.length + newBlocks.length < 12; i++) {
+      const blockType = BLOCK_TYPES[Math.floor(Math.random() * (BLOCK_TYPES.length - 1))] // Exclude secret block
+      
+      // Weighted rarity system
+      const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
+      const rarityWeights = [50, 30, 15, 5]
+      
+      let randomValue = Math.random() * 100
+      let selectedRarity: Block['rarity'] = 'common'
+      
+      for (let j = 0; j < rarities.length; j++) {
+        if (randomValue < rarityWeights[j]) {
+          selectedRarity = rarities[j]
+          break
+        }
+        randomValue -= rarityWeights[j]
+      }
+      
+      const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
+      
+      newBlocks.push({
+        id: `local_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+        name: blockType.name,
+        type: blockType.type,
+        rarity: selectedRarity,
+        value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
+        power: Math.floor(Math.random() * 100) + 20,
+        defense: Math.floor(Math.random() * 80) + 10,
+        image: blockType.emoji,
+        color: blockType.color,
+        description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
+        isStealable: true,
+        spawnTime: Date.now(),
+        traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
+      })
+    }
+    
+    if (newBlocks.length > 0) {
+      setSpawnedBlocks(prev => [...prev, ...newBlocks])
     }
   }
 
@@ -385,40 +426,25 @@ export default function BlockWarsPage() {
   const claimBlock = async (blockId: string) => {
     const block = spawnedBlocks.find(b => b.id === blockId)
     if (!block) {
-      setBattleLog(prev => [...prev, `❌ Block not found or already claimed by another player!`])
+      setBattleLog(prev => [...prev, `❌ Block not found or already claimed!`])
       return
     }
 
     setIsLoading(true)
     
     try {
-      // Use global blocks API for claiming
-      const response = await fetch('/api/game/global-blocks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blockId, playerId: gameState.playerId })
-      })
+      // Simulate a small delay for realism
+      await new Promise(resolve => setTimeout(resolve, 200))
       
-      if (response.ok) {
-        const result = await response.json()
-        updateGameStateAfterClaim(result.claimedBlock)
-        
-        // Immediately refresh global blocks to show the updated state
-        fetchGlobalBlocks()
-        
-        setBattleLog(prev => [...prev, `🎯 Successfully claimed ${result.claimedBlock.name} before other players!`])
-      } else {
-        const errorData = await response.json()
-        setBattleLog(prev => [...prev, `❌ Failed to claim block: ${errorData.error || 'Unknown error'}`])
-        
-        // Refresh blocks to get the latest state
-        fetchGlobalBlocks()
-      }
+      // Update game state with the claimed block
+      updateGameStateAfterClaim(block)
+      
+      // Remove the block from spawned blocks
+      setSpawnedBlocks(prev => prev.filter(b => b.id !== blockId))
+      
+      setBattleLog(prev => [...prev, `🎯 Successfully claimed ${block.name}! +${block.value} coins, +${block.power} attack power!`])
     } catch (error) {
-      setBattleLog(prev => [...prev, `❌ Network error while claiming block. Please try again!`])
-      
-      // Refresh blocks in case of network issues
-      fetchGlobalBlocks()
+      setBattleLog(prev => [...prev, `❌ Error claiming block. Please try again!`])
     }
     
     setIsLoading(false)

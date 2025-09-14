@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 
 interface Block {
@@ -22,43 +21,21 @@ const BLOCK_TYPES = [
   { name: 'Ethereum Block', type: 'eth', color: '#627EEA', emoji: 'Ξ' },
   { name: 'Solana Block', type: 'sol', color: '#9945FF', emoji: '◎' },
   { name: 'Cardano Block', type: 'ada', color: '#0033AD', emoji: '₳' },
-  { name: 'Polygon Block', type: 'matic', color: '#8247E5', emoji: '⟐' },
-  { name: 'Avalanche Block', type: 'avax', color: '#E84142', emoji: '🔺' },
-  { name: 'Chainlink Block', type: 'link', color: '#375BD2', emoji: '🔗' },
-  { name: 'Uniswap Block', type: 'uni', color: '#FF007A', emoji: '🦄' },
-  { name: 'Aave Block', type: 'aave', color: '#B6509E', emoji: '👻' },
-  { name: 'Compound Block', type: 'comp', color: '#00D395', emoji: '🏛️' },
-  { name: 'SushiSwap Block', type: 'sushi', color: '#FA52A0', emoji: '🍣' },
-  { name: 'PancakeSwap Block', type: 'cake', color: '#1FC7D4', emoji: '🥞' },
-  { name: 'Curve Block', type: 'crv', color: '#FFE31A', emoji: '📈' },
-  { name: 'Yearn Block', type: 'yfi', color: '#0074D9', emoji: '💎' },
-  { name: 'Maker Block', type: 'mkr', color: '#1AAB9B', emoji: '🏭' },
-  { name: 'The Graph Block', type: 'grt', color: '#6747ED', emoji: '📊' },
-  { name: 'Filecoin Block', type: 'fil', color: '#0090FF', emoji: '💾' },
-  { name: 'Polkadot Block', type: 'dot', color: '#E6007A', emoji: '●' },
-  { name: 'Cosmos Block', type: 'atom', color: '#2E3148', emoji: '🌌' },
-  { name: 'Dogecoin Block', type: 'doge', color: '#C2A633', emoji: '🐕' },
-  { name: 'Secret Block', type: 'secret', color: '#FFD700', emoji: '🚀', isSecret: true }
+  { name: 'Polygon Block', type: 'matic', color: '#8247E5', emoji: '⟐' }
 ]
 
 // Global shared state for all users - in production, this would be in a database
 let globalBlocks: Block[] = []
 let lastSpawnTime = Date.now()
 let nextSpawnTime = Date.now() + 120000 // 2 minutes from now
-
-// Initialize with some blocks on server start
-if (globalBlocks.length === 0) {
-  generateInitialBlocks()
-}
+let isInitialized = false
 
 function generateInitialBlocks() {
   const numBlocks = 3 // Start with 3 blocks
   const newBlocks: Block[] = []
   
   for (let i = 0; i < numBlocks; i++) {
-    const blockType = BLOCK_TYPES[Math.floor(Math.random() * (BLOCK_TYPES.length - 1))] // Exclude secret block from random generation
-    
-    // Weighted rarity system
+    const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
     const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
     const rarityWeights = [50, 30, 15, 5] // Weighted probability
     
@@ -96,72 +73,19 @@ function generateInitialBlocks() {
   console.log(`Global spawn: Generated ${numBlocks} initial blocks`)
 }
 
-function generateNewBlocks() {
-  // Don't spawn if we already have too many blocks (limit to 12 total)
-  if (globalBlocks.length >= 12) {
-    console.log('Global arena is full, skipping spawn')
-    return 0
-  }
-
-  // Generate 2-3 blocks
-  const numBlocks = Math.floor(Math.random() * 2) + 2
-  const newBlocks: Block[] = []
-  
-  for (let i = 0; i < numBlocks && (globalBlocks.length + i) < 12; i++) {
-    const blockType = BLOCK_TYPES[Math.floor(Math.random() * (BLOCK_TYPES.length - 1))] // Exclude secret block
-    
-    // Weighted rarity system
-    const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
-    const rarityWeights = [50, 30, 15, 5]
-    
-    let randomValue = Math.random() * 100
-    let selectedRarity: Block['rarity'] = 'common'
-    
-    for (let j = 0; j < rarities.length; j++) {
-      if (randomValue < rarityWeights[j]) {
-        selectedRarity = rarities[j]
-        break
-      }
-      randomValue -= rarityWeights[j]
-    }
-    
-    const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
-    
-    newBlocks.push({
-      id: `global_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
-      name: blockType.name,
-      type: blockType.type,
-      rarity: selectedRarity,
-      value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
-      power: Math.floor(Math.random() * 100) + 20,
-      defense: Math.floor(Math.random() * 80) + 10,
-      image: blockType.emoji,
-      color: blockType.color,
-      description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
-      isStealable: true,
-      spawnTime: Date.now(),
-      traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
-    })
-  }
-  
-  globalBlocks = [...globalBlocks, ...newBlocks]
-  console.log(`Global spawn: Generated ${newBlocks.length} new blocks, total: ${globalBlocks.length}`)
-  return newBlocks.length
-}
-
-// GET - Fetch current global blocks and spawn info
 export async function GET() {
   try {
-    const now = Date.now()
-    
-    // Check if it's time to spawn new blocks
-    if (now >= nextSpawnTime) {
-      const spawned = generateNewBlocks()
-      lastSpawnTime = now
-      nextSpawnTime = now + 120000 // Next spawn in 2 minutes
+    // Initialize blocks if not already done
+    if (!isInitialized) {
+      generateInitialBlocks()
+      isInitialized = true
+      console.log('Global blocks initialized with', globalBlocks.length, 'blocks')
     }
     
+    const now = Date.now()
     const timeUntilSpawn = Math.max(0, Math.floor((nextSpawnTime - now) / 1000))
+    
+    console.log(`GET /api/game/global-blocks - returning ${globalBlocks.length} blocks`)
     
     return NextResponse.json({
       blocks: globalBlocks,
@@ -175,7 +99,6 @@ export async function GET() {
   }
 }
 
-// POST - Claim a block (remove from global pool)
 export async function POST(request: NextRequest) {
   try {
     const { blockId, playerId } = await request.json()
@@ -209,65 +132,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Admin function to clear all blocks
 export async function DELETE() {
   try {
     globalBlocks = []
     lastSpawnTime = Date.now()
     nextSpawnTime = Date.now() + 10000 // Spawn new blocks in 10 seconds
+    isInitialized = false
     
     return NextResponse.json({ success: true, message: 'All blocks cleared' })
   } catch (error) {
     console.error('Error clearing blocks:', error)
     return NextResponse.json({ error: 'Failed to clear blocks' }, { status: 500 })
-  }
-}
-
-// PUT - Admin function to spawn secret block
-export async function PUT(request: NextRequest) {
-  try {
-    const { action, adminKey } = await request.json()
-    
-    // Simple admin verification (in production, use proper auth)
-    if (adminKey !== 'block_wars_admin_2025') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    
-    if (action === 'spawn_secret') {
-      const secretBlockType = BLOCK_TYPES.find(type => type.isSecret)
-      if (!secretBlockType) {
-        return NextResponse.json({ error: 'Secret block type not found' }, { status: 400 })
-      }
-      
-      const secretBlock: Block = {
-        id: `secret_block_global_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        name: secretBlockType.name,
-        type: secretBlockType.type,
-        rarity: 'secret',
-        value: 10000,
-        power: 500,
-        defense: 400,
-        image: '/secret-block-astronaut.jpg',
-        color: secretBlockType.color,
-        description: 'The ultimate Secret Block! An astronaut from the crypto cosmos with unimaginable power. Earns $5,000 per minute!',
-        isStealable: true,
-        spawnTime: Date.now(),
-        traits: ['Ultra Rare', 'Secret Rarity', 'Cosmic Power', 'Astronaut']
-      }
-      
-      globalBlocks.push(secretBlock)
-      console.log('Admin spawned a Secret Block globally')
-      
-      return NextResponse.json({
-        success: true,
-        secretBlock,
-        totalBlocks: globalBlocks.length
-      })
-    }
-    
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
-  } catch (error) {
-    console.error('Error handling admin action:', error)
-    return NextResponse.json({ error: 'Failed to handle admin action' }, { status: 500 })
   }
 }
