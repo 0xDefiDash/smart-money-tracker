@@ -109,8 +109,8 @@ function generateRandomBlock(): Block {
 
 export async function POST(request: NextRequest) {
   try {
-    // Generate 1-4 random blocks
-    const numBlocks = Math.floor(Math.random() * 4) + 1
+    // Generate 2-3 random blocks to keep spawning more controlled
+    const numBlocks = Math.floor(Math.random() * 2) + 2 // Now generates 2-3 blocks
     const newBlocks: Block[] = []
     
     for (let i = 0; i < numBlocks; i++) {
@@ -120,6 +120,7 @@ export async function POST(request: NextRequest) {
     // Add some delay to simulate processing
     await new Promise(resolve => setTimeout(resolve, 500))
     
+    console.log(`Spawning ${numBlocks} new blocks`)
     return NextResponse.json(newBlocks)
   } catch (error) {
     console.error('Error spawning blocks:', error)

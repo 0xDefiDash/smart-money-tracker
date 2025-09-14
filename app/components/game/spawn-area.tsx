@@ -53,7 +53,7 @@ export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoadi
           </div>
           <Progress value={spawnProgress} className="h-2" />
           <p className="text-xs text-muted-foreground text-center">
-            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning!' : 'Blocks spawn automatically every 2 minutes'}
+            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning!' : '2-3 blocks spawn every 2 minutes (max 12 total)'}
           </p>
         </CardContent>
       </Card>

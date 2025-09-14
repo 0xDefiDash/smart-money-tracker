@@ -204,59 +204,106 @@ export default function BlockBattlesPage() {
   }
 
   const spawnNewBlocks = useCallback(async () => {
+    // Don't spawn if we already have too many blocks (limit to 12 total)
+    if (spawnedBlocks.length >= 12) {
+      setBattleLog(prev => [...prev, `⏳ Arena is full! Claim some blocks to make room for new ones.`])
+      setGameState(prev => ({
+        ...prev,
+        lastSpawn: Date.now(),
+        nextSpawn: Date.now() + 120000
+      }))
+      return
+    }
+
     try {
       const response = await fetch('/api/game/spawn', { method: 'POST' })
       const newBlocks = await response.json()
       
-      setSpawnedBlocks(prev => [...prev, ...newBlocks])
+      setSpawnedBlocks(prev => {
+        const combined = [...prev, ...newBlocks]
+        // Keep only the most recent 12 blocks if we exceed the limit
+        return combined.length > 12 ? combined.slice(-12) : combined
+      })
+      
       setGameState(prev => ({
         ...prev,
         lastSpawn: Date.now(),
         nextSpawn: Date.now() + 120000
       }))
       
-      setBattleLog(prev => [...prev, `🎁 New blocks have spawned in the arena!`])
+      setBattleLog(prev => [...prev, `🎁 ${newBlocks.length} new blocks have spawned in the arena!`])
     } catch (error) {
       // Generate blocks locally as fallback
       generateLocalBlocks()
     }
-  }, [])
+  }, [spawnedBlocks.length])
 
   const generateLocalBlocks = () => {
-    const numBlocks = Math.floor(Math.random() * 3) + 1
+    // Don't spawn if we already have too many blocks (limit to 12 total)
+    if (spawnedBlocks.length >= 12) {
+      setBattleLog(prev => [...prev, `⏳ Arena is full! Claim some blocks to make room for new ones.`])
+      setGameState(prev => ({
+        ...prev,
+        lastSpawn: Date.now(),
+        nextSpawn: Date.now() + 120000
+      }))
+      return
+    }
+
+    // Generate 2-3 blocks to match API behavior  
+    const numBlocks = Math.floor(Math.random() * 2) + 2
     const newBlocks: Block[] = []
     
     for (let i = 0; i < numBlocks; i++) {
       const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
-      const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
-      const rarity = rarities[Math.floor(Math.random() * rarities.length)]
       
-      const baseValue = rarity === 'legendary' ? 500 : rarity === 'epic' ? 200 : rarity === 'rare' ? 100 : 50
+      // Use weighted rarity system like the API
+      const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
+      const rarityWeights = [50, 30, 15, 5] // Weighted probability
+      
+      let randomValue = Math.random() * 100
+      let selectedRarity: Block['rarity'] = 'common'
+      
+      for (let j = 0; j < rarities.length; j++) {
+        if (randomValue < rarityWeights[j]) {
+          selectedRarity = rarities[j]
+          break
+        }
+        randomValue -= rarityWeights[j]
+      }
+      
+      const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
       
       newBlocks.push({
-        id: `block_${Date.now()}_${i}`,
+        id: `block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
         name: blockType.name,
         type: blockType.type,
-        rarity,
-        value: baseValue + Math.floor(Math.random() * baseValue),
+        rarity: selectedRarity,
+        value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
         power: Math.floor(Math.random() * 100) + 20,
         defense: Math.floor(Math.random() * 80) + 10,
         image: blockType.emoji,
         color: blockType.color,
-        description: `A powerful ${rarity} ${blockType.name} with unique crypto powers!`,
+        description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
         isStealable: true,
         spawnTime: Date.now(),
-        traits: [`${rarity} rarity`, `${blockType.type.toUpperCase()} power`]
+        traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
       })
     }
     
-    setSpawnedBlocks(prev => [...prev, ...newBlocks])
+    setSpawnedBlocks(prev => {
+      const combined = [...prev, ...newBlocks]
+      // Keep only the most recent 12 blocks if we exceed the limit
+      return combined.length > 12 ? combined.slice(-12) : combined
+    })
+    
     setGameState(prev => ({
       ...prev,
       lastSpawn: Date.now(),
-      nextSpawn: Date.now() + 120000
+      nextSpawn: Date.now() + 120000 // Ensure 2-minute spawn timer
     }))
     
+    console.log(`Local spawn: Generated ${numBlocks} new blocks`)
     setBattleLog(prev => [...prev, `🎁 ${numBlocks} new blocks spawned!`])
   }
 
