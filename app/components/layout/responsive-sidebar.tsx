@@ -75,8 +75,8 @@ const sidebarItems = [
     icon: Percent,
   },
   {
-    title: 'Block Battles',
-    href: '/block-battles',
+    title: 'Block Wars',
+    href: '/block-wars',
     icon: Gamepad2,
   },
   {

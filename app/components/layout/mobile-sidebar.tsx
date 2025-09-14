@@ -17,7 +17,9 @@ import {
   LineChart,
   Target,
   Rocket,
-  Globe
+  Globe,
+  Gamepad2,
+  Percent
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -66,7 +68,16 @@ const sidebarItems = [
     href: '/wallet-monitor',
     icon: Wallet,
   },
-
+  {
+    title: 'Yields & APR',
+    href: '/yields',
+    icon: Percent,
+  },
+  {
+    title: 'Block Wars',
+    href: '/block-wars',
+    icon: Gamepad2,
+  },
   {
     title: 'Analytics',
     href: '/analytics',

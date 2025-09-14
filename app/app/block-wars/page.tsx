@@ -104,7 +104,7 @@ const calculateAccumulatedMoney = (ownedBlocks: Block[], lastUpdate: number): nu
   return Math.floor(moneyPerMinute * minutesElapsed)
 }
 
-export default function BlockBattlesPage() {
+export default function BlockWarsPage() {
   const [gameState, setGameState] = useState<GameState>({
     playerId: 'player_' + Math.random().toString(36).substr(2, 9),
     coins: 1000,
@@ -136,7 +136,7 @@ export default function BlockBattlesPage() {
       // Small delay to let the UI settle, then spawn initial blocks
       setTimeout(() => {
         generateLocalBlocks()
-        setBattleLog(prev => [...prev, `🎮 Welcome to Block Battles! Some blocks are ready to claim!`])
+        setBattleLog(prev => [...prev, `🎮 Welcome to Block Wars! Some blocks are ready to claim!`])
       }, 500)
     }
   }, [isInitialized])
@@ -184,16 +184,32 @@ export default function BlockBattlesPage() {
   // Save game state to localStorage whenever it changes
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem('blockBattlesGameState', JSON.stringify(gameState))
-      localStorage.setItem('blockBattlesBattleLog', JSON.stringify(battleLog))
+      localStorage.setItem('blockWarsGameState', JSON.stringify(gameState))
+      localStorage.setItem('blockWarsBattleLog', JSON.stringify(battleLog))
     }
   }, [gameState, battleLog, isInitialized])
 
   const loadGameData = async () => {
     try {
-      // First try to load from localStorage
-      const savedState = localStorage.getItem('blockBattlesGameState')
-      const savedLog = localStorage.getItem('blockBattlesBattleLog')
+      // First try to load from localStorage (check both new and old keys for backward compatibility)
+      let savedState = localStorage.getItem('blockWarsGameState')
+      let savedLog = localStorage.getItem('blockWarsBattleLog')
+      
+      // If not found, check for legacy "Block Battles" keys
+      if (!savedState) {
+        savedState = localStorage.getItem('blockBattlesGameState')
+        savedLog = localStorage.getItem('blockBattlesBattleLog')
+        
+        // If found legacy data, migrate it to the new keys
+        if (savedState) {
+          localStorage.setItem('blockWarsGameState', savedState)
+          localStorage.removeItem('blockBattlesGameState')
+        }
+        if (savedLog) {
+          localStorage.setItem('blockWarsBattleLog', savedLog)
+          localStorage.removeItem('blockBattlesBattleLog')
+        }
+      }
       
       if (savedState) {
         const parsedState = JSON.parse(savedState)
@@ -253,8 +269,8 @@ export default function BlockBattlesPage() {
 
   const resetGame = () => {
     // Clear localStorage
-    localStorage.removeItem('blockBattlesGameState')
-    localStorage.removeItem('blockBattlesBattleLog')
+    localStorage.removeItem('blockWarsGameState')
+    localStorage.removeItem('blockWarsBattleLog')
     
     // Reset to default state
     setGameState({
@@ -272,7 +288,7 @@ export default function BlockBattlesPage() {
     })
     
     setSpawnedBlocks([])
-    setBattleLog([`🔄 Game reset! Welcome to Block Battles!`])
+    setBattleLog([`🔄 Game reset! Welcome to Block Wars!`])
     
     // Spawn some initial blocks
     setTimeout(() => {
@@ -505,7 +521,7 @@ export default function BlockBattlesPage() {
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                    Block Battles
+                    Block Wars
                   </CardTitle>
                   <p className="text-muted-foreground">Collect, Battle, and Dominate the Crypto Arena!</p>
                 </div>
@@ -679,7 +695,7 @@ export default function BlockBattlesPage() {
                   </p>
                 ))}
                 {battleLog.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Welcome to Block Battles! Start claiming blocks to see activity here.</p>
+                  <p className="text-sm text-muted-foreground">Welcome to Block Wars! Start claiming blocks to see activity here.</p>
                 )}
               </div>
             </ScrollArea>
