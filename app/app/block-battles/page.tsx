@@ -99,10 +99,28 @@ export default function BlockBattlesPage() {
   const [battleLog, setBattleLog] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [timeUntilSpawn, setTimeUntilSpawn] = useState(120)
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Initialize game state
+  // Initialize game state from localStorage or API
   useEffect(() => {
     loadGameData()
+  }, [])
+
+  // Spawn initial blocks when game starts
+  useEffect(() => {
+    if (isInitialized && spawnedBlocks.length === 0) {
+      // Small delay to let the UI settle, then spawn initial blocks
+      setTimeout(() => {
+        generateLocalBlocks()
+        setBattleLog(prev => [...prev, `🎮 Welcome to Block Battles! Some blocks are ready to claim!`])
+      }, 500)
+    }
+  }, [isInitialized])
+
+  // Timer for spawning new blocks
+  useEffect(() => {
+    if (!isInitialized) return
+
     const timer = setInterval(() => {
       const now = Date.now()
       const timeLeft = Math.max(0, Math.floor((gameState.nextSpawn - now) / 1000))
@@ -114,18 +132,75 @@ export default function BlockBattlesPage() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [gameState.nextSpawn])
+  }, [gameState.nextSpawn, isInitialized])
+
+  // Save game state to localStorage whenever it changes
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem('blockBattlesGameState', JSON.stringify(gameState))
+      localStorage.setItem('blockBattlesBattleLog', JSON.stringify(battleLog))
+    }
+  }, [gameState, battleLog, isInitialized])
 
   const loadGameData = async () => {
     try {
+      // First try to load from localStorage
+      const savedState = localStorage.getItem('blockBattlesGameState')
+      const savedLog = localStorage.getItem('blockBattlesBattleLog')
+      
+      if (savedState) {
+        const parsedState = JSON.parse(savedState)
+        setGameState(parsedState)
+        
+        if (savedLog) {
+          const parsedLog = JSON.parse(savedLog)
+          setBattleLog(parsedLog)
+        }
+        
+        setIsInitialized(true)
+        setBattleLog(prev => [...prev, `🎮 Welcome back! Your game state has been restored.`])
+        return
+      }
+
+      // If no local state, try API
       const response = await fetch('/api/game/state')
       if (response.ok) {
         const data = await response.json()
         setGameState(data)
       }
     } catch (error) {
-      console.log('Using local game state')
+      console.log('Using default game state')
+    } finally {
+      setIsInitialized(true)
     }
+  }
+
+  const resetGame = () => {
+    // Clear localStorage
+    localStorage.removeItem('blockBattlesGameState')
+    localStorage.removeItem('blockBattlesBattleLog')
+    
+    // Reset to default state
+    setGameState({
+      playerId: 'player_' + Math.random().toString(36).substr(2, 9),
+      coins: 1000,
+      points: 0,
+      level: 1,
+      experience: 0,
+      ownedBlocks: [],
+      defenseStrength: 100,
+      attackPower: 50,
+      lastSpawn: Date.now(),
+      nextSpawn: Date.now() + 120000
+    })
+    
+    setSpawnedBlocks([])
+    setBattleLog([`🔄 Game reset! Welcome to Block Battles!`])
+    
+    // Spawn some initial blocks
+    setTimeout(() => {
+      generateLocalBlocks()
+    }, 1000)
   }
 
   const spawnNewBlocks = useCallback(async () => {
@@ -200,32 +275,42 @@ export default function BlockBattlesPage() {
       
       if (response.ok) {
         const result = await response.json()
-        setGameState(prev => ({
-          ...prev,
-          ownedBlocks: [...prev.ownedBlocks, { ...block, owner: prev.playerId }],
-          coins: prev.coins + block.value,
-          points: prev.points + block.value * 2,
-          experience: prev.experience + 10
-        }))
-        
-        setSpawnedBlocks(prev => prev.filter(b => b.id !== blockId))
-        setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins!`])
+        updateGameStateAfterClaim(block)
       }
     } catch (error) {
       // Handle locally
-      setGameState(prev => ({
+      updateGameStateAfterClaim(block)
+    }
+    
+    setIsLoading(false)
+  }
+
+  const updateGameStateAfterClaim = (block: Block) => {
+    setGameState(prev => {
+      const experienceGained = block.rarity === 'legendary' ? 50 : block.rarity === 'epic' ? 30 : block.rarity === 'rare' ? 20 : 10
+      const newExperience = prev.experience + experienceGained
+      const experienceNeeded = prev.level * 100
+      const newLevel = Math.floor(newExperience / 100) + 1
+      const leveledUp = newLevel > prev.level
+      
+      if (leveledUp) {
+        setBattleLog(prevLog => [...prevLog, `🎉 LEVEL UP! You reached level ${newLevel}!`])
+      }
+
+      return {
         ...prev,
         ownedBlocks: [...prev.ownedBlocks, { ...block, owner: prev.playerId }],
         coins: prev.coins + block.value,
         points: prev.points + block.value * 2,
-        experience: prev.experience + 10
-      }))
-      
-      setSpawnedBlocks(prev => prev.filter(b => b.id !== blockId))
-      setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins!`])
-    }
+        experience: newExperience,
+        level: newLevel,
+        attackPower: prev.attackPower + (leveledUp ? 5 : 0),
+        defenseStrength: prev.defenseStrength + (leveledUp ? 10 : 0)
+      }
+    })
     
-    setIsLoading(false)
+    setSpawnedBlocks(prev => prev.filter(b => b.id !== block.id))
+    setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins! (+${block.rarity === 'legendary' ? 50 : block.rarity === 'epic' ? 30 : block.rarity === 'rare' ? 20 : 10} XP)`])
   }
 
   const stealBlock = async (targetBlock: Block) => {
@@ -309,6 +394,15 @@ export default function BlockBattlesPage() {
                     <span className="font-bold text-purple-500">{gameState.points.toLocaleString()}</span>
                   </div>
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={resetGame}
+                  className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
+                >
+                  Reset Game
+                </Button>
               </div>
             </div>
           </CardHeader>
