@@ -29,17 +29,8 @@ const BLOCK_PRICES = {
   secret: 500000    // $500,000
 }
 
-// Epic blocks that can be purchased - includes our legendary trader
+// Epic blocks that can be purchased
 const EPIC_BLOCKS = [
-  {
-    name: 'James Wynn The Legendary Trader',
-    type: 'legendary_trader',
-    color: '#FFD700',
-    emoji: '👑',
-    description: 'A legendary crypto trader with unprecedented market insight. His trades are the stuff of legends!',
-    traits: ['Market Genius', 'Legendary Status', 'Epic Gains'],
-    image: '/images/blocks/james-wynn-legendary-trader.jpg'
-  },
   {
     name: 'DeFi Protocol Master',
     type: 'defi_master', 
@@ -61,6 +52,15 @@ const EPIC_BLOCKS = [
 ]
 
 const LEGENDARY_BLOCKS = [
+  {
+    name: 'James Wynn The Legendary Trader',
+    type: 'legendary_trader',
+    color: '#FFD700',
+    emoji: '👑',
+    description: 'A legendary crypto trader with unprecedented market insight. His trades are the stuff of legends!',
+    traits: ['Market Genius', 'Legendary Status', 'Epic Gains'],
+    image: '/images/blocks/james-wynn-legendary-trader.jpg'
+  },
   {
     name: 'Satoshi Nakamoto Block',
     type: 'satoshi',
