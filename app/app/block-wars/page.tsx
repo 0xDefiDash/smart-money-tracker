@@ -65,11 +65,14 @@ interface Block {
   isStealable: boolean
   spawnTime: number
   traits: string[]
+  price?: number // New: Purchase price for premium blocks
+  isPurchasable?: boolean // New: Whether this block can be purchased
 }
 
 // Money production rates per minute based on rarity
+// IMPORTANT: Now only works if you have 12+ common blocks!
 const MONEY_PRODUCTION_RATES = {
-  common: 50,      // $50 per minute
+  common: 50,      // $50 per minute (only if 12+ common blocks)
   rare: 150,       // $150 per minute
   epic: 400,       // $400 per minute
   legendary: 1000, // $1000 per minute
@@ -101,7 +104,15 @@ const BLOCK_TYPES = [
 ]
 
 // Helper function to calculate total money per minute from owned blocks
+// NEW RULE: You need 12+ common blocks to start earning money!
 const calculateMoneyPerMinute = (ownedBlocks: Block[]): number => {
+  const commonBlockCount = ownedBlocks.filter(b => b.rarity === 'common').length
+  
+  // If player doesn't have 12+ common blocks, no money generation!
+  if (commonBlockCount < 12) {
+    return 0
+  }
+  
   return ownedBlocks.reduce((total, block) => {
     return total + MONEY_PRODUCTION_RATES[block.rarity]
   }, 0)
@@ -317,16 +328,30 @@ export default function BlockWarsPage() {
     }
   }
 
-  // Generate initial blocks if needed
+  // Fetch blocks from the new global API
   const fetchGlobalBlocks = async () => {
     try {
-      // Generate initial blocks if none exist and game is initialized
-      if (spawnedBlocks.length === 0) {
-        generateLocalBlocks(3)
-        setBattleLog(prev => [...prev, '🎁 Initial blocks have spawned in the global arena!'])
+      const response = await fetch('/api/game/global-blocks')
+      if (response.ok) {
+        const data = await response.json()
+        setSpawnedBlocks(data.blocks || [])
+        if (data.blocks?.length > 0) {
+          setBattleLog(prev => [...prev, `🎁 Loaded ${data.blocks.length} blocks from global arena! Mix of FREE common blocks and PREMIUM purchasable blocks!`])
+        }
+      } else {
+        // Fallback to local generation if API fails
+        if (spawnedBlocks.length === 0) {
+          generateLocalBlocks(3)
+          setBattleLog(prev => [...prev, '🎁 Initial blocks spawned locally!'])
+        }
       }
     } catch (error) {
-      console.error('Error in local block generation:', error)
+      console.error('Error fetching global blocks:', error)
+      // Fallback to local generation
+      if (spawnedBlocks.length === 0) {
+        generateLocalBlocks(3)
+        setBattleLog(prev => [...prev, '🎁 Initial blocks spawned locally (API error)!'])
+      }
     }
   }
 
@@ -456,6 +481,12 @@ export default function BlockWarsPage() {
       return
     }
 
+    // Check if this is a purchasable premium block
+    if (block.isPurchasable) {
+      setBattleLog(prev => [...prev, `❌ This is a premium block! Use the purchase button instead.`])
+      return
+    }
+
     // Check if user already has 12 blocks
     if (gameState.ownedBlocks.length >= 12) {
       setBattleLog(prev => [...prev, `❌ Collection full! You can only own 12 blocks. Sell some blocks to make space for new ones.`])
@@ -465,18 +496,98 @@ export default function BlockWarsPage() {
     setIsLoading(true)
     
     try {
-      // Simulate a small delay for realism
-      await new Promise(resolve => setTimeout(resolve, 200))
-      
       // Update game state with the claimed block
       updateGameStateAfterClaim(block)
       
       // Remove the block from spawned blocks
       setSpawnedBlocks(prev => prev.filter(b => b.id !== blockId))
       
-      setBattleLog(prev => [...prev, `🎯 Successfully claimed ${block.name}! +${block.value} coins, +${block.power} attack power!`])
+      setBattleLog(prev => [...prev, `🎯 Successfully claimed ${block.name} for FREE! +${block.value} coins, +${block.power} attack power!`])
+      
+      // Refresh blocks from API after claiming
+      setTimeout(() => {
+        fetchGlobalBlocks()
+      }, 1000)
     } catch (error) {
       setBattleLog(prev => [...prev, `❌ Error claiming block. Please try again!`])
+    }
+    
+    setIsLoading(false)
+  }
+
+  const purchaseBlock = async (blockId: string) => {
+    const block = spawnedBlocks.find(b => b.id === blockId)
+    if (!block) {
+      setBattleLog(prev => [...prev, `❌ Block not found!`])
+      return
+    }
+
+    if (!block.isPurchasable || !block.price) {
+      setBattleLog(prev => [...prev, `❌ This block is not for sale!`])
+      return
+    }
+
+    // Check if user already has 12 blocks
+    if (gameState.ownedBlocks.length >= 12) {
+      setBattleLog(prev => [...prev, `❌ Collection full! You can only own 12 blocks. Sell some blocks to make space for new ones.`])
+      return
+    }
+
+    // Check if user has enough common blocks (12+)
+    const commonBlockCount = gameState.ownedBlocks.filter(b => b.rarity === 'common').length
+    if (commonBlockCount < 12) {
+      setBattleLog(prev => [...prev, `❌ You need 12 common blocks to purchase premium blocks! You have ${commonBlockCount}/12 common blocks.`])
+      return
+    }
+
+    // Check if user has enough money
+    if (gameState.money < block.price!) {
+      setBattleLog(prev => [...prev, `❌ Not enough money! Need $${block.price!.toLocaleString()}, you have $${gameState.money.toLocaleString()}`])
+      return
+    }
+
+    setIsLoading(true)
+    
+    try {
+      const response = await fetch('/api/game/purchase-block', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          blockId,
+          playerId: gameState.playerId,
+          playerMoney: gameState.money,
+          ownedBlocks: gameState.ownedBlocks
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Update game state - add purchased block and subtract money
+        setGameState(prev => ({
+          ...prev,
+          ownedBlocks: [...prev.ownedBlocks, { ...result.purchasedBlock, owner: prev.playerId }],
+          money: prev.money - result.price,
+          coins: prev.coins + result.purchasedBlock.value, // Still get coins
+          experience: prev.experience + 25, // Bonus XP for purchasing
+          lastMoneyUpdate: Date.now()
+        }))
+        
+        // Remove the block from spawned blocks
+        setSpawnedBlocks(prev => prev.filter(b => b.id !== blockId))
+        
+        setBattleLog(prev => [...prev, `💳 ${result.message} +25 XP for smart investing!`])
+        
+        // Refresh blocks from API after purchase
+        setTimeout(() => {
+          fetchGlobalBlocks()
+        }, 1000)
+      } else {
+        const errorData = await response.json()
+        setBattleLog(prev => [...prev, `❌ Purchase failed: ${errorData.error}`])
+      }
+    } catch (error) {
+      setBattleLog(prev => [...prev, `❌ Network error during purchase. Please try again!`])
     }
     
     setIsLoading(false)
@@ -642,9 +753,9 @@ export default function BlockWarsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                    Block Wars
+                    Block Wars - Competitive Economy
                   </CardTitle>
-                  <p className="text-muted-foreground">Collect, Battle, and Dominate the Crypto Arena!</p>
+                  <p className="text-muted-foreground">🆓 Common blocks are FREE • 💳 Premium blocks cost money • 🎯 Need 12 common blocks to earn money!</p>
                 </div>
               </div>
               
@@ -668,6 +779,62 @@ export default function BlockWarsPage() {
                 >
                   Reset Game
                 </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* New Economy Status */}
+        <Card className="bg-gradient-to-r from-green-600/10 to-blue-600/10 border-green-500/20">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <Target className="w-5 h-5 text-green-500" />
+                  <span>Economy Status</span>
+                </CardTitle>
+              </div>
+              <div className="text-right">
+                {gameState.ownedBlocks.filter(b => b.rarity === 'common').length >= 12 ? (
+                  <div className="flex items-center space-x-2 text-green-500">
+                    <Crown className="w-4 h-4" />
+                    <span className="font-bold">EARNING MONEY!</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2 text-orange-500">
+                    <Timer className="w-4 h-4" />
+                    <span className="font-bold">COLLECTING COMMON BLOCKS</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-gray-500/10 border border-gray-500/20 rounded p-2 text-center">
+                <p className="text-muted-foreground">Common Blocks</p>
+                <p className="font-bold text-lg">
+                  {gameState.ownedBlocks.filter(b => b.rarity === 'common').length}
+                  <span className="text-sm text-muted-foreground">/12</span>
+                </p>
+                <p className="text-xs text-muted-foreground">Need 12 to earn money</p>
+              </div>
+              
+              <div className="bg-green-500/10 border border-green-500/20 rounded p-2 text-center">
+                <p className="text-muted-foreground">Money Earned</p>
+                <p className="font-bold text-lg text-green-500">${gameState.money.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">
+                  {calculateMoneyPerMinute(gameState.ownedBlocks) > 0 ? 
+                    `+$${calculateMoneyPerMinute(gameState.ownedBlocks)}/min` : 
+                    'Need 12 common blocks!'
+                  }
+                </p>
+              </div>
+              
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded p-2 text-center">
+                <p className="text-muted-foreground">Premium Access</p>
+                <p className="font-bold text-lg">
+                  {gameState.ownedBlocks.filter(b => b.rarity === 'common').length >= 12 ? '✅ UNLOCKED' : '🔒 LOCKED'}
+                </p>
+                <p className="text-xs text-muted-foreground">Can buy premium blocks</p>
               </div>
             </div>
           </CardHeader>
@@ -711,8 +878,11 @@ export default function BlockWarsPage() {
                   spawnedBlocks={spawnedBlocks}
                   timeUntilSpawn={timeUntilSpawn}
                   onClaimBlock={claimBlock}
+                  onPurchaseBlock={purchaseBlock}
                   isLoading={isLoading}
                   currentBlockCount={gameState.ownedBlocks.length}
+                  playerMoney={gameState.money}
+                  canPurchasePremium={gameState.ownedBlocks.filter(b => b.rarity === 'common').length >= 12}
                 />
               </TabsContent>
 

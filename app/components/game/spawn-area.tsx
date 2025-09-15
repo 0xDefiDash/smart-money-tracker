@@ -22,17 +22,31 @@ interface Block {
   isStealable: boolean
   spawnTime: number
   traits: string[]
+  price?: number // New: Purchase price for premium blocks
+  isPurchasable?: boolean // New: Whether this block can be purchased
 }
 
 interface SpawnAreaProps {
   spawnedBlocks: Block[]
   timeUntilSpawn: number
   onClaimBlock: (blockId: string) => void
+  onPurchaseBlock?: (blockId: string) => void // New: Purchase handler
   isLoading: boolean
   currentBlockCount: number
+  playerMoney?: number // New: Player's current money
+  canPurchasePremium?: boolean // New: Whether player can purchase premium blocks
 }
 
-export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoading, currentBlockCount }: SpawnAreaProps) {
+export function SpawnArea({ 
+  spawnedBlocks, 
+  timeUntilSpawn, 
+  onClaimBlock, 
+  onPurchaseBlock,
+  isLoading, 
+  currentBlockCount,
+  playerMoney = 0,
+  canPurchasePremium = false
+}: SpawnAreaProps) {
   const spawnProgress = ((120 - timeUntilSpawn) / 120) * 100
   const isAtLimit = currentBlockCount >= 12
 
@@ -55,7 +69,7 @@ export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoadi
           </div>
           <Progress value={spawnProgress} className="h-2" />
           <p className="text-xs text-muted-foreground text-center">
-            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning globally!' : '🌍 Global spawn: 2-3 blocks every 2 minutes (max 12 total) - All players compete!'}
+            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning globally!' : '🌍 Common blocks are FREE! Premium blocks require money earned from 12+ common blocks!'}
           </p>
         </CardContent>
       </Card>
@@ -69,7 +83,7 @@ export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoadi
             <Sparkles className="w-4 h-4 text-yellow-500" />
           </CardTitle>
           <div className="text-sm text-muted-foreground">
-            🏃‍♂️ All players compete for these blocks! First to claim wins!
+            🆓 Common blocks are FREE! 💳 Premium blocks cost money (need 12 common blocks first)
           </div>
         </CardHeader>
         <CardContent>
@@ -90,9 +104,12 @@ export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoadi
                   key={block.id}
                   block={block}
                   onClaim={isAtLimit ? undefined : onClaimBlock}
+                  onPurchase={onPurchaseBlock}
                   showActions={true}
                   isOwned={false}
                   isLoading={isLoading}
+                  playerMoney={playerMoney}
+                  canPurchasePremium={canPurchasePremium}
                 />
               ))}
             </div>

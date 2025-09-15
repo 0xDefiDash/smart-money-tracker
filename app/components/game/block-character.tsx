@@ -13,7 +13,10 @@ import {
   Zap,
   Coins,
   Timer,
-  TrendingUp
+  TrendingUp,
+  ShoppingCart,
+  Lock,
+  DollarSign
 } from 'lucide-react'
 
 // Money production rates per minute based on rarity
@@ -40,6 +43,8 @@ interface Block {
   isStealable: boolean
   spawnTime: number
   traits: string[]
+  price?: number // New: Purchase price for premium blocks
+  isPurchasable?: boolean // New: Whether this block can be purchased
 }
 
 interface BlockCharacterProps {
@@ -48,9 +53,12 @@ interface BlockCharacterProps {
   onSteal?: (block: Block) => void
   onDefend?: (blockId: string) => void
   onSell?: (blockId: string) => void
+  onPurchase?: (blockId: string) => void // New: Purchase handler
   showActions?: boolean
   isOwned?: boolean
   isLoading?: boolean
+  playerMoney?: number // New: Player's current money
+  canPurchasePremium?: boolean // New: Whether player can purchase premium blocks
 }
 
 const getRarityColor = (rarity: Block['rarity']) => {
@@ -87,14 +95,20 @@ export function BlockCharacter({
   onClaim, 
   onSteal, 
   onDefend,
-  onSell, 
+  onSell,
+  onPurchase,
   showActions = true,
   isOwned = false,
-  isLoading = false
+  isLoading = false,
+  playerMoney = 0,
+  canPurchasePremium = false
 }: BlockCharacterProps) {
   const timeAgo = Math.floor((Date.now() - block.spawnTime) / 1000 / 60)
   const moneyPerMinute = MONEY_PRODUCTION_RATES[block.rarity]
   const sellPrice = Math.floor(block.value * SELL_PRICE_MULTIPLIERS[block.rarity])
+  
+  // Check if player can afford this block
+  const canAfford = block.price ? playerMoney >= block.price : true
 
   return (
     <Card className={cn("relative overflow-hidden transition-all duration-300 hover:scale-105", getRarityColor(block.rarity))}>
@@ -107,6 +121,12 @@ export function BlockCharacter({
               <Badge variant="secondary" className="text-xs capitalize">
                 {block.rarity}
               </Badge>
+              {block.isPurchasable && (
+                <Badge className="text-xs bg-green-600 text-white flex items-center space-x-1">
+                  <ShoppingCart className="w-3 h-3" />
+                  <span>Premium</span>
+                </Badge>
+              )}
             </div>
             {timeAgo < 60 && (
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
@@ -150,6 +170,32 @@ export function BlockCharacter({
             </span>
           </div>
 
+          {/* Purchase Price for Premium Blocks */}
+          {block.isPurchasable && block.price && (
+            <div className={`border rounded p-2 ${canAfford ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+              <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center space-x-1">
+                  <ShoppingCart className="w-3 h-3" />
+                  <span>Price:</span>
+                </span>
+                <span className={`font-bold ${canAfford ? 'text-green-400' : 'text-red-400'}`}>
+                  ${block.price.toLocaleString()}
+                </span>
+              </div>
+              {!canAfford && (
+                <p className="text-xs text-red-300 mt-1">
+                  Need ${(block.price - playerMoney).toLocaleString()} more
+                </p>
+              )}
+              {!canPurchasePremium && (
+                <p className="text-xs text-orange-300 mt-1 flex items-center space-x-1">
+                  <Lock className="w-3 h-3" />
+                  <span>Need 12 common blocks first!</span>
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div className="text-center">
@@ -187,18 +233,34 @@ export function BlockCharacter({
           {/* Actions */}
           {showActions && (
             <div className="space-y-2">
-              {!isOwned && (
+              {/* Free Claim (Common blocks only) */}
+              {!isOwned && onClaim && !block.isPurchasable && (
                 <Button 
                   size="sm" 
-                  className="w-full" 
-                  onClick={onClaim ? () => onClaim(block.id) : undefined}
-                  disabled={isLoading || !onClaim}
+                  className="w-full bg-green-600 hover:bg-green-700" 
+                  onClick={() => onClaim(block.id)}
+                  disabled={isLoading}
                 >
-                  {onClaim ? 'Claim Block' : 'Collection Full'}
+                  {isLoading ? 'Claiming...' : '🆓 Claim Free'}
+                </Button>
+              )}
+
+              {/* Purchase Premium Blocks */}
+              {!isOwned && onPurchase && block.isPurchasable && (
+                <Button 
+                  size="sm" 
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50" 
+                  onClick={() => onPurchase(block.id)}
+                  disabled={isLoading || !canAfford || !canPurchasePremium}
+                >
+                  {isLoading ? 'Purchasing...' : 
+                   !canPurchasePremium ? '🔒 Need 12 Common Blocks' :
+                   !canAfford ? '💰 Not Enough Money' : 
+                   `💳 Buy for $${block.price?.toLocaleString()}`}
                 </Button>
               )}
               
-              {!isOwned && block.owner && onSteal && (
+              {!isOwned && block.owner && onSteal && block.isStealable && !block.isPurchasable && (
                 <Button 
                   size="sm" 
                   variant="destructive" 
@@ -206,7 +268,7 @@ export function BlockCharacter({
                   onClick={() => onSteal(block)}
                   disabled={isLoading}
                 >
-                  Steal ({Math.floor(block.value * 0.1)} coins)
+                  ⚔️ Steal ({Math.floor(block.value * 0.1)} coins)
                 </Button>
               )}
               
@@ -218,7 +280,7 @@ export function BlockCharacter({
                   onClick={() => onSell(block.id)}
                   disabled={isLoading}
                 >
-                  <Coins className="w-3 h-3 mr-1" />
+                  <DollarSign className="w-3 h-3 mr-1" />
                   Sell (${sellPrice})
                 </Button>
               )}
@@ -234,6 +296,14 @@ export function BlockCharacter({
                   <Shield className="w-3 h-3 mr-1" />
                   Defend
                 </Button>
+              )}
+
+              {/* Premium Block Protection Notice */}
+              {!isOwned && block.isPurchasable && !block.isStealable && (
+                <div className="text-xs text-center text-muted-foreground bg-blue-500/10 border border-blue-500/20 rounded p-2">
+                  <Shield className="w-3 h-3 inline mr-1" />
+                  Protected - Cannot be stolen
+                </div>
               )}
             </div>
           )}
