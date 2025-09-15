@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       success: true,
       soldBlock: blockToSell,
       sellPrice,
-      message: `Successfully sold ${blockToSell.name} for ${sellPrice} coins!`
+      message: `Successfully sold ${blockToSell.name} for $${sellPrice}!`
     })
     
   } catch (error) {

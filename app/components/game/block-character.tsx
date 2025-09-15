@@ -216,7 +216,7 @@ export function BlockCharacter({
                   disabled={isLoading}
                 >
                   <Coins className="w-3 h-3 mr-1" />
-                  Sell ({sellPrice} coins)
+                  Sell (${sellPrice})
                 </Button>
               )}
               

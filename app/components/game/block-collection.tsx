@@ -128,7 +128,7 @@ export function BlockCollection({ ownedBlocks, coins, onSellBlock, isLoading = f
             </div>
             <p className="text-xs text-muted-foreground">
               You can only own 12 blocks at once. Sell blocks below to free up space for new ones! 
-              Higher rarity blocks sell for more coins.
+              Higher rarity blocks sell for more money.
             </p>
           </div>
         </CardContent>

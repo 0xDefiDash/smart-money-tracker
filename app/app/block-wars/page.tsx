@@ -535,11 +535,11 @@ export default function BlockWarsPage() {
       if (response.ok) {
         const result = await response.json()
         
-        // Update game state - remove sold block and add coins
+        // Update game state - remove sold block and add money (not coins)
         setGameState(prev => ({
           ...prev,
           ownedBlocks: prev.ownedBlocks.filter(block => block.id !== blockId),
-          coins: prev.coins + result.sellPrice,
+          money: prev.money + result.sellPrice, // Add to money instead of coins
           experience: prev.experience + 5, // Small XP bonus for selling
           lastMoneyUpdate: Date.now() // Reset money timer since collection changed
         }))
