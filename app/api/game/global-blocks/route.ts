@@ -20,8 +20,17 @@ const BLOCK_TYPES = [
   { name: 'Bitcoin Block', type: 'btc', color: '#F7931A', emoji: '₿' },
   { name: 'Ethereum Block', type: 'eth', color: '#627EEA', emoji: 'Ξ' },
   { name: 'Solana Block', type: 'sol', color: '#9945FF', emoji: '◎' },
-  { name: 'Cardano Block', type: 'ada', color: '#0033AD', emoji: '₳' },
-  { name: 'Polygon Block', type: 'matic', color: '#8247E5', emoji: '⟐' }
+  { name: 'Cardano Block', type: 'ada', color: '#0033AD', emoji: '₳' }
+]
+
+const LEGENDARY_BLOCKS = [
+  { 
+    name: 'AIXBT AGENT', 
+    type: 'aixbt', 
+    color: '#8A2BE2', 
+    image: '/images/aixbt-agent.jpg',
+    description: 'The legendary AIXBT AGENT - AI-powered crypto intelligence and trading automation!'
+  }
 ]
 
 const SECRET_BLOCKS = [
@@ -67,7 +76,6 @@ function generateInitialBlocks() {
         traits: ['Secret Rarity', 'Legendary Power', 'Base Protocol', 'Crypto Visionary']
       })
     } else {
-      const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
       const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
       const rarityWeights = [50, 30, 15, 5] // Weighted probability
       
@@ -84,21 +92,45 @@ function generateInitialBlocks() {
       
       const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
       
-      newBlocks.push({
-        id: `global_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
-        name: blockType.name,
-        type: blockType.type,
-        rarity: selectedRarity,
-        value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
-        power: Math.floor(Math.random() * 100) + 20,
-        defense: Math.floor(Math.random() * 80) + 10,
-        image: blockType.emoji,
-        color: blockType.color,
-        description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
-        isStealable: true,
-        spawnTime: Date.now(),
-        traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
-      })
+      if (selectedRarity === 'legendary' && LEGENDARY_BLOCKS.length > 0) {
+        // Use AIXBT AGENT for legendary blocks
+        const legendaryBlock = LEGENDARY_BLOCKS[Math.floor(Math.random() * LEGENDARY_BLOCKS.length)]
+        
+        newBlocks.push({
+          id: `legendary_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+          name: legendaryBlock.name,
+          type: legendaryBlock.type,
+          rarity: 'legendary',
+          value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
+          power: Math.floor(Math.random() * 50) + 150, // Legendary blocks have higher power
+          defense: Math.floor(Math.random() * 50) + 120, // Legendary blocks have higher defense
+          image: legendaryBlock.image,
+          color: legendaryBlock.color,
+          description: legendaryBlock.description,
+          isStealable: true,
+          spawnTime: Date.now(),
+          traits: ['Legendary Rarity', 'AI Agent', 'Crypto Intelligence', 'Trading Bot']
+        })
+      } else {
+        // Use regular block types for common, rare, epic
+        const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
+        
+        newBlocks.push({
+          id: `global_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+          name: blockType.name,
+          type: blockType.type,
+          rarity: selectedRarity,
+          value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
+          power: Math.floor(Math.random() * 100) + 20,
+          defense: Math.floor(Math.random() * 80) + 10,
+          image: blockType.emoji,
+          color: blockType.color,
+          description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
+          isStealable: true,
+          spawnTime: Date.now(),
+          traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
+        })
+      }
     }
   }
   

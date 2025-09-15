@@ -122,7 +122,7 @@ export function BlockCharacter({
               className="w-16 h-16 mx-auto rounded-xl flex items-center justify-center text-3xl font-bold relative overflow-hidden"
               style={{ backgroundColor: `${block.color}20`, color: block.color }}
             >
-              {block.rarity === 'secret' && block.image.includes('.jpg') ? (
+              {(block.rarity === 'secret' || block.rarity === 'legendary') && block.image.includes('.jpg') ? (
                 <img 
                   src={block.image} 
                   alt={block.name}
@@ -133,6 +133,9 @@ export function BlockCharacter({
               )}
               {block.rarity === 'secret' && (
                 <div className="absolute -top-1 -right-1 text-xs animate-bounce">✨</div>
+              )}
+              {block.rarity === 'legendary' && (
+                <div className="absolute -top-1 -right-1 text-xs animate-pulse">👑</div>
               )}
             </div>
             <h3 className="font-bold text-sm mt-2">{block.name}</h3>
