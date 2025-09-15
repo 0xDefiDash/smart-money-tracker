@@ -1,4 +1,5 @@
 
+
 import { NextRequest, NextResponse } from 'next/server'
 
 interface Block {
@@ -109,10 +110,8 @@ let globalBlocks: Block[] = []
 
 export async function GET(request: NextRequest) {
   try {
-    // Generate initial blocks if none exist
-    if (globalBlocks.length === 0) {
-      generateInitialBlocks()
-    }
+    // Force regenerate blocks on each call to ensure fresh blocks with proper properties
+    generateInitialBlocks()
     
     return NextResponse.json({ 
       blocks: globalBlocks,
@@ -154,43 +153,41 @@ export async function POST(request: NextRequest) {
 function generateInitialBlocks() {
   const blocks: Block[] = []
   
-  // Generate 3-5 common blocks (free)
-  const commonBlockCount = Math.floor(Math.random() * 3) + 3
+  // Generate 2-3 common blocks (free) - reduced to make room for premium blocks
+  const commonBlockCount = Math.floor(Math.random() * 2) + 2
   for (let i = 0; i < commonBlockCount; i++) {
     const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
     blocks.push(createBlock('common', blockType, false))
   }
   
-  // Add 1-2 purchasable rare blocks
+  // Always add 1-2 purchasable rare blocks
   const rareBlockCount = Math.floor(Math.random() * 2) + 1
   for (let i = 0; i < rareBlockCount; i++) {
     const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
     blocks.push(createBlock('rare', blockType, true))
   }
   
-  // Add 1 purchasable epic block
+  // Always add 1 purchasable epic block
   const epicBlock = EPIC_BLOCKS[Math.floor(Math.random() * EPIC_BLOCKS.length)]
   blocks.push(createPremiumBlock('epic', epicBlock, true))
   
-  // Add 1 purchasable legendary block (rare chance)
-  if (Math.random() < 0.3) { // 30% chance
-    const legendaryBlock = LEGENDARY_BLOCKS[Math.floor(Math.random() * LEGENDARY_BLOCKS.length)]
-    blocks.push(createPremiumBlock('legendary', legendaryBlock, true))
-  }
+  // Always add 1 purchasable legendary block
+  const legendaryBlock = LEGENDARY_BLOCKS[Math.floor(Math.random() * LEGENDARY_BLOCKS.length)]
+  blocks.push(createPremiumBlock('legendary', legendaryBlock, true))
   
-  // Add 1 purchasable secret block (very rare chance)
-  if (Math.random() < 0.1) { // 10% chance
-    const secretBlock = SECRET_BLOCKS[0]
-    blocks.push(createPremiumBlock('secret', secretBlock, true))
-  }
+  // Always add 1 purchasable secret block for testing
+  const secretBlock = SECRET_BLOCKS[0]
+  blocks.push(createPremiumBlock('secret', secretBlock, true))
   
   globalBlocks = blocks
+  console.log(`Generated ${blocks.length} blocks:`, blocks.map(b => `${b.name} (${b.rarity}) - purchasable: ${b.isPurchasable}, price: ${b.price}`))
 }
 
 function createBlock(rarity: Block['rarity'], blockType: any, isPurchasable: boolean): Block {
   const baseValue = rarity === 'legendary' ? 500 : rarity === 'epic' ? 200 : rarity === 'rare' ? 100 : 50
+  const price = isPurchasable ? BLOCK_PRICES[rarity] : 0
   
-  return {
+  const block = {
     id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     name: blockType.name,
     type: blockType.type,
@@ -204,15 +201,18 @@ function createBlock(rarity: Block['rarity'], blockType: any, isPurchasable: boo
     isStealable: !isPurchasable,
     spawnTime: Date.now(),
     traits: [`${rarity} rarity`, `${blockType.type.toUpperCase()} power`],
-    price: isPurchasable ? BLOCK_PRICES[rarity] : undefined,
-    isPurchasable
+    price: price,
+    isPurchasable: isPurchasable
   }
+  
+  return block
 }
 
 function createPremiumBlock(rarity: Block['rarity'], premiumBlock: any, isPurchasable: boolean): Block {
   const baseValue = rarity === 'secret' ? 2000 : rarity === 'legendary' ? 1000 : rarity === 'epic' ? 500 : 200
+  const price = isPurchasable ? BLOCK_PRICES[rarity] : 0
   
-  return {
+  const block = {
     id: `premium_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     name: premiumBlock.name,
     type: premiumBlock.type,
@@ -226,9 +226,11 @@ function createPremiumBlock(rarity: Block['rarity'], premiumBlock: any, isPurcha
     isStealable: false, // Premium blocks cannot be stolen
     spawnTime: Date.now(),
     traits: premiumBlock.traits,
-    price: isPurchasable ? BLOCK_PRICES[rarity] : undefined,
-    isPurchasable
+    price: price,
+    isPurchasable: isPurchasable
   }
+  
+  return block
 }
 
 function handleBlockPurchase(playerId: string, blockId: string, playerMoney: number, ownedBlocks: Block[]) {

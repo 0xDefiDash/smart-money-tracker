@@ -379,6 +379,16 @@ export default function BlockWarsPage() {
       
       const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
       
+      // Set purchase properties based on rarity
+      const isPurchasable = selectedRarity !== 'common'
+      const blockPrices = {
+        common: 0,
+        rare: 5000,
+        epic: 25000,
+        legendary: 100000,
+        secret: 500000
+      }
+
       newBlocks.push({
         id: `local_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
         name: blockType.name,
@@ -390,9 +400,11 @@ export default function BlockWarsPage() {
         image: blockType.emoji,
         color: blockType.color,
         description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
-        isStealable: true,
+        isStealable: !isPurchasable, // Premium blocks can't be stolen
         spawnTime: Date.now(),
-        traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
+        traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`],
+        price: isPurchasable ? blockPrices[selectedRarity] : undefined,
+        isPurchasable
       })
     }
     
