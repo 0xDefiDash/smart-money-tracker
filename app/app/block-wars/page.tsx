@@ -625,7 +625,7 @@ export default function BlockWarsPage() {
           {/* Main Game Area */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="arena" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="arena" className="flex items-center space-x-2">
                   <Target className="w-4 h-4" />
                   <span>Arena</span>
@@ -641,10 +641,6 @@ export default function BlockWarsPage() {
                 <TabsTrigger value="leaderboard" className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
                   <span>Leaderboard</span>
-                </TabsTrigger>
-                <TabsTrigger value="admin" className="flex items-center space-x-2">
-                  <Star className="w-4 h-4" />
-                  <span>Admin</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -743,102 +739,7 @@ export default function BlockWarsPage() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="admin">
-                <div className="space-y-6">
-                  <Card className="bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border-purple-500/20">
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <Star className="w-5 h-5 text-purple-500" />
-                        <span>Admin Panel</span>
-                        {gameState.isAdmin && <Badge className="bg-green-500">Active</Badge>}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">Admin Mode</p>
-                          <p className="text-sm text-muted-foreground">Enable admin privileges to spawn Secret Blocks</p>
-                        </div>
-                        <Button 
-                          onClick={toggleAdminMode}
-                          variant={gameState.isAdmin ? "destructive" : "default"}
-                          size="sm"
-                        >
-                          {gameState.isAdmin ? "Disable" : "Enable"}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
-                          🚀
-                        </div>
-                        <span>Secret Block Controls</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium">Today's Spawns</p>
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="outline">{gameState.secretBlockSpawns}/2</Badge>
-                            <span className="text-sm text-muted-foreground">Daily Limit</span>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium">Next Natural Spawn</p>
-                          <div className="text-sm text-muted-foreground">
-                            {gameState.secretBlockSpawns >= 2 ? (
-                              "All spawns used today"
-                            ) : (
-                              Math.floor((gameState.nextSecretSpawn - Date.now()) / 1000 / 60 / 60) > 0 ? (
-                                `In ${Math.floor((gameState.nextSecretSpawn - Date.now()) / 1000 / 60 / 60)}h ${Math.floor(((gameState.nextSecretSpawn - Date.now()) / 1000 / 60) % 60)}m`
-                              ) : (
-                                "Soon"
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg p-4 border border-yellow-500/20">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <p className="font-medium">Secret Block Astronaut</p>
-                            <p className="text-sm text-muted-foreground">
-                              The ultimate block worth $5,000/minute!
-                            </p>
-                            <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                              <span>Value: 10,000 coins</span>
-                              <span>Power: 500</span>
-                              <span>Defense: 400</span>
-                            </div>
-                          </div>
-                          <Button 
-                            onClick={adminSpawnSecretBlock}
-                            disabled={!gameState.isAdmin || isLoading}
-                            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
-                          >
-                            🚀 Spawn Secret Block
-                          </Button>
-                        </div>
-                      </div>
-
-                      {!gameState.isAdmin && (
-                        <div className="text-center p-4 bg-muted/50 rounded-lg border border-muted">
-                          <p className="text-sm text-muted-foreground">
-                            Enable Admin Mode to access Secret Block spawning controls
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
             </Tabs>
           </div>
         </div>
