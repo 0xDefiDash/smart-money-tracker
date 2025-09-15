@@ -8,10 +8,8 @@ import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Activity,
-  BarChart3,
   Building2,
   Home,
-  Settings,
   TrendingUp,
   Wallet,
   Zap,
@@ -78,16 +76,6 @@ const sidebarItems = [
     title: 'Block Wars',
     href: '/block-wars',
     icon: Gamepad2,
-  },
-  {
-    title: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-  },
-  {
-    title: 'Settings',
-    href: '/settings',
-    icon: Settings,
   },
 ]
 

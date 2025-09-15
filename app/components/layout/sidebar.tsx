@@ -7,10 +7,8 @@ import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Activity,
-  BarChart3,
   Building2,
   Home,
-  Settings,
   TrendingUp,
   Wallet,
   Zap,
@@ -59,16 +57,6 @@ const sidebarItems = [
     title: 'Wallet Monitor',
     href: '/wallet-monitor',
     icon: Wallet,
-  },
-  {
-    title: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-  },
-  {
-    title: 'Settings',
-    href: '/settings',
-    icon: Settings,
   },
 ]
 
