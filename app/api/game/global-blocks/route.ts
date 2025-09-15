@@ -255,13 +255,7 @@ function handleBlockPurchase(playerId: string, blockId: string, playerMoney: num
     }, { status: 400 })
   }
   
-  // Check if player has 12 common blocks (requirement to earn money and buy premium blocks)
-  const commonBlockCount = ownedBlocks.filter(b => b.rarity === 'common').length
-  if (commonBlockCount < 12) {
-    return NextResponse.json({ 
-      error: `You need 12 common blocks to purchase premium blocks! You have ${commonBlockCount}/12 common blocks.` 
-    }, { status: 400 })
-  }
+  // No additional requirements - just need enough money to purchase
   
   // Remove the block from global pool
   globalBlocks = globalBlocks.filter(b => b.id !== blockId)

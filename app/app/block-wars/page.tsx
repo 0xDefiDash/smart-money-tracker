@@ -70,9 +70,8 @@ interface Block {
 }
 
 // Money production rates per minute based on rarity
-// IMPORTANT: Now only works if you have 12+ common blocks!
 const MONEY_PRODUCTION_RATES = {
-  common: 50,      // $50 per minute (only if 12+ common blocks)
+  common: 50,      // $50 per minute
   rare: 150,       // $150 per minute
   epic: 400,       // $400 per minute
   legendary: 1000, // $1000 per minute
@@ -104,15 +103,7 @@ const BLOCK_TYPES = [
 ]
 
 // Helper function to calculate total money per minute from owned blocks
-// NEW RULE: You need 12+ common blocks to start earning money!
 const calculateMoneyPerMinute = (ownedBlocks: Block[]): number => {
-  const commonBlockCount = ownedBlocks.filter(b => b.rarity === 'common').length
-  
-  // If player doesn't have 12+ common blocks, no money generation!
-  if (commonBlockCount < 12) {
-    return 0
-  }
-  
   return ownedBlocks.reduce((total, block) => {
     return total + MONEY_PRODUCTION_RATES[block.rarity]
   }, 0)
@@ -545,12 +536,7 @@ export default function BlockWarsPage() {
       return
     }
 
-    // Check if user has enough common blocks (12+)
-    const commonBlockCount = gameState.ownedBlocks.filter(b => b.rarity === 'common').length
-    if (commonBlockCount < 12) {
-      setBattleLog(prev => [...prev, `❌ You need 12 common blocks to purchase premium blocks! You have ${commonBlockCount}/12 common blocks.`])
-      return
-    }
+    // No common block requirement for purchasing - just need money
 
     // Check if user has enough money
     if (gameState.money < block.price!) {
@@ -767,7 +753,7 @@ export default function BlockWarsPage() {
                   <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                     Block Wars - Competitive Economy
                   </CardTitle>
-                  <p className="text-muted-foreground">🆓 Common blocks are FREE • 💳 Premium blocks cost money • 🎯 Need 12 common blocks to earn money!</p>
+                  <p className="text-muted-foreground">🆓 Common blocks are FREE • 💳 Premium blocks cost money • 💰 All blocks earn money passively!</p>
                 </div>
               </div>
               
@@ -807,7 +793,7 @@ export default function BlockWarsPage() {
                 </CardTitle>
               </div>
               <div className="text-right">
-                {gameState.ownedBlocks.filter(b => b.rarity === 'common').length >= 12 ? (
+                {gameState.ownedBlocks.length > 0 ? (
                   <div className="flex items-center space-x-2 text-green-500">
                     <Crown className="w-4 h-4" />
                     <span className="font-bold">EARNING MONEY!</span>
@@ -815,19 +801,19 @@ export default function BlockWarsPage() {
                 ) : (
                   <div className="flex items-center space-x-2 text-orange-500">
                     <Timer className="w-4 h-4" />
-                    <span className="font-bold">COLLECTING COMMON BLOCKS</span>
+                    <span className="font-bold">COLLECT BLOCKS TO START</span>
                   </div>
                 )}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="bg-gray-500/10 border border-gray-500/20 rounded p-2 text-center">
-                <p className="text-muted-foreground">Common Blocks</p>
+                <p className="text-muted-foreground">Total Blocks</p>
                 <p className="font-bold text-lg">
-                  {gameState.ownedBlocks.filter(b => b.rarity === 'common').length}
+                  {gameState.ownedBlocks.length}
                   <span className="text-sm text-muted-foreground">/12</span>
                 </p>
-                <p className="text-xs text-muted-foreground">Need 12 to earn money</p>
+                <p className="text-xs text-muted-foreground">Collection size limit</p>
               </div>
               
               <div className="bg-green-500/10 border border-green-500/20 rounded p-2 text-center">
@@ -836,17 +822,15 @@ export default function BlockWarsPage() {
                 <p className="text-xs text-muted-foreground">
                   {calculateMoneyPerMinute(gameState.ownedBlocks) > 0 ? 
                     `+$${calculateMoneyPerMinute(gameState.ownedBlocks)}/min` : 
-                    'Need 12 common blocks!'
+                    'Collect blocks to start earning!'
                   }
                 </p>
               </div>
               
               <div className="bg-blue-500/10 border border-blue-500/20 rounded p-2 text-center">
                 <p className="text-muted-foreground">Premium Access</p>
-                <p className="font-bold text-lg">
-                  {gameState.ownedBlocks.filter(b => b.rarity === 'common').length >= 12 ? '✅ UNLOCKED' : '🔒 LOCKED'}
-                </p>
-                <p className="text-xs text-muted-foreground">Can buy premium blocks</p>
+                <p className="font-bold text-lg">✅ ALWAYS UNLOCKED</p>
+                <p className="text-xs text-muted-foreground">Buy premium blocks with money</p>
               </div>
             </div>
           </CardHeader>
@@ -894,7 +878,6 @@ export default function BlockWarsPage() {
                   isLoading={isLoading}
                   currentBlockCount={gameState.ownedBlocks.length}
                   playerMoney={gameState.money}
-                  canPurchasePremium={gameState.ownedBlocks.filter(b => b.rarity === 'common').length >= 12}
                 />
               </TabsContent>
 

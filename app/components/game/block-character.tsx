@@ -58,7 +58,6 @@ interface BlockCharacterProps {
   isOwned?: boolean
   isLoading?: boolean
   playerMoney?: number // New: Player's current money
-  canPurchasePremium?: boolean // New: Whether player can purchase premium blocks
 }
 
 const getRarityColor = (rarity: Block['rarity']) => {
@@ -100,8 +99,7 @@ export function BlockCharacter({
   showActions = true,
   isOwned = false,
   isLoading = false,
-  playerMoney = 0,
-  canPurchasePremium = false
+  playerMoney = 0
 }: BlockCharacterProps) {
   const timeAgo = Math.floor((Date.now() - block.spawnTime) / 1000 / 60)
   const moneyPerMinute = MONEY_PRODUCTION_RATES[block.rarity]
@@ -187,12 +185,7 @@ export function BlockCharacter({
                   Need ${(block.price - playerMoney).toLocaleString()} more
                 </p>
               )}
-              {!canPurchasePremium && (
-                <p className="text-xs text-orange-300 mt-1 flex items-center space-x-1">
-                  <Lock className="w-3 h-3" />
-                  <span>Need 12 common blocks first!</span>
-                </p>
-              )}
+
             </div>
           )}
 
@@ -251,10 +244,9 @@ export function BlockCharacter({
                   size="sm" 
                   className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50" 
                   onClick={() => onPurchase(block.id)}
-                  disabled={isLoading || !canAfford || !canPurchasePremium}
+                  disabled={isLoading || !canAfford}
                 >
                   {isLoading ? 'Purchasing...' : 
-                   !canPurchasePremium ? '🔒 Need 12 Common Blocks' :
                    !canAfford ? '💰 Not Enough Money' : 
                    `💳 Buy for $${block.price?.toLocaleString()}`}
                 </Button>

@@ -34,7 +34,6 @@ interface SpawnAreaProps {
   isLoading: boolean
   currentBlockCount: number
   playerMoney?: number // New: Player's current money
-  canPurchasePremium?: boolean // New: Whether player can purchase premium blocks
 }
 
 export function SpawnArea({ 
@@ -44,8 +43,7 @@ export function SpawnArea({
   onPurchaseBlock,
   isLoading, 
   currentBlockCount,
-  playerMoney = 0,
-  canPurchasePremium = false
+  playerMoney = 0
 }: SpawnAreaProps) {
   const spawnProgress = ((120 - timeUntilSpawn) / 120) * 100
   const isAtLimit = currentBlockCount >= 12
@@ -69,7 +67,7 @@ export function SpawnArea({
           </div>
           <Progress value={spawnProgress} className="h-2" />
           <p className="text-xs text-muted-foreground text-center">
-            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning globally!' : '🌍 Common blocks are FREE! Premium blocks require money earned from 12+ common blocks!'}
+            {timeUntilSpawn === 0 ? '🎁 New blocks are spawning globally!' : '🌍 Common blocks are FREE! Premium blocks require money!'}
           </p>
         </CardContent>
       </Card>
@@ -83,7 +81,7 @@ export function SpawnArea({
             <Sparkles className="w-4 h-4 text-yellow-500" />
           </CardTitle>
           <div className="text-sm text-muted-foreground">
-            🆓 Common blocks are FREE! 💳 Premium blocks cost money (need 12 common blocks first)
+            🆓 Common blocks are FREE! 💳 Premium blocks cost money
           </div>
         </CardHeader>
         <CardContent>
@@ -109,7 +107,6 @@ export function SpawnArea({
                   isOwned={false}
                   isLoading={isLoading}
                   playerMoney={playerMoney}
-                  canPurchasePremium={canPurchasePremium}
                 />
               ))}
             </div>
