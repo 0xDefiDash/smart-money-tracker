@@ -513,27 +513,37 @@ export default function BlockWarsPage() {
   }
 
   const sellBlock = async (blockId: string) => {
+    console.log('Attempting to sell block:', blockId)
+    
     const blockToSell = gameState.ownedBlocks.find(b => b.id === blockId)
     if (!blockToSell) {
       setBattleLog(prev => [...prev, `❌ Block not found in your collection!`])
       return
     }
 
+    console.log('Block found:', blockToSell.name, 'Value:', blockToSell.value)
     setIsLoading(true)
     
     try {
+      const requestData = { 
+        blockId,
+        playerId: gameState.playerId,
+        ownedBlocks: gameState.ownedBlocks
+      }
+      
+      console.log('Sending sell request:', requestData)
+      
       const response = await fetch('/api/game/sell-block', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          blockId,
-          playerId: gameState.playerId,
-          ownedBlocks: gameState.ownedBlocks
-        })
+        body: JSON.stringify(requestData)
       })
 
+      console.log('Response status:', response.status)
+      
       if (response.ok) {
         const result = await response.json()
+        console.log('Sell result:', result)
         
         // Update game state - remove sold block and add money (not coins)
         setGameState(prev => ({
@@ -546,10 +556,12 @@ export default function BlockWarsPage() {
         
         setBattleLog(prev => [...prev, `💰 ${result.message} +5 XP for trade experience!`])
       } else {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Sell error:', errorData)
         setBattleLog(prev => [...prev, `❌ Failed to sell block: ${errorData.error}`])
       }
     } catch (error) {
+      console.error('Network error selling block:', error)
       setBattleLog(prev => [...prev, `❌ Network error while selling block. Please try again!`])
     }
     

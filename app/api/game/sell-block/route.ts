@@ -29,10 +29,21 @@ const SELL_PRICE_MULTIPLIERS = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { blockId, playerId, ownedBlocks } = await request.json()
+    const body = await request.json()
+    const { blockId, playerId, ownedBlocks } = body
     
-    if (!blockId || !playerId || !Array.isArray(ownedBlocks)) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    console.log('Sell request received:', { blockId, playerId, blocksCount: ownedBlocks?.length })
+    
+    if (!blockId) {
+      return NextResponse.json({ error: 'Block ID is required' }, { status: 400 })
+    }
+    
+    if (!playerId) {
+      return NextResponse.json({ error: 'Player ID is required' }, { status: 400 })
+    }
+    
+    if (!Array.isArray(ownedBlocks)) {
+      return NextResponse.json({ error: 'Owned blocks must be an array' }, { status: 400 })
     }
     
     // Find the block to sell
@@ -43,8 +54,10 @@ export async function POST(request: NextRequest) {
     }
     
     // Calculate sell price
-    const sellMultiplier = SELL_PRICE_MULTIPLIERS[blockToSell.rarity as keyof typeof SELL_PRICE_MULTIPLIERS]
+    const sellMultiplier = SELL_PRICE_MULTIPLIERS[blockToSell.rarity as keyof typeof SELL_PRICE_MULTIPLIERS] || 0.6
     const sellPrice = Math.floor(blockToSell.value * sellMultiplier)
+    
+    console.log(`Selling ${blockToSell.name} for $${sellPrice}`)
     
     // In a real application, this would update the database
     // For now, we'll return the data for the client to handle
@@ -57,6 +70,9 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('Error selling block:', error)
-    return NextResponse.json({ error: 'Failed to sell block' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to sell block', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 })
   }
 }
