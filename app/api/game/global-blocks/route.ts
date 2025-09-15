@@ -24,6 +24,16 @@ const BLOCK_TYPES = [
   { name: 'Polygon Block', type: 'matic', color: '#8247E5', emoji: '⟐' }
 ]
 
+const SECRET_BLOCKS = [
+  { 
+    name: 'Jesse Pollak', 
+    type: 'jesse', 
+    color: '#FFD700', 
+    image: '/images/jesse-pollak.jpg',
+    description: 'The legendary Jesse Pollak - Base Protocol architect and crypto visionary!'
+  }
+]
+
 // Global shared state for all users - in production, this would be in a database
 let globalBlocks: Block[] = []
 let lastSpawnTime = Date.now()
@@ -35,38 +45,61 @@ function generateInitialBlocks() {
   const newBlocks: Block[] = []
   
   for (let i = 0; i < numBlocks; i++) {
-    const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
-    const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
-    const rarityWeights = [50, 30, 15, 5] // Weighted probability
+    // Check if we should spawn a secret block (very rare: 1% chance)
+    const isSecretBlock = Math.random() < 0.01
     
-    let randomValue = Math.random() * 100
-    let selectedRarity: Block['rarity'] = 'common'
-    
-    for (let j = 0; j < rarities.length; j++) {
-      if (randomValue < rarityWeights[j]) {
-        selectedRarity = rarities[j]
-        break
+    if (isSecretBlock && SECRET_BLOCKS.length > 0) {
+      const secretBlock = SECRET_BLOCKS[Math.floor(Math.random() * SECRET_BLOCKS.length)]
+      
+      newBlocks.push({
+        id: `secret_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+        name: secretBlock.name,
+        type: secretBlock.type,
+        rarity: 'secret',
+        value: 10000, // Secret blocks are extremely valuable
+        power: 999, // Maximum power
+        defense: 999, // Maximum defense
+        image: secretBlock.image,
+        color: secretBlock.color,
+        description: secretBlock.description,
+        isStealable: true,
+        spawnTime: Date.now(),
+        traits: ['Secret Rarity', 'Legendary Power', 'Base Protocol', 'Crypto Visionary']
+      })
+    } else {
+      const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
+      const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
+      const rarityWeights = [50, 30, 15, 5] // Weighted probability
+      
+      let randomValue = Math.random() * 100
+      let selectedRarity: Block['rarity'] = 'common'
+      
+      for (let j = 0; j < rarities.length; j++) {
+        if (randomValue < rarityWeights[j]) {
+          selectedRarity = rarities[j]
+          break
+        }
+        randomValue -= rarityWeights[j]
       }
-      randomValue -= rarityWeights[j]
+      
+      const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
+      
+      newBlocks.push({
+        id: `global_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+        name: blockType.name,
+        type: blockType.type,
+        rarity: selectedRarity,
+        value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
+        power: Math.floor(Math.random() * 100) + 20,
+        defense: Math.floor(Math.random() * 80) + 10,
+        image: blockType.emoji,
+        color: blockType.color,
+        description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
+        isStealable: true,
+        spawnTime: Date.now(),
+        traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
+      })
     }
-    
-    const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
-    
-    newBlocks.push({
-      id: `global_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
-      name: blockType.name,
-      type: blockType.type,
-      rarity: selectedRarity,
-      value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
-      power: Math.floor(Math.random() * 100) + 20,
-      defense: Math.floor(Math.random() * 80) + 10,
-      image: blockType.emoji,
-      color: blockType.color,
-      description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
-      isStealable: true,
-      spawnTime: Date.now(),
-      traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
-    })
   }
   
   globalBlocks = newBlocks
