@@ -23,6 +23,16 @@ const BLOCK_TYPES = [
   { name: 'Cardano Block', type: 'ada', color: '#0033AD', emoji: '₳' }
 ]
 
+const EPIC_BLOCKS = [
+  { 
+    name: 'Bullrun_Gravano', 
+    type: 'gravano', 
+    color: '#FF6B35', 
+    image: '/images/bullrun-gravano.jpg',
+    description: 'Bullrun_Gravano - The ALPHA DOGS crypto influencer on X with unmatched market insights!'
+  }
+]
+
 const LEGENDARY_BLOCKS = [
   { 
     name: 'AIXBT AGENT', 
@@ -111,8 +121,27 @@ function generateInitialBlocks() {
           spawnTime: Date.now(),
           traits: ['Legendary Rarity', 'AI Agent', 'Crypto Intelligence', 'Trading Bot']
         })
+      } else if (selectedRarity === 'epic' && EPIC_BLOCKS.length > 0) {
+        // Use Bullrun_Gravano for epic blocks
+        const epicBlock = EPIC_BLOCKS[Math.floor(Math.random() * EPIC_BLOCKS.length)]
+        
+        newBlocks.push({
+          id: `epic_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+          name: epicBlock.name,
+          type: epicBlock.type,
+          rarity: 'epic',
+          value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
+          power: Math.floor(Math.random() * 40) + 100, // Epic blocks have high power
+          defense: Math.floor(Math.random() * 40) + 80, // Epic blocks have high defense
+          image: epicBlock.image,
+          color: epicBlock.color,
+          description: epicBlock.description,
+          isStealable: true,
+          spawnTime: Date.now(),
+          traits: ['Epic Rarity', 'Alpha Dogs', 'Crypto Influencer', 'Market Analysis']
+        })
       } else {
-        // Use regular block types for common, rare, epic
+        // Use regular block types for common and rare
         const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
         
         newBlocks.push({
