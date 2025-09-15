@@ -25,11 +25,11 @@ const BLOCK_TYPES = [
 
 const EPIC_BLOCKS = [
   { 
-    name: 'Bullrun_Gravano', 
-    type: 'gravano', 
-    color: '#FF6B35', 
-    image: '/images/bullrun-gravano.jpg',
-    description: 'Bullrun_Gravano - The ALPHA DOGS crypto influencer on X with unmatched market insights!'
+    name: 'James Wynn The Legendary trader', 
+    type: 'james-wynn', 
+    color: '#DAA520', 
+    image: '/images/james-wynn.jpg',
+    description: 'James Wynn The Legendary trader - Master of crypto markets with legendary trading prowess!'
   }
 ]
 
@@ -138,7 +138,7 @@ function generateInitialBlocks() {
           description: epicBlock.description,
           isStealable: true,
           spawnTime: Date.now(),
-          traits: ['Epic Rarity', 'Alpha Dogs', 'Crypto Influencer', 'Market Analysis']
+          traits: ['Epic Rarity', 'Legendary Trader', 'Market Master', 'Trading Expertise']
         })
       } else {
         // Use regular block types for common and rare
