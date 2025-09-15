@@ -114,8 +114,17 @@ export function GameStats({ gameState }: GameStatsProps) {
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm">Owned Blocks</span>
-            <span className="font-bold">{gameState.ownedBlocks.length}</span>
+            <span className="font-bold">
+              {gameState.ownedBlocks.length}
+              <span className="text-xs text-muted-foreground">/12</span>
+            </span>
           </div>
+          
+          {gameState.ownedBlocks.length >= 12 && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded p-2">
+              <p className="text-xs text-red-400">Collection full! Sell blocks to make space.</p>
+            </div>
+          )}
           
           <div className="flex items-center justify-between">
             <span className="text-sm">Total Value</span>
@@ -231,10 +240,12 @@ export function GameStats({ gameState }: GameStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-xs text-muted-foreground">
+            <p>• You can only own 12 blocks at once!</p>
+            <p>• Sell blocks to free up space for new ones</p>
             <p>• Blocks earn money automatically based on rarity</p>
             <p>• Legendary blocks earn $1,000/min!</p>
             <p>• New blocks spawn every 2 minutes</p>
-            <p>• Higher rarity = more value & passive income</p>
+            <p>• Higher rarity = higher sell price (60-80%)</p>
             <p>• Money accumulates even when offline!</p>
             <p>• Steal attempts cost 10% of block value</p>
           </div>

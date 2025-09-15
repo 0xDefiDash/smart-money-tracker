@@ -29,10 +29,12 @@ interface SpawnAreaProps {
   timeUntilSpawn: number
   onClaimBlock: (blockId: string) => void
   isLoading: boolean
+  currentBlockCount: number
 }
 
-export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoading }: SpawnAreaProps) {
+export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoading, currentBlockCount }: SpawnAreaProps) {
   const spawnProgress = ((120 - timeUntilSpawn) / 120) * 100
+  const isAtLimit = currentBlockCount >= 12
 
   return (
     <div className="space-y-6">
@@ -71,13 +73,23 @@ export function SpawnArea({ spawnedBlocks, timeUntilSpawn, onClaimBlock, isLoadi
           </div>
         </CardHeader>
         <CardContent>
+          {/* Block Limit Warning */}
+          {isAtLimit && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4">
+              <h4 className="font-semibold text-sm text-red-400 mb-1">Collection Full! ({currentBlockCount}/12)</h4>
+              <p className="text-xs text-red-300">
+                You've reached the maximum of 12 blocks. Sell some blocks in your Collection to make space for new ones!
+              </p>
+            </div>
+          )}
+          
           {spawnedBlocks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {spawnedBlocks.map((block) => (
                 <BlockCharacter
                   key={block.id}
                   block={block}
-                  onClaim={onClaimBlock}
+                  onClaim={isAtLimit ? undefined : onClaimBlock}
                   showActions={true}
                   isOwned={false}
                   isLoading={isLoading}

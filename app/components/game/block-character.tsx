@@ -47,6 +47,7 @@ interface BlockCharacterProps {
   onClaim?: (blockId: string) => void
   onSteal?: (block: Block) => void
   onDefend?: (blockId: string) => void
+  onSell?: (blockId: string) => void
   showActions?: boolean
   isOwned?: boolean
   isLoading?: boolean
@@ -72,17 +73,28 @@ const getRarityIcon = (rarity: Block['rarity']) => {
   }
 }
 
+// Selling price multipliers based on rarity
+const SELL_PRICE_MULTIPLIERS = {
+  common: 0.6,      // 60% of original value
+  rare: 0.65,       // 65% of original value  
+  epic: 0.7,        // 70% of original value
+  legendary: 0.75,  // 75% of original value
+  secret: 0.8       // 80% of original value
+}
+
 export function BlockCharacter({ 
   block, 
   onClaim, 
   onSteal, 
-  onDefend, 
+  onDefend,
+  onSell, 
   showActions = true,
   isOwned = false,
   isLoading = false
 }: BlockCharacterProps) {
   const timeAgo = Math.floor((Date.now() - block.spawnTime) / 1000 / 60)
   const moneyPerMinute = MONEY_PRODUCTION_RATES[block.rarity]
+  const sellPrice = Math.floor(block.value * SELL_PRICE_MULTIPLIERS[block.rarity])
 
   return (
     <Card className={cn("relative overflow-hidden transition-all duration-300 hover:scale-105", getRarityColor(block.rarity))}>
@@ -172,14 +184,14 @@ export function BlockCharacter({
           {/* Actions */}
           {showActions && (
             <div className="space-y-2">
-              {!isOwned && onClaim && (
+              {!isOwned && (
                 <Button 
                   size="sm" 
                   className="w-full" 
-                  onClick={() => onClaim(block.id)}
-                  disabled={isLoading}
+                  onClick={onClaim ? () => onClaim(block.id) : undefined}
+                  disabled={isLoading || !onClaim}
                 >
-                  Claim Block
+                  {onClaim ? 'Claim Block' : 'Collection Full'}
                 </Button>
               )}
               
@@ -192,6 +204,19 @@ export function BlockCharacter({
                   disabled={isLoading}
                 >
                   Steal ({Math.floor(block.value * 0.1)} coins)
+                </Button>
+              )}
+              
+              {isOwned && onSell && (
+                <Button 
+                  size="sm" 
+                  variant="secondary" 
+                  className="w-full" 
+                  onClick={() => onSell(block.id)}
+                  disabled={isLoading}
+                >
+                  <Coins className="w-3 h-3 mr-1" />
+                  Sell ({sellPrice} coins)
                 </Button>
               )}
               

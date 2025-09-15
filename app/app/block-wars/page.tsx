@@ -456,6 +456,12 @@ export default function BlockWarsPage() {
       return
     }
 
+    // Check if user already has 12 blocks
+    if (gameState.ownedBlocks.length >= 12) {
+      setBattleLog(prev => [...prev, `❌ Collection full! You can only own 12 blocks. Sell some blocks to make space for new ones.`])
+      return
+    }
+
     setIsLoading(true)
     
     try {
@@ -504,6 +510,50 @@ export default function BlockWarsPage() {
     setSpawnedBlocks(prev => prev.filter(b => b.id !== block.id))
     const moneyPerMinute = MONEY_PRODUCTION_RATES[block.rarity]
     setBattleLog(prev => [...prev, `✅ Successfully claimed ${block.name} for ${block.value} coins! This ${block.rarity} block will earn $${moneyPerMinute}/minute! (+${block.rarity === 'legendary' ? 50 : block.rarity === 'epic' ? 30 : block.rarity === 'rare' ? 20 : 10} XP)`])
+  }
+
+  const sellBlock = async (blockId: string) => {
+    const blockToSell = gameState.ownedBlocks.find(b => b.id === blockId)
+    if (!blockToSell) {
+      setBattleLog(prev => [...prev, `❌ Block not found in your collection!`])
+      return
+    }
+
+    setIsLoading(true)
+    
+    try {
+      const response = await fetch('/api/game/sell-block', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          blockId,
+          playerId: gameState.playerId,
+          ownedBlocks: gameState.ownedBlocks
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Update game state - remove sold block and add coins
+        setGameState(prev => ({
+          ...prev,
+          ownedBlocks: prev.ownedBlocks.filter(block => block.id !== blockId),
+          coins: prev.coins + result.sellPrice,
+          experience: prev.experience + 5, // Small XP bonus for selling
+          lastMoneyUpdate: Date.now() // Reset money timer since collection changed
+        }))
+        
+        setBattleLog(prev => [...prev, `💰 ${result.message} +5 XP for trade experience!`])
+      } else {
+        const errorData = await response.json()
+        setBattleLog(prev => [...prev, `❌ Failed to sell block: ${errorData.error}`])
+      }
+    } catch (error) {
+      setBattleLog(prev => [...prev, `❌ Network error while selling block. Please try again!`])
+    }
+    
+    setIsLoading(false)
   }
 
   const stealBlock = async (targetBlock: Block) => {
@@ -650,6 +700,7 @@ export default function BlockWarsPage() {
                   timeUntilSpawn={timeUntilSpawn}
                   onClaimBlock={claimBlock}
                   isLoading={isLoading}
+                  currentBlockCount={gameState.ownedBlocks.length}
                 />
               </TabsContent>
 
@@ -657,6 +708,8 @@ export default function BlockWarsPage() {
                 <BlockCollection 
                   ownedBlocks={gameState.ownedBlocks}
                   coins={gameState.coins}
+                  onSellBlock={sellBlock}
+                  isLoading={isLoading}
                 />
               </TabsContent>
 

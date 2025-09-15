@@ -27,9 +27,11 @@ interface Block {
 interface BlockCollectionProps {
   ownedBlocks: Block[]
   coins: number
+  onSellBlock?: (blockId: string) => void
+  isLoading?: boolean
 }
 
-export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
+export function BlockCollection({ ownedBlocks, coins, onSellBlock, isLoading = false }: BlockCollectionProps) {
   const totalValue = ownedBlocks.reduce((sum, block) => sum + block.value, 0)
   const rarityStats = {
     common: ownedBlocks.filter(b => b.rarity === 'common').length,
@@ -51,8 +53,14 @@ export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
         <Card>
           <CardContent className="p-4 text-center">
             <Package className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-            <p className="text-2xl font-bold">{ownedBlocks.length}</p>
-            <p className="text-sm text-muted-foreground">Total Blocks</p>
+            <p className="text-2xl font-bold">
+              {ownedBlocks.length}
+              <span className="text-sm text-muted-foreground">/12</span>
+            </p>
+            <p className="text-sm text-muted-foreground">Blocks Owned</p>
+            {ownedBlocks.length >= 12 && (
+              <p className="text-xs text-red-400 mt-1">Collection Full!</p>
+            )}
           </CardContent>
         </Card>
         
@@ -86,7 +94,7 @@ export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
         <CardHeader>
           <CardTitle>Collection Breakdown</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="text-center">
               <Badge className="mb-2 bg-gradient-to-r from-yellow-500 to-orange-500 animate-pulse">🚀 Secret</Badge>
@@ -109,6 +117,20 @@ export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
               <p className="text-2xl font-bold">{rarityStats.common}</p>
             </div>
           </div>
+          
+          {/* Block Limit Info */}
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-semibold text-sm">Block Limit System</h4>
+              <Badge variant="outline" className="text-blue-500">
+                {12 - ownedBlocks.length} slots left
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              You can only own 12 blocks at once. Sell blocks below to free up space for new ones! 
+              Higher rarity blocks sell for more coins.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -127,8 +149,10 @@ export function BlockCollection({ ownedBlocks, coins }: BlockCollectionProps) {
                 <BlockCharacter
                   key={block.id}
                   block={block}
-                  showActions={false}
+                  showActions={true}
                   isOwned={true}
+                  onSell={onSellBlock}
+                  isLoading={isLoading}
                 />
               ))}
             </div>
