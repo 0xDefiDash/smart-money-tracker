@@ -157,7 +157,7 @@ export default function BlockWarsPage() {
 
   const [gameState, setGameState] = useState<GameState>({
     playerId: session.user.id,
-    coins: session.user.gameCoins || 1000,
+    coins: session.user.gameMoney || 1000,
     money: 0,
     level: session.user.gameLevel || 1,
     experience: session.user.gameExp || 0,
@@ -844,7 +844,7 @@ export default function BlockWarsPage() {
           {/* User Profile & Game Stats */}
           <div className="lg:col-span-1 space-y-4">
             <UserBoard 
-              gameCoins={gameState.coins}
+              gameMoney={gameState.money}
               gameLevel={gameState.level}
               gameExp={gameState.experience}
             />

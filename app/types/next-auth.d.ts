@@ -8,7 +8,8 @@ declare module "next-auth" {
       id: string
       username: string
       profileImage?: string
-      gameCoins: number
+      xHandle?: string
+      gameMoney: number
       gameLevel: number
       gameExp: number
       isAdmin: boolean
@@ -18,7 +19,8 @@ declare module "next-auth" {
   interface User extends DefaultUser {
     username: string
     profileImage?: string
-    gameCoins: number
+    xHandle?: string
+    gameMoney: number
     gameLevel: number
     gameExp: number
     isAdmin: boolean
@@ -29,7 +31,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     username: string
     profileImage?: string
-    gameCoins: number
+    xHandle?: string
+    gameMoney: number
     gameLevel: number
     gameExp: number
     isAdmin: boolean

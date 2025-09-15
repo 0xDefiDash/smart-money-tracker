@@ -19,7 +19,8 @@ interface UserProfile {
   name: string
   email: string
   profileImage?: string
-  gameCoins: number
+  xHandle?: string
+  gameMoney: number // Changed from gameCoins
   gameLevel: number
   gameExp: number
   isAdmin: boolean
@@ -31,6 +32,7 @@ export function UserProfile() {
   const [profileImageUrl, setProfileImageUrl] = useState<string>('')
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
+  const [editXHandle, setEditXHandle] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -49,6 +51,7 @@ export function UserProfile() {
         const data = await response.json()
         setProfile(data.user)
         setEditName(data.user.name || '')
+        setEditXHandle(data.user.xHandle || '')
         
         // Load profile image from S3 if it exists
         if (data.user.profileImage) {
@@ -86,6 +89,7 @@ export function UserProfile() {
     try {
       const formData = new FormData()
       formData.append('name', editName)
+      formData.append('xHandle', editXHandle)
       if (selectedFile) {
         formData.append('profileImage', selectedFile)
       }
@@ -154,14 +158,17 @@ export function UserProfile() {
           {profile.name || profile.username}
         </CardTitle>
         <p className="text-slate-400 text-sm">@{profile.username}</p>
+        {profile.xHandle && (
+          <p className="text-blue-400 text-xs">𝕏 @{profile.xHandle}</p>
+        )}
         
         <div className="flex justify-center gap-4 mt-4">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-yellow-400">
+            <div className="flex items-center justify-center gap-1 text-green-400">
               <Coins className="h-4 w-4" />
-              <span className="font-semibold">{profile.gameCoins.toLocaleString()}</span>
+              <span className="font-semibold">${profile.gameMoney.toLocaleString()}</span>
             </div>
-            <p className="text-xs text-slate-400">Coins</p>
+            <p className="text-xs text-slate-400">Money</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-purple-400">
@@ -171,11 +178,11 @@ export function UserProfile() {
             <p className="text-xs text-slate-400">Level</p>
           </div>
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-cyan-400">
+            <div className="flex items-center justify-center gap-1 text-green-400">
               <Star className="h-4 w-4" />
-              <span className="font-semibold">{profile.gameExp}</span>
+              <span className="font-semibold">${profile.gameExp.toLocaleString()}</span>
             </div>
-            <p className="text-xs text-slate-400">EXP</p>
+            <p className="text-xs text-slate-400">Money</p>
           </div>
         </div>
 
@@ -230,6 +237,21 @@ export function UserProfile() {
                 placeholder="Your display name"
                 className="bg-slate-700/50 border-slate-600 text-white"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="xHandle" className="text-slate-300">X Handle (Twitter)</Label>
+              <div className="flex items-center space-x-2">
+                <span className="text-slate-400">@</span>
+                <Input
+                  id="xHandle"
+                  type="text"
+                  value={editXHandle}
+                  onChange={(e) => setEditXHandle(e.target.value.replace('@', ''))}
+                  placeholder="your_handle"
+                  className="bg-slate-700/50 border-slate-600 text-white"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

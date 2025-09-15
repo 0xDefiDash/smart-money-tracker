@@ -20,7 +20,8 @@ export async function GET() {
         name: true,
         email: true,
         profileImage: true,
-        gameCoins: true,
+        xHandle: true,
+        gameMoney: true,
         gameLevel: true,
         gameExp: true,
         isAdmin: true
@@ -48,12 +49,17 @@ export async function PUT(request: NextRequest) {
 
     const formData = await request.formData()
     const name = formData.get('name') as string
+    const xHandle = formData.get('xHandle') as string
     const profileImageFile = formData.get('profileImage') as File
 
     const updateData: any = {}
     
     if (name) {
       updateData.name = name
+    }
+    
+    if (xHandle !== null) {
+      updateData.xHandle = xHandle || null // Allow empty string to clear the handle
     }
 
     if (profileImageFile && profileImageFile.size > 0) {
@@ -73,7 +79,8 @@ export async function PUT(request: NextRequest) {
         name: true,
         email: true,
         profileImage: true,
-        gameCoins: true,
+        xHandle: true,
+        gameMoney: true,
         gameLevel: true,
         gameExp: true,
         isAdmin: true

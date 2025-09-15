@@ -42,7 +42,8 @@ const authOptions = {
           name: user.name || user.username,
           email: user.email || '',
           profileImage: user.profileImage || undefined,
-          gameCoins: user.gameCoins,
+          xHandle: user.xHandle || undefined,
+          gameMoney: user.gameMoney,
           gameLevel: user.gameLevel,
           gameExp: user.gameExp,
           isAdmin: user.isAdmin

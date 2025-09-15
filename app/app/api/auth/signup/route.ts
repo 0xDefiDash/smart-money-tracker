@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         email: email || null,
         name: name || username,
-        gameCoins: 1000,
+        gameMoney: 1000,
         gameLevel: 1,
         gameExp: 0,
         isAdmin: false

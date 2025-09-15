@@ -16,7 +16,8 @@ model User {
   name          String?
   password      String?
   profileImage  String?  // URL to profile image
-  gameCoins     Int      @default(0)
+  xHandle       String?  // X (formerly Twitter) handle
+  gameMoney     Int      @default(0)  // Changed from gameCoins to gameMoney
   gameLevel     Int      @default(1)
   gameExp       Int      @default(0)
   isAdmin       Boolean  @default(false)

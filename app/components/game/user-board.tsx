@@ -17,13 +17,13 @@ import {
 } from '@/components/ui/dialog'
 
 interface UserBoardProps {
-  gameCoins: number
+  gameMoney: number // Changed from gameCoins
   gameLevel: number
   gameExp: number
-  onCoinsUpdate?: (coins: number) => void
+  onMoneyUpdate?: (money: number) => void // Changed from onCoinsUpdate
 }
 
-export function UserBoard({ gameCoins, gameLevel, gameExp, onCoinsUpdate }: UserBoardProps) {
+export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: UserBoardProps) {
   const { data: session } = useSession() || {}
   const [profileImageUrl, setProfileImageUrl] = useState<string>('')
   const [showProfile, setShowProfile] = useState(false)
@@ -82,6 +82,9 @@ export function UserBoard({ gameCoins, gameLevel, gameExp, onCoinsUpdate }: User
                 )}
               </div>
               <p className="text-sm text-slate-400">@{session.user.username}</p>
+              {session.user.xHandle && (
+                <p className="text-xs text-blue-400">𝕏 @{session.user.xHandle}</p>
+              )}
             </div>
             <Dialog open={showProfile} onOpenChange={setShowProfile}>
               <DialogTrigger asChild>
@@ -98,11 +101,11 @@ export function UserBoard({ gameCoins, gameLevel, gameExp, onCoinsUpdate }: User
         <CardContent className="pt-0">
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-yellow-400 mb-1">
+              <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
                 <Coins className="h-4 w-4" />
-                <span className="font-bold text-sm">{gameCoins.toLocaleString()}</span>
+                <span className="font-bold text-sm">${gameMoney.toLocaleString()}</span>
               </div>
-              <p className="text-xs text-slate-400">Coins</p>
+              <p className="text-xs text-slate-400">Money</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-purple-400 mb-1">
@@ -112,11 +115,11 @@ export function UserBoard({ gameCoins, gameLevel, gameExp, onCoinsUpdate }: User
               <p className="text-xs text-slate-400">Level</p>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-cyan-400 mb-1">
+              <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
                 <Star className="h-4 w-4" />
-                <span className="font-bold text-sm">{gameExp}</span>
+                <span className="font-bold text-sm">${gameExp.toLocaleString()}</span>
               </div>
-              <p className="text-xs text-slate-400">EXP</p>
+              <p className="text-xs text-slate-400">Money</p>
             </div>
           </div>
           
