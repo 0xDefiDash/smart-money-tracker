@@ -34,6 +34,13 @@ const EPIC_BLOCKS = [
     color: '#DAA520', 
     image: '/images/james-wynn.jpg',
     description: 'James Wynn The Legendary trader - Master of crypto markets with legendary trading prowess!'
+  },
+  { 
+    name: '1CrypticPoet', 
+    type: '1crypticpoet', 
+    color: '#9932CC', 
+    image: '/images/1crypticpoet.jpg',
+    description: '1CrypticPoet - The crowned Base Alpha supporter with royal crypto wisdom and poetic insights!'
   }
 ]
 
