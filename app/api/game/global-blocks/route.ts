@@ -110,16 +110,67 @@ let globalBlocks: Block[] = []
 
 export async function GET(request: NextRequest) {
   try {
-    // Always force regenerate blocks to ensure fresh blocks with proper properties
-    console.log('Generating new blocks...')
-    globalBlocks = [] // Clear any cached blocks
-    generateInitialBlocks()
-    console.log('Generated blocks:', globalBlocks.map(b => ({ name: b.name, rarity: b.rarity, isPurchasable: b.isPurchasable, price: b.price })))
+    // HARDCODED TEST BLOCKS for debugging
+    const testBlocks: Block[] = [
+      {
+        id: 'test_common_block',
+        name: 'Test Common Block',
+        type: 'btc',
+        rarity: 'common',
+        value: 50,
+        power: 30,
+        defense: 20,
+        image: '₿',
+        color: '#F7931A',
+        description: 'A free common block for testing',
+        isStealable: true,
+        spawnTime: Date.now(),
+        traits: ['common rarity', 'BTC power'],
+        isPurchasable: false
+      },
+      {
+        id: 'test_rare_purchasable',
+        name: 'Test Rare Purchasable Block',
+        type: 'eth',
+        rarity: 'rare',
+        value: 100,
+        power: 60,
+        defense: 40,
+        image: 'Ξ',
+        color: '#627EEA',
+        description: 'A purchasable rare block for testing',
+        isStealable: false,
+        spawnTime: Date.now(),
+        traits: ['rare rarity', 'ETH power'],
+        isPurchasable: true,
+        price: 5000
+      },
+      {
+        id: 'test_epic_purchasable',
+        name: 'Test Epic Purchasable Block',
+        type: 'epic',
+        rarity: 'epic',
+        value: 300,
+        power: 120,
+        defense: 80,
+        image: '💎',
+        color: '#9945FF',
+        description: 'A purchasable epic block for testing',
+        isStealable: false,
+        spawnTime: Date.now(),
+        traits: ['epic rarity', 'Diamond power'],
+        isPurchasable: true,
+        price: 25000
+      }
+    ]
+    
+    globalBlocks = testBlocks
+    console.log('TEST BLOCKS:', globalBlocks.map(b => ({ name: b.name, rarity: b.rarity, isPurchasable: b.isPurchasable, price: b.price })))
     
     return NextResponse.json({ 
       blocks: globalBlocks,
       totalBlocks: globalBlocks.length,
-      message: 'Global blocks fetched successfully'
+      message: 'Test blocks generated successfully'
     })
     
   } catch (error) {
@@ -158,23 +209,107 @@ function generateInitialBlocks() {
   
   // Generate 1 common block (free)
   const blockType1 = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
-  blocks.push(createBlock('common', blockType1, false))
+  const commonBlock: Block = {
+    id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: blockType1.name,
+    type: blockType1.type,
+    rarity: 'common',
+    value: 50 + Math.floor(Math.random() * 25),
+    power: Math.floor(Math.random() * 100) + 20,
+    defense: Math.floor(Math.random() * 80) + 10,
+    image: blockType1.emoji,
+    color: blockType1.color,
+    description: `A common ${blockType1.name} with unique crypto powers!`,
+    isStealable: true,
+    spawnTime: Date.now(),
+    traits: ['common rarity', `${blockType1.type.toUpperCase()} power`],
+    isPurchasable: false
+  }
+  blocks.push(commonBlock)
   
-  // Always add 1 purchasable rare block
+  // Generate 1 purchasable rare block
   const blockType2 = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
-  blocks.push(createBlock('rare', blockType2, true))
+  const rareBlock: Block = {
+    id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: blockType2.name,
+    type: blockType2.type,
+    rarity: 'rare',
+    value: 100 + Math.floor(Math.random() * 50),
+    power: Math.floor(Math.random() * 100) + 20,
+    defense: Math.floor(Math.random() * 80) + 10,
+    image: blockType2.emoji,
+    color: blockType2.color,
+    description: `A rare ${blockType2.name} with unique crypto powers!`,
+    isStealable: false,
+    spawnTime: Date.now(),
+    traits: ['rare rarity', `${blockType2.type.toUpperCase()} power`],
+    isPurchasable: true,
+    price: 5000
+  }
+  blocks.push(rareBlock)
   
-  // Always add 1 purchasable epic block
+  // Generate 1 purchasable epic block
   const epicBlock = EPIC_BLOCKS[Math.floor(Math.random() * EPIC_BLOCKS.length)]
-  blocks.push(createPremiumBlock('epic', epicBlock, true))
+  const epicBlockObj: Block = {
+    id: `premium_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: epicBlock.name,
+    type: epicBlock.type,
+    rarity: 'epic',
+    value: 500 + Math.floor(Math.random() * 150),
+    power: Math.floor(Math.random() * 150) + 100,
+    defense: Math.floor(Math.random() * 120) + 60,
+    image: epicBlock.image,
+    color: epicBlock.color,
+    description: epicBlock.description,
+    isStealable: false,
+    spawnTime: Date.now(),
+    traits: epicBlock.traits,
+    isPurchasable: true,
+    price: 25000
+  }
+  blocks.push(epicBlockObj)
   
-  // Always add 1 purchasable legendary block
+  // Generate 1 purchasable legendary block
   const legendaryBlock = LEGENDARY_BLOCKS[Math.floor(Math.random() * LEGENDARY_BLOCKS.length)]
-  blocks.push(createPremiumBlock('legendary', legendaryBlock, true))
+  const legendaryBlockObj: Block = {
+    id: `premium_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: legendaryBlock.name,
+    type: legendaryBlock.type,
+    rarity: 'legendary',
+    value: 1000 + Math.floor(Math.random() * 300),
+    power: Math.floor(Math.random() * 150) + 150,
+    defense: Math.floor(Math.random() * 120) + 80,
+    image: legendaryBlock.image,
+    color: legendaryBlock.color,
+    description: legendaryBlock.description,
+    isStealable: false,
+    spawnTime: Date.now(),
+    traits: legendaryBlock.traits,
+    isPurchasable: true,
+    price: 100000
+  }
+  blocks.push(legendaryBlockObj)
   
-  // Always add 1 purchasable secret block
+  // Generate 1 purchasable secret block
   const secretBlock = SECRET_BLOCKS[0]
-  blocks.push(createPremiumBlock('secret', secretBlock, true))
+  const secretBlockObj: Block = {
+    id: `premium_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: secretBlock.name,
+    type: secretBlock.type,
+    rarity: 'secret',
+    value: 2000 + Math.floor(Math.random() * 600),
+    power: Math.floor(Math.random() * 150) + 200,
+    defense: Math.floor(Math.random() * 120) + 100,
+    image: secretBlock.image,
+    color: secretBlock.color,
+    description: secretBlock.description,
+    isStealable: false,
+    spawnTime: Date.now(),
+    traits: secretBlock.traits,
+    isPurchasable: true,
+    price: 500000
+  }
+  blocks.push(secretBlockObj)
   
   globalBlocks = blocks
   console.log(`Generated ${blocks.length} blocks:`, blocks.map(b => `${b.name} (${b.rarity}) - purchasable: ${b.isPurchasable}, price: ${b.price}`))
