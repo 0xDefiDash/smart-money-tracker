@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Coins, Trophy, Star, Crown, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { ProfileImage } from '@/components/ui/profile-image'
-import { UserProfile } from '@/components/auth/user-profile'
+import { BlockWarsProfileSettings } from '@/components/game/block-wars-profile-settings'
 import {
   Dialog,
   DialogContent,
@@ -37,48 +37,61 @@ export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: User
     <>
       <Card className="bg-slate-800/50 border-purple-500/20">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-3">
-            <div className="relative">
-              <div className="border-2 border-purple-500/30 rounded-full p-0.5">
-                <ProfileImage 
-                  user={session.user} 
-                  size="lg" 
-                  className="h-11 w-11"
-                />
-              </div>
-              {session.user.isAdmin && (
-                <div className="absolute -top-1 -right-1 p-1 bg-yellow-500/20 rounded-full border border-yellow-500/30">
-                  <Crown className="h-3 w-3 text-yellow-400" />
+          <div className="flex items-center justify-between mb-2">
+            <CardTitle className="text-lg flex items-center gap-3">
+              <div className="relative">
+                <div className="border-2 border-purple-500/30 rounded-full p-0.5">
+                  <ProfileImage 
+                    user={session.user} 
+                    size="lg" 
+                    className="h-11 w-11"
+                  />
                 </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-white font-semibold">
-                  {session.user.name || session.user.username}
-                </span>
                 {session.user.isAdmin && (
-                  <Badge className="text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                    Admin
-                  </Badge>
+                  <div className="absolute -top-1 -right-1 p-1 bg-yellow-500/20 rounded-full border border-yellow-500/30">
+                    <Crown className="h-3 w-3 text-yellow-400" />
+                  </div>
                 )}
               </div>
-              <p className="text-sm text-slate-400">@{session.user.username}</p>
-              {session.user.xHandle && (
-                <p className="text-xs text-blue-400">𝕏 @{session.user.xHandle}</p>
-              )}
-            </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-white font-semibold">
+                    {session.user.name || session.user.username}
+                  </span>
+                  {session.user.isAdmin && (
+                    <Badge className="text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                      Admin
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-slate-400">@{session.user.username}</p>
+                {session.user.xHandle && (
+                  <p className="text-xs text-blue-400">𝕏 @{session.user.xHandle}</p>
+                )}
+              </div>
+            </CardTitle>
+            
             <Dialog open={showProfile} onOpenChange={setShowProfile}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="border-slate-600 hover:bg-slate-700">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-slate-600 hover:bg-slate-700 hover:border-purple-400 transition-colors"
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-slate-900 border-slate-700 max-w-md">
-                <UserProfile />
+              <DialogContent className="bg-transparent border-0 p-0 max-w-2xl">
+                <BlockWarsProfileSettings 
+                  onClose={() => setShowProfile(false)}
+                  onProfileUpdate={(updatedProfile) => {
+                    // Handle profile updates if needed
+                    console.log('Profile updated:', updatedProfile)
+                  }}
+                />
               </DialogContent>
             </Dialog>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="grid grid-cols-3 gap-4 mb-4">
