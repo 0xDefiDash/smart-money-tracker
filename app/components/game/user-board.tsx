@@ -3,12 +3,11 @@
 
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Coins, Trophy, Star, Crown, Settings } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { downloadFile } from '@/lib/s3'
+import { useState } from 'react'
+import { ProfileImage } from '@/components/ui/profile-image'
 import { UserProfile } from '@/components/auth/user-profile'
 import {
   Dialog,
@@ -25,25 +24,7 @@ interface UserBoardProps {
 
 export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: UserBoardProps) {
   const { data: session } = useSession() || {}
-  const [profileImageUrl, setProfileImageUrl] = useState<string>('')
   const [showProfile, setShowProfile] = useState(false)
-
-  useEffect(() => {
-    if (session?.user?.profileImage) {
-      loadProfileImage()
-    }
-  }, [session?.user?.profileImage])
-
-  const loadProfileImage = async () => {
-    try {
-      if (session?.user?.profileImage) {
-        const imageUrl = await downloadFile(session.user.profileImage)
-        setProfileImageUrl(imageUrl)
-      }
-    } catch (error) {
-      console.error('Failed to load profile image:', error)
-    }
-  }
 
   const expToNext = gameLevel * 100 // Experience needed for next level
   const expProgress = (gameExp % 100) / 100 * 100 // Progress to next level
@@ -58,12 +39,13 @@ export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: User
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-3">
             <div className="relative">
-              <Avatar className="h-12 w-12 border-2 border-purple-500/30">
-                <AvatarImage src={profileImageUrl} alt={session.user.username} />
-                <AvatarFallback className="bg-purple-600/20 text-purple-400 text-lg">
-                  {session.user.username?.charAt(0).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              <div className="border-2 border-purple-500/30 rounded-full p-0.5">
+                <ProfileImage 
+                  user={session.user} 
+                  size="lg" 
+                  className="h-11 w-11"
+                />
+              </div>
               {session.user.isAdmin && (
                 <div className="absolute -top-1 -right-1 p-1 bg-yellow-500/20 rounded-full border border-yellow-500/30">
                   <Crown className="h-3 w-3 text-yellow-400" />

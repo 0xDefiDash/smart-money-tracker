@@ -7,11 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Upload, User, Coins, Trophy, Star, LogOut, Camera } from 'lucide-react'
-import { downloadFile } from '@/lib/s3'
+import { Loader2, User, Coins, Trophy, Star, LogOut } from 'lucide-react'
+import { ProfileImage } from '@/components/ui/profile-image'
+import { ProfileImageUpload } from '@/components/ui/profile-image-upload'
 
 interface UserProfile {
   id: string
@@ -29,11 +29,9 @@ interface UserProfile {
 export function UserProfile() {
   const { data: session } = useSession() || {}
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [profileImageUrl, setProfileImageUrl] = useState<string>('')
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
   const [editXHandle, setEditXHandle] = useState('')
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -52,31 +50,9 @@ export function UserProfile() {
         setProfile(data.user)
         setEditName(data.user.name || '')
         setEditXHandle(data.user.xHandle || '')
-        
-        // Load profile image from S3 if it exists
-        if (data.user.profileImage) {
-          const imageUrl = await downloadFile(data.user.profileImage)
-          setProfileImageUrl(imageUrl)
-        }
       }
     } catch (error) {
       console.error('Failed to fetch profile:', error)
-    }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        setError('File size must be less than 5MB')
-        return
-      }
-      if (!file.type.startsWith('image/')) {
-        setError('Please select an image file')
-        return
-      }
-      setSelectedFile(file)
-      setError('')
     }
   }
 
@@ -90,9 +66,6 @@ export function UserProfile() {
       const formData = new FormData()
       formData.append('name', editName)
       formData.append('xHandle', editXHandle)
-      if (selectedFile) {
-        formData.append('profileImage', selectedFile)
-      }
 
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
@@ -105,13 +78,6 @@ export function UserProfile() {
         setProfile(data.user)
         setSuccess('Profile updated successfully!')
         setIsEditing(false)
-        setSelectedFile(null)
-        
-        // Reload profile image
-        if (data.user.profileImage) {
-          const imageUrl = await downloadFile(data.user.profileImage)
-          setProfileImageUrl(imageUrl)
-        }
       } else {
         setError(data.error || 'Failed to update profile')
       }
@@ -119,6 +85,15 @@ export function UserProfile() {
       setError('An error occurred while updating profile')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleImageUpdate = (imageUrl: string | null) => {
+    if (profile) {
+      setProfile({
+        ...profile,
+        profileImage: imageUrl || undefined
+      })
     }
   }
 
@@ -141,12 +116,13 @@ export function UserProfile() {
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
           <div className="relative">
-            <Avatar className="h-24 w-24 border-2 border-purple-500/30">
-              <AvatarImage src={profileImageUrl} alt={profile.username} />
-              <AvatarFallback className="text-2xl bg-purple-600/20 text-purple-400">
-                {profile.username.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="border-2 border-purple-500/30 rounded-full p-1">
+              <ProfileImage 
+                user={profile} 
+                size="xl" 
+                className="h-20 w-20"
+              />
+            </div>
             {profile.isAdmin && (
               <div className="absolute -top-1 -right-1 p-1 bg-yellow-500/20 rounded-full border border-yellow-500/30">
                 <Star className="h-3 w-3 text-yellow-400" />
@@ -226,77 +202,71 @@ export function UserProfile() {
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleUpdate} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-300">Display Name</Label>
-              <Input
-                id="name"
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="Your display name"
-                className="bg-slate-700/50 border-slate-600 text-white"
+          <div className="space-y-6">
+            {/* Profile Image Upload Section */}
+            <div className="text-center">
+              <Label className="text-slate-300 text-sm font-medium block mb-3">Profile Picture</Label>
+              <ProfileImageUpload 
+                user={profile} 
+                onImageUpdate={handleImageUpdate}
+                size="xl"
+                className="flex flex-col items-center"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="xHandle" className="text-slate-300">X Handle (Twitter)</Label>
-              <div className="flex items-center space-x-2">
-                <span className="text-slate-400">@</span>
+            {/* Profile Information Form */}
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-slate-300">Display Name</Label>
                 <Input
-                  id="xHandle"
+                  id="name"
                   type="text"
-                  value={editXHandle}
-                  onChange={(e) => setEditXHandle(e.target.value.replace('@', ''))}
-                  placeholder="your_handle"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Your display name"
                   className="bg-slate-700/50 border-slate-600 text-white"
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="profileImage" className="text-slate-300">Profile Picture</Label>
-              <div className="flex items-center space-x-2">
-                <Input
-                  id="profileImage"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="bg-slate-700/50 border-slate-600 text-white file:text-white"
-                />
-                <Camera className="h-4 w-4 text-slate-400" />
+              <div className="space-y-2">
+                <Label htmlFor="xHandle" className="text-slate-300">X Handle (Twitter)</Label>
+                <div className="flex items-center space-x-2">
+                  <span className="text-slate-400">@</span>
+                  <Input
+                    id="xHandle"
+                    type="text"
+                    value={editXHandle}
+                    onChange={(e) => setEditXHandle(e.target.value.replace('@', ''))}
+                    placeholder="your_handle"
+                    className="bg-slate-700/50 border-slate-600 text-white"
+                  />
+                </div>
               </div>
-              {selectedFile && (
-                <p className="text-sm text-slate-400">
-                  Selected: {selectedFile.name}
-                </p>
-              )}
-            </div>
 
-            <div className="flex gap-2">
-              <Button 
-                type="submit" 
-                className="flex-1 bg-green-600 hover:bg-green-700"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
-              <Button 
-                type="button"
-                onClick={() => {
-                  setIsEditing(false)
-                  setSelectedFile(null)
-                  setError('')
-                  setSuccess('')
-                }}
-                variant="outline"
-                className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
+              <div className="flex gap-2">
+                <Button 
+                  type="submit" 
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  disabled={isLoading}
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+                <Button 
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(false)
+                    setError('')
+                    setSuccess('')
+                  }}
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
         )}
       </CardContent>
     </Card>
