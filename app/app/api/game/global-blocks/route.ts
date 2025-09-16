@@ -51,6 +51,13 @@ const LEGENDARY_BLOCKS = [
     color: '#FF6B35', 
     image: '/images/100xdarren.jpg',
     description: 'The legendary 100xDarren - Master of 100x gains and crypto alpha signals!'
+  },
+  { 
+    name: 'CryptoExpert101', 
+    type: 'cryptoexpert101', 
+    color: '#00BFFF', 
+    image: '/images/cryptoexpert101.jpg',
+    description: 'The legendary CryptoExpert101 - Infinity Gainz mastermind with unlimited crypto wisdom!'
   }
 ]
 
