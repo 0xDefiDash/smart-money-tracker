@@ -110,23 +110,11 @@ let globalBlocks: Block[] = []
 
 export async function GET(request: NextRequest) {
   try {
-    // Force regenerate blocks on each call to ensure fresh blocks with proper properties
+    // Always force regenerate blocks to ensure fresh blocks with proper properties
+    console.log('Generating new blocks...')
+    globalBlocks = [] // Clear any cached blocks
     generateInitialBlocks()
-    
-    // TESTING: Temporarily force the first block to be purchasable for testing
-    if (globalBlocks.length > 0 && globalBlocks[0].rarity === 'common') {
-      globalBlocks[0] = {
-        ...globalBlocks[0],
-        rarity: 'epic',
-        isPurchasable: true,
-        price: 25000,
-        isStealable: false,
-        description: 'TESTING: A premium epic block for purchase testing!',
-        value: 200,
-        power: 120,
-        defense: 80
-      }
-    }
+    console.log('Generated blocks:', globalBlocks.map(b => ({ name: b.name, rarity: b.rarity, isPurchasable: b.isPurchasable, price: b.price })))
     
     return NextResponse.json({ 
       blocks: globalBlocks,
@@ -168,19 +156,13 @@ export async function POST(request: NextRequest) {
 function generateInitialBlocks() {
   const blocks: Block[] = []
   
-  // Generate 2-3 common blocks (free) - reduced to make room for premium blocks
-  const commonBlockCount = Math.floor(Math.random() * 2) + 2
-  for (let i = 0; i < commonBlockCount; i++) {
-    const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
-    blocks.push(createBlock('common', blockType, false))
-  }
+  // Generate 1 common block (free)
+  const blockType1 = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
+  blocks.push(createBlock('common', blockType1, false))
   
-  // Always add 1-2 purchasable rare blocks
-  const rareBlockCount = Math.floor(Math.random() * 2) + 1
-  for (let i = 0; i < rareBlockCount; i++) {
-    const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
-    blocks.push(createBlock('rare', blockType, true))
-  }
+  // Always add 1 purchasable rare block
+  const blockType2 = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
+  blocks.push(createBlock('rare', blockType2, true))
   
   // Always add 1 purchasable epic block
   const epicBlock = EPIC_BLOCKS[Math.floor(Math.random() * EPIC_BLOCKS.length)]
@@ -190,7 +172,7 @@ function generateInitialBlocks() {
   const legendaryBlock = LEGENDARY_BLOCKS[Math.floor(Math.random() * LEGENDARY_BLOCKS.length)]
   blocks.push(createPremiumBlock('legendary', legendaryBlock, true))
   
-  // Always add 1 purchasable secret block for testing
+  // Always add 1 purchasable secret block
   const secretBlock = SECRET_BLOCKS[0]
   blocks.push(createPremiumBlock('secret', secretBlock, true))
   
@@ -200,7 +182,7 @@ function generateInitialBlocks() {
 
 function createBlock(rarity: Block['rarity'], blockType: any, isPurchasable: boolean): Block {
   const baseValue = rarity === 'legendary' ? 500 : rarity === 'epic' ? 200 : rarity === 'rare' ? 100 : 50
-  const price = isPurchasable ? BLOCK_PRICES[rarity] : 0
+  const price = isPurchasable ? BLOCK_PRICES[rarity] : undefined
   
   const block = {
     id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -220,12 +202,13 @@ function createBlock(rarity: Block['rarity'], blockType: any, isPurchasable: boo
     isPurchasable: isPurchasable
   }
   
+  console.log('Created block:', block.name, 'isPurchasable:', block.isPurchasable, 'price:', block.price)
   return block
 }
 
 function createPremiumBlock(rarity: Block['rarity'], premiumBlock: any, isPurchasable: boolean): Block {
   const baseValue = rarity === 'secret' ? 2000 : rarity === 'legendary' ? 1000 : rarity === 'epic' ? 500 : 200
-  const price = isPurchasable ? BLOCK_PRICES[rarity] : 0
+  const price = isPurchasable ? BLOCK_PRICES[rarity] : undefined
   
   const block = {
     id: `premium_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -245,6 +228,7 @@ function createPremiumBlock(rarity: Block['rarity'], premiumBlock: any, isPurcha
     isPurchasable: isPurchasable
   }
   
+  console.log('Created premium block:', block.name, 'isPurchasable:', block.isPurchasable, 'price:', block.price)
   return block
 }
 
