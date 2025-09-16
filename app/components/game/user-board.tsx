@@ -29,9 +29,15 @@ export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: User
   const expToNext = gameLevel * 100 // Experience needed for next level
   const expProgress = (gameExp % 100) / 100 * 100 // Progress to next level
 
+  // Debug logging
+  console.log('UserBoard render - Session:', session?.user ? 'User found' : 'No user')
+
   if (!session?.user) {
+    console.log('UserBoard: No session user, returning null')
     return null
   }
+
+  console.log('UserBoard: Rendering with user:', session.user.username)
 
   return (
     <>
@@ -76,9 +82,11 @@ export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: User
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="border-slate-600 hover:bg-slate-700 hover:border-purple-400 transition-colors"
+                  className="border-purple-500/50 hover:bg-purple-600 hover:border-purple-400 transition-colors bg-slate-800/80 shadow-lg"
+                  title="Profile Settings"
+                  data-testid="settings-button"
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className="h-4 w-4 text-purple-300 hover:text-white" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-transparent border-0 p-0 max-w-2xl">
