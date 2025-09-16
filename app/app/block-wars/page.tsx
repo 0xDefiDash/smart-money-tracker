@@ -28,6 +28,7 @@ import {
 import { BlockCharacter } from '@/components/game/block-character'
 import { GameStats } from '@/components/game/game-stats'
 import { BlockCollection } from '@/components/game/block-collection'
+import Leaderboard from '@/components/game/leaderboard'
 import { BattleArena } from '@/components/game/battle-arena'
 import { SpawnArea } from '@/components/game/spawn-area'
 import { UserBoard } from '@/components/game/user-board'
@@ -1474,73 +1475,7 @@ export default function BlockWarsPage() {
               </TabsContent>
 
               <TabsContent value="leaderboard">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Trophy className="w-5 h-5 text-yellow-500" />
-                      <span>Global Leaderboard</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                        <div className="flex items-center space-x-3">
-                          <Crown className="w-5 h-5 text-yellow-500" />
-                          <div>
-                            <p className="font-bold">CryptoKing_2025</p>
-                            <p className="text-sm text-muted-foreground">Level 47</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-yellow-500">$2,847,392</p>
-                          <p className="text-sm text-muted-foreground">834 blocks</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-slate-500/10 rounded-lg border border-slate-500/20">
-                        <div className="flex items-center space-x-3">
-                          <Star className="w-5 h-5 text-slate-400" />
-                          <div>
-                            <p className="font-bold">BlockMaster_Pro</p>
-                            <p className="text-sm text-muted-foreground">Level 42</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-slate-400">$1,923,847</p>
-                          <p className="text-sm text-muted-foreground">567 blocks</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                        <div className="flex items-center space-x-3">
-                          <TrendingUp className="w-5 h-5 text-orange-500" />
-                          <div>
-                            <p className="font-bold">WhaleHunter_77</p>
-                            <p className="text-sm text-muted-foreground">Level 38</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-orange-500">$1,456,291</p>
-                          <p className="text-sm text-muted-foreground">412 blocks</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                        <div className="flex items-center space-x-3">
-                          <Gamepad2 className="w-5 h-5 text-blue-500" />
-                          <div>
-                            <p className="font-bold">You</p>
-                            <p className="text-sm text-muted-foreground">Level {gameState.level}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-blue-500">${gameState.money.toLocaleString()}</p>
-                          <p className="text-sm text-muted-foreground">{gameState.ownedBlocks.length} blocks</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <Leaderboard gameState={gameState} />
               </TabsContent>
 
 
