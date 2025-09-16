@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Wallet, Search, Copy, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react'
+import { Wallet, Search, Copy, ExternalLink, TrendingUp, TrendingDown, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { useWallet } from '@/contexts/WalletContext'
+import { WalletConnect } from '@/components/wallet/WalletConnect'
 
 interface TokenBalance {
   symbol: string
@@ -18,6 +20,7 @@ interface TokenBalance {
 }
 
 export default function WalletPage() {
+  const { isConnected, address } = useWallet()
   const [walletAddress, setWalletAddress] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   
@@ -49,19 +52,88 @@ export default function WalletPage() {
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Wallet Analytics</h1>
           <p className="text-muted-foreground mt-1">Analyze any wallet's token holdings and transactions</p>
         </div>
-        <Link href="/wallet-monitor">
-          <Button>
-            <Wallet className="w-4 h-4 mr-2" />
-            Advanced Monitor
-          </Button>
-        </Link>
+        <div className="flex space-x-2">
+          {isConnected && (
+            <Link href="/wallet-dashboard">
+              <Button>
+                <Wallet className="w-4 h-4 mr-2" />
+                My Dashboard
+              </Button>
+            </Link>
+          )}
+          <Link href="/wallet-monitor">
+            <Button variant="outline">
+              <Plus className="w-4 h-4 mr-2" />
+              Advanced Monitor
+            </Button>
+          </Link>
+        </div>
       </div>
+
+      {/* Connected Wallet Section */}
+      {isConnected && (
+        <Card className="border-blue-500/20 bg-blue-500/5">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Wallet className="w-5 h-5 text-blue-500" />
+              <span>Your Connected Wallet</span>
+            </CardTitle>
+            <CardDescription>
+              Your wallet is connected. View detailed analytics in your dashboard.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center">
+                  <Wallet className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {address?.slice(0, 6)}...{address?.slice(-4)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Connected via Coinbase Wallet</p>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setWalletAddress(address || '')}
+                >
+                  Analyze This Wallet
+                </Button>
+                <Link href="/wallet-dashboard">
+                  <Button size="sm">
+                    View Dashboard
+                    <ExternalLink className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Wallet Connection Section */}
+      {!isConnected && (
+        <Card>
+          <CardContent className="p-6">
+            <WalletConnect 
+              onConnect={() => console.log('Wallet connected!')}
+              showFeatures={false}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search Section */}
       <Card>
         <CardHeader>
           <CardTitle>Wallet Lookup</CardTitle>
-          <CardDescription>Enter a wallet address to view its holdings</CardDescription>
+          <CardDescription>
+            Enter any wallet address to view its holdings and analyze activity
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex space-x-2">
@@ -79,6 +151,19 @@ export default function WalletPage() {
               )}
             </Button>
           </div>
+          
+          {isConnected && (
+            <div className="mt-3 pt-3 border-t">
+              <p className="text-sm text-muted-foreground mb-2">Quick actions for your wallet:</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setWalletAddress(address || '')}
+              >
+                Load My Wallet Data
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

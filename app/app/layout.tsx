@@ -6,9 +6,11 @@ import { ResponsiveSidebar } from '@/components/layout/responsive-sidebar'
 import { MobileHeader } from '@/components/layout/mobile-header'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
+import { Toaster as HotToaster } from 'react-hot-toast'
 import { DefidashAgent } from '@/components/chat/defidash-agent'
 import { RollingBanner } from '@/components/ui/rolling-banner'
 import { AuthProvider } from '@/components/auth/auth-provider'
+import { WalletProvider } from '@/contexts/WalletContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -47,13 +49,14 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="flex flex-col min-h-screen bg-background">
+          <WalletProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="flex flex-col min-h-screen bg-background">
             {/* Mobile Header */}
             <MobileHeader />
             
@@ -81,9 +84,11 @@ export default function RootLayout({
             </div>
           </div>
           <Toaster />
+          <HotToaster position="top-right" />
           {/* Defidash Agent Chat */}
           <DefidashAgent />
         </ThemeProvider>
+          </WalletProvider>
         </AuthProvider>
       </body>
     </html>

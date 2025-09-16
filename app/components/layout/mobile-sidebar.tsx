@@ -19,6 +19,7 @@ import {
   Gamepad2,
   Percent
 } from 'lucide-react'
+import { WalletButton } from '@/components/wallet/WalletButton'
 
 const sidebarItems = [
   {
@@ -62,9 +63,14 @@ const sidebarItems = [
     icon: Globe,
   },
   {
-    title: 'Wallet Monitor',
-    href: '/wallet-monitor',
+    title: 'Wallet Analytics',
+    href: '/wallet',
     icon: Wallet,
+  },
+  {
+    title: 'Wallet Dashboard',
+    href: '/wallet-dashboard',
+    icon: Activity,
   },
   {
     title: 'Yields & APR',
@@ -132,7 +138,12 @@ export function MobileSidebar({ onItemClick }: MobileSidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-4">
+        {/* Wallet Connection */}
+        <div className="flex justify-center">
+          <WalletButton />
+        </div>
+        
         <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 rounded-lg p-3">
           <div className="flex items-center space-x-2 mb-2">
             <Zap className="w-4 h-4 text-blue-500" />
