@@ -591,10 +591,8 @@ export default function BlockWarsPage() {
         block.value
       )
       
-      // Refresh blocks from API after claiming
-      setTimeout(() => {
-        fetchGlobalBlocks()
-      }, 1000)
+      // Don't fetch new blocks immediately - let natural spawn timer handle it
+      // This prevents claimed blocks from "reappearing" immediately
     } catch (error) {
       setBattleLog(prev => [...prev, `❌ Error claiming block. Please try again!`])
     }
@@ -671,10 +669,8 @@ export default function BlockWarsPage() {
           block.value
         )
         
-        // Refresh blocks from API after purchase
-        setTimeout(() => {
-          fetchGlobalBlocks()
-        }, 1000)
+        // Don't fetch new blocks immediately - let natural spawn timer handle it
+        // This prevents purchased blocks from "reappearing" immediately
       } else {
         const errorData = await response.json()
         setBattleLog(prev => [...prev, `❌ Purchase failed: ${errorData.error}`])
