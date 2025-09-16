@@ -31,6 +31,7 @@ import { BlockCollection } from '@/components/game/block-collection'
 import { BattleArena } from '@/components/game/battle-arena'
 import { SpawnArea } from '@/components/game/spawn-area'
 import { UserBoard } from '@/components/game/user-board'
+import { TransactionTicker } from '@/components/game/transaction-ticker'
 
 interface GameState {
   playerId: string
@@ -579,6 +580,17 @@ export default function BlockWarsPage() {
       
       setBattleLog(prev => [...prev, `🎯 Successfully claimed ${block.name} for FREE! +${block.value} coins, +${block.power} attack power!`])
       
+      // Record the transaction
+      recordTransaction(
+        block.id,
+        block.name,
+        block.type,
+        block.rarity,
+        'claim',
+        undefined, // No price for claims
+        block.value
+      )
+      
       // Refresh blocks from API after claiming
       setTimeout(() => {
         fetchGlobalBlocks()
@@ -647,6 +659,17 @@ export default function BlockWarsPage() {
         setSpawnedBlocks(prev => prev.filter(b => b.id !== blockId))
         
         setBattleLog(prev => [...prev, `💳 ${result.message} +25 XP for smart investing!`])
+        
+        // Record the transaction
+        recordTransaction(
+          block.id,
+          block.name,
+          block.type,
+          block.rarity,
+          'purchase',
+          block.price,
+          block.value
+        )
         
         // Refresh blocks from API after purchase
         setTimeout(() => {
@@ -736,6 +759,17 @@ export default function BlockWarsPage() {
         }))
         
         setBattleLog(prev => [...prev, `💰 ${result.message} +5 XP for trade experience!`])
+        
+        // Record the transaction
+        recordTransaction(
+          blockToSell.id,
+          blockToSell.name,
+          blockToSell.type,
+          blockToSell.rarity,
+          'sell',
+          result.sellPrice, // The price received for selling
+          blockToSell.value
+        )
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
         console.error('Sell error:', errorData)
@@ -818,6 +852,17 @@ export default function BlockWarsPage() {
       
       const moneyPerMinute = MONEY_PRODUCTION_RATES[targetBlock.rarity]
       setBattleLog(prev => [...prev, `🎯 ${attackInfo.name} SUCCESS! Stole ${targetBlock.name} from ${targetEnemy.name}! Now earning $${moneyPerMinute}/min! (+${25 + (powerAdvantage * 2)} XP)`])
+      
+      // Record the transaction
+      recordTransaction(
+        targetBlock.id,
+        targetBlock.name,
+        targetBlock.type,
+        targetBlock.rarity,
+        'steal',
+        actualCost, // Cost paid for the steal attempt
+        targetBlock.value
+      )
     } else {
       // Handle steal insurance refund
       const refundAmount = gameState.upgradeEffects?.stealInsurance ? Math.floor(actualCost * 0.5) : 0
@@ -1070,6 +1115,38 @@ export default function BlockWarsPage() {
     }
   }, [isInitialized])
 
+  // Helper function to record block transactions
+  const recordTransaction = async (
+    blockId: string,
+    blockName: string,
+    blockType: string,
+    blockRarity: string,
+    transactionType: string,
+    price?: number,
+    value?: number
+  ) => {
+    try {
+      await fetch('/api/game/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          playerId: gameState.playerId,
+          playerName: session?.user?.name || `Player ${gameState.playerId.slice(-6)}`,
+          blockId,
+          blockName,
+          blockType,
+          blockRarity,
+          transactionType,
+          price,
+          value
+        })
+      })
+    } catch (error) {
+      console.error('Error recording transaction:', error)
+      // Don't fail the main operation if transaction logging fails
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -1113,6 +1190,9 @@ export default function BlockWarsPage() {
             </div>
           </CardHeader>
         </Card>
+
+        {/* Transaction Ticker - Rolling Bar */}
+        <TransactionTicker />
 
         {/* New Economy Status */}
         <Card className="bg-gradient-to-r from-green-600/10 to-blue-600/10 border-green-500/20">

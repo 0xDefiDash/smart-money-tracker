@@ -185,3 +185,21 @@ model AlertSubscription {
   
   @@map("alert_subscriptions")
 }
+
+model BlockTransaction {
+  id            String   @id @default(cuid())
+  playerId      String
+  playerName    String?  // Store player name for display
+  blockId       String
+  blockName     String
+  blockType     String   // btc, eth, sol, etc.
+  blockRarity   String   // common, rare, epic, legendary, secret
+  transactionType String // "claim", "purchase", "steal", "sell"
+  price         Int?     // Price paid (null for free claims)
+  value         Int      // Block value in coins
+  timestamp     DateTime @default(now())
+  
+  @@map("block_transactions")
+  @@index([timestamp])
+  @@index([playerId])
+}
