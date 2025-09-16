@@ -546,7 +546,7 @@ export function BattleArena({ gameState, onStealBlock, onDefendBlocks, isLoading
                     Defense Strategy Tips
                   </h4>
                   <ul className="text-xs text-left text-muted-foreground space-y-1">
-                    <li>• Players need Attack Power > {getTotalDefenseStrength()} to target you</li>
+                    <li>• Players need Attack Power &gt; {getTotalDefenseStrength()} to target you</li>
                     <li>• Higher defense reduces enemy success rates significantly</li>
                     <li>• Consider Store upgrades for Block Protection and Fortress Mode</li>
                     <li>• Keep valuable blocks when your defense is strong</li>
