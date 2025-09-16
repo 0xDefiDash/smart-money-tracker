@@ -54,6 +54,7 @@ interface GameState {
 interface BattleArenaProps {
   gameState: GameState
   onStealBlock: (block: any, attackType: string) => void
+  onStealMoney: (enemyId: string, attackType: string) => void
   onDefendBlocks: () => void
   isLoading: boolean
 }
@@ -108,6 +109,7 @@ const ENEMY_PLAYERS = [
     name: 'CryptoNovice',
     level: 8,
     defenseStrength: 65,
+    money: 12500, // Available money to steal
     reputation: 'Newcomer',
     lastSeen: 'Online',
     blocks: [
@@ -134,6 +136,7 @@ const ENEMY_PLAYERS = [
     name: 'BlockHunter',
     level: 15,
     defenseStrength: 95,
+    money: 28750, // Available money to steal
     reputation: 'Experienced',
     lastSeen: '2m ago',
     blocks: [
@@ -160,6 +163,7 @@ const ENEMY_PLAYERS = [
     name: 'CryptoWarrior',
     level: 22,
     defenseStrength: 130,
+    money: 67500, // Available money to steal
     reputation: 'Veteran',
     lastSeen: '10m ago',
     blocks: [
@@ -186,6 +190,7 @@ const ENEMY_PLAYERS = [
     name: 'WhaleKiller',
     level: 35,
     defenseStrength: 180,
+    money: 142500, // Available money to steal
     reputation: 'Champion',
     lastSeen: 'Online',
     blocks: [
@@ -209,7 +214,7 @@ const ENEMY_PLAYERS = [
   }
 ]
 
-export function BattleArena({ gameState, onStealBlock, onDefendBlocks, isLoading }: BattleArenaProps) {
+export function BattleArena({ gameState, onStealBlock, onStealMoney, onDefendBlocks, isLoading }: BattleArenaProps) {
   const [selectedTarget, setSelectedTarget] = useState<{ blockId: string; attackType: AttackType } | null>(null)
   const [attackCooldowns, setAttackCooldowns] = useState<Record<AttackType, number>>({
     stealth: 0,
@@ -387,6 +392,84 @@ export function BattleArena({ gameState, onStealBlock, onDefendBlocks, isLoading
                             </div>
                           )}
                         </div>
+
+                        {/* Money Stealing Section */}
+                        {canTarget && (
+                          <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-3 mb-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-green-500/10 rounded-full flex items-center justify-center">
+                                  💰
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-green-700 dark:text-green-400">Steal Money</h4>
+                                  <p className="text-xs text-muted-foreground">Target has ${enemy.money.toLocaleString()}</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Money Attack Options */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                              {(Object.keys(ATTACK_TYPES) as AttackType[]).map((attackType) => {
+                                const attackInfo = ATTACK_TYPES[attackType]
+                                const cost = Math.floor(enemy.money * 0.08 * attackInfo.costMultiplier) // 8% of enemy's money as base cost
+                                const successRate = calculateSuccessRate(getTotalAttackPower(), enemy.defenseStrength, attackType)
+                                const potentialSteal = Math.floor(enemy.money * (0.15 + (successRate / 1000))) // Steal 15-25% based on success rate
+                                const isOnCooldown = attackCooldowns[attackType] > 0
+                                const canAfford = gameState.money >= cost
+                                
+                                return (
+                                  <div key={attackType} className="border border-green-500/30 rounded p-2 bg-green-500/5">
+                                    <div className="flex items-center space-x-1 mb-1">
+                                      <span style={{ color: attackInfo.color }}>
+                                        {attackInfo.icon}
+                                      </span>
+                                      <span className="text-xs font-medium">{attackInfo.name}</span>
+                                    </div>
+                                    
+                                    <div className="space-y-1 text-xs text-muted-foreground mb-2">
+                                      <div className="flex justify-between">
+                                        <span>Success:</span>
+                                        <span className={successRate > 70 ? 'text-green-500' : successRate > 40 ? 'text-yellow-500' : 'text-red-500'}>
+                                          {successRate}%
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>Cost:</span>
+                                        <span>${cost.toLocaleString()}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>Steal:</span>
+                                        <span className="text-green-600 font-medium">${potentialSteal.toLocaleString()}</span>
+                                      </div>
+                                    </div>
+                                    
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="w-full text-xs bg-green-500/10 hover:bg-green-500/20"
+                                      style={{ borderColor: '#16a34a', color: '#16a34a' }}
+                                      onClick={() => {
+                                        const cooldownTime = ATTACK_TYPES[attackType].cooldown
+                                        setAttackCooldowns(prev => ({ ...prev, [attackType]: cooldownTime }))
+                                        onStealMoney(enemy.id, attackType)
+                                      }}
+                                      disabled={isLoading || !canAfford || isOnCooldown}
+                                    >
+                                      {isOnCooldown ? (
+                                        <><Clock className="w-3 h-3 mr-1" />{attackCooldowns[attackType]}s</>
+                                      ) : !canAfford ? (
+                                        'Too Expensive'
+                                      ) : (
+                                        'STEAL MONEY'
+                                      )}
+                                    </Button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Enemy Blocks */}
                         {canTarget && (
@@ -640,6 +723,46 @@ export function BattleArena({ gameState, onStealBlock, onDefendBlocks, isLoading
                         <span><strong>Store Upgrades:</strong> Enhance your Attack Power, Defense, and special abilities in the Store</span>
                       </li>
                     </ul>
+                  </div>
+                </div>
+
+                {/* Money Stealing Mechanics */}
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center">
+                    <div className="w-4 h-4 mr-2 text-green-600">💰</div>
+                    Money Stealing Strategy
+                  </h3>
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-2">
+                        <CheckCircle className="w-4 h-4 mt-0.5 text-green-500" />
+                        <div>
+                          <p className="text-sm font-medium text-green-700 dark:text-green-400">Direct Money Attacks</p>
+                          <p className="text-xs text-muted-foreground">Attack players directly to steal 15-25% of their money without taking their blocks</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <CheckCircle className="w-4 h-4 mt-0.5 text-green-500" />
+                        <div>
+                          <p className="text-sm font-medium text-green-700 dark:text-green-400">High Risk, High Reward</p>
+                          <p className="text-xs text-muted-foreground">Stronger enemies have more money to steal but higher defense - choose targets wisely</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <CheckCircle className="w-4 h-4 mt-0.5 text-green-500" />
+                        <div>
+                          <p className="text-sm font-medium text-green-700 dark:text-green-400">Success-Based Returns</p>
+                          <p className="text-xs text-muted-foreground">Higher success rates = larger percentage stolen (up to 25% at 95% success rate)</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <CheckCircle className="w-4 h-4 mt-0.5 text-green-500" />
+                        <div>
+                          <p className="text-sm font-medium text-green-700 dark:text-green-400">Money Multiplier Bonuses</p>
+                          <p className="text-xs text-muted-foreground">Store upgrades can increase your stolen money with multiplier bonuses</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

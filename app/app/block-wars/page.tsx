@@ -858,6 +858,100 @@ export default function BlockWarsPage() {
     setBattleLog(prev => [...prev, `🛡️ Defense upgraded! +20 defense strength for 100 coins.`])
   }
 
+  const stealMoney = async (enemyId: string, attackType: string = 'direct') => {
+    setIsLoading(true)
+    
+    // Get total attack power and defense including bonuses
+    const totalAttackPower = gameState.attackPower + (gameState.upgradeEffects?.attackPowerBonus || 0)
+    
+    // Find the target enemy
+    const enemyData = {
+      'enemy_1': { defenseStrength: 65, money: 12500, name: 'CryptoNovice' },
+      'enemy_2': { defenseStrength: 95, money: 28750, name: 'BlockHunter' },
+      'enemy_3': { defenseStrength: 130, money: 67500, name: 'CryptoWarrior' },
+      'enemy_4': { defenseStrength: 180, money: 142500, name: 'WhaleKiller' }
+    }[enemyId] || { defenseStrength: 100, money: 50000, name: 'Unknown Player' }
+    
+    // Check if player can attempt steal (attack power must be > enemy defense)
+    if (totalAttackPower <= enemyData.defenseStrength) {
+      setBattleLog(prev => [...prev, `❌ Attack power too low! You need ${enemyData.defenseStrength + 1} attack power to target ${enemyData.name}.`])
+      setIsLoading(false)
+      return
+    }
+    
+    // Attack type modifiers
+    const attackTypeModifiers = {
+      'stealth': { costMultiplier: 0.7, successModifier: -5, name: 'Stealth Strike' },
+      'direct': { costMultiplier: 1.0, successModifier: 0, name: 'Direct Assault' },
+      'calculated': { costMultiplier: 1.5, successModifier: 15, name: 'Calculated Strike' }
+    }
+    
+    const attackInfo = attackTypeModifiers[attackType as keyof typeof attackTypeModifiers] || attackTypeModifiers['direct']
+    
+    // Calculate attack cost (8% of enemy's money as base cost)
+    const baseCost = Math.floor(enemyData.money * 0.08)
+    const actualCost = Math.floor(baseCost * attackInfo.costMultiplier)
+    
+    if (gameState.money < actualCost) {
+      setBattleLog(prev => [...prev, `❌ Not enough money for ${attackInfo.name}! Need $${actualCost.toLocaleString()}.`])
+      setIsLoading(false)
+      return
+    }
+    
+    // Calculate success rate based on strategic formula
+    const powerAdvantage = totalAttackPower - enemyData.defenseStrength
+    const baseSuccessRate = Math.min(85, 45 + (powerAdvantage * 2)) // Max 85% base success
+    const upgradeBonus = gameState.upgradeEffects?.stealSuccessBonus || 0
+    const finalSuccessRate = Math.max(10, Math.min(95, baseSuccessRate + attackInfo.successModifier + upgradeBonus))
+    
+    // Calculate potential money steal (15-25% of enemy's money based on success rate)
+    const stealPercentage = 0.15 + (finalSuccessRate / 1000)
+    const potentialSteal = Math.floor(enemyData.money * stealPercentage)
+    
+    const success = Math.random() * 100 < finalSuccessRate
+    
+    if (success) {
+      // Apply money multiplier bonus if available
+      const moneyMultiplier = 1 + (gameState.upgradeEffects?.moneyMultiplierBonus || 0)
+      const finalSteal = Math.floor(potentialSteal * moneyMultiplier)
+      
+      setGameState(prev => ({
+        ...prev,
+        money: prev.money - actualCost + finalSteal, // Lose cost, gain stolen money
+        experience: prev.experience + (20 + (powerAdvantage * 1.5)), // XP based on difficulty
+        lastMoneyUpdate: Date.now()
+      }))
+      
+      let successMessage = `💰 ${attackInfo.name} SUCCESS! Stole $${finalSteal.toLocaleString()} from ${enemyData.name}!`
+      if (moneyMultiplier > 1) {
+        successMessage += ` Money multiplier bonus applied! (+${Math.round((moneyMultiplier - 1) * 100)}%)`
+      }
+      successMessage += ` (+${20 + Math.floor(powerAdvantage * 1.5)} XP)`
+      
+      setBattleLog(prev => [...prev, successMessage])
+    } else {
+      // Handle steal insurance refund
+      const refundAmount = gameState.upgradeEffects?.stealInsurance ? Math.floor(actualCost * 0.5) : 0
+      const finalCost = actualCost - refundAmount
+      
+      setGameState(prev => ({
+        ...prev,
+        money: prev.money - finalCost,
+        experience: prev.experience + 3 // Small consolation XP
+      }))
+      
+      let failMessage = `💥 ${attackInfo.name} failed against ${enemyData.name}! Lost $${actualCost.toLocaleString()}.`
+      if (refundAmount > 0) {
+        failMessage += ` Steal Insurance refunded $${refundAmount.toLocaleString()}!`
+      }
+      failMessage += ` (+3 XP)`
+      
+      setBattleLog(prev => [...prev, failMessage])
+    }
+    
+    setIsLoading(false)
+  }
+
   const toggleAdminMode = () => {
     setGameState(prev => ({
       ...prev,
@@ -1297,6 +1391,7 @@ export default function BlockWarsPage() {
                 <BattleArena 
                   gameState={gameState}
                   onStealBlock={stealBlock}
+                  onStealMoney={stealMoney}
                   onDefendBlocks={defendBlocks}
                   isLoading={isLoading}
                 />
