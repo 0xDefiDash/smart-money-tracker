@@ -44,6 +44,13 @@ const LEGENDARY_BLOCKS = [
     color: '#8A2BE2', 
     image: '/images/aixbt-agent.jpg',
     description: 'The legendary AIXBT AGENT - AI-powered crypto intelligence and trading automation!'
+  },
+  { 
+    name: '100xDarren', 
+    type: '100xdarren', 
+    color: '#FF6B35', 
+    image: '/images/100xdarren.jpg',
+    description: 'The legendary 100xDarren - Master of 100x gains and crypto alpha signals!'
   }
 ]
 
