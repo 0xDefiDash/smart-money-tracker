@@ -16,6 +16,8 @@ interface Block {
   isStealable: boolean
   spawnTime: number
   traits: string[]
+  price?: number // Purchase price for premium blocks
+  isPurchasable?: boolean // Whether this block can be purchased
 }
 
 const BLOCK_TYPES = [
@@ -61,8 +63,17 @@ let lastSpawnTime = Date.now()
 let nextSpawnTime = Date.now() + 120000 // 2 minutes from now
 let isInitialized = false
 
+// Block prices based on rarity
+const BLOCK_PRICES = {
+  common: 0,        // Common blocks are FREE
+  rare: 5000,       // $5,000
+  epic: 25000,      // $25,000
+  legendary: 100000, // $100,000
+  secret: 500000    // $500,000
+}
+
 function generateInitialBlocks() {
-  const numBlocks = 3 // Start with 3 blocks
+  const numBlocks = 6 // Start with more blocks (mix of free and paid)
   const newBlocks: Block[] = []
   
   for (let i = 0; i < numBlocks; i++) {
@@ -83,9 +94,11 @@ function generateInitialBlocks() {
         image: secretBlock.image,
         color: secretBlock.color,
         description: secretBlock.description,
-        isStealable: true,
+        isStealable: false, // Secret blocks can't be stolen (premium)
         spawnTime: Date.now(),
-        traits: ['Secret Rarity', 'Legendary Power', 'Base Protocol', 'Crypto Visionary']
+        traits: ['Secret Rarity', 'Legendary Power', 'Base Protocol', 'Crypto Visionary'],
+        price: BLOCK_PRICES.secret,
+        isPurchasable: true
       })
     } else {
       const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
@@ -119,9 +132,11 @@ function generateInitialBlocks() {
           image: legendaryBlock.image,
           color: legendaryBlock.color,
           description: legendaryBlock.description,
-          isStealable: true,
+          isStealable: false, // Legendary blocks can't be stolen (premium)
           spawnTime: Date.now(),
-          traits: ['Legendary Rarity', 'AI Agent', 'Crypto Intelligence', 'Trading Bot']
+          traits: ['Legendary Rarity', 'AI Agent', 'Crypto Intelligence', 'Trading Bot'],
+          price: BLOCK_PRICES.legendary,
+          isPurchasable: true
         })
       } else if (selectedRarity === 'epic' && EPIC_BLOCKS.length > 0) {
         // Use Bullrun_Gravano for epic blocks
@@ -138,13 +153,18 @@ function generateInitialBlocks() {
           image: epicBlock.image,
           color: epicBlock.color,
           description: epicBlock.description,
-          isStealable: true,
+          isStealable: false, // Epic blocks can't be stolen (premium)
           spawnTime: Date.now(),
-          traits: ['Epic Rarity', 'Legendary Trader', 'Market Master', 'Trading Expertise']
+          traits: ['Epic Rarity', 'Legendary Trader', 'Market Master', 'Trading Expertise'],
+          price: BLOCK_PRICES.epic,
+          isPurchasable: true
         })
       } else {
         // Use regular block types for common and rare
         const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
+        
+        // Determine if block is purchasable (rare and above require payment, common is free)
+        const isPurchasable = selectedRarity !== 'common'
         
         newBlocks.push({
           id: `global_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
@@ -157,9 +177,11 @@ function generateInitialBlocks() {
           image: blockType.emoji,
           color: blockType.color,
           description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
-          isStealable: true,
+          isStealable: !isPurchasable, // Common blocks can be stolen, premium blocks cannot
           spawnTime: Date.now(),
-          traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`]
+          traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`],
+          price: isPurchasable ? BLOCK_PRICES[selectedRarity] : undefined,
+          isPurchasable
         })
       }
     }

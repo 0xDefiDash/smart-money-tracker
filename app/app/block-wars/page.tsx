@@ -419,16 +419,16 @@ export default function BlockWarsPage() {
     }
   }
 
-  // Local block generation function
+  // Local block generation function - improved spawning system
   const generateLocalBlocks = (count: number) => {
     const newBlocks: Block[] = []
     
     for (let i = 0; i < count && spawnedBlocks.length + newBlocks.length < 12; i++) {
       const blockType = BLOCK_TYPES[Math.floor(Math.random() * (BLOCK_TYPES.length - 1))] // Exclude secret block
       
-      // Weighted rarity system
+      // Improved weighted rarity system - more balanced distribution
       const rarities: Block['rarity'][] = ['common', 'rare', 'epic', 'legendary']
-      const rarityWeights = [50, 30, 15, 5]
+      const rarityWeights = [60, 25, 12, 3] // Favor common blocks but ensure premium variety
       
       let randomValue = Math.random() * 100
       let selectedRarity: Block['rarity'] = 'common'
@@ -443,7 +443,7 @@ export default function BlockWarsPage() {
       
       const baseValue = selectedRarity === 'legendary' ? 500 : selectedRarity === 'epic' ? 200 : selectedRarity === 'rare' ? 100 : 50
       
-      // Set purchase properties based on rarity
+      // Set purchase properties based on rarity - common blocks are FREE, others cost money
       const isPurchasable = selectedRarity !== 'common'
       const blockPrices = {
         common: 0,
@@ -464,7 +464,7 @@ export default function BlockWarsPage() {
         image: blockType.emoji,
         color: blockType.color,
         description: `A powerful ${selectedRarity} ${blockType.name} with unique crypto powers!`,
-        isStealable: !isPurchasable, // Premium blocks can't be stolen
+        isStealable: !isPurchasable, // Common blocks can be stolen, premium blocks cannot
         spawnTime: Date.now(),
         traits: [`${selectedRarity} rarity`, `${blockType.type.toUpperCase()} power`],
         price: isPurchasable ? blockPrices[selectedRarity] : undefined,
