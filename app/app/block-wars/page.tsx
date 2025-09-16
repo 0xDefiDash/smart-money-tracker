@@ -120,6 +120,45 @@ export default function BlockWarsPage() {
   const { data: session, status } = useSession() || {}
   const router = useRouter()
 
+  // Initialize all state hooks at the top level with default values
+  const [gameState, setGameState] = useState<GameState>({
+    playerId: 'loading',
+    coins: 1000,
+    money: 0,
+    level: 1,
+    experience: 0,
+    ownedBlocks: [],
+    defenseStrength: 100,
+    attackPower: 50,
+    lastSpawn: Date.now(),
+    nextSpawn: Date.now() + 120000, // 2 minutes
+    lastMoneyUpdate: Date.now(),
+    secretBlockSpawns: 0,
+    lastSecretSpawn: 0,
+    nextSecretSpawn: Date.now() + Math.random() * 12 * 60 * 60 * 1000, // Random time within 12 hours
+    isAdmin: false
+  })
+  
+  const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
+  const [battleLog, setBattleLog] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [timeUntilSpawn, setTimeUntilSpawn] = useState(120)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Update game state when session is available
+  useEffect(() => {
+    if (session?.user && gameState.playerId === 'loading') {
+      setGameState(prev => ({
+        ...prev,
+        playerId: session.user.id,
+        coins: session.user.gameMoney || 1000,
+        level: session.user.gameLevel || 1,
+        experience: session.user.gameExp || 0,
+        isAdmin: session.user.isAdmin || false
+      }))
+    }
+  }, [session?.user, gameState.playerId])
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (status === 'loading') return // Still loading
@@ -146,29 +185,17 @@ export default function BlockWarsPage() {
     return null // Will redirect via useEffect
   }
 
-  const [gameState, setGameState] = useState<GameState>({
-    playerId: session.user.id,
-    coins: session.user.gameMoney || 1000,
-    money: 0,
-    level: session.user.gameLevel || 1,
-    experience: session.user.gameExp || 0,
-    ownedBlocks: [],
-    defenseStrength: 100,
-    attackPower: 50,
-    lastSpawn: Date.now(),
-    nextSpawn: Date.now() + 120000, // 2 minutes
-    lastMoneyUpdate: Date.now(),
-    secretBlockSpawns: 0,
-    lastSecretSpawn: 0,
-    nextSecretSpawn: Date.now() + Math.random() * 12 * 60 * 60 * 1000, // Random time within 12 hours
-    isAdmin: session.user.isAdmin || false
-  })
-
-  const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
-  const [battleLog, setBattleLog] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [timeUntilSpawn, setTimeUntilSpawn] = useState(120)
-  const [isInitialized, setIsInitialized] = useState(false)
+  // Wait for gameState to be properly initialized
+  if (gameState.playerId === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
+          <p className="text-slate-300">Initializing Game...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Initialize game state from localStorage or API
   useEffect(() => {
