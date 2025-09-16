@@ -1,6 +1,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 // Alchemy ZORA endpoint
 const ALCHEMY_ZORA_URL = 'https://zora-mainnet.g.alchemy.com/v2/PuVtYU5KQdv0MuUE3jf1uY1nkJNZf5t5'
 
