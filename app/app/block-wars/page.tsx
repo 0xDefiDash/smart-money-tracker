@@ -48,6 +48,17 @@ interface GameState {
   lastSecretSpawn: number // Last secret block spawn time
   nextSecretSpawn: number // Next scheduled secret block spawn
   isAdmin?: boolean // Admin privileges for manual spawning
+  upgrades?: { [key: string]: number } // Track purchased upgrades and their levels
+  upgradeEffects?: {
+    attackPowerBonus: number
+    defenseStrengthBonus: number
+    stealSuccessBonus: number
+    blockProtectionBonus: number
+    moneyMultiplierBonus: number
+    collectionSizeBonus: number
+    earlyDetection: boolean
+    stealInsurance: boolean
+  }
 }
 
 interface Block {
@@ -136,7 +147,18 @@ export default function BlockWarsPage() {
     secretBlockSpawns: 0,
     lastSecretSpawn: 0,
     nextSecretSpawn: Date.now() + Math.random() * 12 * 60 * 60 * 1000, // Random time within 12 hours
-    isAdmin: false
+    isAdmin: false,
+    upgrades: {},
+    upgradeEffects: {
+      attackPowerBonus: 0,
+      defenseStrengthBonus: 0,
+      stealSuccessBonus: 0,
+      blockProtectionBonus: 0,
+      moneyMultiplierBonus: 0,
+      collectionSizeBonus: 0,
+      earlyDetection: false,
+      stealInsurance: false
+    }
   })
   
   const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
@@ -144,6 +166,9 @@ export default function BlockWarsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [timeUntilSpawn, setTimeUntilSpawn] = useState(120)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [storeItems, setStoreItems] = useState<any[]>([])
+  const [storeCategories, setStoreCategories] = useState<any>({})
+  const [selectedCategory, setSelectedCategory] = useState<'power' | 'defense' | 'special'>('power')
 
   // Update game state when session is available
   useEffect(() => {
@@ -772,6 +797,116 @@ export default function BlockWarsPage() {
     setBattleLog(prev => [...prev, `🔧 Admin mode ${!gameState.isAdmin ? 'enabled' : 'disabled'}!`])
   }
 
+  // Fetch store items from API
+  const fetchStoreItems = async () => {
+    try {
+      const response = await fetch('/api/game/store')
+      if (response.ok) {
+        const data = await response.json()
+        setStoreItems(data.items || [])
+        setStoreCategories(data.categories || {})
+      }
+    } catch (error) {
+      console.error('Error fetching store items:', error)
+      setBattleLog(prev => [...prev, '❌ Failed to load store items'])
+    }
+  }
+
+  // Purchase upgrade from store
+  const purchaseUpgrade = async (itemId: string) => {
+    const item = storeItems.find(i => i.id === itemId)
+    if (!item) {
+      setBattleLog(prev => [...prev, `❌ Item not found!`])
+      return
+    }
+
+    const currentLevel = gameState.upgrades?.[itemId] || 0
+    const actualPrice = Math.floor(item.price * Math.pow(1.5, currentLevel))
+
+    if (gameState.money < actualPrice) {
+      setBattleLog(prev => [...prev, `❌ Not enough money! Need $${actualPrice.toLocaleString()}, you have $${gameState.money.toLocaleString()}`])
+      return
+    }
+
+    if (currentLevel >= item.maxLevel) {
+      setBattleLog(prev => [...prev, `❌ ${item.name} is already at maximum level!`])
+      return
+    }
+
+    setIsLoading(true)
+    
+    try {
+      const response = await fetch('/api/game/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          itemId,
+          playerId: gameState.playerId,
+          playerMoney: gameState.money,
+          currentUpgrades: gameState.upgrades
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Update game state with new upgrade
+        setGameState(prev => {
+          const newUpgrades = { ...prev.upgrades, [itemId]: result.newLevel }
+          const currentEffects = prev.upgradeEffects || {
+            attackPowerBonus: 0,
+            defenseStrengthBonus: 0,
+            stealSuccessBonus: 0,
+            blockProtectionBonus: 0,
+            moneyMultiplierBonus: 0,
+            collectionSizeBonus: 0,
+            earlyDetection: false,
+            stealInsurance: false
+          }
+          
+          // Apply new upgrade effects
+          const newEffects = {
+            attackPowerBonus: currentEffects.attackPowerBonus + result.upgradeEffects.attackPowerBonus,
+            defenseStrengthBonus: currentEffects.defenseStrengthBonus + result.upgradeEffects.defenseStrengthBonus,
+            stealSuccessBonus: currentEffects.stealSuccessBonus + result.upgradeEffects.stealSuccessBonus,
+            blockProtectionBonus: currentEffects.blockProtectionBonus + result.upgradeEffects.blockProtectionBonus,
+            moneyMultiplierBonus: currentEffects.moneyMultiplierBonus + result.upgradeEffects.moneyMultiplierBonus,
+            collectionSizeBonus: currentEffects.collectionSizeBonus + result.upgradeEffects.collectionSizeBonus,
+            earlyDetection: currentEffects.earlyDetection || result.upgradeEffects.earlyDetection,
+            stealInsurance: currentEffects.stealInsurance || result.upgradeEffects.stealInsurance
+          }
+
+          return {
+            ...prev,
+            money: result.remainingMoney,
+            upgrades: newUpgrades,
+            upgradeEffects: newEffects,
+            // Apply permanent stat bonuses
+            attackPower: itemId.includes('attack') ? prev.attackPower + result.upgradeEffects.attackPowerBonus : prev.attackPower,
+            defenseStrength: itemId.includes('defense') ? prev.defenseStrength + result.upgradeEffects.defenseStrengthBonus : prev.defenseStrength
+          }
+        })
+        
+        setBattleLog(prev => [...prev, `🛒 ${result.message} Power up complete!`])
+        
+      } else {
+        const errorData = await response.json()
+        setBattleLog(prev => [...prev, `❌ Purchase failed: ${errorData.error}`])
+      }
+    } catch (error) {
+      setBattleLog(prev => [...prev, `❌ Network error during purchase. Please try again!`])
+    }
+    
+    setIsLoading(false)
+  }
+
+  // Load store items on initialization
+  useEffect(() => {
+    if (isInitialized) {
+      fetchStoreItems()
+    }
+  }, [isInitialized])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -884,7 +1019,7 @@ export default function BlockWarsPage() {
           {/* Main Game Area */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="arena" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="arena" className="flex items-center space-x-2">
                   <Target className="w-4 h-4" />
                   <span>Arena</span>
@@ -892,6 +1027,10 @@ export default function BlockWarsPage() {
                 <TabsTrigger value="collection" className="flex items-center space-x-2">
                   <Crown className="w-4 h-4" />
                   <span>Collection</span>
+                </TabsTrigger>
+                <TabsTrigger value="store" className="flex items-center space-x-2">
+                  <Coins className="w-4 h-4" />
+                  <span>Store</span>
                 </TabsTrigger>
                 <TabsTrigger value="battles" className="flex items-center space-x-2">
                   <Sword className="w-4 h-4" />
@@ -922,6 +1061,167 @@ export default function BlockWarsPage() {
                   onSellBlock={sellBlock}
                   isLoading={isLoading}
                 />
+              </TabsContent>
+
+              <TabsContent value="store" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Coins className="w-5 h-5 text-yellow-500" />
+                      <span>Upgrade Store</span>
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Use your earned money to buy powerful upgrades! Upgrades stack and get more expensive with each level.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {/* Category Selection */}
+                      <div className="flex space-x-2">
+                        {['power', 'defense', 'special'].map((category) => (
+                          <Button
+                            key={category}
+                            variant={selectedCategory === category ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSelectedCategory(category as any)}
+                            className={`capitalize ${
+                              selectedCategory === category 
+                                ? 'bg-purple-600 hover:bg-purple-700' 
+                                : 'hover:bg-purple-600/20'
+                            }`}
+                          >
+                            {category === 'power' && '⚔️'}
+                            {category === 'defense' && '🛡️'}
+                            {category === 'special' && '✨'}
+                            {' '}
+                            {category}
+                          </Button>
+                        ))}
+                      </div>
+
+                      {/* Category Description */}
+                      <div className="text-sm text-muted-foreground">
+                        {storeCategories[selectedCategory] || 'Loading category info...'}
+                      </div>
+
+                      {/* Store Items */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {storeItems
+                          .filter(item => item.category === selectedCategory)
+                          .map(item => {
+                            const currentLevel = gameState.upgrades?.[item.id] || 0
+                            const actualPrice = Math.floor(item.price * Math.pow(1.5, currentLevel))
+                            const canAfford = gameState.money >= actualPrice
+                            const maxLevel = currentLevel >= item.maxLevel
+                            
+                            return (
+                              <Card key={item.id} className={`border-2 ${maxLevel ? 'border-green-500/50 bg-green-500/5' : canAfford ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-gray-500/20'}`}>
+                                <CardContent className="p-4">
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-2xl" style={{ color: item.color }}>
+                                        {item.icon}
+                                      </span>
+                                      <div>
+                                        <h3 className="font-bold text-sm">{item.name}</h3>
+                                        <p className="text-xs text-muted-foreground">
+                                          Level {currentLevel}/{item.maxLevel}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="font-bold text-sm" style={{ color: item.color }}>
+                                        ${actualPrice.toLocaleString()}
+                                      </p>
+                                      {currentLevel > 0 && (
+                                        <p className="text-xs text-muted-foreground">
+                                          Base: ${item.price.toLocaleString()}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <p className="text-xs text-muted-foreground mb-2">
+                                    {item.description}
+                                  </p>
+                                  
+                                  <div className="flex items-center justify-between">
+                                    <Badge variant="outline" className="text-xs">
+                                      {item.effect}
+                                    </Badge>
+                                    
+                                    <Button
+                                      size="sm"
+                                      disabled={!canAfford || maxLevel || isLoading}
+                                      onClick={() => purchaseUpgrade(item.id)}
+                                      className={`text-xs ${
+                                        maxLevel 
+                                          ? 'bg-green-600 text-white'
+                                          : canAfford
+                                          ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                                          : 'bg-gray-600 text-gray-300'
+                                      }`}
+                                    >
+                                      {isLoading && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                                      {maxLevel ? 'MAX' : canAfford ? 'BUY' : 'TOO EXPENSIVE'}
+                                    </Button>
+                                  </div>
+                                  
+                                  {currentLevel > 0 && (
+                                    <div className="mt-2 pt-2 border-t border-gray-500/20">
+                                      <p className="text-xs text-green-400">
+                                        ✅ Owned (Level {currentLevel}) - {item.effect} active
+                                      </p>
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            )
+                          })}
+                      </div>
+
+                      {/* Current Upgrades Summary */}
+                      {gameState.upgrades && Object.keys(gameState.upgrades).length > 0 && (
+                        <Card className="bg-blue-500/10 border-blue-500/20">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center space-x-2">
+                              <Star className="w-5 h-5 text-blue-400" />
+                              <span>Active Upgrades</span>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                              {(gameState.upgradeEffects?.attackPowerBonus || 0) > 0 && (
+                                <div className="text-red-400">⚔️ +{gameState.upgradeEffects?.attackPowerBonus || 0} Attack</div>
+                              )}
+                              {(gameState.upgradeEffects?.defenseStrengthBonus || 0) > 0 && (
+                                <div className="text-blue-400">🛡️ +{gameState.upgradeEffects?.defenseStrengthBonus || 0} Defense</div>
+                              )}
+                              {(gameState.upgradeEffects?.stealSuccessBonus || 0) > 0 && (
+                                <div className="text-orange-400">💥 +{gameState.upgradeEffects?.stealSuccessBonus || 0}% Steal Rate</div>
+                              )}
+                              {(gameState.upgradeEffects?.blockProtectionBonus || 0) > 0 && (
+                                <div className="text-cyan-400">🏰 +{gameState.upgradeEffects?.blockProtectionBonus || 0}% Protection</div>
+                              )}
+                              {(gameState.upgradeEffects?.moneyMultiplierBonus || 0) > 0 && (
+                                <div className="text-green-400">💰 +{gameState.upgradeEffects?.moneyMultiplierBonus || 0}% Money</div>
+                              )}
+                              {(gameState.upgradeEffects?.collectionSizeBonus || 0) > 0 && (
+                                <div className="text-yellow-400">📦 +{gameState.upgradeEffects?.collectionSizeBonus || 0} Slots</div>
+                              )}
+                              {gameState.upgradeEffects?.earlyDetection && (
+                                <div className="text-purple-400">📡 Early Detection</div>
+                              )}
+                              {gameState.upgradeEffects?.stealInsurance && (
+                                <div className="text-pink-400">🔒 Steal Insurance</div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="battles">
