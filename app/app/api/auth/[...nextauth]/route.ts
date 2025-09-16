@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs'
 
 const authOptions = {
   adapter: PrismaAdapter(prisma),
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: 'credentials',
