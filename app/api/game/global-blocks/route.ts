@@ -113,6 +113,21 @@ export async function GET(request: NextRequest) {
     // Force regenerate blocks on each call to ensure fresh blocks with proper properties
     generateInitialBlocks()
     
+    // TESTING: Temporarily force the first block to be purchasable for testing
+    if (globalBlocks.length > 0 && globalBlocks[0].rarity === 'common') {
+      globalBlocks[0] = {
+        ...globalBlocks[0],
+        rarity: 'epic',
+        isPurchasable: true,
+        price: 25000,
+        isStealable: false,
+        description: 'TESTING: A premium epic block for purchase testing!',
+        value: 200,
+        power: 120,
+        defense: 80
+      }
+    }
+    
     return NextResponse.json({ 
       blocks: globalBlocks,
       totalBlocks: globalBlocks.length,

@@ -122,9 +122,9 @@ export default function BlockWarsPage() {
 
   // Initialize all state hooks at the top level with default values
   const [gameState, setGameState] = useState<GameState>({
-    playerId: 'loading',
+    playerId: session?.user?.id || 'test_player_' + Math.random().toString(36).substr(2, 9), // TESTING: Use session or create test ID
     coins: 1000,
-    money: 0,
+    money: 500000, // TESTING: Give enough money to test purchasing ($500k)
     level: 1,
     experience: 0,
     ownedBlocks: [],
@@ -159,6 +159,9 @@ export default function BlockWarsPage() {
     }
   }, [session?.user, gameState.playerId])
 
+  // TEMPORARY: Skip authentication for testing
+  // Comment out authentication checks for testing purposes
+  /*
   // Redirect to login if not authenticated
   useEffect(() => {
     if (status === 'loading') return // Still loading
@@ -184,7 +187,10 @@ export default function BlockWarsPage() {
   if (status === 'unauthenticated' || !session?.user) {
     return null // Will redirect via useEffect
   }
+  */
 
+  // TESTING: Skip the loading check since we're initializing with default values
+  /*
   // Wait for gameState to be properly initialized
   if (gameState.playerId === 'loading') {
     return (
@@ -196,6 +202,7 @@ export default function BlockWarsPage() {
       </div>
     )
   }
+  */
 
   // Initialize game state from localStorage or API
   useEffect(() => {
