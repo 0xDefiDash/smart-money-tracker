@@ -114,17 +114,30 @@ const BLOCK_TYPES = [
 ]
 
 // Helper function to calculate total money per minute from owned blocks
-const calculateMoneyPerMinute = (ownedBlocks: Block[]): number => {
-  return ownedBlocks.reduce((total, block) => {
+const calculateMoneyPerMinute = (ownedBlocks: Block[], upgradeEffects?: any): number => {
+  const baseMoneyPerMinute = ownedBlocks.reduce((total, block) => {
     return total + MONEY_PRODUCTION_RATES[block.rarity]
   }, 0)
+  
+  // Apply money multiplier bonus from upgrades
+  const multiplierBonus = upgradeEffects?.moneyMultiplierBonus || 0
+  const multiplier = 1 + (multiplierBonus / 100) // Convert percentage to multiplier
+  
+  return Math.floor(baseMoneyPerMinute * multiplier)
 }
 
 // Helper function to calculate accumulated money since last update
-const calculateAccumulatedMoney = (ownedBlocks: Block[], lastUpdate: number): number => {
+const calculateAccumulatedMoney = (ownedBlocks: Block[], lastUpdate: number, upgradeEffects?: any): number => {
   const minutesElapsed = (Date.now() - lastUpdate) / 60000 // Convert to minutes
-  const moneyPerMinute = calculateMoneyPerMinute(ownedBlocks)
+  const moneyPerMinute = calculateMoneyPerMinute(ownedBlocks, upgradeEffects)
   return Math.floor(moneyPerMinute * minutesElapsed)
+}
+
+// Helper function to get maximum collection size including bonuses
+const getMaxCollectionSize = (upgradeEffects?: any): number => {
+  const baseSize = 12
+  const collectionBonus = upgradeEffects?.collectionSizeBonus || 0
+  return baseSize + collectionBonus
 }
 
 export default function BlockWarsPage() {
@@ -275,7 +288,7 @@ export default function BlockWarsPage() {
 
     const moneyTimer = setInterval(() => {
       setGameState(prev => {
-        const accumulatedMoney = calculateAccumulatedMoney(prev.ownedBlocks, prev.lastMoneyUpdate)
+        const accumulatedMoney = calculateAccumulatedMoney(prev.ownedBlocks, prev.lastMoneyUpdate, prev.upgradeEffects)
         
         if (accumulatedMoney > 0) {
           return {
@@ -337,7 +350,7 @@ export default function BlockWarsPage() {
         }
         
         // Calculate and add accumulated money from passive generation
-        const accumulatedMoney = calculateAccumulatedMoney(parsedState.ownedBlocks, parsedState.lastMoneyUpdate)
+        const accumulatedMoney = calculateAccumulatedMoney(parsedState.ownedBlocks, parsedState.lastMoneyUpdate, parsedState.upgradeEffects)
         if (accumulatedMoney > 0) {
           parsedState.money = (parsedState.money || 0) + accumulatedMoney
           parsedState.lastMoneyUpdate = Date.now()
@@ -736,37 +749,93 @@ export default function BlockWarsPage() {
     setIsLoading(false)
   }
 
-  const stealBlock = async (targetBlock: Block) => {
+  const stealBlock = async (targetBlock: Block, attackType: string = 'direct') => {
     setIsLoading(true)
     
-    const success = Math.random() > 0.5 // 50% success rate
-    const cost = Math.floor(targetBlock.value * 0.1)
+    // Get total attack power and defense including bonuses
+    const totalAttackPower = gameState.attackPower + (gameState.upgradeEffects?.attackPowerBonus || 0)
+    const totalDefenseStrength = gameState.defenseStrength + (gameState.upgradeEffects?.defenseStrengthBonus || 0)
     
-    if (gameState.coins < cost) {
-      setBattleLog(prev => [...prev, `❌ Not enough coins to attempt steal! Need ${cost} coins.`])
+    // Find the target enemy based on block owner
+    const targetEnemy = {
+      'enemy_block_1': { defenseStrength: 65, name: 'CryptoNovice' },
+      'enemy_block_2': { defenseStrength: 95, name: 'BlockHunter' },
+      'enemy_block_3': { defenseStrength: 130, name: 'CryptoWarrior' },
+      'enemy_block_4': { defenseStrength: 180, name: 'WhaleKiller' }
+    }[targetBlock.id] || { defenseStrength: 100, name: 'Unknown Player' }
+    
+    // Check if player can attempt steal (attack power must be > enemy defense)
+    if (totalAttackPower <= targetEnemy.defenseStrength) {
+      setBattleLog(prev => [...prev, `❌ Attack power too low! You need ${targetEnemy.defenseStrength + 1} attack power to target ${targetEnemy.name}.`])
       setIsLoading(false)
       return
     }
     
+    // Attack type modifiers
+    const attackTypeModifiers = {
+      'stealth': { costMultiplier: 0.7, successModifier: -5, name: 'Stealth Strike' },
+      'direct': { costMultiplier: 1.0, successModifier: 0, name: 'Direct Assault' },
+      'calculated': { costMultiplier: 1.5, successModifier: 15, name: 'Calculated Strike' }
+    }
+    
+    const attackInfo = attackTypeModifiers[attackType as keyof typeof attackTypeModifiers] || attackTypeModifiers['direct']
+    
+    // Calculate attack cost (now using money instead of coins)
+    const baseCost = Math.floor(targetBlock.value * 0.15) // 15% of block value
+    const actualCost = Math.floor(baseCost * attackInfo.costMultiplier)
+    
+    if (gameState.money < actualCost) {
+      setBattleLog(prev => [...prev, `❌ Not enough money for ${attackInfo.name}! Need $${actualCost.toLocaleString()}.`])
+      setIsLoading(false)
+      return
+    }
+    
+    // Check if collection is full
+    if (gameState.ownedBlocks.length >= 12) {
+      setBattleLog(prev => [...prev, `❌ Collection full! Sell some blocks to make space.`])
+      setIsLoading(false)
+      return
+    }
+    
+    // Calculate success rate based on strategic formula
+    const powerAdvantage = totalAttackPower - targetEnemy.defenseStrength
+    const baseSuccessRate = Math.min(85, 45 + (powerAdvantage * 2)) // Max 85% base success
+    const upgradeBonus = gameState.upgradeEffects?.stealSuccessBonus || 0
+    const finalSuccessRate = Math.max(10, Math.min(95, baseSuccessRate + attackInfo.successModifier + upgradeBonus))
+    
+    const success = Math.random() * 100 < finalSuccessRate
+    
     if (success) {
+      // Apply steal insurance refund if available and this was a failure (but it succeeded, so no refund)
       setGameState(prev => ({
         ...prev,
         ownedBlocks: [...prev.ownedBlocks, { ...targetBlock, owner: prev.playerId }],
-        coins: prev.coins - cost + targetBlock.value,
-        // Removed immediate money reward - stolen blocks will earn passively
-        experience: prev.experience + 15,
+        money: prev.money - actualCost,
+        coins: prev.coins + targetBlock.value, // Still get coins as reward
+        experience: prev.experience + (25 + (powerAdvantage * 2)), // More XP for harder targets
         lastMoneyUpdate: Date.now()
       }))
       
       const moneyPerMinute = MONEY_PRODUCTION_RATES[targetBlock.rarity]
-      setBattleLog(prev => [...prev, `🎯 Successfully stole ${targetBlock.name}! Gained ${targetBlock.value} value and it will earn $${moneyPerMinute}/min!`])
+      setBattleLog(prev => [...prev, `🎯 ${attackInfo.name} SUCCESS! Stole ${targetBlock.name} from ${targetEnemy.name}! Now earning $${moneyPerMinute}/min! (+${25 + (powerAdvantage * 2)} XP)`])
     } else {
+      // Handle steal insurance refund
+      const refundAmount = gameState.upgradeEffects?.stealInsurance ? Math.floor(actualCost * 0.5) : 0
+      const finalCost = actualCost - refundAmount
+      
       setGameState(prev => ({
         ...prev,
-        coins: prev.coins - cost
+        money: prev.money - finalCost,
+        experience: prev.experience + 5 // Small consolation XP
       }))
       
-      setBattleLog(prev => [...prev, `💥 Steal attempt failed! Lost ${cost} coins to defense systems.`])
+      let failMessage = `💥 ${attackInfo.name} failed against ${targetEnemy.name}! Lost $${actualCost.toLocaleString()}.`
+      if (refundAmount > 0) {
+        failMessage += ` Steal Insurance refunded $${refundAmount.toLocaleString()}!`
+      }
+      failMessage += ` (+5 XP)`
+      
+      setBattleLog(prev => [...prev, failMessage])
     }
     
     setIsLoading(false)
