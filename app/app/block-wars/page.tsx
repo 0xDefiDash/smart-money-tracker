@@ -1188,6 +1188,85 @@ export default function BlockWarsPage() {
           </CardHeader>
         </Card>
 
+        {/* Defidash Rewards Section */}
+        <Card className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-yellow-500/30 shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="text-center">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent flex items-center justify-center space-x-2 mb-2">
+                <Trophy className="w-6 h-6 text-yellow-500" />
+                <span>🏆 Weekly Defidash Rewards 🏆</span>
+                <Trophy className="w-6 h-6 text-yellow-500" />
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Top 5 leaderboard positions earn $DEFIDASH tokens every week!</p>
+            </div>
+            
+            <div className="grid grid-cols-5 gap-3 mt-4">
+              {/* 1st Place */}
+              <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/30 border-2 border-yellow-400/40 rounded-lg p-3 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-transparent"></div>
+                <div className="relative z-10">
+                  <div className="text-2xl mb-1">🥇</div>
+                  <div className="text-xs font-bold text-yellow-400 mb-1">1st Place</div>
+                  <div className="text-lg font-bold text-yellow-300">1,000</div>
+                  <div className="text-xs text-yellow-400/80">$DEFIDASH</div>
+                </div>
+              </div>
+
+              {/* 2nd Place */}
+              <div className="bg-gradient-to-br from-gray-400/20 to-gray-500/30 border-2 border-gray-400/40 rounded-lg p-3 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-300/10 to-transparent"></div>
+                <div className="relative z-10">
+                  <div className="text-2xl mb-1">🥈</div>
+                  <div className="text-xs font-bold text-gray-300 mb-1">2nd Place</div>
+                  <div className="text-lg font-bold text-gray-200">750</div>
+                  <div className="text-xs text-gray-300/80">$DEFIDASH</div>
+                </div>
+              </div>
+
+              {/* 3rd Place */}
+              <div className="bg-gradient-to-br from-orange-600/20 to-orange-700/30 border-2 border-orange-500/40 rounded-lg p-3 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-400/10 to-transparent"></div>
+                <div className="relative z-10">
+                  <div className="text-2xl mb-1">🥉</div>
+                  <div className="text-xs font-bold text-orange-400 mb-1">3rd Place</div>
+                  <div className="text-lg font-bold text-orange-300">500</div>
+                  <div className="text-xs text-orange-400/80">$DEFIDASH</div>
+                </div>
+              </div>
+
+              {/* 4th Place */}
+              <div className="bg-gradient-to-br from-blue-600/20 to-blue-700/30 border-2 border-blue-500/40 rounded-lg p-3 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-transparent"></div>
+                <div className="relative z-10">
+                  <div className="text-2xl mb-1">🎖️</div>
+                  <div className="text-xs font-bold text-blue-400 mb-1">4th Place</div>
+                  <div className="text-lg font-bold text-blue-300">300</div>
+                  <div className="text-xs text-blue-400/80">$DEFIDASH</div>
+                </div>
+              </div>
+
+              {/* 5th Place */}
+              <div className="bg-gradient-to-br from-purple-600/20 to-purple-700/30 border-2 border-purple-500/40 rounded-lg p-3 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-transparent"></div>
+                <div className="relative z-10">
+                  <div className="text-2xl mb-1">🏅</div>
+                  <div className="text-xs font-bold text-purple-400 mb-1">5th Place</div>
+                  <div className="text-lg font-bold text-purple-300">200</div>
+                  <div className="text-xs text-purple-400/80">$DEFIDASH</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-center mt-4">
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 rounded-full px-4 py-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-green-400">Weekly Reset: Sunday 12:00 UTC</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+
         {/* Transaction Ticker - Rolling Bar */}
         <TransactionTicker />
 
