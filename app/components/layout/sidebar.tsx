@@ -13,7 +13,8 @@ import {
   Wallet,
   Zap,
   Target,
-  Rocket
+  Rocket,
+  Gamepad2
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -23,11 +24,15 @@ const sidebarItems = [
     icon: Home,
   },
   {
+    title: 'Block Wars',
+    href: '/block-wars',
+    icon: Gamepad2,
+  },
+  {
     title: 'Live Market',
     href: '/market',
     icon: TrendingUp,
   },
-
   {
     title: 'Whale Tracker',
     href: '/whale-tracker',

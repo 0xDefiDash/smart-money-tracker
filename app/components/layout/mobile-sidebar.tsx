@@ -27,6 +27,11 @@ const sidebarItems = [
     icon: Home,
   },
   {
+    title: 'Block Wars',
+    href: '/block-wars',
+    icon: Gamepad2,
+  },
+  {
     title: 'Live Market',
     href: '/market',
     icon: TrendingUp,
@@ -70,12 +75,6 @@ const sidebarItems = [
     title: 'Wallet Dashboard',
     href: '/wallet-dashboard',
     icon: Activity,
-  },
-
-  {
-    title: 'Block Wars',
-    href: '/block-wars',
-    icon: Gamepad2,
   },
 ]
 
