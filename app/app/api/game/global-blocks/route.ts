@@ -41,6 +41,13 @@ const EPIC_BLOCKS = [
     color: '#9932CC', 
     image: '/images/1crypticpoet.jpg',
     description: '1CrypticPoet - The crowned Base Alpha supporter with royal crypto wisdom and poetic insights!'
+  },
+  { 
+    name: 'poe_real69 - The Godfather Trench Warrior POE', 
+    type: 'poe-real69', 
+    color: '#FF4500', 
+    image: '/images/poe-real69.jpg',
+    description: 'The Godfather Trench Warrior POE - Elite crypto strategist and battlefield commander with epic trading prowess!'
   }
 ]
 
