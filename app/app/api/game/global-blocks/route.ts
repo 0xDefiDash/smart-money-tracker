@@ -75,6 +75,13 @@ const SECRET_BLOCKS = [
     color: '#FFD700', 
     image: '/images/jesse-pollak.jpg',
     description: 'The legendary Jesse Pollak - Base Protocol architect and crypto visionary!'
+  },
+  { 
+    name: 'realDonaldTrump', 
+    type: 'realdonaldtrump', 
+    color: '#FF0000', 
+    image: '/images/realdonaldtrump.jpg',
+    description: 'realDonaldTrump - The ultimate power block with legendary status and maximum authority!'
   }
 ]
 
