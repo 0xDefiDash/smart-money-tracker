@@ -3,33 +3,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { blockId, playerId, playerMoney, ownedBlocks } = await request.json()
+    const { blockId, playerId, playerMoney, ownedBlocks, blockData } = await request.json()
     
-    if (!blockId || !playerId) {
+    if (!blockId || !playerId || !blockData) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
     }
 
-    // Fetch the actual block data from global blocks to preserve original information
-    let originalBlock = null
-    try {
-      // Get the base URL from the request
-      const baseUrl = request.nextUrl.origin
-      const globalBlocksResponse = await fetch(`${baseUrl}/api/game/global-blocks`)
-      const globalBlocksData = await globalBlocksResponse.json()
-      
-      if (globalBlocksData.blocks) {
-        originalBlock = globalBlocksData.blocks.find((block: any) => block.id === blockId)
-        console.log('Found original block:', originalBlock?.name || 'Not found')
-      }
-    } catch (error) {
-      console.error('Error fetching global blocks:', error)
-    }
-
-    // If we couldn't find the original block, return error
-    if (!originalBlock) {
-      return NextResponse.json({ error: 'Block not found or no longer available' }, { status: 404 })
-    }
-
+    // Use the block data passed from frontend (more reliable than fetching again)
+    const originalBlock = blockData
+    
     // Use original block data
     const blockName = originalBlock.name
     const blockType = originalBlock.type

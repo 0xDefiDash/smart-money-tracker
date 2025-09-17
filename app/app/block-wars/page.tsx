@@ -637,7 +637,8 @@ export default function BlockWarsPage() {
           blockId,
           playerId: gameState.playerId,
           playerMoney: gameState.money,
-          ownedBlocks: gameState.ownedBlocks
+          ownedBlocks: gameState.ownedBlocks,
+          blockData: block // Pass the complete block data
         })
       })
 
