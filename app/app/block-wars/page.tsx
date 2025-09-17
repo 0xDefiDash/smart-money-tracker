@@ -1006,15 +1006,41 @@ export default function BlockWarsPage() {
   // Fetch store items from API
   const fetchStoreItems = async () => {
     try {
-      const response = await fetch('/api/game/store')
+      const response = await fetch('/api/game/store', {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
+      
       if (response.ok) {
         const data = await response.json()
-        setStoreItems(data.items || [])
-        setStoreCategories(data.categories || {})
+        console.log('Store data received:', data) // Debug log
+        
+        if (data.success) {
+          setStoreItems(data.items || [])
+          setStoreCategories(data.categories || {
+            power: 'Increase your offensive capabilities',
+            defense: 'Protect your blocks from thieves', 
+            special: 'Unique abilities and bonuses'
+          })
+          setBattleLog(prev => [...prev, `✅ Loaded ${data.totalItems || data.items?.length || 0} store items`])
+        } else {
+          throw new Error(data.error || 'Failed to load store data')
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
     } catch (error) {
       console.error('Error fetching store items:', error)
-      setBattleLog(prev => [...prev, '❌ Failed to load store items'])
+      setBattleLog(prev => [...prev, '❌ Failed to load store items - using fallback data'])
+      
+      // Set fallback categories
+      setStoreCategories({
+        power: 'Increase your offensive capabilities with attack upgrades, critical strikes, and combat bonuses',
+        defense: 'Protect your blocks from thieves with shields, fortifications, and defensive abilities', 
+        special: 'Unique abilities and economic bonuses including profit boosters, passive income, and utility upgrades'
+      })
     }
   }
 
@@ -1107,6 +1133,11 @@ export default function BlockWarsPage() {
   }
 
   // Load store items on initialization
+  useEffect(() => {
+    fetchStoreItems()
+  }, [])
+
+  // Also load store items when game is initialized (backup)
   useEffect(() => {
     if (isInitialized) {
       fetchStoreItems()
@@ -1421,7 +1452,7 @@ export default function BlockWarsPage() {
 
                       {/* Category Description */}
                       <div className="text-sm text-muted-foreground">
-                        {storeCategories[selectedCategory] || 'Loading category info...'}
+                        {storeCategories[selectedCategory] || (Object.keys(storeCategories).length === 0 ? 'Loading category info...' : 'Category information unavailable')}
                       </div>
 
                       {/* Store Items */}

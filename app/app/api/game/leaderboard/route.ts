@@ -32,205 +32,145 @@ interface LeaderboardEntry {
 // In-memory player data store (in production this would be a database)
 const playerDataStore = new Map<string, LeaderboardEntry>()
 
+// Helper function to add missing properties to player data
+const addMissingPlayerProperties = (player: any): LeaderboardEntry => {
+  const baseAttackPower = Math.floor(player.level * 2 + player.winRate * 0.5)
+  const baseDefensePower = Math.floor(player.level * 1.8 + player.blocksOwned * 10)
+  
+  return {
+    ...player,
+    attackPower: player.attackPower || baseAttackPower,
+    defenseStrength: player.defenseStrength || baseDefensePower,
+    upgradesPurchased: player.upgradesPurchased || Math.floor(player.level / 3),
+    totalUpgradesCost: player.totalUpgradesCost || Math.floor(player.money * 0.3),
+    lastActive: player.lastActive || new Date().toISOString()
+  }
+}
+
 // Initialize with some demo players for showcase
 const initializeDemoPlayers = () => {
   if (playerDataStore.size === 0) {
-    const demoPlayers: LeaderboardEntry[] = [
-  {
-    playerId: 'player_1',
-    playerName: 'CryptoKing_2025',
-    level: 47,
-    money: 2847392,
-    blocksOwned: 12, // Max blocks
-    totalValue: 3200000,
-    winRate: 89.5,
-    battlesWon: 234,
-    battlesLost: 27,
-    moneyPerMinute: 8450,
-    rareBlocksOwned: 3,
-    epicBlocksOwned: 4,
-    legendaryBlocksOwned: 3,
-    secretBlocksOwned: 2,
-    rank: 1,
-    badge: 'Diamond Whale',
-    badgeColor: '#3B82F6'
-  },
-  {
-    playerId: 'player_2', 
-    playerName: 'BlockMaster_Pro',
-    level: 42,
-    money: 1923847,
-    blocksOwned: 12,
-    totalValue: 2100000,
-    winRate: 76.3,
-    battlesWon: 189,
-    battlesLost: 59,
-    moneyPerMinute: 6200,
-    rareBlocksOwned: 4,
-    epicBlocksOwned: 3,
-    legendaryBlocksOwned: 2,
-    secretBlocksOwned: 3,
-    rank: 2,
-    badge: 'Platinum Master',
-    badgeColor: '#8B5CF6'
-  },
-  {
-    playerId: 'player_3',
-    playerName: 'WhaleHunter_77',
-    level: 38,
-    money: 1456291,
-    blocksOwned: 11,
-    totalValue: 1800000,
-    winRate: 82.1,
-    battlesWon: 156,
-    battlesLost: 34,
-    moneyPerMinute: 4850,
-    rareBlocksOwned: 2,
-    epicBlocksOwned: 3,
-    legendaryBlocksOwned: 3,
-    secretBlocksOwned: 3,
-    rank: 3,
-    badge: 'Gold Hunter',
-    badgeColor: '#F59E0B'
-  },
-  {
-    playerId: 'player_4',
-    playerName: 'DefiMaster_2025',
-    level: 35,
-    money: 1234567,
-    blocksOwned: 10,
-    totalValue: 1500000,
-    winRate: 71.4,
-    battlesWon: 125,
-    battlesLost: 50,
-    moneyPerMinute: 3900,
-    rareBlocksOwned: 3,
-    epicBlocksOwned: 2,
-    legendaryBlocksOwned: 2,
-    secretBlocksOwned: 3,
-    rank: 4,
-    badge: 'DeFi Lord',
-    badgeColor: '#10B981'
-  },
-  {
-    playerId: 'player_5',
-    playerName: 'NFTCollector_X',
-    level: 33,
-    money: 1098765,
-    blocksOwned: 12,
-    totalValue: 1200000,
-    winRate: 68.9,
-    battlesWon: 98,
-    battlesLost: 44,
-    moneyPerMinute: 3200,
-    rareBlocksOwned: 5,
-    epicBlocksOwned: 2,
-    legendaryBlocksOwned: 1,
-    secretBlocksOwned: 4,
-    rank: 5,
-    badge: 'Silver Collector',
-    badgeColor: '#6B7280'
-  },
-  {
-    playerId: 'player_6',
-    playerName: 'SatoshiDisciple',
-    level: 31,
-    money: 987654,
-    blocksOwned: 9,
-    totalValue: 1100000,
-    winRate: 74.2,
-    battlesWon: 89,
-    battlesLost: 31,
-    moneyPerMinute: 2800,
-    rareBlocksOwned: 2,
-    epicBlocksOwned: 2,
-    legendaryBlocksOwned: 2,
-    secretBlocksOwned: 3,
-    rank: 6,
-    badge: 'Bitcoin Disciple',
-    badgeColor: '#F7931A'
-  },
-  {
-    playerId: 'player_7',
-    playerName: 'AltcoinAlpha',
-    level: 29,
-    money: 876543,
-    blocksOwned: 8,
-    totalValue: 950000,
-    winRate: 63.8,
-    battlesWon: 76,
-    battlesLost: 43,
-    moneyPerMinute: 2400,
-    rareBlocksOwned: 3,
-    epicBlocksOwned: 1,
-    legendaryBlocksOwned: 1,
-    secretBlocksOwned: 3,
-    rank: 7,
-    badge: 'Alt Explorer',
-    badgeColor: '#EF4444'
-  },
-  {
-    playerId: 'player_8',
-    playerName: 'YieldFarmer_Pro',
-    level: 27,
-    money: 765432,
-    blocksOwned: 7,
-    totalValue: 820000,
-    winRate: 69.1,
-    battlesWon: 65,
-    battlesLost: 29,
-    moneyPerMinute: 2100,
-    rareBlocksOwned: 2,
-    epicBlocksOwned: 1,
-    legendaryBlocksOwned: 1,
-    secretBlocksOwned: 3,
-    rank: 8,
-    badge: 'Yield Master',
-    badgeColor: '#059669'
-  },
-  {
-    playerId: 'player_9',
-    playerName: 'StakingStorm',
-    level: 25,
-    money: 654321,
-    blocksOwned: 6,
-    totalValue: 700000,
-    winRate: 58.7,
-    battlesWon: 54,
-    battlesLost: 38,
-    moneyPerMinute: 1800,
-    rareBlocksOwned: 2,
-    epicBlocksOwned: 1,
-    legendaryBlocksOwned: 0,
-    secretBlocksOwned: 3,
-    rank: 9,
-    badge: 'Staking Pro',
-    badgeColor: '#7C3AED'
-  },
-  {
-    playerId: 'player_10',
-    playerName: 'LiquidityLord',
-    level: 23,
-    money: 543210,
-    blocksOwned: 5,
-    totalValue: 580000,
-    winRate: 61.3,
-    battlesWon: 49,
-    battlesLost: 31,
-    moneyPerMinute: 1500,
-    rareBlocksOwned: 1,
-    epicBlocksOwned: 1,
-    legendaryBlocksOwned: 0,
-    secretBlocksOwned: 3,
-    rank: 10,
-    badge: 'Liquidity Seeker',
-    badgeColor: '#0891B2'
-  }
+    const baseDemoPlayers = [
+      {
+        playerId: 'player_1',
+        playerName: 'CryptoKing_2025',
+        level: 47,
+        money: 2847392,
+        blocksOwned: 12,
+        totalValue: 3200000,
+        winRate: 89.5,
+        battlesWon: 234,
+        battlesLost: 27,
+        moneyPerMinute: 8450,
+        rareBlocksOwned: 3,
+        epicBlocksOwned: 4,
+        legendaryBlocksOwned: 3,
+        secretBlocksOwned: 2,
+        rank: 1,
+        badge: 'Diamond Whale',
+        badgeColor: '#3B82F6'
+      },
+      {
+        playerId: 'player_2',
+        playerName: 'BlockMaster_Pro',
+        level: 42,
+        money: 1923847,
+        blocksOwned: 12,
+        totalValue: 2100000,
+        winRate: 76.3,
+        battlesWon: 189,
+        battlesLost: 59,
+        moneyPerMinute: 6200,
+        rareBlocksOwned: 4,
+        epicBlocksOwned: 3,
+        legendaryBlocksOwned: 2,
+        secretBlocksOwned: 3,
+        rank: 2,
+        badge: 'Platinum Master',
+        badgeColor: '#8B5CF6'
+      },
+      {
+        playerId: 'player_3',
+        playerName: 'WhaleHunter_77',
+        level: 38,
+        money: 1456291,
+        blocksOwned: 11,
+        totalValue: 1800000,
+        winRate: 82.1,
+        battlesWon: 156,
+        battlesLost: 34,
+        moneyPerMinute: 4850,
+        rareBlocksOwned: 2,
+        epicBlocksOwned: 3,
+        legendaryBlocksOwned: 3,
+        secretBlocksOwned: 3,
+        rank: 3,
+        badge: 'Gold Hunter',
+        badgeColor: '#F59E0B'
+      },
+      {
+        playerId: 'player_4',
+        playerName: 'DefiMaster_2025',
+        level: 35,
+        money: 1234567,
+        blocksOwned: 10,
+        totalValue: 1500000,
+        winRate: 71.4,
+        battlesWon: 125,
+        battlesLost: 50,
+        moneyPerMinute: 3900,
+        rareBlocksOwned: 3,
+        epicBlocksOwned: 2,
+        legendaryBlocksOwned: 2,
+        secretBlocksOwned: 3,
+        rank: 4,
+        badge: 'DeFi Lord',
+        badgeColor: '#10B981'
+      },
+      {
+        playerId: 'player_5',
+        playerName: 'NFTCollector_X',
+        level: 33,
+        money: 1098765,
+        blocksOwned: 12,
+        totalValue: 1200000,
+        winRate: 68.9,
+        battlesWon: 98,
+        battlesLost: 44,
+        moneyPerMinute: 3200,
+        rareBlocksOwned: 5,
+        epicBlocksOwned: 2,
+        legendaryBlocksOwned: 1,
+        secretBlocksOwned: 4,
+        rank: 5,
+        badge: 'Silver Collector',
+        badgeColor: '#6B7280'
+      },
+      {
+        playerId: 'player_6',
+        playerName: 'SatoshiDisciple',
+        level: 31,
+        money: 987654,
+        blocksOwned: 9,
+        totalValue: 1100000,
+        winRate: 74.2,
+        battlesWon: 89,
+        battlesLost: 31,
+        moneyPerMinute: 2800,
+        rareBlocksOwned: 2,
+        epicBlocksOwned: 2,
+        legendaryBlocksOwned: 2,
+        secretBlocksOwned: 3,
+        rank: 6,
+        badge: 'Bitcoin Disciple',
+        badgeColor: '#F7931A'
+      }
     ]
     
-    // Store demo players
-    demoPlayers.forEach(player => {
-      playerDataStore.set(player.playerId, player)
+    // Add missing properties and store demo players
+    baseDemoPlayers.forEach(basePlayer => {
+      const fullPlayer = addMissingPlayerProperties(basePlayer)
+      playerDataStore.set(fullPlayer.playerId, fullPlayer)
     })
   }
 }
@@ -260,7 +200,7 @@ const calculatePlayerBadge = (player: Partial<LeaderboardEntry>) => {
 
 // Function to update player data in real-time
 const updatePlayerData = (playerId: string, gameState: any) => {
-  const existingPlayer = playerDataStore.get(playerId) || {
+  const defaultPlayer = {
     playerId,
     playerName: playerId === 'current_player' ? 'You' : `Player_${playerId.slice(-4)}`,
     level: 1,
@@ -279,6 +219,8 @@ const updatePlayerData = (playerId: string, gameState: any) => {
     badge: 'Rookie',
     badgeColor: '#9CA3AF'
   }
+  
+  const existingPlayer = playerDataStore.get(playerId) || addMissingPlayerProperties(defaultPlayer)
 
   // Count blocks by rarity
   const blockCounts = {
@@ -339,7 +281,7 @@ export async function GET(request: NextRequest) {
     let currentPlayer = playerDataStore.get(playerId)
     if (!currentPlayer) {
       // Create new player with default stats
-      currentPlayer = {
+      const defaultPlayer = {
         playerId,
         playerName: 'You',
         level: 1,
@@ -359,6 +301,7 @@ export async function GET(request: NextRequest) {
         badgeColor: '#9CA3AF',
         isCurrentPlayer: true
       }
+      currentPlayer = addMissingPlayerProperties(defaultPlayer)
       playerDataStore.set(playerId, currentPlayer)
       allPlayers.push(currentPlayer)
     }

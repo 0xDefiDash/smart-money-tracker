@@ -344,18 +344,23 @@ const STORE_ITEMS: StoreItem[] = [
 
 export async function GET(request: NextRequest) {
   try {
+    const categories = {
+      power: 'Increase your offensive capabilities with attack upgrades, critical strikes, and combat bonuses',
+      defense: 'Protect your blocks from thieves with shields, fortifications, and defensive abilities', 
+      special: 'Unique abilities and economic bonuses including profit boosters, passive income, and utility upgrades'
+    }
+
     return NextResponse.json({
       success: true,
       items: STORE_ITEMS,
-      categories: {
-        power: 'Increase your offensive capabilities',
-        defense: 'Protect your blocks from thieves', 
-        special: 'Unique abilities and bonuses'
-      }
+      categories: categories,
+      totalItems: STORE_ITEMS.length,
+      lastUpdated: new Date().toISOString()
     })
   } catch (error) {
+    console.error('Store API error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch store items' },
+      { success: false, error: 'Failed to fetch store items', categories: {} },
       { status: 500 }
     )
   }
