@@ -118,6 +118,7 @@ const SECRET_BLOCKS = [
 let globalBlocks: Block[] = []
 let lastSpawnTime = Date.now()
 let nextSpawnTime = Date.now() + 120000 // 2 minutes from now
+let lastSecretBlockSpawn = Date.now() - 3600000 // Set 1 hour ago initially to allow immediate spawn
 let isInitialized = false
 
 // Block prices based on rarity
@@ -134,10 +135,14 @@ function generateInitialBlocks() {
   const newBlocks: Block[] = []
   
   for (let i = 0; i < numBlocks; i++) {
-    // Check if we should spawn a secret block (very rare: 1% chance)
-    const isSecretBlock = Math.random() < 0.01
+    // Check if we should spawn a secret block (once per hour = 24 times per day)
+    const now = Date.now()
+    const hoursSinceLastSecret = (now - lastSecretBlockSpawn) / (1000 * 60 * 60) // Convert to hours
+    const shouldSpawnSecretBlock = hoursSinceLastSecret >= 1 && i === 0 // Only check on first block to avoid multiple spawns
     
-    if (isSecretBlock && SECRET_BLOCKS.length > 0) {
+    if (shouldSpawnSecretBlock && SECRET_BLOCKS.length > 0) {
+      // Update the last secret block spawn time
+      lastSecretBlockSpawn = now
       const secretBlock = SECRET_BLOCKS[Math.floor(Math.random() * SECRET_BLOCKS.length)]
       
       newBlocks.push({
