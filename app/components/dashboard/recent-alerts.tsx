@@ -8,17 +8,17 @@ import { Zap, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getTimeAgo } from '@/lib/utils'
 
-// Mock alerts data with current timestamps for September 14, 2025
-const baseTimestamp = new Date('2025-09-14T16:30:00Z').getTime();
+// Mock alerts data with current timestamps for September 17, 2025
+const baseTimestamp = new Date('2025-09-17T14:45:00Z').getTime();
 const mockAlerts = [
   {
     id: '1',
     type: 'whale_transaction',
     title: 'Major Bitcoin Whale Movement',
-    message: 'Transaction worth $24.78M detected from BlackRock Ultra Digital wallet',
-    amount: 24789340,
+    message: 'Transaction worth $28.93M detected from BlackRock Ultra Digital wallet',
+    amount: 28934560,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 240000), // 4 minutes ago
+    timestamp: new Date(baseTimestamp - 180000), // 3 minutes ago
     severity: 'high',
     isRead: false,
   },

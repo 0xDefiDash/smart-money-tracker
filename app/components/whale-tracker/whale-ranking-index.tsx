@@ -11,19 +11,19 @@ import { Copy, Crown, TrendingUp, TrendingDown, ExternalLink, Wallet, Activity, 
 import { formatCurrency, formatNumber, truncateAddress } from '@/lib/utils'
 import { toast } from 'react-hot-toast'
 
-// Updated whale ranking data for September 14, 2025
+// Updated whale ranking data for September 17, 2025
 const topWhales = [
   {
     rank: 1,
     walletAddress: '0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503',
     label: 'BlackRock Ultra Digital Vault',
-    totalBalance: 4120000000, // $4.12B (continued massive growth)
-    balanceChange24h: 12.3, // higher growth
+    totalBalance: 4580000000, // $4.58B (explosive growth continues)
+    balanceChange24h: 15.7, // accelerating growth
     dominantAssets: ['BTC', 'ETH', 'USDC'],
-    lastTxAmount: 178000000,
-    lastTxTime: '4 minutes ago',
-    totalTxCount: 1456,
-    avgTxSize: 14200000,
+    lastTxAmount: 198000000,
+    lastTxTime: '3 minutes ago',
+    totalTxCount: 1689,
+    avgTxSize: 16900000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 99
@@ -32,13 +32,13 @@ const topWhales = [
     rank: 2,
     walletAddress: '0x73BCEb1Cd57C711feaC4224D062b0F6ff338aA6c',
     label: 'Sovereign Wealth Fund Alpha',
-    totalBalance: 3780000000, // $3.78B (strong growth)
-    balanceChange24h: 8.9,
+    totalBalance: 4120000000, // $4.12B (massive growth)
+    balanceChange24h: 11.4,
     dominantAssets: ['BTC', 'ETH', 'SOL'],
-    lastTxAmount: 267000000,
-    lastTxTime: '8 minutes ago',
-    totalTxCount: 1234,
-    avgTxSize: 21600000,
+    lastTxAmount: 289000000,
+    lastTxTime: '7 minutes ago',
+    totalTxCount: 1456,
+    avgTxSize: 24800000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 98
@@ -47,13 +47,13 @@ const topWhales = [
     rank: 3,
     walletAddress: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
     label: 'Grayscale Ultra Holdings Prime',
-    totalBalance: 3340000000, // $3.34B (continued growth)
-    balanceChange24h: 6.7,
+    totalBalance: 3680000000, // $3.68B (continued strong growth)
+    balanceChange24h: 8.9,
     dominantAssets: ['BTC', 'ETH', 'WBTC'],
-    lastTxAmount: 212000000,
-    lastTxTime: '18 minutes ago',
-    totalTxCount: 1876,
-    avgTxSize: 12800000,
+    lastTxAmount: 234000000,
+    lastTxTime: '22 minutes ago',
+    totalTxCount: 2134,
+    avgTxSize: 14200000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 97
@@ -62,13 +62,13 @@ const topWhales = [
     rank: 4,
     walletAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     label: 'Coinbase Prime Ultra Custody',
-    totalBalance: 2890000000, // $2.89B (significant increase)
-    balanceChange24h: 23.4,
+    totalBalance: 3240000000, // $3.24B (massive increase)
+    balanceChange24h: 28.9,
     dominantAssets: ['ETH', 'USDC', 'WETH'],
-    lastTxAmount: 289000000,
-    lastTxTime: '4 minutes ago',
-    totalTxCount: 2789,
-    avgTxSize: 6890000,
+    lastTxAmount: 324000000,
+    lastTxTime: '7 minutes ago',
+    totalTxCount: 3234,
+    avgTxSize: 7890000,
     whaleType: 'exchange',
     riskLevel: 'low',
     influence: 95
@@ -77,13 +77,13 @@ const topWhales = [
     rank: 5,
     walletAddress: '0x2F0b23f53734252Bda2277357e97e1517d6B042A',
     label: 'Fidelity Digital Asset Vault',
-    totalBalance: 2560000000, // $2.56B (strong growth)
-    balanceChange24h: 31.2,
+    totalBalance: 2890000000, // $2.89B (accelerating growth)
+    balanceChange24h: 36.8,
     dominantAssets: ['BTC', 'ETH', 'AVAX'],
-    lastTxAmount: 167000000,
-    lastTxTime: '28 minutes ago',
-    totalTxCount: 1567,
-    avgTxSize: 9200000,
+    lastTxAmount: 189000000,
+    lastTxTime: '31 minutes ago',
+    totalTxCount: 1834,
+    avgTxSize: 10800000,
     whaleType: 'institutional',
     riskLevel: 'low',
     influence: 94
@@ -92,12 +92,12 @@ const topWhales = [
     rank: 6,
     walletAddress: '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
     label: 'Binance Ultra HNW Custody',
-    totalBalance: 2230000000, // $2.23B (strong growth)
-    balanceChange24h: 28.7,
+    totalBalance: 2560000000, // $2.56B (robust growth)
+    balanceChange24h: 32.4,
     dominantAssets: ['BTC', 'BNB', 'SOL'],
-    lastTxAmount: 189000000,
-    lastTxTime: '19 minutes ago',
-    totalTxCount: 4123,
+    lastTxAmount: 212000000,
+    lastTxTime: '16 minutes ago',
+    totalTxCount: 4789,
     avgTxSize: 4890000,
     whaleType: 'exchange',
     riskLevel: 'medium',

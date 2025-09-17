@@ -6,32 +6,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, PieChart, Pie, Cell } from 'recharts'
 import { TrendingUp, Activity, PieChart as PieChartIcon } from 'lucide-react'
 
-// Updated whale activity data for September 14, 2025
+// Updated whale activity data for September 17, 2025
 const volumeData = [
-  { time: '00:00', volume: 78, count: 22 },
-  { time: '04:00', volume: 64, count: 18 },
-  { time: '08:00', volume: 156, count: 38 },
-  { time: '12:00', volume: 234, count: 52 },
-  { time: '16:00', volume: 189, count: 45 },
-  { time: '20:00', volume: 123, count: 31 },
-  { time: '24:00', volume: 145, count: 36 },
+  { time: '00:00', volume: 89, count: 26 },
+  { time: '04:00', volume: 78, count: 21 },
+  { time: '08:00', volume: 187, count: 44 },
+  { time: '12:00', volume: 276, count: 61 },
+  { time: '16:00', volume: 234, count: 52 },
+  { time: '20:00', volume: 156, count: 38 },
+  { time: '24:00', volume: 198, count: 47 },
 ]
 
 const blockchainData = [
-  { name: 'Bitcoin', value: 44, color: '#F7931A' },
-  { name: 'Ethereum', value: 33, color: '#627EEA' },
-  { name: 'Solana', value: 16, color: '#9945FF' },
-  { name: 'Base', value: 4, color: '#0052FF' },
-  { name: 'TON', value: 2, color: '#0088CC' },
+  { name: 'Bitcoin', value: 46, color: '#F7931A' },
+  { name: 'Ethereum', value: 35, color: '#627EEA' },
+  { name: 'Solana', value: 12, color: '#9945FF' },
+  { name: 'Base', value: 3, color: '#0052FF' },
+  { name: 'TON', value: 3, color: '#0088CC' },
   { name: 'Other', value: 1, color: '#6B7280' },
 ]
 
 const transactionSizeData = [
-  { range: '$1M-5M', count: 216 },
-  { range: '$5M-10M', count: 145 },
-  { range: '$10M-50M', count: 102 },
-  { range: '$50M-100M', count: 41 },
-  { range: '$100M+', count: 34 },
+  { range: '$1M-5M', count: 267 },
+  { range: '$5M-10M', count: 189 },
+  { range: '$10M-50M', count: 134 },
+  { range: '$50M-100M', count: 56 },
+  { range: '$100M+', count: 48 },
 ]
 
 export function WhaleCharts() {

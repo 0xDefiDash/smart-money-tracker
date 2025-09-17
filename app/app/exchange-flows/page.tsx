@@ -8,109 +8,109 @@ import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, LineChart, Line, AreaChart, Area } from 'recharts'
 import { useState, useEffect } from 'react'
 
-// Exchange flow data updated for September 11, 2025
+// Exchange flow data updated for September 17, 2025
 const mockExchangeFlows = [
   { 
     exchange: 'Binance', 
-    inflow: 4250000000, 
-    outflow: 3890000000, 
-    net: 360000000,
-    volume24h: 21800000000,
-    marketShare: 36.2,
+    inflow: 4580000000, 
+    outflow: 4120000000, 
+    net: 460000000,
+    volume24h: 24600000000,
+    marketShare: 37.1,
     assets: ['BTC', 'ETH', 'BNB', 'SOL', 'TON'],
     status: 'normal'
   },
   { 
     exchange: 'Coinbase', 
-    inflow: 2890000000, 
-    outflow: 2650000000, 
-    net: 240000000,
-    volume24h: 12400000000,
-    marketShare: 20.5,
+    inflow: 3240000000, 
+    outflow: 2980000000, 
+    net: 260000000,
+    volume24h: 14200000000,
+    marketShare: 21.4,
     assets: ['BTC', 'ETH', 'USDC', 'BASE', 'SOL'],
     status: 'normal'
   },
   { 
     exchange: 'Bybit', 
-    inflow: 2340000000, 
-    outflow: 2780000000, 
-    net: -440000000,
-    volume24h: 9200000000,
-    marketShare: 15.3,
+    inflow: 2680000000, 
+    outflow: 3140000000, 
+    net: -460000000,
+    volume24h: 10800000000,
+    marketShare: 16.3,
     assets: ['BTC', 'ETH', 'USDT', 'SOL', 'SUI'],
     status: 'outflow'
   },
   { 
     exchange: 'OKX', 
-    inflow: 1850000000, 
-    outflow: 1630000000, 
-    net: 220000000,
-    volume24h: 6800000000,
-    marketShare: 11.3,
+    inflow: 2120000000, 
+    outflow: 1890000000, 
+    net: 230000000,
+    volume24h: 7900000000,
+    marketShare: 11.9,
     assets: ['BTC', 'ETH', 'OKB', 'TON', 'NOT'],
     status: 'normal'
   },
   { 
     exchange: 'Kraken', 
-    inflow: 1120000000, 
-    outflow: 980000000, 
-    net: 140000000,
-    volume24h: 4300000000,
-    marketShare: 7.1,
+    inflow: 1340000000, 
+    outflow: 1180000000, 
+    net: 160000000,
+    volume24h: 5100000000,
+    marketShare: 7.7,
     assets: ['BTC', 'ETH', 'XRP', 'ADA', 'DOT'],
     status: 'normal'
   },
   { 
     exchange: 'Bitfinex', 
-    inflow: 720000000, 
-    outflow: 1140000000, 
-    net: -420000000,
-    volume24h: 2900000000,
-    marketShare: 4.8,
+    inflow: 890000000, 
+    outflow: 1340000000, 
+    net: -450000000,
+    volume24h: 3400000000,
+    marketShare: 5.1,
     assets: ['BTC', 'ETH', 'USDT', 'LTC'],
     status: 'alert'
   },
   { 
     exchange: 'KuCoin', 
-    inflow: 890000000, 
-    outflow: 1380000000, 
-    net: -490000000,
-    volume24h: 3600000000,
-    marketShare: 5.9,
+    inflow: 1120000000, 
+    outflow: 1650000000, 
+    net: -530000000,
+    volume24h: 4300000000,
+    marketShare: 6.5,
     assets: ['BTC', 'ETH', 'KCS', 'USDT'],
     status: 'alert'
   },
   { 
     exchange: 'Gate.io', 
-    inflow: 560000000, 
-    outflow: 650000000, 
-    net: -90000000,
-    volume24h: 2200000000,
-    marketShare: 3.6,
+    inflow: 720000000, 
+    outflow: 820000000, 
+    net: -100000000,
+    volume24h: 2800000000,
+    marketShare: 4.2,
     assets: ['BTC', 'ETH', 'GT', 'USDT'],
     status: 'outflow'
   },
   { 
     exchange: 'HTX (Huobi)', 
-    inflow: 480000000, 
-    outflow: 520000000, 
-    net: -40000000,
-    volume24h: 1900000000,
-    marketShare: 3.2,
+    inflow: 620000000, 
+    outflow: 680000000, 
+    net: -60000000,
+    volume24h: 2400000000,
+    marketShare: 3.6,
     assets: ['BTC', 'ETH', 'USDT', 'TRX'],
     status: 'outflow'
   }
 ]
 
-// Historical flow data for trends (September 11, 2025 - last 24 hours)
+// Historical flow data for trends (September 17, 2025 - last 24 hours)
 const historicalFlowData = [
-  { time: '00:00', totalInflow: 11.2, totalOutflow: 10.8 },
-  { time: '04:00', totalInflow: 10.5, totalOutflow: 11.6 },
-  { time: '08:00', totalInflow: 12.8, totalOutflow: 11.4 },
-  { time: '12:00', totalInflow: 15.1, totalOutflow: 13.2 },
-  { time: '16:00', totalInflow: 13.9, totalOutflow: 14.5 },
-  { time: '20:00', totalInflow: 14.7, totalOutflow: 12.8 },
-  { time: '24:00', totalInflow: 13.2, totalOutflow: 12.9 },
+  { time: '00:00', totalInflow: 12.8, totalOutflow: 11.9 },
+  { time: '04:00', totalInflow: 11.7, totalOutflow: 12.4 },
+  { time: '08:00', totalInflow: 14.2, totalOutflow: 12.8 },
+  { time: '12:00', totalInflow: 16.8, totalOutflow: 14.6 },
+  { time: '16:00', totalInflow: 15.4, totalOutflow: 16.2 },
+  { time: '20:00', totalInflow: 16.9, totalOutflow: 14.1 },
+  { time: '24:00', totalInflow: 14.8, totalOutflow: 14.3 },
 ]
 
 const colors = {

@@ -8,18 +8,18 @@ import { Activity, ExternalLink, ArrowRightIcon } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
-// Updated whale transaction data for September 14, 2025
-const baseTimestamp = new Date('2025-09-14T16:30:00Z').getTime();
+// Updated whale transaction data for September 17, 2025
+const baseTimestamp = new Date('2025-09-17T14:45:00Z').getTime();
 const mockWhaleTransactions = [
   {
     id: '1',
     txHash: '0xa7f9d3e2c8b5f1a6d4c9e7b2f5d8b1a6e3c9f5d2b8e4a7f1d6c3b9e2f5a8d4c7',
     fromAddress: '0xa7f9d3e2c8b5f1a6d4c9e7b2f5d8b1a6',
     toAddress: '0xe3c9f5d2b8e4a7f1d6c3b9e2f5a8d4c7',
-    value: '8,234.67',
-    valueUsd: 24789340,
+    value: '9,876.89',
+    valueUsd: 28934560,
     cryptocurrency: 'BTC',
-    timestamp: new Date(baseTimestamp - 240000), // 4 minutes ago
+    timestamp: new Date(baseTimestamp - 180000), // 3 minutes ago
     blockchain: 'bitcoin',
     isAlert: true,
   },

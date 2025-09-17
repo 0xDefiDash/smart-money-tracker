@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$12.35M',
         priceUsdFormatted: '0.00001234',
         bondingProgressFormatted: '85.60',
-        createdAt: '2025-09-10T08:30:00Z',
+        createdAt: '2025-09-17T08:30:00Z',
       },
       {
         tokenAddress: '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr',
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$3.46M',
         priceUsdFormatted: '0.00003456',
         bondingProgressFormatted: '94.20',
-        createdAt: '2025-09-10T07:15:00Z',
+        createdAt: '2025-09-17T07:15:00Z',
       },
       {
         tokenAddress: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$18.92M',
         priceUsdFormatted: '0.00001892',
         bondingProgressFormatted: '72.80',
-        createdAt: '2025-09-10T09:45:00Z',
+        createdAt: '2025-09-17T09:45:00Z',
       },
       {
         tokenAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$25.11M',
         priceUsdFormatted: '0.00002511',
         bondingProgressFormatted: '67.30',
-        createdAt: '2025-09-10T06:20:00Z',
+        createdAt: '2025-09-17T06:20:00Z',
       },
       {
         tokenAddress: 'So11111111111111111111111111111111111111112',
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$956.00K',
         priceUsdFormatted: '0.00000956',
         bondingProgressFormatted: '45.10',
-        createdAt: '2025-09-10T10:12:00Z',
+        createdAt: '2025-09-17T10:12:00Z',
       },
       {
         tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$43.98M',
         priceUsdFormatted: '0.00004398',
         bondingProgressFormatted: '91.70',
-        createdAt: '2025-09-10T05:35:00Z',
+        createdAt: '2025-09-17T05:35:00Z',
       },
       {
         tokenAddress: 'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3',
@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$27.64M',
         priceUsdFormatted: '0.00002764',
         bondingProgressFormatted: '56.90',
-        createdAt: '2025-09-10T11:28:00Z',
+        createdAt: '2025-09-17T11:28:00Z',
       },
       {
         tokenAddress: '4UuGQgkD3rSeoXatXRWwRfuJiELLLkKeUrcyTp5s9AyK',
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
         formattedFDV: '$65.96M',
         priceUsdFormatted: '0.00006596',
         bondingProgressFormatted: '96.40',
-        createdAt: '2025-09-10T04:22:00Z',
+        createdAt: '2025-09-17T04:22:00Z',
       }
     ]
 
