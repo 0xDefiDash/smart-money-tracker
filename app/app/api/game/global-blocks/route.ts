@@ -22,8 +22,7 @@ interface Block {
 
 const BLOCK_TYPES = [
   { name: 'Bitcoin Block', type: 'btc', color: '#F7931A', emoji: '₿' },
-  { name: 'Ethereum Block', type: 'eth', color: '#627EEA', emoji: 'Ξ' },
-  { name: 'Solana Block', type: 'sol', color: '#9945FF', emoji: '◎' }
+  { name: 'Ethereum Block', type: 'eth', color: '#627EEA', emoji: 'Ξ' }
 ]
 
 const RARE_BLOCKS = [
@@ -40,6 +39,13 @@ const RARE_BLOCKS = [
     color: '#228B22', 
     image: '/images/pepecoineth.jpg',
     description: 'pepecoineth - The Green parabola Frog with legendary meme powers and crypto wisdom!'
+  },
+  { 
+    name: 'CryptoWendyO', 
+    type: 'cryptowendyo', 
+    color: '#8A2BE2', 
+    image: '/images/cryptowendyo.jpg',
+    description: 'CryptoWendyO - A OG Crypto advocate boxing her way On-Chain with unstoppable determination!'
   }
 ]
 

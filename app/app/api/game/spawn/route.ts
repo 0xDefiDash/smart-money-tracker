@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 const BLOCK_TYPES = [
   { name: 'Bitcoin Block', type: 'btc', color: '#F7931A', emoji: '₿' },
   { name: 'Ethereum Block', type: 'eth', color: '#627EEA', emoji: 'Ξ' },
-  { name: 'Solana Block', type: 'sol', color: '#9945FF', emoji: '◎' },
+
 
   { name: 'Polygon Block', type: 'matic', color: '#8247E5', emoji: '⟐' },
   { name: 'Avalanche Block', type: 'avax', color: '#E84142', emoji: '🔺' },
