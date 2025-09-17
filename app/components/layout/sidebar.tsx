@@ -98,8 +98,8 @@ export function Sidebar() {
                   className={cn(
                     'flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group',
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      ? 'bg-neon-gradient text-black font-semibold glow-green'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent glow-hover'
                   )}
                 >
                   <Icon className={cn(
@@ -115,9 +115,9 @@ export function Sidebar() {
       </nav>
 
       <div className="absolute bottom-4 left-4 right-4">
-        <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 rounded-lg p-3">
+        <div className="bg-gradient-to-r from-neon-green/10 to-neon-blue/10 border border-neon-green/30 rounded-lg p-3 glow-green">
           <div className="flex items-center space-x-2 mb-2">
-            <Zap className="w-4 h-4 text-blue-500" />
+            <Zap className="w-4 h-4 text-neon-green-bright" />
             <span className="text-xs font-medium text-foreground">Real-time Updates</span>
           </div>
           <p className="text-xs text-muted-foreground">

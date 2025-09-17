@@ -214,9 +214,9 @@ export default function BlockWarsPage() {
   // Show loading while checking authentication
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-gray-900 to-slate-950">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-neon-green-bright mx-auto mb-4" />
           <p className="text-slate-300">Loading Block Wars...</p>
         </div>
       </div>
@@ -234,9 +234,9 @@ export default function BlockWarsPage() {
   // Wait for gameState to be properly initialized
   if (gameState.playerId === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-gray-900 to-slate-950">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-neon-green-bright mx-auto mb-4" />
           <p className="text-slate-300">Initializing Game...</p>
         </div>
       </div>
@@ -1146,18 +1146,18 @@ export default function BlockWarsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-tech-gradient p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <Card className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-purple-500/20">
+        <Card className="bg-gradient-to-r from-neon-green/20 to-neon-blue/20 border-neon-green/30 glow-green">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-neon-gradient rounded-xl flex items-center justify-center glow-hover">
                   <Gamepad2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-neon-green-bright to-neon-blue-bright bg-clip-text text-transparent">
                     Block Wars - Competitive Economy
                   </CardTitle>
                   <p className="text-muted-foreground">🆓 Common blocks are FREE • 💳 Premium blocks cost money • 💰 All blocks earn money passively!</p>
