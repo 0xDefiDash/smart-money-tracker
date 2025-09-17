@@ -21,7 +21,7 @@ const BLOCK_TYPES = [
   { name: 'Maker Block', type: 'mkr', color: '#1AAB9B', emoji: '🏭' },
   { name: 'The Graph Block', type: 'grt', color: '#6747ED', emoji: '📊' },
   { name: 'Filecoin Block', type: 'fil', color: '#0090FF', emoji: '💾' },
-  { name: 'Polkadot Block', type: 'dot', color: '#E6007A', emoji: '●' },
+
   { name: 'Cosmos Block', type: 'atom', color: '#2E3148', emoji: '🌌' },
   { name: 'Dogecoin Block', type: 'doge', color: '#C2A633', emoji: '🐕' }
 ]
