@@ -18,6 +18,11 @@ interface LeaderboardEntry {
   epicBlocksOwned: number
   legendaryBlocksOwned: number
   secretBlocksOwned: number
+  attackPower: number
+  defenseStrength: number
+  upgradesPurchased: number
+  totalUpgradesCost: number
+  lastActive: string
   rank: number
   badge: string
   badgeColor: string
