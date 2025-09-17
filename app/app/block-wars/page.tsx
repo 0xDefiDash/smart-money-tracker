@@ -647,7 +647,7 @@ export default function BlockWarsPage() {
         // Update game state - add purchased block and subtract money
         setGameState(prev => ({
           ...prev,
-          ownedBlocks: [...prev.ownedBlocks, { ...result.purchasedBlock, owner: prev.playerId }],
+          ownedBlocks: [...prev.ownedBlocks, { ...result.purchasedBlock, owner: prev.playerId, isPurchasable: false }],
           money: prev.money - result.price,
           coins: prev.coins + result.purchasedBlock.value, // Still get coins
           experience: prev.experience + 25, // Bonus XP for purchasing
@@ -697,7 +697,7 @@ export default function BlockWarsPage() {
 
       return {
         ...prev,
-        ownedBlocks: [...prev.ownedBlocks, { ...block, owner: prev.playerId }],
+        ownedBlocks: [...prev.ownedBlocks, { ...block, owner: prev.playerId, isPurchasable: false }],
         coins: prev.coins + block.value,
         // Removed immediate money reward - blocks will earn money passively!
         experience: newExperience,
@@ -840,7 +840,7 @@ export default function BlockWarsPage() {
       // Apply steal insurance refund if available and this was a failure (but it succeeded, so no refund)
       setGameState(prev => ({
         ...prev,
-        ownedBlocks: [...prev.ownedBlocks, { ...targetBlock, owner: prev.playerId }],
+        ownedBlocks: [...prev.ownedBlocks, { ...targetBlock, owner: prev.playerId, isPurchasable: false }],
         money: prev.money - actualCost,
         coins: prev.coins + targetBlock.value, // Still get coins as reward
         experience: prev.experience + (25 + (powerAdvantage * 2)), // More XP for harder targets

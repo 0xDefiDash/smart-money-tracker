@@ -12,11 +12,14 @@ export async function POST(request: NextRequest) {
     // Fetch the actual block data from global blocks to preserve original information
     let originalBlock = null
     try {
-      const globalBlocksResponse = await fetch('http://localhost:3000/api/game/global-blocks')
+      // Get the base URL from the request
+      const baseUrl = request.nextUrl.origin
+      const globalBlocksResponse = await fetch(`${baseUrl}/api/game/global-blocks`)
       const globalBlocksData = await globalBlocksResponse.json()
       
       if (globalBlocksData.blocks) {
         originalBlock = globalBlocksData.blocks.find((block: any) => block.id === blockId)
+        console.log('Found original block:', originalBlock?.name || 'Not found')
       }
     } catch (error) {
       console.error('Error fetching global blocks:', error)
@@ -63,6 +66,7 @@ export async function POST(request: NextRequest) {
       color: blockColor, // Preserve original color
       description: blockDescription, // Preserve original description
       isStealable: false, // Premium blocks can't be stolen (this is the main change when purchased)
+      isPurchasable: false, // Remove purchasable status - it's now owned
       spawnTime: originalBlock.spawnTime || Date.now(),
       traits: [...blockTraits, 'Owned', 'Protected'] // Preserve original traits and add ownership traits
     }
