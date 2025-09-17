@@ -73,21 +73,64 @@ const getRankGradient = (rank: number) => {
 export default function Leaderboard({ gameState }: LeaderboardProps) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<string>('')
 
+  // Real-time polling interval
   useEffect(() => {
     fetchLeaderboard()
-  }, [gameState])
+    
+    // Poll every 5 seconds for real-time updates
+    const interval = setInterval(fetchLeaderboard, 5000)
+    
+    return () => clearInterval(interval)
+  }, [gameState.playerId])
+
+  // Update player data whenever game state changes
+  useEffect(() => {
+    if (gameState.playerId) {
+      updatePlayerData()
+    }
+  }, [gameState.money, gameState.ownedBlocks, gameState.level])
 
   const fetchLeaderboard = async () => {
     try {
-      const response = await fetch(`/api/game/leaderboard?playerId=${gameState.playerId}&limit=10`)
+      const playerId = gameState.playerId || 'current_player'
+      const response = await fetch(`/api/game/leaderboard?playerId=${playerId}&limit=10&t=${Date.now()}`)
       const data = await response.json()
       setLeaderboard(data.leaderboard)
+      setLastUpdated(data.lastUpdated)
     } catch (error) {
       console.error('Error fetching leaderboard:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const updatePlayerData = async () => {
+    try {
+      const playerId = gameState.playerId || 'current_player'
+      await fetch('/api/game/leaderboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playerId,
+          gameState
+        })
+      })
+      
+      // Fetch updated leaderboard immediately after updating player data
+      setTimeout(fetchLeaderboard, 500) // Small delay to ensure data is processed
+    } catch (error) {
+      console.error('Error updating player data:', error)
+    }
+  }
+
+  // Expose function to parent component for manual updates
+  const forceUpdate = () => {
+    updatePlayerData()
+    fetchLeaderboard()
   }
 
   if (loading) {
@@ -115,12 +158,22 @@ export default function Leaderboard({ gameState }: LeaderboardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
-          <span>Global Leaderboard</span>
-          <Badge variant="secondary" className="ml-auto">
-            Live
-          </Badge>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Trophy className="w-5 h-5 text-yellow-500" />
+            <span>Global Leaderboard</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-500 font-medium">Live</span>
+            </div>
+            {lastUpdated && (
+              <Badge variant="outline" className="text-xs">
+                Updated {new Date(lastUpdated).toLocaleTimeString()}
+              </Badge>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -254,9 +307,20 @@ export default function Leaderboard({ gameState }: LeaderboardProps) {
 
         {/* Stats Summary */}
         <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-          <div className="text-sm text-muted-foreground text-center">
+          <div className="text-sm text-muted-foreground text-center space-y-2">
             <p>🏆 Compete for the top spot by collecting rare blocks and winning battles!</p>
-            <p className="mt-1">Maximum 12 blocks per player • Leaderboard updates in real-time</p>
+            <div className="flex justify-center items-center space-x-4 text-xs">
+              <span>📊 Updates every 5 seconds</span>
+              <span>•</span>
+              <span>🎮 Max 12 blocks per player</span>
+              <span>•</span>
+              <span>⚡ Real-time player tracking</span>
+            </div>
+            {lastUpdated && (
+              <p className="text-xs opacity-75">
+                Last sync: {new Date(lastUpdated).toLocaleString()}
+              </p>
+            )}
           </div>
         </div>
       </CardContent>

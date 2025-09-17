@@ -24,8 +24,13 @@ interface LeaderboardEntry {
   isCurrentPlayer?: boolean
 }
 
-// Mock leaderboard data
-const MOCK_LEADERBOARD: LeaderboardEntry[] = [
+// In-memory player data store (in production this would be a database)
+const playerDataStore = new Map<string, LeaderboardEntry>()
+
+// Initialize with some demo players for showcase
+const initializeDemoPlayers = () => {
+  if (playerDataStore.size === 0) {
+    const demoPlayers: LeaderboardEntry[] = [
   {
     playerId: 'player_1',
     playerName: 'CryptoKing_2025',
@@ -216,7 +221,102 @@ const MOCK_LEADERBOARD: LeaderboardEntry[] = [
     badge: 'Liquidity Seeker',
     badgeColor: '#0891B2'
   }
-]
+    ]
+    
+    // Store demo players
+    demoPlayers.forEach(player => {
+      playerDataStore.set(player.playerId, player)
+    })
+  }
+}
+
+// Helper function to calculate player badge based on stats
+const calculatePlayerBadge = (player: Partial<LeaderboardEntry>) => {
+  const { money = 0, winRate = 0, blocksOwned = 0, legendaryBlocksOwned = 0, secretBlocksOwned = 0 } = player
+  
+  if (money >= 2000000 && winRate >= 85) {
+    return { badge: 'Diamond Whale', badgeColor: '#3B82F6' }
+  } else if (money >= 1500000 && winRate >= 75) {
+    return { badge: 'Platinum Master', badgeColor: '#8B5CF6' }
+  } else if (money >= 1000000 && winRate >= 70) {
+    return { badge: 'Gold Hunter', badgeColor: '#F59E0B' }
+  } else if (money >= 700000 && (legendaryBlocksOwned >= 2 || secretBlocksOwned >= 3)) {
+    return { badge: 'Epic Collector', badgeColor: '#10B981' }
+  } else if (money >= 500000 && blocksOwned >= 8) {
+    return { badge: 'Block Master', badgeColor: '#6B7280' }
+  } else if (money >= 250000 && winRate >= 60) {
+    return { badge: 'Rising Star', badgeColor: '#F59E0B' }
+  } else if (blocksOwned >= 5) {
+    return { badge: 'Collector', badgeColor: '#059669' }
+  } else {
+    return { badge: 'Rookie', badgeColor: '#9CA3AF' }
+  }
+}
+
+// Function to update player data in real-time
+const updatePlayerData = (playerId: string, gameState: any) => {
+  const existingPlayer = playerDataStore.get(playerId) || {
+    playerId,
+    playerName: playerId === 'current_player' ? 'You' : `Player_${playerId.slice(-4)}`,
+    level: 1,
+    money: 0,
+    blocksOwned: 0,
+    totalValue: 0,
+    winRate: 0,
+    battlesWon: 0,
+    battlesLost: 0,
+    moneyPerMinute: 0,
+    rareBlocksOwned: 0,
+    epicBlocksOwned: 0,
+    legendaryBlocksOwned: 0,
+    secretBlocksOwned: 0,
+    rank: 0,
+    badge: 'Rookie',
+    badgeColor: '#9CA3AF'
+  }
+
+  // Count blocks by rarity
+  const blockCounts = {
+    rare: 0,
+    epic: 0,
+    legendary: 0,
+    secret: 0
+  }
+  
+  gameState.ownedBlocks?.forEach((block: any) => {
+    if (block.rarity) {
+      blockCounts[block.rarity as keyof typeof blockCounts]++
+    }
+  })
+
+  // Update player stats
+  const updatedPlayer: LeaderboardEntry = {
+    ...existingPlayer,
+    level: gameState.level || existingPlayer.level,
+    money: gameState.money || 0,
+    blocksOwned: Math.min(gameState.ownedBlocks?.length || 0, 12), // Enforce 12-block limit
+    totalValue: (gameState.money || 0) + (gameState.ownedBlocks?.reduce((total: number, block: any) => total + (block.value || 0), 0) || 0),
+    moneyPerMinute: gameState.moneyPerMinute || existingPlayer.moneyPerMinute,
+    rareBlocksOwned: blockCounts.rare,
+    epicBlocksOwned: blockCounts.epic,
+    legendaryBlocksOwned: blockCounts.legendary,
+    secretBlocksOwned: blockCounts.secret,
+    // Maintain battle stats (would be updated from battle results)
+    battlesWon: gameState.battlesWon || existingPlayer.battlesWon,
+    battlesLost: gameState.battlesLost || existingPlayer.battlesLost,
+    winRate: gameState.battlesWon || gameState.battlesLost ? 
+      ((gameState.battlesWon || 0) / ((gameState.battlesWon || 0) + (gameState.battlesLost || 0))) * 100 : 
+      existingPlayer.winRate
+  }
+
+  // Calculate badge
+  const badgeInfo = calculatePlayerBadge(updatedPlayer)
+  updatedPlayer.badge = badgeInfo.badge
+  updatedPlayer.badgeColor = badgeInfo.badgeColor
+
+  playerDataStore.set(playerId, updatedPlayer)
+  return updatedPlayer
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -224,15 +324,17 @@ export async function GET(request: NextRequest) {
     const playerId = searchParams.get('playerId') || 'current_player'
     const limit = parseInt(searchParams.get('limit') || '10')
     
-    // Add current player to leaderboard if not present
-    const leaderboardWithPlayer = [...MOCK_LEADERBOARD]
+    // Initialize demo players if needed
+    initializeDemoPlayers()
+    
+    // Get all players from store
+    const allPlayers = Array.from(playerDataStore.values())
     
     // Check if current player exists in leaderboard
-    const playerExists = leaderboardWithPlayer.find(entry => entry.playerId === playerId)
-    
-    if (!playerExists) {
-      // Add current player with modest stats
-      leaderboardWithPlayer.push({
+    let currentPlayer = playerDataStore.get(playerId)
+    if (!currentPlayer) {
+      // Create new player with default stats
+      currentPlayer = {
         playerId,
         playerName: 'You',
         level: 1,
@@ -247,25 +349,25 @@ export async function GET(request: NextRequest) {
         epicBlocksOwned: 0,
         legendaryBlocksOwned: 0,
         secretBlocksOwned: 0,
-        rank: leaderboardWithPlayer.length + 1,
+        rank: 0,
         badge: 'Rookie',
         badgeColor: '#9CA3AF',
         isCurrentPlayer: true
-      })
+      }
+      playerDataStore.set(playerId, currentPlayer)
+      allPlayers.push(currentPlayer)
     }
     
     // Sort by money and assign ranks
-    leaderboardWithPlayer.sort((a, b) => b.money - a.money)
-    leaderboardWithPlayer.forEach((entry, index) => {
+    allPlayers.sort((a, b) => b.money - a.money)
+    allPlayers.forEach((entry, index) => {
       entry.rank = index + 1
-      if (entry.playerId === playerId) {
-        entry.isCurrentPlayer = true
-      }
+      entry.isCurrentPlayer = entry.playerId === playerId
     })
     
     // Return top entries plus current player if not in top
-    const topEntries = leaderboardWithPlayer.slice(0, limit)
-    const currentPlayerEntry = leaderboardWithPlayer.find(entry => entry.playerId === playerId)
+    const topEntries = allPlayers.slice(0, limit)
+    const currentPlayerEntry = allPlayers.find(entry => entry.playerId === playerId)
     
     let result = topEntries
     if (currentPlayerEntry && !topEntries.includes(currentPlayerEntry)) {
@@ -274,13 +376,45 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       leaderboard: result,
-      totalPlayers: leaderboardWithPlayer.length,
+      totalPlayers: allPlayers.length,
       lastUpdated: new Date().toISOString()
     })
   } catch (error) {
     console.error('Error fetching leaderboard:', error)
     return NextResponse.json(
       { error: 'Failed to fetch leaderboard' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST endpoint to update player data in real-time
+export async function POST(request: NextRequest) {
+  try {
+    const { playerId, gameState } = await request.json()
+    
+    if (!playerId || !gameState) {
+      return NextResponse.json(
+        { error: 'Player ID and game state are required' },
+        { status: 400 }
+      )
+    }
+    
+    // Initialize demo players if needed
+    initializeDemoPlayers()
+    
+    // Update player data
+    const updatedPlayer = updatePlayerData(playerId, gameState)
+    
+    return NextResponse.json({
+      success: true,
+      player: updatedPlayer,
+      lastUpdated: new Date().toISOString()
+    })
+  } catch (error) {
+    console.error('Error updating player data:', error)
+    return NextResponse.json(
+      { error: 'Failed to update player data' },
       { status: 500 }
     )
   }
