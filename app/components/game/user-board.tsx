@@ -5,7 +5,8 @@ import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Coins, Trophy, Star, Crown, Settings } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Coins, Trophy, Star, Crown, Settings, Edit3, Check, X, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { ProfileImage } from '@/components/ui/profile-image'
 import { BlockWarsProfileSettings } from '@/components/game/block-wars-profile-settings'
@@ -20,14 +21,53 @@ interface UserBoardProps {
   gameLevel: number
   gameExp: number
   onMoneyUpdate?: (money: number) => void // Changed from onCoinsUpdate
+  walletAddress?: string
+  twitterHandle?: string
+  onProfileUpdate?: (updates: { walletAddress?: string; twitterHandle?: string }) => void
 }
 
-export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: UserBoardProps) {
+export function UserBoard({ 
+  gameMoney, 
+  gameLevel, 
+  gameExp, 
+  onMoneyUpdate,
+  walletAddress,
+  twitterHandle,
+  onProfileUpdate 
+}: UserBoardProps) {
   const { data: session } = useSession() || {}
   const [showProfile, setShowProfile] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editWallet, setEditWallet] = useState(walletAddress || '')
+  const [editTwitter, setEditTwitter] = useState(twitterHandle || '')
 
   const expToNext = gameLevel * 100 // Experience needed for next level
   const expProgress = (gameExp % 100) / 100 * 100 // Progress to next level
+
+  // Handle saving profile updates
+  const handleSaveProfile = () => {
+    if (onProfileUpdate) {
+      onProfileUpdate({
+        walletAddress: editWallet.trim(),
+        twitterHandle: editTwitter.trim().replace('@', '') // Remove @ if user types it
+      })
+    }
+    setIsEditing(false)
+  }
+
+  // Handle canceling edit
+  const handleCancelEdit = () => {
+    setEditWallet(walletAddress || '')
+    setEditTwitter(twitterHandle || '')
+    setIsEditing(false)
+  }
+
+  // Truncate wallet address for display
+  const truncateWallet = (address: string) => {
+    if (!address) return ''
+    if (address.length <= 12) return address
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
 
   // Debug logging
   console.log('UserBoard render - Session:', session?.user ? 'User found' : 'No user')
@@ -71,34 +111,107 @@ export function UserBoard({ gameMoney, gameLevel, gameExp, onMoneyUpdate }: User
                   )}
                 </div>
                 <p className="text-sm text-slate-400">@{session.user.username}</p>
-                {session.user.xHandle && (
-                  <p className="text-xs text-blue-400">𝕏 @{session.user.xHandle}</p>
-                )}
+                
+                {/* Wallet Address */}
+                <div className="mt-1">
+                  {isEditing ? (
+                    <Input
+                      value={editWallet}
+                      onChange={(e) => setEditWallet(e.target.value)}
+                      placeholder="0x... wallet address"
+                      className="h-6 text-xs bg-slate-700/50 border-slate-600 text-slate-300 placeholder:text-slate-500"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <Wallet className="w-3 h-3 text-green-400" />
+                      <span className="text-xs text-green-400">
+                        {walletAddress ? truncateWallet(walletAddress) : 'Add wallet address'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Twitter Handle */}
+                <div className="mt-1">
+                  {isEditing ? (
+                    <div className="flex items-center">
+                      <span className="text-xs text-blue-400 mr-1">@</span>
+                      <Input
+                        value={editTwitter}
+                        onChange={(e) => setEditTwitter(e.target.value)}
+                        placeholder="Twitter handle"
+                        className="h-6 text-xs bg-slate-700/50 border-slate-600 text-slate-300 placeholder:text-slate-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs font-bold text-blue-400">𝕏</span>
+                      <span className="text-xs text-blue-400">
+                        {twitterHandle ? `@${twitterHandle}` : 'Add Twitter handle'}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardTitle>
             
-            <Dialog open={showProfile} onOpenChange={setShowProfile}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="border-purple-500/50 hover:bg-purple-600 hover:border-purple-400 transition-colors bg-slate-800/80 shadow-lg"
-                  title="Profile Settings"
-                  data-testid="settings-button"
-                >
-                  <Settings className="h-4 w-4 text-purple-300 hover:text-white" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-transparent border-0 p-0 max-w-2xl">
-                <BlockWarsProfileSettings 
-                  onClose={() => setShowProfile(false)}
-                  onProfileUpdate={(updatedProfile) => {
-                    // Handle profile updates if needed
-                    console.log('Profile updated:', updatedProfile)
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
+            <div className="flex gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveProfile}
+                    className="bg-green-600 hover:bg-green-700 border-green-500"
+                    title="Save Profile"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    className="border-red-500/50 hover:bg-red-600 hover:border-red-400"
+                    title="Cancel"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsEditing(true)}
+                    className="border-blue-500/50 hover:bg-blue-600 hover:border-blue-400"
+                    title="Edit Profile"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                  <Dialog open={showProfile} onOpenChange={setShowProfile}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-purple-500/50 hover:bg-purple-600 hover:border-purple-400 transition-colors bg-slate-800/80 shadow-lg"
+                        title="Profile Settings"
+                        data-testid="settings-button"
+                      >
+                        <Settings className="h-4 w-4 text-purple-300 hover:text-white" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-transparent border-0 p-0 max-w-2xl">
+                      <BlockWarsProfileSettings 
+                        onClose={() => setShowProfile(false)}
+                        onProfileUpdate={(updatedProfile) => {
+                          // Handle profile updates if needed
+                          console.log('Profile updated:', updatedProfile)
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="pt-0">

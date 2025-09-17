@@ -61,6 +61,9 @@ interface GameState {
     earlyDetection: boolean
     stealInsurance: boolean
   }
+  // Player profile information
+  walletAddress?: string
+  twitterHandle?: string
 }
 
 interface Block {
@@ -391,6 +394,25 @@ export default function BlockWarsPage() {
     } finally {
       setIsInitialized(true)
     }
+  }
+
+  // Handle profile updates (wallet address and Twitter handle)
+  const handleProfileUpdate = (updates: { walletAddress?: string; twitterHandle?: string }) => {
+    setGameState(prev => {
+      const updatedState = {
+        ...prev,
+        walletAddress: updates.walletAddress,
+        twitterHandle: updates.twitterHandle
+      }
+      
+      // Save to localStorage
+      const storageKey = `blockWarsGameState_${prev.playerId || 'default'}`
+      localStorage.setItem(storageKey, JSON.stringify(updatedState))
+      
+      return updatedState
+    })
+    
+    setBattleLog(prev => [...prev, '✅ Profile updated successfully!'])
   }
 
   // Fetch blocks from the new global API
@@ -1363,6 +1385,9 @@ export default function BlockWarsPage() {
               gameMoney={gameState.money}
               gameLevel={gameState.level}
               gameExp={gameState.experience}
+              walletAddress={gameState.walletAddress}
+              twitterHandle={gameState.twitterHandle}
+              onProfileUpdate={handleProfileUpdate}
             />
             <GameStats gameState={gameState} />
           </div>
