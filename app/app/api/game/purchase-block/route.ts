@@ -9,41 +9,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
     }
 
-    // Since we're using local state management, we need to simulate the purchase
-    // In a real app, you'd retrieve the actual block from database and verify purchase
-    
-    // For now, we'll extract block information from the blockId if it contains the data
-    // Or use reasonable defaults for purchased blocks
-    
-    let blockName = 'Premium Block'
-    let blockType = 'premium'
-    let blockRarity: 'rare' | 'epic' | 'legendary' | 'secret' = 'rare'
-    let blockPrice = 5000
-    let blockImage = '💎'
-    let blockColor = '#3B82F6'
-    
-    // Extract info from blockId if possible
-    if (blockId.includes('rare')) {
-      blockRarity = 'rare'
-      blockPrice = 5000
-      blockImage = '🔷'
-      blockColor = '#3B82F6'
-    } else if (blockId.includes('epic')) {
-      blockRarity = 'epic'  
-      blockPrice = 25000
-      blockImage = '🔮'
-      blockColor = '#8B5CF6'
-    } else if (blockId.includes('legendary')) {
-      blockRarity = 'legendary'
-      blockPrice = 100000
-      blockImage = '👑'
-      blockColor = '#F59E0B'
-    } else if (blockId.includes('secret')) {
-      blockRarity = 'secret'
-      blockPrice = 500000
-      blockImage = '🚀'
-      blockColor = '#FFD700'
+    // Fetch the actual block data from global blocks to preserve original information
+    let originalBlock = null
+    try {
+      const globalBlocksResponse = await fetch('http://localhost:3000/api/game/global-blocks')
+      const globalBlocksData = await globalBlocksResponse.json()
+      
+      if (globalBlocksData.blocks) {
+        originalBlock = globalBlocksData.blocks.find((block: any) => block.id === blockId)
+      }
+    } catch (error) {
+      console.error('Error fetching global blocks:', error)
     }
+
+    // If we couldn't find the original block, return error
+    if (!originalBlock) {
+      return NextResponse.json({ error: 'Block not found or no longer available' }, { status: 404 })
+    }
+
+    // Use original block data
+    const blockName = originalBlock.name
+    const blockType = originalBlock.type
+    const blockRarity = originalBlock.rarity
+    const blockPrice = originalBlock.price || 5000
+    const blockImage = originalBlock.image
+    const blockColor = originalBlock.color
+    const blockDescription = originalBlock.description
+    const blockTraits = originalBlock.traits || []
 
     // Check if player has enough money
     if (playerMoney < blockPrice) {
@@ -61,24 +53,24 @@ export async function POST(request: NextRequest) {
 
     const purchasedBlock = {
       id: blockId,
-      name: blockName,
-      type: blockType,
-      rarity: blockRarity,
-      value: blockPrice * 0.2, // Base coins value is 20% of price
-      power: blockRarity === 'legendary' ? 150 : blockRarity === 'epic' ? 120 : blockRarity === 'rare' ? 80 : 60,
-      defense: blockRarity === 'legendary' ? 140 : blockRarity === 'epic' ? 110 : blockRarity === 'rare' ? 70 : 50,
-      image: blockImage,
-      color: blockColor,
-      description: `A premium ${blockRarity} block with enhanced crypto powers!`,
-      isStealable: false, // Premium blocks can't be stolen
-      spawnTime: Date.now(),
-      traits: [`${blockRarity} rarity`, 'Premium', 'Protected']
+      name: blockName, // Preserve original name (e.g., "100xDarren", "0xSweep", etc.)
+      type: blockType, // Preserve original type
+      rarity: blockRarity, // Preserve original rarity
+      value: originalBlock.value || (blockPrice * 0.2), // Use original value or fallback
+      power: originalBlock.power || (blockRarity === 'legendary' ? 150 : blockRarity === 'epic' ? 120 : blockRarity === 'rare' ? 80 : 60),
+      defense: originalBlock.defense || (blockRarity === 'legendary' ? 140 : blockRarity === 'epic' ? 110 : blockRarity === 'rare' ? 70 : 50),
+      image: blockImage, // Preserve original image
+      color: blockColor, // Preserve original color
+      description: blockDescription, // Preserve original description
+      isStealable: false, // Premium blocks can't be stolen (this is the main change when purchased)
+      spawnTime: originalBlock.spawnTime || Date.now(),
+      traits: [...blockTraits, 'Owned', 'Protected'] // Preserve original traits and add ownership traits
     }
 
     // Return the purchase result
     return NextResponse.json({
       success: true,
-      message: `Successfully purchased ${purchasedBlock.name} for $${blockPrice.toLocaleString()}!`,
+      message: `Successfully purchased ${blockName} for $${blockPrice.toLocaleString()}!`,
       purchasedBlock,
       price: blockPrice
     })
