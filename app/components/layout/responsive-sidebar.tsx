@@ -17,8 +17,7 @@ import {
   Target,
   Rocket,
   Globe,
-  Gamepad2,
-  Percent
+  Gamepad2
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 
@@ -73,11 +72,7 @@ const sidebarItems = [
     href: '/wallet-dashboard',
     icon: Activity,
   },
-  {
-    title: 'Yields & APR',
-    href: '/yields',
-    icon: Percent,
-  },
+
   {
     title: 'Block Wars',
     href: '/block-wars',

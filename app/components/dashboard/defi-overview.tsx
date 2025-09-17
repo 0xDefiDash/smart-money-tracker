@@ -208,65 +208,11 @@ export function DeFiOverview() {
         </div>
 
         {/* Tabs for different data views */}
-        <Tabs defaultValue="yields" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="yields">Top Yields</TabsTrigger>
+        <Tabs defaultValue="protocols" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="protocols">Top Protocols</TabsTrigger>
             <TabsTrigger value="movers">Market Movers</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="yields" className="space-y-4">
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-foreground">High Yield Opportunities</h4>
-              {poolsData.topPools?.slice(0, 8).map((pool, index) => (
-                <div
-                  key={pool.pool}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="text-xs font-bold text-muted-foreground w-6">
-                      #{index + 1}
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <p className="font-medium text-sm text-foreground">
-                          {pool.project} {pool.symbol}
-                        </p>
-                        <Badge variant="outline" className="text-xs">
-                          {pool.chain}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        TVL: {formatCurrency(pool.tvlUsd)}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <p className="font-bold text-sm text-green-500">
-                      {formatPercent(pool.apy)} APY
-                    </p>
-                    {pool.apyBase && pool.apyReward && (
-                      <p className="text-xs text-muted-foreground">
-                        Base: {formatPercent(pool.apyBase)} + Rewards: {formatPercent(pool.apyReward)}
-                      </p>
-                    )}
-                  </div>
-                  
-                  {pool.url && (
-                    <a
-                      href={pool.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-2 text-primary hover:text-primary/80"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </TabsContent>
 
           <TabsContent value="protocols" className="space-y-4">
             <div className="space-y-3">
