@@ -30,7 +30,7 @@ const RARE_BLOCKS = [
     name: '0xSweep', 
     type: '0xsweep', 
     color: '#FF6347', 
-    image: '/images/0xsweep.jpg',
+    image: '/images/UPaVddbm_400x400.jpg',
     description: '0xSweep - The legendary NFT sweeper and DeFi strategist with unmatched market insight!'
   },
   { 
