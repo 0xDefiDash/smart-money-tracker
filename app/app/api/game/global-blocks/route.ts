@@ -39,11 +39,11 @@ const RARE_BLOCKS = [
 
 const EPIC_BLOCKS = [
   { 
-    name: 'James Wynn The Legendary trader', 
-    type: 'james-wynn', 
-    color: '#DAA520', 
-    image: '/images/james-wynn.jpg',
-    description: 'James Wynn The Legendary trader - Master of crypto markets with legendary trading prowess!'
+    name: 'Bullrun_Gravano', 
+    type: 'bullrun-gravano', 
+    color: '#FFD700', 
+    image: '/images/bullrun-gravano.jpg',
+    description: 'Bullrun_Gravano - The OG Crypto Gem Hunter with legendary market instincts and golden touch!'
   },
   { 
     name: '1CrypticPoet', 
