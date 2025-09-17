@@ -27,6 +27,16 @@ const BLOCK_TYPES = [
   { name: 'Cardano Block', type: 'ada', color: '#0033AD', emoji: '₳' }
 ]
 
+const RARE_BLOCKS = [
+  { 
+    name: '0xSweep', 
+    type: '0xsweep', 
+    color: '#FF6347', 
+    image: '/images/0xsweep.jpg',
+    description: '0xSweep - The legendary NFT sweeper and DeFi strategist with unmatched market insight!'
+  }
+]
+
 const EPIC_BLOCKS = [
   { 
     name: 'James Wynn The Legendary trader', 
@@ -174,7 +184,7 @@ function generateInitialBlocks() {
           isPurchasable: true
         })
       } else if (selectedRarity === 'epic' && EPIC_BLOCKS.length > 0) {
-        // Use Bullrun_Gravano for epic blocks
+        // Use Epic blocks
         const epicBlock = EPIC_BLOCKS[Math.floor(Math.random() * EPIC_BLOCKS.length)]
         
         newBlocks.push({
@@ -194,8 +204,29 @@ function generateInitialBlocks() {
           price: BLOCK_PRICES.epic,
           isPurchasable: true
         })
+      } else if (selectedRarity === 'rare' && RARE_BLOCKS.length > 0) {
+        // Use 0xSweep and other rare blocks
+        const rareBlock = RARE_BLOCKS[Math.floor(Math.random() * RARE_BLOCKS.length)]
+        
+        newBlocks.push({
+          id: `rare_block_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+          name: rareBlock.name,
+          type: rareBlock.type,
+          rarity: 'rare',
+          value: baseValue + Math.floor(Math.random() * baseValue * 0.5),
+          power: Math.floor(Math.random() * 30) + 60, // Rare blocks have good power
+          defense: Math.floor(Math.random() * 25) + 50, // Rare blocks have decent defense
+          image: rareBlock.image,
+          color: rareBlock.color,
+          description: rareBlock.description,
+          isStealable: false, // Rare blocks can't be stolen (premium)
+          spawnTime: Date.now(),
+          traits: ['Rare Rarity', 'NFT Sweeper', 'DeFi Expert', 'Market Strategist'],
+          price: BLOCK_PRICES.rare,
+          isPurchasable: true
+        })
       } else {
-        // Use regular block types for common and rare
+        // Use regular block types for common blocks
         const blockType = BLOCK_TYPES[Math.floor(Math.random() * BLOCK_TYPES.length)]
         
         // Determine if block is purchasable (rare and above require payment, common is free)
