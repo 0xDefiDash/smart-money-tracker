@@ -7,7 +7,7 @@ const BLOCK_TYPES = [
   { name: 'Bitcoin Block', type: 'btc', color: '#F7931A', emoji: '₿' },
   { name: 'Ethereum Block', type: 'eth', color: '#627EEA', emoji: 'Ξ' },
   { name: 'Solana Block', type: 'sol', color: '#9945FF', emoji: '◎' },
-  { name: 'Cardano Block', type: 'ada', color: '#0033AD', emoji: '₳' },
+
   { name: 'Polygon Block', type: 'matic', color: '#8247E5', emoji: '⟐' },
   { name: 'Avalanche Block', type: 'avax', color: '#E84142', emoji: '🔺' },
   { name: 'Chainlink Block', type: 'link', color: '#375BD2', emoji: '🔗' },

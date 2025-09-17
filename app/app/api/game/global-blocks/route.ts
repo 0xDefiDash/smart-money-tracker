@@ -23,8 +23,7 @@ interface Block {
 const BLOCK_TYPES = [
   { name: 'Bitcoin Block', type: 'btc', color: '#F7931A', emoji: '₿' },
   { name: 'Ethereum Block', type: 'eth', color: '#627EEA', emoji: 'Ξ' },
-  { name: 'Solana Block', type: 'sol', color: '#9945FF', emoji: '◎' },
-  { name: 'Cardano Block', type: 'ada', color: '#0033AD', emoji: '₳' }
+  { name: 'Solana Block', type: 'sol', color: '#9945FF', emoji: '◎' }
 ]
 
 const RARE_BLOCKS = [
@@ -34,6 +33,13 @@ const RARE_BLOCKS = [
     color: '#FF6347', 
     image: '/images/0xsweep.jpg',
     description: '0xSweep - The legendary NFT sweeper and DeFi strategist with unmatched market insight!'
+  },
+  { 
+    name: 'pepecoineth', 
+    type: 'pepecoineth', 
+    color: '#228B22', 
+    image: '/images/pepecoineth.jpg',
+    description: 'pepecoineth - The Green parabola Frog with legendary meme powers and crypto wisdom!'
   }
 ]
 
