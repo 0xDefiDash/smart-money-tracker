@@ -1316,33 +1316,37 @@ export default function BlockWarsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-tech-gradient p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
+    <div className="min-h-screen bg-tech-gradient p-2 sm:p-4">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        {/* Header - Mobile Optimized */}
         <Card className="bg-gradient-to-r from-neon-green/20 to-neon-blue/20 border-neon-green/30 glow-green">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-neon-gradient rounded-xl flex items-center justify-center glow-hover">
-                  <Gamepad2 className="w-6 h-6 text-white" />
+          <CardHeader className="pb-4 sm:pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neon-gradient rounded-xl flex items-center justify-center glow-hover">
+                  <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-neon-green-bright to-neon-blue-bright bg-clip-text text-transparent">
-                    Block Wars - Competitive Economy
+                  <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-neon-green-bright to-neon-blue-bright bg-clip-text text-transparent leading-tight">
+                    Block Wars
                   </CardTitle>
-                  <p className="text-muted-foreground">🆓 Common blocks are FREE • 💳 Premium blocks cost money • 💰 All blocks earn money passively!</p>
+                  <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">🆓 Common blocks are FREE • 💳 Premium blocks cost money • 💰 All blocks earn money passively!</p>
+                  <p className="text-xs text-muted-foreground sm:hidden">🆓 FREE blocks • 💳 Premium blocks • 💰 Passive income!</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
-                <div className="text-right">
-                  <div className="flex items-center space-x-2">
-                    <Coins className="w-4 h-4 text-yellow-500" />
-                    <span className="font-bold text-yellow-500">{gameState.coins.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Trophy className="w-4 h-4 text-green-500" />
-                    <span className="font-bold text-green-500">${gameState.money.toLocaleString()}</span>
+              <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-4">
+                {/* Stats - Mobile Optimized */}
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="text-center sm:text-right">
+                    <div className="flex items-center space-x-1 sm:space-x-2 justify-center sm:justify-end">
+                      <Coins className="w-4 h-4 text-yellow-500" />
+                      <span className="font-bold text-yellow-500 text-sm sm:text-base">{gameState.coins.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center space-x-1 sm:space-x-2 justify-center sm:justify-end">
+                      <Trophy className="w-4 h-4 text-green-500" />
+                      <span className="font-bold text-green-500 text-sm sm:text-base">${gameState.money.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
                 
@@ -1350,79 +1354,83 @@ export default function BlockWarsPage() {
                   variant="outline" 
                   size="sm"
                   onClick={resetGame}
-                  className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300"
+                  className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300 text-xs sm:text-sm px-2 sm:px-3 touch-manipulation"
                 >
-                  Reset Game
+                  <span className="hidden sm:inline">Reset Game</span>
+                  <span className="sm:hidden">Reset</span>
                 </Button>
               </div>
             </div>
           </CardHeader>
         </Card>
 
-        {/* Defidash Rewards Section */}
+        {/* Defidash Rewards Section - Mobile Optimized */}
         <Card className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-yellow-500/30 shadow-lg">
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-3 sm:pb-4">
             <div className="text-center">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent flex items-center justify-center space-x-2 mb-2">
-                <Trophy className="w-6 h-6 text-yellow-500" />
-                <span>🏆 Weekly Defidash Rewards 🏆</span>
-                <Trophy className="w-6 h-6 text-yellow-500" />
+              <CardTitle className="text-lg sm:text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 mb-2">
+                <div className="flex items-center space-x-2 sm:space-x-1">
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+                  <span className="text-base sm:text-xl">🏆 Weekly Defidash Rewards 🏆</span>
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+                </div>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">Top 5 leaderboard positions earn $DEFIDASH tokens every week!</p>
+              <p className="text-xs sm:text-sm text-muted-foreground px-2">Top 5 leaderboard positions earn $DEFIDASH tokens every week!</p>
             </div>
             
-            <div className="grid grid-cols-5 gap-3 mt-4">
+            {/* Mobile: Show rewards in scrollable horizontal layout */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mt-3 sm:mt-4 overflow-x-auto">
               {/* 1st Place */}
-              <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/30 border-2 border-yellow-400/40 rounded-lg p-3 text-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/30 border-2 border-yellow-400/40 rounded-lg p-2 sm:p-3 text-center relative overflow-hidden min-h-[80px] sm:min-h-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-transparent"></div>
                 <div className="relative z-10">
-                  <div className="text-2xl mb-1">🥇</div>
+                  <div className="text-xl sm:text-2xl mb-1">🥇</div>
                   <div className="text-xs font-bold text-yellow-400 mb-1">1st Place</div>
-                  <div className="text-lg font-bold text-yellow-300">1,000</div>
+                  <div className="text-base sm:text-lg font-bold text-yellow-300">1,000</div>
                   <div className="text-xs text-yellow-400/80">$DEFIDASH</div>
                 </div>
               </div>
 
               {/* 2nd Place */}
-              <div className="bg-gradient-to-br from-gray-400/20 to-gray-500/30 border-2 border-gray-400/40 rounded-lg p-3 text-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-gray-400/20 to-gray-500/30 border-2 border-gray-400/40 rounded-lg p-2 sm:p-3 text-center relative overflow-hidden min-h-[80px] sm:min-h-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-300/10 to-transparent"></div>
                 <div className="relative z-10">
-                  <div className="text-2xl mb-1">🥈</div>
+                  <div className="text-xl sm:text-2xl mb-1">🥈</div>
                   <div className="text-xs font-bold text-gray-300 mb-1">2nd Place</div>
-                  <div className="text-lg font-bold text-gray-200">750</div>
+                  <div className="text-base sm:text-lg font-bold text-gray-200">750</div>
                   <div className="text-xs text-gray-300/80">$DEFIDASH</div>
                 </div>
               </div>
 
               {/* 3rd Place */}
-              <div className="bg-gradient-to-br from-orange-600/20 to-orange-700/30 border-2 border-orange-500/40 rounded-lg p-3 text-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-orange-600/20 to-orange-700/30 border-2 border-orange-500/40 rounded-lg p-2 sm:p-3 text-center relative overflow-hidden min-h-[80px] sm:min-h-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-400/10 to-transparent"></div>
                 <div className="relative z-10">
-                  <div className="text-2xl mb-1">🥉</div>
+                  <div className="text-xl sm:text-2xl mb-1">🥉</div>
                   <div className="text-xs font-bold text-orange-400 mb-1">3rd Place</div>
-                  <div className="text-lg font-bold text-orange-300">500</div>
+                  <div className="text-base sm:text-lg font-bold text-orange-300">500</div>
                   <div className="text-xs text-orange-400/80">$DEFIDASH</div>
                 </div>
               </div>
 
               {/* 4th Place */}
-              <div className="bg-gradient-to-br from-blue-600/20 to-blue-700/30 border-2 border-blue-500/40 rounded-lg p-3 text-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-blue-600/20 to-blue-700/30 border-2 border-blue-500/40 rounded-lg p-2 sm:p-3 text-center relative overflow-hidden min-h-[80px] sm:min-h-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-transparent"></div>
                 <div className="relative z-10">
-                  <div className="text-2xl mb-1">🎖️</div>
+                  <div className="text-xl sm:text-2xl mb-1">🎖️</div>
                   <div className="text-xs font-bold text-blue-400 mb-1">4th Place</div>
-                  <div className="text-lg font-bold text-blue-300">300</div>
+                  <div className="text-base sm:text-lg font-bold text-blue-300">300</div>
                   <div className="text-xs text-blue-400/80">$DEFIDASH</div>
                 </div>
               </div>
 
               {/* 5th Place */}
-              <div className="bg-gradient-to-br from-purple-600/20 to-purple-700/30 border-2 border-purple-500/40 rounded-lg p-3 text-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-purple-600/20 to-purple-700/30 border-2 border-purple-500/40 rounded-lg p-2 sm:p-3 text-center relative overflow-hidden min-h-[80px] sm:min-h-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-transparent"></div>
                 <div className="relative z-10">
-                  <div className="text-2xl mb-1">🏅</div>
+                  <div className="text-xl sm:text-2xl mb-1">🏅</div>
                   <div className="text-xs font-bold text-purple-400 mb-1">5th Place</div>
-                  <div className="text-lg font-bold text-purple-300">200</div>
+                  <div className="text-base sm:text-lg font-bold text-purple-300">200</div>
                   <div className="text-xs text-purple-400/80">$DEFIDASH</div>
                 </div>
               </div>
@@ -1512,30 +1520,51 @@ export default function BlockWarsPage() {
           {/* Main Game Area */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="arena" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="arena" className="flex items-center space-x-2">
-                  <Target className="w-4 h-4" />
-                  <span>Arena</span>
+              {/* Mobile-optimized tabs */}
+              <TabsList className="grid w-full grid-cols-5 h-12 sm:h-auto bg-black/50">
+                <TabsTrigger 
+                  value="arena" 
+                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                >
+                  <Target className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Arena</span>
+                  <span className="sm:hidden text-xs">🎯</span>
                 </TabsTrigger>
-                <TabsTrigger value="collection" className="flex items-center space-x-2">
-                  <Crown className="w-4 h-4" />
-                  <span>Collection</span>
+                <TabsTrigger 
+                  value="collection" 
+                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                >
+                  <Crown className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Collection</span>
+                  <span className="sm:hidden text-xs">👑</span>
                 </TabsTrigger>
-                <TabsTrigger value="store" className="flex items-center space-x-2">
-                  <Coins className="w-4 h-4" />
-                  <span>Store</span>
+                <TabsTrigger 
+                  value="store" 
+                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                >
+                  <Coins className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Store</span>
+                  <span className="sm:hidden text-xs">🛒</span>
                 </TabsTrigger>
-                <TabsTrigger value="battles" className="flex items-center space-x-2">
-                  <Sword className="w-4 h-4" />
-                  <span>Battles</span>
+                <TabsTrigger 
+                  value="battles" 
+                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                >
+                  <Sword className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Battles</span>
+                  <span className="sm:hidden text-xs">⚔️</span>
                 </TabsTrigger>
-                <TabsTrigger value="leaderboard" className="flex items-center space-x-2">
-                  <Users className="w-4 h-4" />
-                  <span>Leaderboard</span>
+                <TabsTrigger 
+                  value="leaderboard" 
+                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                >
+                  <Users className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Leaderboard</span>
+                  <span className="sm:hidden text-xs">🏆</span>
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="arena" className="space-y-6">
+              <TabsContent value="arena" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
                 <SpawnArea 
                   spawnedBlocks={spawnedBlocks}
                   timeUntilSpawn={timeUntilSpawn}
@@ -1547,7 +1576,7 @@ export default function BlockWarsPage() {
                 />
               </TabsContent>
 
-              <TabsContent value="collection">
+              <TabsContent value="collection" className="mt-4 sm:mt-6">
                 <BlockCollection 
                   ownedBlocks={gameState.ownedBlocks}
                   coins={gameState.coins}
@@ -1556,7 +1585,7 @@ export default function BlockWarsPage() {
                 />
               </TabsContent>
 
-              <TabsContent value="store" className="space-y-6">
+              <TabsContent value="store" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">

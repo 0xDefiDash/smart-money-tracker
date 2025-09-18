@@ -49,24 +49,24 @@ export function SpawnArea({
   const isAtLimit = currentBlockCount >= 12
 
   return (
-    <div className="space-y-6">
-      {/* Spawn Timer */}
+    <div className="space-y-4 sm:space-y-6">
+      {/* Spawn Timer - Mobile optimized */}
       <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/20">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Timer className="w-5 h-5 text-green-500" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+            <Timer className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
             <span>Block Spawn Timer</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Next spawn in:</span>
-            <span className="font-bold text-green-500">
+            <span className="text-xs sm:text-sm text-muted-foreground">Next spawn in:</span>
+            <span className="font-bold text-green-500 text-lg sm:text-xl">
               {Math.floor(timeUntilSpawn / 60)}:{(timeUntilSpawn % 60).toString().padStart(2, '0')}
             </span>
           </div>
-          <Progress value={spawnProgress} className="h-2" />
-          <p className="text-xs text-muted-foreground text-center">
+          <Progress value={spawnProgress} className="h-3 sm:h-2" />
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
             {timeUntilSpawn === 0 ? '🎁 New blocks are spawning globally!' : '🌍 Common blocks are FREE! Premium blocks require money!'}
           </p>
         </CardContent>
@@ -74,10 +74,10 @@ export function SpawnArea({
 
       {/* Global Spawned Blocks */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Gift className="w-5 h-5 text-purple-500" />
-            <span>🌍 Global Arena - Available Blocks ({spawnedBlocks.length})</span>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+            <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
+            <span className="truncate">🌍 Global Arena ({spawnedBlocks.length})</span>
             <Sparkles className="w-4 h-4 text-yellow-500" />
           </CardTitle>
           <div className="text-sm text-muted-foreground">

@@ -32,6 +32,11 @@ const sidebarItems = [
     icon: Gamepad2,
   },
   {
+    title: 'Block Wars Players Guide',
+    href: '/block-wars-guide',
+    icon: Target,
+  },
+  {
     title: 'Live Market',
     href: '/market',
     icon: TrendingUp,
@@ -93,58 +98,62 @@ export function MobileSidebar({ onItemClick }: MobileSidebarProps) {
 
   return (
     <div className="flex flex-col h-full bg-card">
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <Activity className="w-4 h-4 text-white" />
+      <div className="p-4 sm:p-6 border-b border-border">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <Activity className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-foreground">Defidash</h1>
-            <p className="text-xs text-muted-foreground">Smart Money Tracker</p>
+            <h1 className="text-base font-bold text-foreground">Defidash</h1>
+            <p className="text-sm text-muted-foreground">Smart Money Tracker</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 px-4 py-4 space-y-1">
-        {sidebarItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onItemClick}
-              className={cn(
-                'flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group touch-manipulation',
-                isActive
-                  ? 'bg-primary text-primary-foreground shadow-lg'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent active:bg-accent'
-              )}
-            >
-              <Icon className={cn(
-                'w-5 h-5 transition-colors',
-                isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
-              )} />
-              <span className="font-medium text-base">{item.title}</span>
-            </Link>
-          )
-        })}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+        <div className="space-y-2">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onItemClick}
+                className={cn(
+                  'flex items-center space-x-4 px-4 py-4 rounded-xl transition-all duration-200 group touch-manipulation min-h-[56px]',
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-lg scale-[0.98] active:scale-95'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent active:bg-accent active:scale-95'
+                )}
+              >
+                <Icon className={cn(
+                  'w-6 h-6 transition-colors flex-shrink-0',
+                  isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
+                )} />
+                <span className="font-medium text-base leading-tight">{item.title}</span>
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
       <div className="p-4 border-t border-border space-y-4">
         {/* Wallet Connection */}
         <div className="flex justify-center">
-          <WalletButton />
+          <div className="scale-110">
+            <WalletButton />
+          </div>
         </div>
         
-        <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 rounded-lg p-3">
+        <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 rounded-lg p-4">
           <div className="flex items-center space-x-2 mb-2">
-            <Zap className="w-4 h-4 text-blue-500" />
-            <span className="text-xs font-medium text-foreground">Real-time Updates</span>
+            <Zap className="w-5 h-5 text-blue-500" />
+            <span className="text-sm font-medium text-foreground">Live Tracking</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Monitoring {whaleCount} whale addresses
+          <p className="text-sm text-muted-foreground">
+            {whaleCount} whale addresses monitored
           </p>
         </div>
       </div>

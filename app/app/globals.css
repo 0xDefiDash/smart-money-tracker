@@ -1,6 +1,67 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobile optimization utilities */
+@layer utilities {
+  /* Touch targets should be at least 44x44px for iOS and 48x48px for Android */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Improved touch manipulation */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Prevent text selection on game elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Better scroll behavior on mobile */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Mobile-friendly hover states */
+  @media (hover: none) and (pointer: coarse) {
+    .hover\:scale-105:hover {
+      transform: none;
+    }
+    .group:hover .group-hover\:scale-110 {
+      transform: none;
+    }
+  }
+  
+  /* Active states for touch devices */
+  .touch-active:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  
+  /* Safe area utilities for mobile devices with notches */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
  
 @layer base {
   :root {

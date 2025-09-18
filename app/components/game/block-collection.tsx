@@ -47,36 +47,36 @@ export function BlockCollection({ ownedBlocks, coins, onSellBlock, isLoading = f
   })
 
   return (
-    <div className="space-y-6">
-      {/* Collection Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Package className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-            <p className="text-2xl font-bold">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Collection Stats - Mobile Optimized */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="touch-manipulation">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <Package className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-blue-500" />
+            <p className="text-lg sm:text-2xl font-bold">
               {ownedBlocks.length}
-              <span className="text-sm text-muted-foreground">/12</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">/12</span>
             </p>
-            <p className="text-sm text-muted-foreground">Blocks Owned</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Blocks Owned</p>
             {ownedBlocks.length >= 12 && (
               <p className="text-xs text-red-400 mt-1">Collection Full!</p>
             )}
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4 text-center">
-            <TrendingUp className="w-8 h-8 mx-auto mb-2 text-green-500" />
-            <p className="text-2xl font-bold">{totalValue.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground">Total Value</p>
+        <Card className="touch-manipulation">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-green-500" />
+            <p className="text-lg sm:text-2xl font-bold">{totalValue.toLocaleString()}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Total Value</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Crown className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
-            <p className="text-2xl font-bold">{rarityStats.legendary}</p>
-            <p className="text-sm text-muted-foreground">Legendary</p>
+        <Card className="touch-manipulation">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <Crown className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-yellow-500" />
+            <p className="text-lg sm:text-2xl font-bold">{rarityStats.legendary}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Legendary</p>
           </CardContent>
         </Card>
         
