@@ -29,6 +29,11 @@ const sidebarItems = [
     icon: Gamepad2,
   },
   {
+    title: 'Block Wars Players Guide',
+    href: '/block-wars-guide',
+    icon: Target,
+  },
+  {
     title: 'Live Market',
     href: '/market',
     icon: TrendingUp,
