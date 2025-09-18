@@ -16,7 +16,6 @@ import {
   LineChart,
   Target,
   Rocket,
-  Globe,
   Gamepad2
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
@@ -62,11 +61,7 @@ const sidebarItems = [
     href: '/bonkfun',
     icon: Rocket,
   },
-  {
-    title: 'ZORA Tracker',
-    href: '/zora',
-    icon: Globe,
-  },
+
   {
     title: 'Wallet Analytics',
     href: '/wallet',
