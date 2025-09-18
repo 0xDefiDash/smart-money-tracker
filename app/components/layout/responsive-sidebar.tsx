@@ -38,11 +38,6 @@ const sidebarItems = [
     icon: Target,
   },
   {
-    title: 'Live Market',
-    href: '/market',
-    icon: TrendingUp,
-  },
-  {
     title: 'Token Charts',
     href: '/token-charts',
     icon: LineChart,

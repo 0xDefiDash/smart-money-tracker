@@ -34,11 +34,6 @@ const sidebarItems = [
     icon: Target,
   },
   {
-    title: 'Live Market',
-    href: '/market',
-    icon: TrendingUp,
-  },
-  {
     title: 'Whale Tracker',
     href: '/whale-tracker',
     icon: Activity,
