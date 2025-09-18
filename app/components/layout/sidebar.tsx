@@ -15,7 +15,8 @@ import {
   Target,
   Rocket,
   Gamepad2,
-  Radio
+  Radio,
+  Video
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -33,6 +34,11 @@ const sidebarItems = [
     title: 'Block Wars Live',
     href: '/block-wars/live',
     icon: Radio,
+  },
+  {
+    title: 'Go Live',
+    href: '/block-wars/go-live',
+    icon: Video,
   },
   {
     title: 'Block Wars Players Guide',
