@@ -73,6 +73,8 @@ interface GameState {
     token: string
     timestamp: number
     description: string
+    transactionHash?: string // Blockchain transaction hash
+    treasuryAddress?: string // Destination address for token transfers
   }>
 }
 
@@ -1190,47 +1192,80 @@ export default function BlockWarsPage() {
       return
     }
 
+    // Check if player has wallet address configured
+    if (!gameState.walletAddress) {
+      setBattleLog(prev => [...prev, `❌ Please configure your crypto wallet address in profile settings first!`])
+      return
+    }
+
     setIsLoading(true)
-    setBattleLog(prev => [...prev, `🔗 Connecting to Base Chain for $DEFIDASH transaction...`])
+    setBattleLog(prev => [...prev, `🔗 Initiating $DEFIDASH transfer to DEFIDASH treasury on Base Chain...`])
     
     try {
-      // Simulate Base Chain transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Update game state with crypto purchase
-      setGameState(prev => {
-        const newUpgrades = { ...prev.upgrades, [itemId]: 1 }
-        const newDefidashBalance = (prev.defidashBalance || 0) - requiredDefidash
-        const newCryptoTransaction = {
-          type: 'spend' as const,
+      // Call the crypto purchase API to handle the blockchain transaction
+      const response = await fetch('/api/game/crypto-purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          itemId,
+          playerId: gameState.playerId,
+          playerWalletAddress: gameState.walletAddress,
           amount: requiredDefidash,
           token: 'DEFIDASH',
-          timestamp: Date.now(),
-          description: `Purchased ${item.name}`
-        }
-        const newCryptoTransactions = [...(prev.cryptoTransactions || []), newCryptoTransaction]
-        
-        const updatedState = {
-          ...prev,
-          upgrades: newUpgrades,
-          defidashBalance: newDefidashBalance,
-          cryptoTransactions: newCryptoTransactions,
-          experience: prev.experience + 1000 // Bonus XP for crypto purchases
-        }
-
-        // Save to localStorage
-        const storageKey = `blockWarsGameState_${prev.playerId || 'default'}`
-        localStorage.setItem(storageKey, JSON.stringify(updatedState))
-        
-        return updatedState
+          treasuryAddress: '0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6'
+        })
       })
-      
-      setBattleLog(prev => [...prev, `✅ Base Chain transaction confirmed!`])
-      setBattleLog(prev => [...prev, `🎉 Secret block ${item.name} unlocked with ${requiredDefidash} $DEFIDASH!`])
-      setBattleLog(prev => [...prev, `💎 You now have exclusive access to this legendary block!`])
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Update game state with crypto purchase
+        setGameState(prev => {
+          const newUpgrades = { ...prev.upgrades, [itemId]: 1 }
+          const newDefidashBalance = (prev.defidashBalance || 0) - requiredDefidash
+          const newCryptoTransaction = {
+            type: 'spend' as const,
+            amount: requiredDefidash,
+            token: 'DEFIDASH',
+            timestamp: Date.now(),
+            description: `Purchased ${item.name}`,
+            transactionHash: result.transactionHash || undefined,
+            treasuryAddress: '0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6'
+          }
+          const newCryptoTransactions = [...(prev.cryptoTransactions || []), newCryptoTransaction]
+          
+          const updatedState = {
+            ...prev,
+            upgrades: newUpgrades,
+            defidashBalance: newDefidashBalance,
+            cryptoTransactions: newCryptoTransactions,
+            experience: prev.experience + 1000 // Bonus XP for crypto purchases
+          }
+
+          // Save to localStorage
+          const storageKey = `blockWarsGameState_${prev.playerId || 'default'}`
+          localStorage.setItem(storageKey, JSON.stringify(updatedState))
+          
+          return updatedState
+        })
+        
+        setBattleLog(prev => [...prev, `✅ Base Chain transaction confirmed!`])
+        setBattleLog(prev => [...prev, `💰 ${requiredDefidash} $DEFIDASH transferred to treasury: 0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6`])
+        setBattleLog(prev => [...prev, `🎉 Secret block ${item.name} unlocked!`])
+        setBattleLog(prev => [...prev, `💎 You now have exclusive access to this legendary block!`])
+        
+        if (result.transactionHash) {
+          setBattleLog(prev => [...prev, `🔗 TX Hash: ${result.transactionHash.substring(0, 20)}...`])
+        }
+        
+      } else {
+        const errorData = await response.json()
+        setBattleLog(prev => [...prev, `❌ Blockchain transaction failed: ${errorData.error}`])
+      }
       
     } catch (error) {
-      setBattleLog(prev => [...prev, `❌ Base Chain transaction failed. Please try again!`])
+      setBattleLog(prev => [...prev, `❌ Network error during crypto purchase. Please try again!`])
+      console.error('Crypto purchase error:', error)
     }
     
     setIsLoading(false)

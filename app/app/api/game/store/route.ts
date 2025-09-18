@@ -15,6 +15,7 @@ interface StoreItem {
   cryptoPrice?: number // Price in $DEFIDASH tokens
   cryptoToken?: string // Token name (e.g., 'DEFIDASH')
   isSecret?: boolean // Whether this is a secret item
+  treasuryAddress?: string // Destination wallet address for crypto purchases
 }
 
 // Store items available for purchase
@@ -345,10 +346,11 @@ const STORE_ITEMS: StoreItem[] = [
   },
 
   // Crypto Secrets (purchasable with $DEFIDASH on Base Chain)
+  // Treasury Address: 0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6
   {
     id: 'secret_realdonaldtrump_crypto',
     name: 'Secret: realDonaldTrump Block',
-    description: 'Unlock the ultra-rare realDonaldTrump block with $DEFIDASH tokens. This legendary secret block provides massive money generation and prestige.',
+    description: 'Unlock the ultra-rare realDonaldTrump block with $DEFIDASH tokens. Tokens are sent to DEFIDASH treasury on Base Chain. This legendary secret block provides massive money generation and prestige.',
     price: 0, // No regular money cost
     cryptoPrice: 1500,
     cryptoToken: 'DEFIDASH',
@@ -357,12 +359,13 @@ const STORE_ITEMS: StoreItem[] = [
     icon: '🇺🇸',
     color: '#FFD700',
     maxLevel: 1,
-    isSecret: true
+    isSecret: true,
+    treasuryAddress: '0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6'
   },
   {
     id: 'secret_bitcoin_wizard_crypto',
     name: 'Secret: Bitcoin Wizard Block',
-    description: 'Purchase the legendary Bitcoin Wizard block with $DEFIDASH. This mystical block grants enhanced crypto powers and exclusive abilities.',
+    description: 'Purchase the legendary Bitcoin Wizard block with $DEFIDASH. Tokens are sent to DEFIDASH treasury on Base Chain. This mystical block grants enhanced crypto powers and exclusive abilities.',
     price: 0, // No regular money cost
     cryptoPrice: 1500,
     cryptoToken: 'DEFIDASH',
@@ -371,12 +374,13 @@ const STORE_ITEMS: StoreItem[] = [
     icon: '🧙‍♂️',
     color: '#F7931A',
     maxLevel: 1,
-    isSecret: true
+    isSecret: true,
+    treasuryAddress: '0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6'
   },
   {
     id: 'secret_diamond_hands_crypto',
     name: 'Secret: Diamond Hands Block',
-    description: 'Acquire the exclusive Diamond Hands block using $DEFIDASH tokens. Provides ultimate block protection and enhanced earning power.',
+    description: 'Acquire the exclusive Diamond Hands block using $DEFIDASH tokens. Tokens are sent to DEFIDASH treasury on Base Chain. Provides ultimate block protection and enhanced earning power.',
     price: 0, // No regular money cost
     cryptoPrice: 1500,
     cryptoToken: 'DEFIDASH',
@@ -385,12 +389,13 @@ const STORE_ITEMS: StoreItem[] = [
     icon: '💎',
     color: '#40E0D0',
     maxLevel: 1,
-    isSecret: true
+    isSecret: true,
+    treasuryAddress: '0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6'
   },
   {
     id: 'secret_base_chain_master_crypto',
     name: 'Secret: Base Chain Master',
-    description: 'Unlock the Base Chain Master block with $DEFIDASH tokens. This exclusive block celebrates your commitment to the Base ecosystem.',
+    description: 'Unlock the Base Chain Master block with $DEFIDASH tokens. Tokens are sent to DEFIDASH treasury on Base Chain. This exclusive block celebrates your commitment to the Base ecosystem.',
     price: 0, // No regular money cost
     cryptoPrice: 1500,
     cryptoToken: 'DEFIDASH',
@@ -399,12 +404,13 @@ const STORE_ITEMS: StoreItem[] = [
     icon: '⚡',
     color: '#0052FF',
     maxLevel: 1,
-    isSecret: true
+    isSecret: true,
+    treasuryAddress: '0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6'
   },
   {
     id: 'secret_defidash_founder_crypto',
     name: 'Secret: DEFIDASH Founder Block',
-    description: 'The ultimate prestige block for true DEFIDASH believers. Purchase with $DEFIDASH tokens to unlock founder-level status and rewards.',
+    description: 'The ultimate prestige block for true DEFIDASH believers. Purchase with $DEFIDASH tokens to unlock founder-level status and rewards. Tokens are sent to DEFIDASH treasury on Base Chain.',
     price: 0, // No regular money cost
     cryptoPrice: 1500,
     cryptoToken: 'DEFIDASH',
@@ -413,7 +419,8 @@ const STORE_ITEMS: StoreItem[] = [
     icon: '👑',
     color: '#8A2BE2',
     maxLevel: 1,
-    isSecret: true
+    isSecret: true,
+    treasuryAddress: '0xA6b6491129d5ad8cA0bAfAb611B597fFBB42c5D6'
   }
 ]
 
