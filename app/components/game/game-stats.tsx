@@ -35,6 +35,7 @@ interface GameState {
   lastSpawn: number
   nextSpawn: number
   lastMoneyUpdate: number
+  defidashBalance?: number
 }
 
 interface GameStatsProps {
@@ -248,6 +249,38 @@ export function GameStats({ gameState }: GameStatsProps) {
             <p>• Higher rarity = higher sell price (60-80%)</p>
             <p>• Money accumulates even when offline!</p>
             <p>• Steal attempts cost 10% of block value</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Crypto Balance */}
+      <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center space-x-2">
+            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+              <span className="text-xs font-bold text-white">$</span>
+            </div>
+            <span>Crypto Balance</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+              <span className="text-sm font-medium">$DEFIDASH</span>
+              <Badge variant="outline" className="text-xs bg-purple-500/20 text-purple-400 border-purple-500/30">
+                BASE CHAIN
+              </Badge>
+            </div>
+            <span className="font-bold text-blue-400 text-lg">
+              {(gameState.defidashBalance || 0).toLocaleString()}
+            </span>
+          </div>
+          
+          <div className="mt-3 p-2 bg-blue-500/10 rounded border border-blue-500/20">
+            <p className="text-xs text-blue-300">
+              💎 Use $DEFIDASH to purchase exclusive secret blocks in the Crypto section of the store!
+            </p>
           </div>
         </CardContent>
       </Card>

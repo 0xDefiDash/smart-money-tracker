@@ -7,11 +7,14 @@ interface StoreItem {
   name: string
   description: string
   price: number
-  category: 'power' | 'defense' | 'special'
+  category: 'power' | 'defense' | 'special' | 'crypto'
   effect: string
   icon: string
   color: string
   maxLevel: number
+  cryptoPrice?: number // Price in $DEFIDASH tokens
+  cryptoToken?: string // Token name (e.g., 'DEFIDASH')
+  isSecret?: boolean // Whether this is a secret item
 }
 
 // Store items available for purchase
@@ -339,6 +342,78 @@ const STORE_ITEMS: StoreItem[] = [
     icon: '🐋',
     color: '#0066CC',
     maxLevel: 1
+  },
+
+  // Crypto Secrets (purchasable with $DEFIDASH on Base Chain)
+  {
+    id: 'secret_realdonaldtrump_crypto',
+    name: 'Secret: realDonaldTrump Block',
+    description: 'Unlock the ultra-rare realDonaldTrump block with $DEFIDASH tokens. This legendary secret block provides massive money generation and prestige.',
+    price: 0, // No regular money cost
+    cryptoPrice: 1500,
+    cryptoToken: 'DEFIDASH',
+    category: 'crypto',
+    effect: 'Unlocks realDonaldTrump Secret Block',
+    icon: '🇺🇸',
+    color: '#FFD700',
+    maxLevel: 1,
+    isSecret: true
+  },
+  {
+    id: 'secret_bitcoin_wizard_crypto',
+    name: 'Secret: Bitcoin Wizard Block',
+    description: 'Purchase the legendary Bitcoin Wizard block with $DEFIDASH. This mystical block grants enhanced crypto powers and exclusive abilities.',
+    price: 0, // No regular money cost
+    cryptoPrice: 1500,
+    cryptoToken: 'DEFIDASH',
+    category: 'crypto',
+    effect: 'Unlocks Bitcoin Wizard Secret Block',
+    icon: '🧙‍♂️',
+    color: '#F7931A',
+    maxLevel: 1,
+    isSecret: true
+  },
+  {
+    id: 'secret_diamond_hands_crypto',
+    name: 'Secret: Diamond Hands Block',
+    description: 'Acquire the exclusive Diamond Hands block using $DEFIDASH tokens. Provides ultimate block protection and enhanced earning power.',
+    price: 0, // No regular money cost
+    cryptoPrice: 1500,
+    cryptoToken: 'DEFIDASH',
+    category: 'crypto',
+    effect: 'Unlocks Diamond Hands Secret Block',
+    icon: '💎',
+    color: '#40E0D0',
+    maxLevel: 1,
+    isSecret: true
+  },
+  {
+    id: 'secret_base_chain_master_crypto',
+    name: 'Secret: Base Chain Master',
+    description: 'Unlock the Base Chain Master block with $DEFIDASH tokens. This exclusive block celebrates your commitment to the Base ecosystem.',
+    price: 0, // No regular money cost
+    cryptoPrice: 1500,
+    cryptoToken: 'DEFIDASH',
+    category: 'crypto',
+    effect: 'Unlocks Base Chain Master Block',
+    icon: '⚡',
+    color: '#0052FF',
+    maxLevel: 1,
+    isSecret: true
+  },
+  {
+    id: 'secret_defidash_founder_crypto',
+    name: 'Secret: DEFIDASH Founder Block',
+    description: 'The ultimate prestige block for true DEFIDASH believers. Purchase with $DEFIDASH tokens to unlock founder-level status and rewards.',
+    price: 0, // No regular money cost
+    cryptoPrice: 1500,
+    cryptoToken: 'DEFIDASH',
+    category: 'crypto',
+    effect: 'Unlocks DEFIDASH Founder Block + Special Badge',
+    icon: '👑',
+    color: '#8A2BE2',
+    maxLevel: 1,
+    isSecret: true
   }
 ]
 
@@ -347,7 +422,8 @@ export async function GET(request: NextRequest) {
     const categories = {
       power: 'Increase your offensive capabilities with attack upgrades, critical strikes, and combat bonuses',
       defense: 'Protect your blocks from thieves with shields, fortifications, and defensive abilities', 
-      special: 'Unique abilities and economic bonuses including profit boosters, passive income, and utility upgrades'
+      special: 'Unique abilities and economic bonuses including profit boosters, passive income, and utility upgrades',
+      crypto: 'Exclusive secret blocks purchasable only with $DEFIDASH tokens on Base Chain - unlock ultimate prestige and power'
     }
 
     return NextResponse.json({

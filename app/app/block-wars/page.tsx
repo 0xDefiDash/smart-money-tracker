@@ -64,6 +64,16 @@ interface GameState {
   // Player profile information
   walletAddress?: string
   twitterHandle?: string
+  
+  // Crypto token balances
+  defidashBalance?: number // $DEFIDASH token balance on Base Chain
+  cryptoTransactions?: Array<{
+    type: 'purchase' | 'earn' | 'spend'
+    amount: number
+    token: string
+    timestamp: number
+    description: string
+  }>
 }
 
 interface Block {
@@ -176,7 +186,10 @@ export default function BlockWarsPage() {
       collectionSizeBonus: 0,
       earlyDetection: false,
       stealInsurance: false
-    }
+    },
+    // Initial crypto balances for testing
+    defidashBalance: 2500, // Give players some $DEFIDASH to start with
+    cryptoTransactions: []
   })
   
   const [spawnedBlocks, setSpawnedBlocks] = useState<Block[]>([])
@@ -186,7 +199,7 @@ export default function BlockWarsPage() {
   const [isInitialized, setIsInitialized] = useState(false)
   const [storeItems, setStoreItems] = useState<any[]>([])
   const [storeCategories, setStoreCategories] = useState<any>({})
-  const [selectedCategory, setSelectedCategory] = useState<'power' | 'defense' | 'special'>('power')
+  const [selectedCategory, setSelectedCategory] = useState<'power' | 'defense' | 'special' | 'crypto'>('power')
 
   // Update game state when session is available
   useEffect(() => {
@@ -1154,6 +1167,75 @@ export default function BlockWarsPage() {
     setIsLoading(false)
   }
 
+  // Purchase crypto secret with $DEFIDASH tokens
+  const purchaseCryptoSecret = async (itemId: string) => {
+    const item = storeItems.find(i => i.id === itemId)
+    if (!item || !item.isSecret || !item.cryptoPrice) {
+      setBattleLog(prev => [...prev, `❌ Invalid crypto secret item!`])
+      return
+    }
+
+    const requiredDefidash = item.cryptoPrice
+    const currentBalance = gameState.defidashBalance || 0
+
+    if (currentBalance < requiredDefidash) {
+      setBattleLog(prev => [...prev, `❌ Insufficient $DEFIDASH! Need ${requiredDefidash} $DEFIDASH, you have ${currentBalance} $DEFIDASH`])
+      return
+    }
+
+    // Check if already owned
+    const alreadyOwned = gameState.upgrades?.[itemId] || 0
+    if (alreadyOwned > 0) {
+      setBattleLog(prev => [...prev, `❌ You already own this secret block!`])
+      return
+    }
+
+    setIsLoading(true)
+    setBattleLog(prev => [...prev, `🔗 Connecting to Base Chain for $DEFIDASH transaction...`])
+    
+    try {
+      // Simulate Base Chain transaction delay
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Update game state with crypto purchase
+      setGameState(prev => {
+        const newUpgrades = { ...prev.upgrades, [itemId]: 1 }
+        const newDefidashBalance = (prev.defidashBalance || 0) - requiredDefidash
+        const newCryptoTransaction = {
+          type: 'spend' as const,
+          amount: requiredDefidash,
+          token: 'DEFIDASH',
+          timestamp: Date.now(),
+          description: `Purchased ${item.name}`
+        }
+        const newCryptoTransactions = [...(prev.cryptoTransactions || []), newCryptoTransaction]
+        
+        const updatedState = {
+          ...prev,
+          upgrades: newUpgrades,
+          defidashBalance: newDefidashBalance,
+          cryptoTransactions: newCryptoTransactions,
+          experience: prev.experience + 1000 // Bonus XP for crypto purchases
+        }
+
+        // Save to localStorage
+        const storageKey = `blockWarsGameState_${prev.playerId || 'default'}`
+        localStorage.setItem(storageKey, JSON.stringify(updatedState))
+        
+        return updatedState
+      })
+      
+      setBattleLog(prev => [...prev, `✅ Base Chain transaction confirmed!`])
+      setBattleLog(prev => [...prev, `🎉 Secret block ${item.name} unlocked with ${requiredDefidash} $DEFIDASH!`])
+      setBattleLog(prev => [...prev, `💎 You now have exclusive access to this legendary block!`])
+      
+    } catch (error) {
+      setBattleLog(prev => [...prev, `❌ Base Chain transaction failed. Please try again!`])
+    }
+    
+    setIsLoading(false)
+  }
+
   // Load store items on initialization
   useEffect(() => {
     fetchStoreItems()
@@ -1454,7 +1536,7 @@ export default function BlockWarsPage() {
                     <div className="space-y-6">
                       {/* Category Selection */}
                       <div className="flex space-x-2">
-                        {['power', 'defense', 'special'].map((category) => (
+                        {['power', 'defense', 'special', 'crypto'].map((category) => (
                           <Button
                             key={category}
                             variant={selectedCategory === category ? 'default' : 'outline'}
@@ -1486,12 +1568,27 @@ export default function BlockWarsPage() {
                           .filter(item => item.category === selectedCategory)
                           .map(item => {
                             const currentLevel = gameState.upgrades?.[item.id] || 0
-                            const actualPrice = Math.floor(item.price * Math.pow(1.5, currentLevel))
-                            const canAfford = gameState.money >= actualPrice
+                            const isCryptoItem = item.category === 'crypto' && item.isSecret
+                            const actualPrice = isCryptoItem ? item.cryptoPrice : Math.floor(item.price * Math.pow(1.5, currentLevel))
+                            const canAfford = isCryptoItem 
+                              ? (gameState.defidashBalance || 0) >= (item.cryptoPrice || 0)
+                              : gameState.money >= actualPrice
                             const maxLevel = currentLevel >= item.maxLevel
                             
                             return (
-                              <Card key={item.id} className={`border-2 ${maxLevel ? 'border-green-500/50 bg-green-500/5' : canAfford ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-gray-500/20'}`}>
+                              <Card key={item.id} className={`border-2 ${
+                                isCryptoItem 
+                                  ? maxLevel 
+                                    ? 'border-purple-500/50 bg-purple-500/5' 
+                                    : canAfford 
+                                    ? 'border-blue-500/50 bg-blue-500/5' 
+                                    : 'border-gray-500/20'
+                                  : maxLevel 
+                                  ? 'border-green-500/50 bg-green-500/5' 
+                                  : canAfford 
+                                  ? 'border-yellow-500/50 bg-yellow-500/5' 
+                                  : 'border-gray-500/20'
+                              }`}>
                                 <CardContent className="p-4">
                                   <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center space-x-2">
@@ -1500,19 +1597,41 @@ export default function BlockWarsPage() {
                                       </span>
                                       <div>
                                         <h3 className="font-bold text-sm">{item.name}</h3>
-                                        <p className="text-xs text-muted-foreground">
-                                          Level {currentLevel}/{item.maxLevel}
-                                        </p>
+                                        {isCryptoItem ? (
+                                          <div className="flex items-center space-x-1">
+                                            <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                              SECRET
+                                            </Badge>
+                                            <Badge variant="outline" className="text-xs bg-purple-500/20 text-purple-400 border-purple-500/30">
+                                              BASE CHAIN
+                                            </Badge>
+                                          </div>
+                                        ) : (
+                                          <p className="text-xs text-muted-foreground">
+                                            Level {currentLevel}/{item.maxLevel}
+                                          </p>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="text-right">
-                                      <p className="font-bold text-sm" style={{ color: item.color }}>
-                                        ${actualPrice.toLocaleString()}
-                                      </p>
-                                      {currentLevel > 0 && (
-                                        <p className="text-xs text-muted-foreground">
-                                          Base: ${item.price.toLocaleString()}
-                                        </p>
+                                      {isCryptoItem ? (
+                                        <div className="flex items-center space-x-1">
+                                          <span className="text-blue-500 font-bold text-xs">$DEFIDASH</span>
+                                          <p className="font-bold text-sm text-blue-400">
+                                            {item.cryptoPrice?.toLocaleString() || 0}
+                                          </p>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <p className="font-bold text-sm" style={{ color: item.color }}>
+                                            ${actualPrice.toLocaleString()}
+                                          </p>
+                                          {currentLevel > 0 && (
+                                            <p className="text-xs text-muted-foreground">
+                                              Base: ${item.price.toLocaleString()}
+                                            </p>
+                                          )}
+                                        </>
                                       )}
                                     </div>
                                   </div>
@@ -1529,9 +1648,15 @@ export default function BlockWarsPage() {
                                     <Button
                                       size="sm"
                                       disabled={!canAfford || maxLevel || isLoading}
-                                      onClick={() => purchaseUpgrade(item.id)}
+                                      onClick={() => isCryptoItem ? purchaseCryptoSecret(item.id) : purchaseUpgrade(item.id)}
                                       className={`text-xs ${
-                                        maxLevel 
+                                        isCryptoItem
+                                          ? maxLevel
+                                            ? 'bg-purple-600 text-white'
+                                            : canAfford
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                            : 'bg-gray-600 text-gray-300'
+                                          : maxLevel 
                                           ? 'bg-green-600 text-white'
                                           : canAfford
                                           ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
@@ -1539,14 +1664,30 @@ export default function BlockWarsPage() {
                                       }`}
                                     >
                                       {isLoading && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
-                                      {maxLevel ? 'MAX' : canAfford ? 'BUY' : 'TOO EXPENSIVE'}
+                                      {maxLevel 
+                                        ? 'OWNED' 
+                                        : canAfford 
+                                        ? (isCryptoItem ? 'BUY WITH $DEFIDASH' : 'BUY') 
+                                        : (isCryptoItem ? 'NEED MORE $DEFIDASH' : 'TOO EXPENSIVE')
+                                      }
                                     </Button>
                                   </div>
+                                  
+                                  {isCryptoItem && (
+                                    <div className="mt-2 pt-2 border-t border-blue-500/20">
+                                      <div className="flex justify-between text-xs">
+                                        <span className="text-blue-400">Your $DEFIDASH Balance:</span>
+                                        <span className="font-bold text-blue-300">
+                                          {(gameState.defidashBalance || 0).toLocaleString()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
                                   
                                   {currentLevel > 0 && (
                                     <div className="mt-2 pt-2 border-t border-gray-500/20">
                                       <p className="text-xs text-green-400">
-                                        ✅ Owned (Level {currentLevel}) - {item.effect} active
+                                        ✅ Owned {isCryptoItem && '- Exclusive Secret Block!'} - {item.effect} {!isCryptoItem && 'active'}
                                       </p>
                                     </div>
                                   )}
