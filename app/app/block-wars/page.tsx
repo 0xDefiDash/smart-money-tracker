@@ -29,7 +29,7 @@ import { BlockCharacter } from '@/components/game/block-character'
 import { GameStats } from '@/components/game/game-stats'
 import { BlockCollection } from '@/components/game/block-collection'
 import Leaderboard from '@/components/game/leaderboard'
-import { BattleArena } from '@/components/game/battle-arena'
+import { EnhancedBattleArena } from '@/components/game/enhanced-battle-arena'
 import { SpawnArea } from '@/components/game/spawn-area'
 import { UserBoard } from '@/components/game/user-board'
 import { TransactionTicker } from '@/components/game/transaction-ticker'
@@ -1777,12 +1777,14 @@ export default function BlockWarsPage() {
               </TabsContent>
 
               <TabsContent value="battles">
-                <BattleArena 
+                <EnhancedBattleArena 
                   gameState={gameState}
                   onStealBlock={stealBlock}
                   onStealMoney={stealMoney}
                   onDefendBlocks={defendBlocks}
                   isLoading={isLoading}
+                  battleLog={battleLog}
+                  setBattleLog={setBattleLog}
                 />
               </TabsContent>
 

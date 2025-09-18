@@ -199,8 +199,21 @@
     }
   }
 
+  @keyframes marquee {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
   .animate-scroll-horizontal {
     animation: scroll-horizontal 60s linear infinite;
+  }
+
+  .animate-marquee {
+    animation: marquee 15s linear infinite;
   }
 
   /* Pause animation on hover for better UX */
@@ -208,9 +221,34 @@
     animation-play-state: paused;
   }
 
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
   /* Smooth hardware acceleration */
   .animate-scroll-horizontal {
     backface-visibility: hidden;
     transform: translateZ(0);
+  }
+
+  .animate-marquee {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  /* Fade-in animation for battle logs */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out;
   }
 }
