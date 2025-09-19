@@ -226,140 +226,152 @@ export default function GoLivePage() {
             : "bg-gradient-to-r from-blue-500/20 to-purple-500/20"
         )}>
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center glow-hover",
-                  isLive 
-                    ? "bg-gradient-to-br from-red-500 to-pink-500" 
-                    : "bg-gradient-to-br from-blue-500 to-purple-500"
-                )}>
-                  {isLive ? <Radio className="w-6 h-6 text-white" /> : <Video className="w-6 h-6 text-white" />}
-                </div>
-                <div>
-                  <CardTitle className={cn(
-                    "text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
+            {/* Mobile-first header layout */}
+            <div className="space-y-4">
+              {/* Top row - Icon and title */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={cn(
+                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center glow-hover",
                     isLive 
-                      ? "from-red-400 to-pink-400" 
-                      : "from-blue-400 to-purple-400"
+                      ? "bg-gradient-to-br from-red-500 to-pink-500" 
+                      : "bg-gradient-to-br from-blue-500 to-purple-500"
                   )}>
-                    {isLive ? 'You\'re Live!' : 'Go Live - Block Wars'}
-                  </CardTitle>
-                  <p className="text-muted-foreground">
-                    {isLive 
-                      ? `Streaming for ${formatDuration(streamStats.streamDuration)}` 
-                      : 'Start your Block Wars live stream'}
-                  </p>
+                    {isLive ? <Radio className="w-5 h-5 sm:w-6 sm:h-6 text-white" /> : <Video className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className={cn(
+                      "text-lg sm:text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent truncate",
+                      isLive 
+                        ? "from-red-400 to-pink-400" 
+                        : "from-blue-400 to-purple-400"
+                    )}>
+                      {isLive ? 'You\'re Live!' : 'Go Live - Block Wars'}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {isLive 
+                        ? `Streaming for ${formatDuration(streamStats.streamDuration)}` 
+                        : 'Start your Block Wars live stream'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Your rank - always visible */}
+                <div className="text-center flex-shrink-0">
+                  <div className="text-xl sm:text-2xl font-bold text-blue-400">#{userStats.rank}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Your Rank</div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
-                {isLive && (
-                  <div className="flex items-center space-x-6 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-red-400">{streamStats.viewers}</div>
-                      <div className="text-sm text-muted-foreground">Viewers</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-pink-400">{streamStats.likes}</div>
-                      <div className="text-sm text-muted-foreground">Likes</div>
-                    </div>
+              {/* Live stats row - only when live */}
+              {isLive && (
+                <div className="flex items-center justify-center space-x-8 pt-2 border-t border-slate-700/30">
+                  <div className="text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-red-400">{streamStats.viewers}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Viewers</div>
                   </div>
-                )}
-                
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-400">#{userStats.rank}</div>
-                  <div className="text-sm text-muted-foreground">Your Rank</div>
+                  <div className="text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-pink-400">{streamStats.likes}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Likes</div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {isLive && (
-              <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
+              <div className="space-y-3 pt-4 border-t border-slate-700/50">
+                {/* Live indicator and title */}
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs sm:text-sm">
                     LIVE - {streamSettings.category}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">{streamSettings.title}</span>
                 </div>
                 
-                <Button
-                  onClick={handleEndStream}
-                  variant="destructive"
-                  size="sm"
-                  className="flex items-center space-x-2"
-                >
-                  <Square className="w-4 h-4" />
-                  <span>End Stream</span>
-                </Button>
+                {/* Stream title */}
+                <div className="text-sm sm:text-base text-muted-foreground line-clamp-1">
+                  {streamSettings.title}
+                </div>
+                
+                {/* End stream button - full width on mobile */}
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleEndStream}
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center space-x-2 w-full sm:w-auto"
+                  >
+                    <Square className="w-4 h-4" />
+                    <span>End Stream</span>
+                  </Button>
+                </div>
               </div>
             )}
           </CardHeader>
         </Card>
 
-        {/* User Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Zap className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-blue-400">{userStats.level}</div>
+        {/* User Stats Overview - Mobile optimized */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-4">
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-blue-400">{userStats.level}</div>
               <div className="text-xs text-muted-foreground">Level</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-yellow-400">#{userStats.rank}</div>
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-yellow-400">#{userStats.rank}</div>
               <div className="text-xs text-muted-foreground">Rank</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Users className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-purple-400">{userStats.followers.toLocaleString()}</div>
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-purple-400">{userStats.followers.toLocaleString()}</div>
               <div className="text-xs text-muted-foreground">Followers</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Gamepad2 className="w-6 h-6 text-green-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-green-400">{userStats.totalBlocks}</div>
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-green-400">{userStats.totalBlocks}</div>
               <div className="text-xs text-muted-foreground">Blocks</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Video className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-orange-400">{userStats.totalStreams}</div>
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Video className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-orange-400">{userStats.totalStreams}</div>
               <div className="text-xs text-muted-foreground">Streams</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Eye className="w-6 h-6 text-cyan-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-cyan-400">{userStats.avgViewers}</div>
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-cyan-400">{userStats.avgViewers}</div>
               <div className="text-xs text-muted-foreground">Avg Views</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Clock className="w-6 h-6 text-pink-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-pink-400">{userStats.totalHours}h</div>
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-pink-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-pink-400">{userStats.totalHours}h</div>
               <div className="text-xs text-muted-foreground">Hours</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/80 border-slate-700/50">
-            <CardContent className="p-4 text-center">
-              <Heart className="w-6 h-6 text-red-500 mx-auto mb-2" />
-              <div className="text-xl font-bold text-green-400">${(userStats.monthlyEarnings / 1000).toFixed(1)}k</div>
+          <Card className="bg-slate-900/80 border-slate-700/50 hover:bg-slate-800/80 transition-colors">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 mx-auto mb-1 sm:mb-2" />
+              <div className="text-base sm:text-xl font-bold text-green-400">${(userStats.monthlyEarnings / 1000).toFixed(1)}k</div>
               <div className="text-xs text-muted-foreground">Monthly</div>
             </CardContent>
           </Card>
@@ -367,14 +379,16 @@ export default function GoLivePage() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-900/80 border-slate-700/50">
-            <TabsTrigger value="setup" disabled={isLive}>
-              Stream Setup
+          <TabsList className="grid w-full grid-cols-3 bg-slate-900/80 border-slate-700/50 h-12 sm:h-14">
+            <TabsTrigger value="setup" disabled={isLive} className="text-sm sm:text-base font-medium">
+              <span className="hidden sm:inline">Stream Setup</span>
+              <span className="sm:hidden">Setup</span>
             </TabsTrigger>
-            <TabsTrigger value="dashboard" disabled={!isLive}>
-              Live Dashboard
+            <TabsTrigger value="dashboard" disabled={!isLive} className="text-sm sm:text-base font-medium">
+              <span className="hidden sm:inline">Live Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
             </TabsTrigger>
-            <TabsTrigger value="settings">
+            <TabsTrigger value="settings" className="text-sm sm:text-base font-medium">
               Settings
             </TabsTrigger>
           </TabsList>

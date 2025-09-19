@@ -188,188 +188,242 @@ export default function BlockWarsLivePage() {
   return (
     <div className="min-h-screen bg-tech-gradient p-2 sm:p-4">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
+        {/* Header - Mobile optimized */}
         <Card className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500/30 glow-red">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center glow-hover">
-                  <Radio className="w-6 h-6 text-white" />
+              <div className="flex items-center space-x-3 min-w-0 flex-1">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center glow-hover flex-shrink-0">
+                  <Radio className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div>
-                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate">
                     Block Wars Live
                   </CardTitle>
-                  <p className="text-muted-foreground">Watch top players battle for legendary blocks</p>
+                  <p className="text-sm text-muted-foreground truncate">Watch top players battle for legendary blocks</p>
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-400">{activeStreamers.length}</div>
-                <div className="text-sm text-muted-foreground">Live Streamers</div>
+              <div className="text-center flex-shrink-0">
+                <div className="text-xl sm:text-2xl font-bold text-red-400">{activeStreamers.length}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Live Streamers</div>
               </div>
             </div>
           </CardHeader>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Stream View */}
-          <div className="lg:col-span-3 space-y-4">
-            {/* Selected Stream */}
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 border-slate-700/50 overflow-hidden">
-              <CardContent className="p-0">
-                {/* Stream Video Area */}
-                <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-transparent to-blue-500/10"></div>
-                  
-                  {/* Mock Stream Content */}
-                  <div className="relative z-10 text-center space-y-4">
-                    <div className="text-6xl">{selectedStreamer.avatar}</div>
-                    <div className="space-y-2">
-                      <h2 className="text-2xl font-bold text-white">{selectedStreamer.name}</h2>
-                      <p className="text-lg text-gray-300">{selectedStreamer.streamTitle}</p>
-                      <Badge className={cn("text-sm", getCategoryColor(selectedStreamer.category))}>
-                        {selectedStreamer.category}
-                      </Badge>
+        <div className="space-y-4 lg:space-y-6">
+          {/* Mobile: Show active streamers list at top */}
+          <div className="lg:hidden">
+            <Card className="bg-slate-900/80 border-slate-700/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center space-x-2">
+                  <Users className="w-4 h-4" />
+                  <span>Live Streamers</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex space-x-3 overflow-x-auto pb-2">
+                  {activeStreamers.map((streamer) => (
+                    <div
+                      key={streamer.id}
+                      onClick={() => setSelectedStreamer(streamer)}
+                      className={cn(
+                        "flex-shrink-0 w-16 text-center cursor-pointer transition-all duration-200",
+                        selectedStreamer.id === streamer.id ? "opacity-100" : "opacity-60 hover:opacity-80"
+                      )}
+                    >
+                      <div className="relative mb-2">
+                        <div className={cn(
+                          "w-12 h-12 rounded-full flex items-center justify-center text-lg border-2 transition-colors",
+                          selectedStreamer.id === streamer.id 
+                            ? "border-blue-500 bg-blue-500/20" 
+                            : "border-slate-600 bg-slate-800"
+                        )}>
+                          {streamer.avatar}
+                        </div>
+                        {streamer.isLive && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-slate-900 animate-pulse"></div>
+                        )}
+                      </div>
+                      <div className="text-xs font-medium truncate">{streamer.name}</div>
+                      <div className="text-xs text-muted-foreground">{streamer.viewerCount.toLocaleString()}</div>
                     </div>
-                    
-                    {/* Live indicator */}
-                    <div className="flex items-center justify-center space-x-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-red-400 font-bold">LIVE</span>
-                      <span className="text-gray-400">•</span>
-                      <span className="text-gray-400">{getStreamDuration(selectedStreamer.startTime)}</span>
-                    </div>
-                  </div>
-
-                  {/* Stream Stats Overlay */}
-                  <div className="absolute top-4 left-4 flex space-x-3">
-                    <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1 flex items-center space-x-2">
-                      <Eye className="w-4 h-4 text-white" />
-                      <span className="text-white font-medium">{selectedStreamer.viewerCount.toLocaleString()}</span>
-                    </div>
-                    <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1 flex items-center space-x-2">
-                      <Heart className="w-4 h-4 text-red-400" />
-                      <span className="text-white font-medium">{selectedStreamer.likes.toLocaleString()}</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                {/* Stream Controls */}
-                <div className="p-4 bg-slate-900/50 border-t border-slate-700/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
+            {/* Main Stream View */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* Selected Stream */}
+              <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 border-slate-700/50 overflow-hidden">
+                <CardContent className="p-0">
+                  {/* Stream Video Area */}
+                  <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-transparent to-blue-500/10"></div>
+                    
+                    {/* Mock Stream Content */}
+                    <div className="relative z-10 text-center space-y-3 sm:space-y-4 p-4">
+                      <div className="text-4xl sm:text-6xl">{selectedStreamer.avatar}</div>
+                      <div className="space-y-1 sm:space-y-2">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white">{selectedStreamer.name}</h2>
+                        <p className="text-sm sm:text-lg text-gray-300 line-clamp-2 px-2">{selectedStreamer.streamTitle}</p>
+                        <Badge className={cn("text-xs sm:text-sm", getCategoryColor(selectedStreamer.category))}>
+                          {selectedStreamer.category}
+                        </Badge>
+                      </div>
+                      
+                      {/* Live indicator */}
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="text-red-400 font-bold text-sm sm:text-base">LIVE</span>
+                        <span className="text-gray-400 text-sm sm:text-base">•</span>
+                        <span className="text-gray-400 text-sm sm:text-base">{getStreamDuration(selectedStreamer.startTime)}</span>
+                      </div>
+                    </div>
+
+                    {/* Stream Stats Overlay */}
+                    <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 sm:px-3 sm:py-1 flex items-center space-x-1 sm:space-x-2">
+                        <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                        <span className="text-white font-medium text-xs sm:text-sm">{selectedStreamer.viewerCount.toLocaleString()}</span>
+                      </div>
+                      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 sm:px-3 sm:py-1 flex items-center space-x-1 sm:space-x-2">
+                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+                        <span className="text-white font-medium text-xs sm:text-sm">{selectedStreamer.likes.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stream Controls - Mobile optimized */}
+                  <div className="p-3 sm:p-4 bg-slate-900/50 border-t border-slate-700/50 space-y-3">
+                    {/* Action buttons */}
+                    <div className="flex items-center justify-center space-x-3">
                       <Button
                         variant={likedStreams.includes(selectedStreamer.id) ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleLike(selectedStreamer.id)}
-                        className="flex items-center space-x-2"
+                        className="flex items-center space-x-2 min-w-[80px] h-10"
                       >
                         <Heart className={cn("w-4 h-4", likedStreams.includes(selectedStreamer.id) && "fill-current")} />
-                        <span>Like</span>
+                        <span className="text-sm">Like</span>
                       </Button>
                       
                       <Button
                         variant={followedStreamers.includes(selectedStreamer.id) ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleFollow(selectedStreamer.id)}
-                        className="flex items-center space-x-2"
+                        className="flex items-center space-x-2 min-w-[90px] h-10"
                       >
                         <UserPlus className="w-4 h-4" />
-                        <span>{followedStreamers.includes(selectedStreamer.id) ? 'Following' : 'Follow'}</span>
+                        <span className="text-sm">{followedStreamers.includes(selectedStreamer.id) ? 'Following' : 'Follow'}</span>
                       </Button>
 
-                      <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                      <Button variant="outline" size="sm" className="flex items-center space-x-2 min-w-[70px] h-10">
                         <Gift className="w-4 h-4" />
-                        <span>Gift</span>
+                        <span className="text-sm">Gift</span>
                       </Button>
                     </div>
 
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <Trophy className="w-4 h-4" />
-                      <span>Rank #{selectedStreamer.rank}</span>
+                    {/* Stats */}
+                    <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                      <div className="flex items-center space-x-1">
+                        <Trophy className="w-4 h-4" />
+                        <span>Rank #{selectedStreamer.rank}</span>
+                      </div>
                       <span>•</span>
-                      <span>Level {selectedStreamer.gameLevel}</span>
+                      <div className="flex items-center space-x-1">
+                        <Zap className="w-4 h-4" />
+                        <span>Level {selectedStreamer.gameLevel}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Streamer Profile Card */}
-            <StreamerProfile 
-              streamer={selectedStreamer}
-              isFollowing={followedStreamers.includes(selectedStreamer.id)}
-              onFollow={() => handleFollow(selectedStreamer.id)}
-            />
-          </div>
+              {/* Streamer Profile Card */}
+              <StreamerProfile 
+                streamer={selectedStreamer}
+                isFollowing={followedStreamers.includes(selectedStreamer.id)}
+                onFollow={() => handleFollow(selectedStreamer.id)}
+              />
+            </div>
 
-          {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Live Chat */}
-            <LiveChat streamerId={selectedStreamer.id} />
+            {/* Sidebar - Desktop only, Mobile content moved to top */}
+            <div className="hidden lg:block space-y-4">
+              {/* Live Chat */}
+              <LiveChat streamerId={selectedStreamer.id} />
 
-            {/* Active Streamers List */}
-            <Card className="bg-slate-900/80 border-slate-700/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center space-x-2">
-                  <Users className="w-5 h-5" />
-                  <span>Live Streamers</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <ScrollArea className="h-96">
-                  <div className="space-y-3">
-                    {activeStreamers.map((streamer) => (
-                      <div
-                        key={streamer.id}
-                        onClick={() => setSelectedStreamer(streamer)}
-                        className={cn(
-                          "p-3 rounded-lg cursor-pointer transition-all duration-200 border",
-                          selectedStreamer.id === streamer.id
-                            ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30"
-                            : "bg-slate-800/50 border-slate-700/30 hover:bg-slate-700/50"
-                        )}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="relative">
-                            <div className="w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-xl">
-                              {streamer.avatar}
-                            </div>
-                            {streamer.isLive && (
-                              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-slate-900 animate-pulse"></div>
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-1">
-                              <h4 className="font-semibold text-sm truncate">{streamer.name}</h4>
-                              {streamer.isVerified && (
-                                <Star className="w-3 h-3 text-blue-400 fill-current" />
+              {/* Active Streamers List - Desktop */}
+              <Card className="bg-slate-900/80 border-slate-700/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center space-x-2">
+                    <Users className="w-5 h-5" />
+                    <span>Live Streamers</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ScrollArea className="h-96">
+                    <div className="space-y-3">
+                      {activeStreamers.map((streamer) => (
+                        <div
+                          key={streamer.id}
+                          onClick={() => setSelectedStreamer(streamer)}
+                          className={cn(
+                            "p-3 rounded-lg cursor-pointer transition-all duration-200 border touch-manipulation",
+                            selectedStreamer.id === streamer.id
+                              ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30"
+                              : "bg-slate-800/50 border-slate-700/30 hover:bg-slate-700/50"
+                          )}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-xl">
+                                {streamer.avatar}
+                              </div>
+                              {streamer.isLive && (
+                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-slate-900 animate-pulse"></div>
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {streamer.streamTitle}
-                            </p>
-                            <div className="flex items-center justify-between mt-1">
-                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                <Eye className="w-3 h-3" />
-                                <span>{streamer.viewerCount.toLocaleString()}</span>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-1">
+                                <h4 className="font-semibold text-sm truncate">{streamer.name}</h4>
+                                {streamer.isVerified && (
+                                  <Star className="w-3 h-3 text-blue-400 fill-current flex-shrink-0" />
+                                )}
                               </div>
-                              <Badge className={cn("text-xs", getCategoryColor(streamer.category))}>
-                                {streamer.category}
-                              </Badge>
+                              <p className="text-xs text-muted-foreground line-clamp-1">
+                                {streamer.streamTitle}
+                              </p>
+                              <div className="flex items-center justify-between mt-1">
+                                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                  <Eye className="w-3 h-3" />
+                                  <span>{streamer.viewerCount.toLocaleString()}</span>
+                                </div>
+                                <Badge className={cn("text-xs", getCategoryColor(streamer.category))}>
+                                  {streamer.category}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
 
-            {/* Viewers List */}
-            <ViewersList streamerId={selectedStreamer.id} />
+              {/* Viewers List */}
+              <ViewersList streamerId={selectedStreamer.id} />
+            </div>
+          </div>
+
+          {/* Mobile: Live Chat at bottom */}
+          <div className="lg:hidden">
+            <LiveChat streamerId={selectedStreamer.id} />
           </div>
         </div>
       </div>
