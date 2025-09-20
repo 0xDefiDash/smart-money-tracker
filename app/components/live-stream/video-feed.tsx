@@ -138,12 +138,14 @@ export function VideoFeed({
     }
   }, [selectedVideoDevice, selectedAudioDevice])
 
-  // Auto start if requested
+  // Auto start if requested or if this is a streamer's feed
   useEffect(() => {
-    if (autoStart && !stream) {
+    if ((autoStart || isStreamer) && !stream) {
+      setIsVideoEnabled(true)
+      setIsAudioEnabled(true)
       startVideo()
     }
-  }, [autoStart])
+  }, [autoStart, isStreamer])
 
   const getMediaConstraints = (): MediaConstraints => {
     const baseVideoConstraints = {
@@ -417,10 +419,10 @@ export function VideoFeed({
                 </div>
                 <div>
                   <p className="font-semibold text-gray-400">
-                    {isLoading ? 'Starting Camera...' : error ? 'Camera Error' : 'Camera Off'}
+                    {isLoading ? 'Starting Camera...' : error ? 'Camera Error' : isStreamer ? 'Camera Ready' : 'Camera Off'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {error || (isLoading ? 'Please wait...' : 'Click to enable camera')}
+                    {error || (isLoading ? 'Please wait...' : isStreamer ? 'Click buttons below to enable camera' : 'Click to enable camera')}
                   </p>
                 </div>
               </div>

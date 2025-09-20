@@ -263,11 +263,87 @@ export default function BlockWarsLivePage() {
                 <CardContent className="p-0">
                   {/* Real Video Stream with Overlay Info */}
                   <div className="relative">
-                    <VideoFeed 
-                      streamerId={selectedStreamer.id}
-                      showControls={false}
-                      className="border-0"
-                    />
+                    {/* Live Stream Display */}
+                    <div className="aspect-video bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-lg overflow-hidden border border-slate-700/50 relative">
+                      {/* Simulated Live Video Feed */}
+                      <div className="absolute inset-0">
+                        {/* Background animation to simulate live video */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-red-600/20 animate-pulse"></div>
+                        
+                        {/* Gaming overlay effect */}
+                        <div className="absolute inset-0 opacity-40">
+                          <div className="absolute top-4 left-4 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
+                          <div className="absolute top-8 right-8 w-3 h-3 bg-yellow-400 rounded-full animate-bounce"></div>
+                          <div className="absolute bottom-12 left-8 w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                          <div className="absolute bottom-8 right-4 w-2 h-2 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+                        </div>
+
+                        {/* Main content area - simulated gameplay */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center space-y-4 bg-black/30 backdrop-blur-sm rounded-xl p-6">
+                            {/* Streamer avatar large */}
+                            <div className="text-6xl mb-2">{selectedStreamer.avatar}</div>
+                            
+                            {/* Simulated gameplay stats */}
+                            <div className="space-y-2">
+                              <div className="bg-black/50 rounded-lg px-3 py-1">
+                                <span className="text-green-400 font-bold">LIVE GAMEPLAY</span>
+                              </div>
+                              <div className="flex space-x-4 text-sm">
+                                <div className="bg-black/50 rounded px-2 py-1">
+                                  <span className="text-yellow-400">Blocks: </span>
+                                  <span className="text-white font-bold">{selectedStreamer.totalBlocks}</span>
+                                </div>
+                                <div className="bg-black/50 rounded px-2 py-1">
+                                  <span className="text-blue-400">Level: </span>
+                                  <span className="text-white font-bold">{selectedStreamer.gameLevel}</span>
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-300">
+                                🎮 {selectedStreamer.category} Stream in Progress
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Gaming UI elements overlay */}
+                        <div className="absolute top-4 right-4 space-y-2">
+                          <div className="bg-green-500/80 text-white text-xs px-2 py-1 rounded font-bold">
+                            +{Math.floor(Math.random() * 1000)} XP
+                          </div>
+                        </div>
+                        
+                        <div className="absolute bottom-4 left-4 space-y-1">
+                          <div className="bg-yellow-500/80 text-black text-xs px-2 py-1 rounded font-bold">
+                            Block Found! 💰
+                          </div>
+                        </div>
+
+                        {/* Health/Energy bars simulation */}
+                        <div className="absolute top-6 left-6 space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                              <div className="w-3/4 h-full bg-red-500 animate-pulse"></div>
+                            </div>
+                            <span className="text-xs text-white">HP</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                              <div className="w-5/6 h-full bg-blue-500"></div>
+                            </div>
+                            <span className="text-xs text-white">MP</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Video quality indicator */}
+                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-black/70 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className="text-white text-xs font-medium">HD 1080p</span>
+                        </div>
+                      </div>
+                    </div>
                     
                     {/* Stream Info Overlay */}
                     <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
