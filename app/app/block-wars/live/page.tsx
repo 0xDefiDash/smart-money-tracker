@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +30,7 @@ import { LiveChat } from '@/components/live-stream/live-chat'
 import { StreamControls } from '@/components/live-stream/stream-controls'
 import { ViewersList } from '@/components/live-stream/viewers-list'
 import { VideoFeed } from '@/components/live-stream/video-feed'
+import { StreamManager } from '@/components/live-stream/stream-manager'
 import { cn } from '@/lib/utils'
 
 interface Streamer {
@@ -65,6 +67,7 @@ interface LiveStream {
 
 export default function BlockWarsLivePage() {
   const { data: session, status } = useSession() || {}
+  const router = useRouter()
   
   const [activeStreamers] = useState<Streamer[]>([
     {
@@ -204,9 +207,18 @@ export default function BlockWarsLivePage() {
                   <p className="text-sm text-muted-foreground truncate">Watch top players battle for legendary blocks</p>
                 </div>
               </div>
-              <div className="text-center flex-shrink-0">
-                <div className="text-xl sm:text-2xl font-bold text-red-400">{activeStreamers.length}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Live Streamers</div>
+              <div className="flex items-center space-x-4 flex-shrink-0">
+                <div className="text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-red-400">{activeStreamers.length}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Live Streamers</div>
+                </div>
+                <Button
+                  onClick={() => router.push('/block-wars/stream')}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-4 py-2 sm:px-6 sm:py-3"
+                >
+                  <Radio className="w-4 h-4 mr-2" />
+                  Go Live
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -265,11 +277,9 @@ export default function BlockWarsLivePage() {
                   <div className="relative">
                     {/* Live Video Feed Component */}
                     <div className="relative">
-                      <VideoFeed 
+                      <StreamManager 
                         isStreamer={false}
                         streamerId={selectedStreamer.id}
-                        showControls={false}
-                        autoStart={true}
                         className="border-0"
                       />
                       

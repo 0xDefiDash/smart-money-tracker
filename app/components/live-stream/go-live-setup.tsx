@@ -44,6 +44,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { VideoFeed } from './video-feed'
+import { StreamManager } from './stream-manager'
 
 interface StreamSettings {
   title: string
@@ -625,9 +626,8 @@ export function GoLiveSetup({
         {/* Preview & Go Live Sidebar */}
         <div className="space-y-6">
           {/* Stream Preview */}
-          <VideoFeed 
+          <StreamManager 
             isStreamer={true}
-            showControls={true}
             className="bg-slate-900/80 border-slate-700/50"
           />
 

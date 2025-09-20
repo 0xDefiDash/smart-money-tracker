@@ -1,10 +1,12 @@
 
+
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import { 
   Video,
   VideoOff,
@@ -21,7 +23,12 @@ import {
   Maximize,
   Volume2,
   VolumeX,
-  RefreshCw
+  RefreshCw,
+  Radio,
+  Share,
+  Zap,
+  Upload,
+  Download
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -46,6 +53,7 @@ export function VideoFeed({
   autoStart = false
 }: VideoFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [isVideoEnabled, setIsVideoEnabled] = useState(false)
   const [isAudioEnabled, setIsAudioEnabled] = useState(false)
@@ -53,6 +61,8 @@ export function VideoFeed({
   const [deviceType, setDeviceType] = useState<'desktop' | 'mobile'>('desktop')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [streamQuality, setStreamQuality] = useState<'480p' | '720p' | '1080p'>('720p')
   const [permissions, setPermissions] = useState({
     camera: 'prompt',
     microphone: 'prompt'
@@ -77,12 +87,21 @@ export function VideoFeed({
     focus: 60
   })
 
-  // Detect device type
+  // Detect device type and capabilities
   useEffect(() => {
     const checkDeviceType = () => {
       const userAgent = navigator.userAgent.toLowerCase()
       const isMobile = /android|iphone|ipad|ipod|blackberry|windows phone/.test(userAgent)
+      const hasGetDisplayMedia = navigator.mediaDevices && 'getDisplayMedia' in navigator.mediaDevices
+      
       setDeviceType(isMobile ? 'mobile' : 'desktop')
+      
+      // Log available media capabilities
+      console.log('Media Capabilities:', {
+        getUserMedia: navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices,
+        getDisplayMedia: hasGetDisplayMedia,
+        deviceType: isMobile ? 'mobile' : 'desktop'
+      })
     }
     checkDeviceType()
   }, [])
@@ -180,16 +199,27 @@ export function VideoFeed({
   // Auto start if requested and if this is a streamer's feed
   useEffect(() => {
     if ((autoStart && isStreamer) && !stream) {
-      setIsVideoEnabled(true)
-      setIsAudioEnabled(true)
-      startVideo()
+      startDesktopCapture()
     }
   }, [autoStart, isStreamer])
 
+  const getQualityConstraints = (quality: string) => {
+    switch (quality) {
+      case '1080p':
+        return { width: { ideal: 1920 }, height: { ideal: 1080 } }
+      case '720p':
+        return { width: { ideal: 1280 }, height: { ideal: 720 } }
+      case '480p':
+      default:
+        return { width: { ideal: 854 }, height: { ideal: 480 } }
+    }
+  }
+
   const getMediaConstraints = (): MediaConstraints => {
+    const qualityConstraints = getQualityConstraints(streamQuality)
+    
     const baseVideoConstraints = {
-      width: { ideal: deviceType === 'mobile' ? 720 : 1280 },
-      height: { ideal: deviceType === 'mobile' ? 1280 : 720 },
+      ...qualityConstraints,
       frameRate: { ideal: 30, max: 60 },
       facingMode: deviceType === 'mobile' ? 'user' : undefined,
       deviceId: selectedVideoDevice ? { exact: selectedVideoDevice } : undefined
@@ -208,7 +238,7 @@ export function VideoFeed({
     }
   }
 
-  const startVideo = async () => {
+  const startDesktopCapture = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setError('Camera access is not supported in this browser')
       return
@@ -218,6 +248,9 @@ export function VideoFeed({
     setError(null)
 
     try {
+      // First try to get camera access
+      setIsVideoEnabled(true)
+      setIsAudioEnabled(true)
       const constraints = getMediaConstraints()
       const newStream = await navigator.mediaDevices.getUserMedia(constraints)
       
@@ -227,9 +260,15 @@ export function VideoFeed({
       }
       
       setStream(newStream)
+      setIsStreaming(true)
       setError(null)
+      
+      // If this is a streamer, also start sending the stream to the server
+      if (isStreamer) {
+        await startStreamBroadcast(newStream)
+      }
     } catch (err: any) {
-      console.error('Failed to start video:', err)
+      console.error('Failed to start desktop capture:', err)
       let errorMessage = 'Failed to access camera'
       
       switch (err.name) {
@@ -260,12 +299,107 @@ export function VideoFeed({
     }
   }
 
+  const startScreenShare = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      setError('Screen sharing is not supported in this browser')
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          ...getQualityConstraints(streamQuality),
+          frameRate: { ideal: 30, max: 60 }
+        },
+        audio: true
+      })
+
+      // Combine screen video with microphone audio if needed
+      if (isAudioEnabled && selectedAudioDevice) {
+        try {
+          const audioStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              deviceId: selectedAudioDevice ? { exact: selectedAudioDevice } : undefined
+            }
+          })
+          
+          // Add audio track from microphone to screen stream
+          const audioTrack = audioStream.getAudioTracks()[0]
+          if (audioTrack) {
+            screenStream.addTrack(audioTrack)
+          }
+        } catch (audioErr) {
+          console.warn('Failed to add microphone audio:', audioErr)
+        }
+      }
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = screenStream
+        videoRef.current.muted = isMuted
+      }
+      
+      setStream(screenStream)
+      setIsStreaming(true)
+      setIsVideoEnabled(true)
+      setError(null)
+
+      // Handle screen share end
+      screenStream.getVideoTracks()[0].onended = () => {
+        stopVideo()
+        setError('Screen sharing ended')
+      }
+      
+      if (isStreamer) {
+        await startStreamBroadcast(screenStream)
+      }
+    } catch (err: any) {
+      console.error('Failed to start screen share:', err)
+      setError(`Screen sharing error: ${err.message || 'Failed to capture screen'}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const startStreamBroadcast = async (mediaStream: MediaStream) => {
+    try {
+      // In a real implementation, this would send the stream to a WebRTC server
+      // For now, we'll simulate the broadcast
+      console.log('Starting stream broadcast for streamer mode...')
+      
+      // Simulate sending stream data to server
+      const streamData = {
+        streamerId: 'current-user-id',
+        quality: streamQuality,
+        hasVideo: mediaStream.getVideoTracks().length > 0,
+        hasAudio: mediaStream.getAudioTracks().length > 0,
+        timestamp: Date.now()
+      }
+      
+      // In a real app, you would send this to your streaming server
+      // await fetch('/api/stream/start', {
+      //   method: 'POST',
+      //   body: JSON.stringify(streamData)
+      // })
+      
+      console.log('Stream broadcast started:', streamData)
+    } catch (err) {
+      console.error('Failed to start stream broadcast:', err)
+    }
+  }
+
   const stopVideo = () => {
     if (stream) {
       stream.getTracks().forEach(track => {
         track.stop()
       })
       setStream(null)
+      setIsStreaming(false)
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null
@@ -285,7 +419,7 @@ export function VideoFeed({
       // Turn on video
       setIsVideoEnabled(true)
       if (!stream) {
-        await startVideo()
+        await startDesktopCapture()
       } else {
         // Add video track to existing stream
         try {
@@ -322,7 +456,7 @@ export function VideoFeed({
       // Turn on audio
       setIsAudioEnabled(true)
       if (!stream) {
-        await startVideo()
+        await startDesktopCapture()
       } else {
         // Add audio track to existing stream
         try {
@@ -347,33 +481,32 @@ export function VideoFeed({
   }
 
   const switchCamera = async () => {
-    if (deviceType === 'mobile' && stream) {
+    if (availableDevices.videoInputs.length <= 1) return
+    
+    const currentIndex = availableDevices.videoInputs.findIndex(d => d.deviceId === selectedVideoDevice)
+    const nextIndex = (currentIndex + 1) % availableDevices.videoInputs.length
+    const nextDevice = availableDevices.videoInputs[nextIndex]
+    
+    setSelectedVideoDevice(nextDevice.deviceId)
+    
+    // Restart video with new device
+    if (stream && isVideoEnabled) {
       const videoTrack = stream.getVideoTracks()[0]
       if (videoTrack) {
-        const settings = videoTrack.getSettings()
-        const newFacingMode = settings.facingMode === 'user' ? 'environment' : 'user'
+        videoTrack.stop()
+        stream.removeTrack(videoTrack)
         
         try {
-          videoTrack.stop()
-          const videoConstraints = getMediaConstraints().video
-          const newConstraints = typeof videoConstraints === 'object' ? {
-            ...videoConstraints,
-            facingMode: newFacingMode
-          } : {
-            facingMode: newFacingMode
-          }
-          
-          const newStream = await navigator.mediaDevices.getUserMedia({ 
-            video: newConstraints,
-            audio: false 
-          })
-          
-          const newVideoTrack = newStream.getVideoTracks()[0]
-          stream.removeTrack(videoTrack)
-          stream.addTrack(newVideoTrack)
-          
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream
+          const constraints = getMediaConstraints()
+          if (constraints.video) {
+            const newStream = await navigator.mediaDevices.getUserMedia({
+              video: constraints.video,
+              audio: false
+            })
+            const newTrack = newStream.getVideoTracks()[0]
+            if (newTrack) {
+              stream.addTrack(newTrack)
+            }
           }
         } catch (err) {
           console.error('Failed to switch camera:', err)
@@ -394,7 +527,7 @@ export function VideoFeed({
     stopVideo()
     setTimeout(() => {
       if (isVideoEnabled || isAudioEnabled) {
-        startVideo()
+        startDesktopCapture()
       }
     }, 100)
   }
@@ -419,7 +552,7 @@ export function VideoFeed({
               </Badge>
             </CardTitle>
             <div className="flex items-center space-x-2">
-              {stream && (
+              {isStreaming && (
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1"></div>
                   LIVE
@@ -437,21 +570,20 @@ export function VideoFeed({
         {/* Video Display */}
         <div className="relative aspect-video bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-lg overflow-hidden border border-slate-700/50">
           {!isStreamer && streamerId ? (
-            /* Viewer Mode: Show actual stream with gaming overlay */
+            /* Viewer Mode: Show real-time stream from the streamer */
             <div className="relative w-full h-full">
-              {/* Try to load the streamer's feed - for now showing a realistic stream */}
+              {/* Real-time stream viewer - In a real app this would connect to WebRTC */}
               <video
                 autoPlay
                 playsInline
                 muted={isMuted}
-                loop
                 controls={false}
                 className="w-full h-full object-cover"
                 src={streamerId ? `/api/stream/${streamerId}` : '/api/stream/placeholder-demo-video'}
                 poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMUEyMDMzIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MzAiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzMzQ0NTU7c3RvcC1vcGFjaXR5OjEiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFBMjAzMztzdG9wLW9wYWNpdHk6MSIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4="
                 onError={(e) => {
                   console.error('Video loading error:', e)
-                  setError('Failed to load stream. Please refresh the page or try a different streamer.')
+                  setError('Failed to load stream. Streamer may be offline.')
                 }}
                 onLoadStart={() => {
                   setError(null)
@@ -542,29 +674,41 @@ export function VideoFeed({
                   </div>
                 </div>
 
-                {/* Dynamic action messages */}
-                <div className="absolute top-1/4 right-1/4">
-                  <div className="bg-orange-500/90 text-white text-sm px-4 py-2 rounded-lg font-bold animate-bounce">
-                    🔥 COMBO x3!
-                  </div>
-                </div>
-                
-                <div className="absolute bottom-1/3 right-1/3">
-                  <div className="bg-cyan-500/90 text-white text-sm px-4 py-2 rounded-lg font-bold animate-pulse">
-                    ⚡ Power-up!
+                {/* Stream quality indicator for viewers */}
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-black/70 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-white text-xs font-medium">Live HD Stream</span>
                   </div>
                 </div>
               </div>
             </div>
           ) : stream ? (
             /* Streamer Mode: Show actual camera feed */
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted={isMuted}
-              className="w-full h-full object-cover"
-            />
+            <div className="relative w-full h-full">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted={isMuted}
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Streaming indicator overlay */}
+              <div className="absolute top-4 right-4">
+                <Badge className="bg-red-500/90 text-white text-xs px-3 py-1 animate-pulse">
+                  <Radio className="w-3 h-3 mr-1" />
+                  STREAMING LIVE
+                </Badge>
+              </div>
+              
+              {/* Stream quality indicator */}
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-black/70 text-white text-xs px-2 py-1">
+                  {streamQuality.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
           ) : (
             /* No stream: Show setup/error state */
             <div className="absolute inset-0 flex items-center justify-center">
@@ -583,7 +727,7 @@ export function VideoFeed({
                     {isLoading ? 'Starting Camera...' : error ? 'Camera Error' : isStreamer ? 'Camera Ready' : 'Waiting for Stream'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {error || (isLoading ? 'Please wait...' : isStreamer ? 'Click buttons below to enable camera' : 'Stream will appear here when live')}
+                    {error || (isLoading ? 'Please wait...' : isStreamer ? 'Click buttons below to start streaming' : 'Stream will appear here when live')}
                   </p>
                 </div>
               </div>
@@ -599,6 +743,9 @@ export function VideoFeed({
                    isVideoEnabled ? 'Video Only' :
                    isAudioEnabled ? 'Audio Only' : 'No Feed'}
                 </Badge>
+                <Badge className="bg-black/60 text-white text-xs px-2 py-1">
+                  {streamQuality}
+                </Badge>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -611,7 +758,7 @@ export function VideoFeed({
                   {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </Button>
                 
-                {deviceType === 'mobile' && (
+                {availableDevices.videoInputs.length > 1 && (
                   <Button
                     size="sm"
                     variant="secondary"
@@ -632,7 +779,7 @@ export function VideoFeed({
             <div className="flex items-start space-x-3">
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-red-400">Camera Error</p>
+                <p className="text-sm font-medium text-red-400">Stream Error</p>
                 <p className="text-xs text-red-300 mt-1">{error}</p>
               </div>
             </div>
@@ -641,52 +788,63 @@ export function VideoFeed({
 
         {/* Control Buttons - Only for streamers */}
         {showControls && isStreamer && (
-          <div className="grid grid-cols-2 gap-3">
-            {/* Desktop Camera Button */}
-            <Button
-              onClick={() => {
-                setDeviceType('desktop')
-                setIsVideoEnabled(true)
-                setIsAudioEnabled(true)
-                startVideo()
-              }}
-              variant={deviceType === 'desktop' && stream ? "default" : "outline"}
-              className="flex flex-col items-center space-y-2 h-20 text-center"
-              disabled={isLoading}
-            >
-              <Monitor className="w-6 h-6" />
-              <div>
-                <div className="font-semibold text-sm">Desktop Camera</div>
-                <div className="text-xs text-muted-foreground">
-                  {deviceType === 'desktop' && isVideoEnabled ? 'Active' : 'Enable'}
+          <div className="space-y-4">
+            {/* Primary Streaming Options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Desktop Camera Button */}
+              <Button
+                onClick={startDesktopCapture}
+                variant={stream && deviceType === 'desktop' ? "default" : "outline"}
+                className="flex flex-col items-center space-y-2 h-20 text-center"
+                disabled={isLoading}
+              >
+                <Monitor className="w-6 h-6" />
+                <div>
+                  <div className="font-semibold text-sm">Desktop Camera</div>
+                  <div className="text-xs text-muted-foreground">
+                    {stream && deviceType === 'desktop' ? 'Active' : 'Start Webcam'}
+                  </div>
                 </div>
-              </div>
-            </Button>
+              </Button>
 
-            {/* Mobile Camera Button */}
-            <Button
-              onClick={() => {
-                setDeviceType('mobile')
-                setIsVideoEnabled(true)
-                setIsAudioEnabled(true)
-                startVideo()
-              }}
-              variant={deviceType === 'mobile' && stream ? "default" : "outline"}
-              className="flex flex-col items-center space-y-2 h-20 text-center"
-              disabled={isLoading}
-            >
-              <Smartphone className="w-6 h-6" />
-              <div>
-                <div className="font-semibold text-sm">Mobile Camera</div>
-                <div className="text-xs text-muted-foreground">
-                  {deviceType === 'mobile' && isVideoEnabled ? 'Active' : 'Enable'}
+              {/* Screen Share Button */}
+              <Button
+                onClick={startScreenShare}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-20 text-center"
+                disabled={isLoading || !navigator.mediaDevices?.getDisplayMedia}
+              >
+                <Share className="w-6 h-6" />
+                <div>
+                  <div className="font-semibold text-sm">Screen Share</div>
+                  <div className="text-xs text-muted-foreground">
+                    Share your screen
+                  </div>
                 </div>
+              </Button>
+            </div>
+
+            {/* Stream Quality Selection */}
+            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
+              <Label className="text-sm font-medium">Stream Quality:</Label>
+              <div className="flex space-x-2">
+                {(['480p', '720p', '1080p'] as const).map((quality) => (
+                  <Button
+                    key={quality}
+                    variant={streamQuality === quality ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setStreamQuality(quality)}
+                    className="text-xs px-2 py-1 h-7"
+                  >
+                    {quality}
+                  </Button>
+                ))}
               </div>
-            </Button>
+            </div>
           </div>
         )}
 
-        {/* Detailed Controls - Only for streamers */}
+        {/* Detailed Controls - Only for streamers with active stream */}
         {showControls && stream && isStreamer && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
             <Button
@@ -757,6 +915,14 @@ export function VideoFeed({
               <div className="flex justify-between">
                 <span>Available Cameras:</span>
                 <span>{availableDevices.videoInputs.length}</span>
+              </div>
+            )}
+            {stream && (
+              <div className="flex justify-between">
+                <span>Stream Status:</span>
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                  Broadcasting
+                </Badge>
               </div>
             )}
           </div>
