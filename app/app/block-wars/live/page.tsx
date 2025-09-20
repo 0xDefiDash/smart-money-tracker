@@ -28,6 +28,7 @@ import { StreamerProfile } from '@/components/live-stream/streamer-profile'
 import { LiveChat } from '@/components/live-stream/live-chat'
 import { StreamControls } from '@/components/live-stream/stream-controls'
 import { ViewersList } from '@/components/live-stream/viewers-list'
+import { VideoFeed } from '@/components/live-stream/video-feed'
 import { cn } from '@/lib/utils'
 
 interface Streamer {
@@ -260,39 +261,50 @@ export default function BlockWarsLivePage() {
               {/* Selected Stream */}
               <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 border-slate-700/50 overflow-hidden">
                 <CardContent className="p-0">
-                  {/* Stream Video Area */}
-                  <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-transparent to-blue-500/10"></div>
+                  {/* Real Video Stream with Overlay Info */}
+                  <div className="relative">
+                    <VideoFeed 
+                      streamerId={selectedStreamer.id}
+                      showControls={false}
+                      className="border-0"
+                    />
                     
-                    {/* Mock Stream Content */}
-                    <div className="relative z-10 text-center space-y-3 sm:space-y-4 p-4">
-                      <div className="text-4xl sm:text-6xl">{selectedStreamer.avatar}</div>
-                      <div className="space-y-1 sm:space-y-2">
-                        <h2 className="text-xl sm:text-2xl font-bold text-white">{selectedStreamer.name}</h2>
-                        <p className="text-sm sm:text-lg text-gray-300 line-clamp-2 px-2">{selectedStreamer.streamTitle}</p>
-                        <Badge className={cn("text-xs sm:text-sm", getCategoryColor(selectedStreamer.category))}>
-                          {selectedStreamer.category}
-                        </Badge>
+                    {/* Stream Info Overlay */}
+                    <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
+                      {/* Left side - Stream stats */}
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                        <div className="bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1 sm:px-3 sm:py-1 flex items-center space-x-1 sm:space-x-2">
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                          <span className="text-white font-medium text-xs sm:text-sm">{selectedStreamer.viewerCount.toLocaleString()}</span>
+                        </div>
+                        <div className="bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1 sm:px-3 sm:py-1 flex items-center space-x-1 sm:space-x-2">
+                          <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+                          <span className="text-white font-medium text-xs sm:text-sm">{selectedStreamer.likes.toLocaleString()}</span>
+                        </div>
                       </div>
                       
-                      {/* Live indicator */}
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse"></div>
-                        <span className="text-red-400 font-bold text-sm sm:text-base">LIVE</span>
-                        <span className="text-gray-400 text-sm sm:text-base">•</span>
-                        <span className="text-gray-400 text-sm sm:text-base">{getStreamDuration(selectedStreamer.startTime)}</span>
+                      {/* Right side - Live indicator */}
+                      <div className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1 flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="text-red-400 font-bold text-xs sm:text-sm">LIVE</span>
+                        <span className="text-gray-300 text-xs sm:text-sm">•</span>
+                        <span className="text-gray-300 text-xs sm:text-sm">{getStreamDuration(selectedStreamer.startTime)}</span>
                       </div>
                     </div>
-
-                    {/* Stream Stats Overlay */}
-                    <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 sm:px-3 sm:py-1 flex items-center space-x-1 sm:space-x-2">
-                        <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                        <span className="text-white font-medium text-xs sm:text-sm">{selectedStreamer.viewerCount.toLocaleString()}</span>
-                      </div>
-                      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 sm:px-3 sm:py-1 flex items-center space-x-1 sm:space-x-2">
-                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
-                        <span className="text-white font-medium text-xs sm:text-sm">{selectedStreamer.likes.toLocaleString()}</span>
+                    
+                    {/* Bottom overlay - Stream info */}
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="bg-black/70 backdrop-blur-sm rounded-lg p-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="text-2xl sm:text-4xl">{selectedStreamer.avatar}</div>
+                          <div className="flex-1 min-w-0">
+                            <h2 className="text-lg sm:text-xl font-bold text-white truncate">{selectedStreamer.name}</h2>
+                            <p className="text-sm text-gray-300 line-clamp-1">{selectedStreamer.streamTitle}</p>
+                            <Badge className={cn("text-xs mt-1", getCategoryColor(selectedStreamer.category))}>
+                              {selectedStreamer.category}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

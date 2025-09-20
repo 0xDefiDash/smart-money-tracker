@@ -43,6 +43,7 @@ import {
   Radio
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { VideoFeed } from './video-feed'
 
 interface StreamSettings {
   title: string
@@ -624,65 +625,55 @@ export function GoLiveSetup({
         {/* Preview & Go Live Sidebar */}
         <div className="space-y-6">
           {/* Stream Preview */}
+          <VideoFeed 
+            isStreamer={true}
+            showControls={true}
+            className="bg-slate-900/80 border-slate-700/50"
+          />
+
+          {/* Stream Info Preview */}
           <Card className="bg-slate-900/80 border-slate-700/50">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Eye className="w-5 h-5" />
-                <span>Preview</span>
+                <span>Stream Info</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Mock Stream Preview */}
-              <div className="aspect-video bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-lg flex items-center justify-center border border-slate-700/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5"></div>
-                <div className="text-center space-y-3 relative z-10">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto">
-                    <Camera className="w-8 h-8 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-purple-400">Stream Preview</p>
-                    <p className="text-sm text-muted-foreground">Setup your camera to see live preview</p>
-                  </div>
-                </div>
+            <CardContent className="space-y-3">
+              <h4 className="font-bold text-lg line-clamp-2">
+                {streamSettings.title || '🎮 Your Amazing Stream Title'}
+              </h4>
+              <div className="flex items-center space-x-2 flex-wrap gap-1">
+                {streamSettings.category && (() => {
+                  const category = CATEGORIES.find(c => c.value === streamSettings.category)
+                  return category ? (
+                    <Badge className={cn("text-xs", category.bgColor, category.color, category.borderColor)}>
+                      <category.icon className="w-3 h-3 mr-1" />
+                      {category.label}
+                    </Badge>
+                  ) : null
+                })()}
+                <Badge variant="outline" className="text-xs capitalize">
+                  {streamSettings.maturityRating || 'everyone'}
+                </Badge>
               </div>
-
-              {/* Stream Info Preview */}
-              <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700/30">
-                <h4 className="font-bold text-lg line-clamp-2">
-                  {streamSettings.title || '🎮 Your Amazing Stream Title'}
-                </h4>
-                <div className="flex items-center space-x-2 flex-wrap gap-1">
-                  {streamSettings.category && (() => {
-                    const category = CATEGORIES.find(c => c.value === streamSettings.category)
-                    return category ? (
-                      <Badge className={cn("text-xs", category.bgColor, category.color, category.borderColor)}>
-                        <category.icon className="w-3 h-3 mr-1" />
-                        {category.label}
+              {streamSettings.tags && streamSettings.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {streamSettings.tags.slice(0, 3).map((tag) => {
+                    const tagObj = SUGGESTED_TAGS.find(t => t.label === tag)
+                    return (
+                      <Badge key={tag} className={cn("text-xs", tagObj?.color || "bg-slate-700/50")}>
+                        {tag}
                       </Badge>
-                    ) : null
-                  })()}
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {streamSettings.maturityRating || 'everyone'}
-                  </Badge>
+                    )
+                  })}
+                  {streamSettings.tags.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{streamSettings.tags.length - 3}
+                    </Badge>
+                  )}
                 </div>
-                {streamSettings.tags && streamSettings.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {streamSettings.tags.slice(0, 3).map((tag) => {
-                      const tagObj = SUGGESTED_TAGS.find(t => t.label === tag)
-                      return (
-                        <Badge key={tag} className={cn("text-xs", tagObj?.color || "bg-slate-700/50")}>
-                          {tag}
-                        </Badge>
-                      )
-                    })}
-                    {streamSettings.tags.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{streamSettings.tags.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
             </CardContent>
           </Card>
 
