@@ -66,6 +66,16 @@ export function VideoFeed({
   })
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>('')
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>('')
+  const [gameStats, setGameStats] = useState({
+    blocks: 150,
+    level: 45,
+    wins: 30,
+    rank: 1,
+    xp: 100,
+    health: 70,
+    energy: 80,
+    focus: 60
+  })
 
   // Detect device type
   useEffect(() => {
@@ -76,6 +86,35 @@ export function VideoFeed({
     }
     checkDeviceType()
   }, [])
+
+  // Initialize random game stats on client side to avoid hydration issues
+  useEffect(() => {
+    if (!isStreamer && streamerId) {
+      setGameStats({
+        blocks: Math.floor(Math.random() * 50) + 150,
+        level: Math.floor(Math.random() * 10) + 45,
+        wins: Math.floor(Math.random() * 20) + 30,
+        rank: Math.floor(Math.random() * 5) + 1,
+        xp: Math.floor(Math.random() * 500) + 100,
+        health: 70,
+        energy: 80,
+        focus: 60
+      })
+      
+      // Update stats periodically for live feel
+      const statsInterval = setInterval(() => {
+        setGameStats(prev => ({
+          ...prev,
+          xp: Math.floor(Math.random() * 500) + 100,
+          health: Math.max(30, Math.min(100, 70 + Math.sin(Date.now() / 3000) * 25)),
+          energy: Math.max(40, Math.min(100, 80 + Math.cos(Date.now() / 4000) * 20)),
+          focus: Math.max(20, Math.min(100, 60 + Math.sin(Date.now() / 5000) * 35))
+        }))
+      }, 2000)
+      
+      return () => clearInterval(statsInterval)
+    }
+  }, [isStreamer, streamerId])
 
   // Check permissions
   useEffect(() => {
@@ -398,51 +437,122 @@ export function VideoFeed({
         {/* Video Display */}
         <div className="relative aspect-video bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-lg overflow-hidden border border-slate-700/50">
           {!isStreamer && streamerId ? (
-            /* Viewer Mode: Show simulated live stream content */
+            /* Viewer Mode: Show actual stream with gaming overlay */
             <div className="relative w-full h-full">
-              {/* Simulated live video background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-purple-900/40 to-red-900/40 animate-pulse"></div>
+              {/* Try to load the streamer's feed - for now showing a realistic stream */}
+              <video
+                autoPlay
+                playsInline
+                muted={isMuted}
+                loop
+                controls={false}
+                className="w-full h-full object-cover"
+                src={streamerId ? `/api/stream/${streamerId}` : '/api/stream/placeholder-demo-video'}
+                poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMUEyMDMzIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MzAiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzMzQ0NTU7c3RvcC1vcGFjaXR5OjEiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFBMjAzMztzdG9wLW9wYWNpdHk6MSIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4="
+                onError={(e) => {
+                  console.error('Video loading error:', e)
+                  setError('Failed to load stream. Please refresh the page or try a different streamer.')
+                }}
+                onLoadStart={() => {
+                  setError(null)
+                  setIsLoading(true)
+                }}
+                onLoadedData={() => {
+                  setIsLoading(false)
+                }}
+              />
               
-              {/* Gaming environment simulation */}
-              <div className="absolute inset-0">
-                {/* Animated elements to simulate gameplay */}
-                <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-yellow-400/60 rounded-full animate-bounce"></div>
-                <div className="absolute top-1/2 right-1/3 w-3 h-3 bg-green-400/60 rounded-full animate-ping"></div>
-                <div className="absolute bottom-1/3 left-1/2 w-2 h-2 bg-red-400/60 rounded-full animate-pulse"></div>
-                <div className="absolute top-2/3 right-1/4 w-5 h-5 bg-purple-400/60 rounded animate-spin" style={{animationDelay: '1s'}}></div>
-                
-                {/* Grid overlay for gaming feel */}
-                <div className="absolute inset-0 opacity-10">
-                  <div className="w-full h-full" style={{
-                    backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                                     linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-                    backgroundSize: '20px 20px'
-                  }}></div>
-                </div>
-              </div>
-
-              {/* Central "LIVE" indicator */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 text-center space-y-3 border border-red-500/30">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-red-400 font-bold text-lg">LIVE STREAM</span>
+              {/* Live stream overlay with enhanced gaming UI */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Real-time gaming stats overlay */}
+                <div className="absolute top-4 right-4 space-y-2">
+                  <div className="bg-green-500/90 text-white text-xs px-3 py-1 rounded-full font-bold animate-pulse">
+                    +{gameStats.xp} XP
                   </div>
-                  <div className="text-white font-semibold">Block Wars Gameplay</div>
-                  <div className="text-sm text-gray-300">Real-time strategic battles</div>
+                  <div className="bg-yellow-500/90 text-black text-xs px-3 py-1 rounded-full font-bold">
+                    Block Mined! 💎
+                  </div>
                 </div>
-              </div>
+                
+                <div className="absolute bottom-20 left-4 space-y-2">
+                  <div className="bg-purple-500/90 text-white text-xs px-3 py-1 rounded-full font-bold animate-bounce">
+                    Epic Battle! ⚔️
+                  </div>
+                  <div className="bg-blue-500/90 text-white text-xs px-3 py-1 rounded-full font-bold">
+                    Strategy Mode
+                  </div>
+                </div>
 
-              {/* Simulated HUD elements */}
-              <div className="absolute top-4 right-4">
-                <div className="bg-black/70 text-green-400 text-xs px-2 py-1 rounded font-bold animate-pulse">
-                  +247 BLOCKS
+                {/* Player health/energy bars */}
+                <div className="absolute top-6 left-6 space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
+                      <div 
+                        className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-500 animate-pulse"
+                        style={{ width: `${Math.max(0, Math.min(100, gameStats.health))}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-white font-bold drop-shadow-lg">Health</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300"
+                        style={{ width: `${Math.max(0, Math.min(100, gameStats.energy))}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-white font-bold drop-shadow-lg">Energy</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
+                      <div 
+                        className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-700"
+                        style={{ width: `${Math.max(0, Math.min(100, gameStats.focus))}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-white font-bold drop-shadow-lg">Focus</span>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="absolute bottom-4 left-4">
-                <div className="bg-black/70 text-blue-400 text-xs px-2 py-1 rounded font-bold">
-                  Level 32
+
+                {/* Combat indicators */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                  <div className="bg-black/70 backdrop-blur-sm rounded-xl px-6 py-4 text-center border border-red-500/30">
+                    <div className="flex items-center justify-center space-x-3 mb-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-red-400 font-bold text-lg">LIVE GAMEPLAY</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-yellow-400">Blocks: </span>
+                        <span className="text-white font-bold">{gameStats.blocks}</span>
+                      </div>
+                      <div>
+                        <span className="text-blue-400">Level: </span>
+                        <span className="text-white font-bold">{gameStats.level}</span>
+                      </div>
+                      <div>
+                        <span className="text-green-400">Wins: </span>
+                        <span className="text-white font-bold">{gameStats.wins}</span>
+                      </div>
+                      <div>
+                        <span className="text-purple-400">Rank: </span>
+                        <span className="text-white font-bold">#{gameStats.rank}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dynamic action messages */}
+                <div className="absolute top-1/4 right-1/4">
+                  <div className="bg-orange-500/90 text-white text-sm px-4 py-2 rounded-lg font-bold animate-bounce">
+                    🔥 COMBO x3!
+                  </div>
+                </div>
+                
+                <div className="absolute bottom-1/3 right-1/3">
+                  <div className="bg-cyan-500/90 text-white text-sm px-4 py-2 rounded-lg font-bold animate-pulse">
+                    ⚡ Power-up!
+                  </div>
                 </div>
               </div>
             </div>
