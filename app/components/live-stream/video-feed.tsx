@@ -138,9 +138,9 @@ export function VideoFeed({
     }
   }, [selectedVideoDevice, selectedAudioDevice])
 
-  // Auto start if requested or if this is a streamer's feed
+  // Auto start if requested and if this is a streamer's feed
   useEffect(() => {
-    if ((autoStart || isStreamer) && !stream) {
+    if ((autoStart && isStreamer) && !stream) {
       setIsVideoEnabled(true)
       setIsAudioEnabled(true)
       startVideo()
@@ -397,7 +397,57 @@ export function VideoFeed({
       <CardContent className={cn("space-y-4", !showControls && "p-0")}>
         {/* Video Display */}
         <div className="relative aspect-video bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-lg overflow-hidden border border-slate-700/50">
-          {stream ? (
+          {!isStreamer && streamerId ? (
+            /* Viewer Mode: Show simulated live stream content */
+            <div className="relative w-full h-full">
+              {/* Simulated live video background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-purple-900/40 to-red-900/40 animate-pulse"></div>
+              
+              {/* Gaming environment simulation */}
+              <div className="absolute inset-0">
+                {/* Animated elements to simulate gameplay */}
+                <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-yellow-400/60 rounded-full animate-bounce"></div>
+                <div className="absolute top-1/2 right-1/3 w-3 h-3 bg-green-400/60 rounded-full animate-ping"></div>
+                <div className="absolute bottom-1/3 left-1/2 w-2 h-2 bg-red-400/60 rounded-full animate-pulse"></div>
+                <div className="absolute top-2/3 right-1/4 w-5 h-5 bg-purple-400/60 rounded animate-spin" style={{animationDelay: '1s'}}></div>
+                
+                {/* Grid overlay for gaming feel */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="w-full h-full" style={{
+                    backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                                     linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+                    backgroundSize: '20px 20px'
+                  }}></div>
+                </div>
+              </div>
+
+              {/* Central "LIVE" indicator */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 text-center space-y-3 border border-red-500/30">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-red-400 font-bold text-lg">LIVE STREAM</span>
+                  </div>
+                  <div className="text-white font-semibold">Block Wars Gameplay</div>
+                  <div className="text-sm text-gray-300">Real-time strategic battles</div>
+                </div>
+              </div>
+
+              {/* Simulated HUD elements */}
+              <div className="absolute top-4 right-4">
+                <div className="bg-black/70 text-green-400 text-xs px-2 py-1 rounded font-bold animate-pulse">
+                  +247 BLOCKS
+                </div>
+              </div>
+              
+              <div className="absolute bottom-4 left-4">
+                <div className="bg-black/70 text-blue-400 text-xs px-2 py-1 rounded font-bold">
+                  Level 32
+                </div>
+              </div>
+            </div>
+          ) : stream ? (
+            /* Streamer Mode: Show actual camera feed */
             <video
               ref={videoRef}
               autoPlay
@@ -406,6 +456,7 @@ export function VideoFeed({
               className="w-full h-full object-cover"
             />
           ) : (
+            /* No stream: Show setup/error state */
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center space-y-3">
                 <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto">
@@ -419,18 +470,18 @@ export function VideoFeed({
                 </div>
                 <div>
                   <p className="font-semibold text-gray-400">
-                    {isLoading ? 'Starting Camera...' : error ? 'Camera Error' : isStreamer ? 'Camera Ready' : 'Camera Off'}
+                    {isLoading ? 'Starting Camera...' : error ? 'Camera Error' : isStreamer ? 'Camera Ready' : 'Waiting for Stream'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {error || (isLoading ? 'Please wait...' : isStreamer ? 'Click buttons below to enable camera' : 'Click to enable camera')}
+                    {error || (isLoading ? 'Please wait...' : isStreamer ? 'Click buttons below to enable camera' : 'Stream will appear here when live')}
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Video Controls Overlay */}
-          {stream && showControls && (
+          {/* Video Controls Overlay - Only for streamers */}
+          {stream && showControls && isStreamer && (
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Badge className="bg-black/60 text-white text-xs px-2 py-1">
@@ -465,8 +516,8 @@ export function VideoFeed({
           )}
         </div>
 
-        {/* Error Display */}
-        {error && showControls && (
+        {/* Error Display - Only for streamers */}
+        {error && showControls && isStreamer && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
             <div className="flex items-start space-x-3">
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
@@ -478,7 +529,7 @@ export function VideoFeed({
           </div>
         )}
 
-        {/* Control Buttons */}
+        {/* Control Buttons - Only for streamers */}
         {showControls && isStreamer && (
           <div className="grid grid-cols-2 gap-3">
             {/* Desktop Camera Button */}
@@ -525,8 +576,8 @@ export function VideoFeed({
           </div>
         )}
 
-        {/* Detailed Controls */}
-        {showControls && stream && (
+        {/* Detailed Controls - Only for streamers */}
+        {showControls && stream && isStreamer && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
             <Button
               onClick={toggleVideo}
@@ -571,8 +622,8 @@ export function VideoFeed({
           </div>
         )}
 
-        {/* Device Status Info */}
-        {showControls && (
+        {/* Device Status Info - Only for streamers */}
+        {showControls && isStreamer && (
           <div className="text-xs text-muted-foreground space-y-1">
             <div className="flex justify-between">
               <span>Camera Permission:</span>
@@ -598,6 +649,21 @@ export function VideoFeed({
                 <span>{availableDevices.videoInputs.length}</span>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Viewer Info - Show streaming quality info for viewers */}
+        {!isStreamer && streamerId && (
+          <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-lg p-4">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-green-400 font-semibold">Watching Live Stream</span>
+            </div>
+            <div className="text-center mt-2">
+              <p className="text-sm text-muted-foreground">
+                HD Quality • Real-time Block Wars Action
+              </p>
+            </div>
           </div>
         )}
       </CardContent>

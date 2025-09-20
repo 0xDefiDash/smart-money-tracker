@@ -36,9 +36,13 @@ export function RollingBanner() {
         
         const result = await response.json()
         
-        if (result.success && result.data) {
+        if (result.data) {
           setTokens(result.data)
           setError(null)
+          // Log if we're using fallback data but don't treat as error
+          if (result.fallback) {
+            console.info('Using fallback trending tokens data:', result.message)
+          }
         } else {
           throw new Error(result.error || 'Invalid response format')
         }
