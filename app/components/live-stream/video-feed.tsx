@@ -28,7 +28,9 @@ import {
   Share,
   Zap,
   Upload,
-  Download
+  Download,
+  Play,
+  Pause
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -86,6 +88,7 @@ export function VideoFeed({
     energy: 80,
     focus: 60
   })
+  const [isPaused, setIsPaused] = useState(false)
 
   // Detect device type and capabilities
   useEffect(() => {
@@ -572,52 +575,83 @@ export function VideoFeed({
           {!isStreamer && streamerId ? (
             /* Viewer Mode: Show real-time stream from the streamer */
             <div className="relative w-full h-full">
-              {/* Check if this is a user stream (starts with 'user_') or demo stream */}
-              {streamerId.startsWith('user_') ? (
-                /* Real user stream - For now showing demo video with live overlay */
-                <video
-                  autoPlay
-                  playsInline
-                  muted={isMuted}
-                  controls={false}
-                  className="w-full h-full object-cover"
-                  src="/api/stream/placeholder-demo-video"
-                  poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMUEyMDMzIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MzAiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzMzQ0NTU7c3RvcC1vcGFjaXR5OjEiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFBMjAzMztzdG9wLW9wYWNpdHk6MSIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4="
-                  onError={(e) => {
-                    console.error('Video loading error:', e)
-                    setError('Failed to load stream. Streamer may be offline.')
-                  }}
-                  onLoadStart={() => {
-                    setError(null)
-                    setIsLoading(true)
-                  }}
-                  onLoadedData={() => {
-                    setIsLoading(false)
-                  }}
+              <video
+                key={streamerId}
+                ref={videoRef}
+                autoPlay
+                playsInline
+                loop
+                muted={false} // Set to false initially to allow audio
+                controls={false}
+                className="w-full h-full object-cover bg-slate-800"
+                onLoadStart={() => {
+                  console.log('Video loading started for streamerId:', streamerId)
+                  setError(null)
+                  setIsLoading(true)
+                }}
+                onLoadedMetadata={() => {
+                  console.log('Video metadata loaded')
+                  setIsLoading(false)
+                  // Try to play the video
+                  if (videoRef.current) {
+                    videoRef.current.play().catch(e => {
+                      console.log('Autoplay failed, user interaction required:', e)
+                      // This is normal - browsers prevent autoplay without user interaction
+                    })
+                  }
+                }}
+                onLoadedData={() => {
+                  console.log('Video data loaded')
+                  setIsLoading(false)
+                }}
+                onCanPlay={() => {
+                  console.log('Video can play')
+                  setIsLoading(false)
+                }}
+                onPlay={() => {
+                  console.log('Video started playing')
+                  setIsLoading(false)
+                }}
+                onError={(e) => {
+                  const videoElement = e.target as HTMLVideoElement
+                  console.error('Video loading error:', {
+                    error: videoElement.error,
+                    networkState: videoElement.networkState,
+                    readyState: videoElement.readyState,
+                    src: videoElement.src
+                  })
+                  setError(`Failed to load video stream. Error: ${videoElement.error?.message || 'Unknown error'}`)
+                  setIsLoading(false)
+                }}
+                onStalled={() => {
+                  console.warn('Video stalled')
+                }}
+                onWaiting={() => {
+                  console.log('Video waiting for data')
+                  setIsLoading(true)
+                }}
+                onEmptied={() => {
+                  console.log('Video emptied')
+                }}
+                onAbort={() => {
+                  console.log('Video loading aborted')
+                }}
+              >
+                {/* Multiple source fallbacks */}
+                <source 
+                  src={streamerId.startsWith('user_') ? "/api/stream/placeholder-demo-video" : `/api/stream/${streamerId}`} 
+                  type="video/mp4" 
                 />
-              ) : (
-                /* Pre-recorded demo streams */
-                <video
-                  autoPlay
-                  playsInline
-                  muted={isMuted}
-                  controls={false}
-                  className="w-full h-full object-cover"
-                  src={`/api/stream/${streamerId}`}
-                  poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMUEyMDMzIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MzAiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzMzQ0NTU7c3RvcC1vcGFjaXR5OjEiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFBMjAzMztzdG9wLW9wYWNpdHk6MSIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4="
-                  onError={(e) => {
-                    console.error('Video loading error:', e)
-                    setError('Failed to load stream. Streamer may be offline.')
-                  }}
-                  onLoadStart={() => {
-                    setError(null)
-                    setIsLoading(true)
-                  }}
-                  onLoadedData={() => {
-                    setIsLoading(false)
-                  }}
+                <source 
+                  src="/api/stream/direct/51bc0967-834a-4440-ba3c-8c17d3ce43ab_0780159e12e96b0a676be5a09c7b20fa.mp4" 
+                  type="video/mp4" 
                 />
-              )}
+                <source 
+                  src="/videos/51bc0967-834a-4440-ba3c-8c17d3ce43ab_0780159e12e96b0a676be5a09c7b20fa.mp4" 
+                  type="video/mp4" 
+                />
+                Your browser does not support the video tag.
+              </video>
               
               {/* Live stream overlay with enhanced gaming UI */}
               <div className="absolute inset-0 pointer-events-none">
@@ -717,6 +751,59 @@ export function VideoFeed({
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Video Controls for Viewers - always show basic controls */}
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      if (videoRef.current) {
+                        if (videoRef.current.paused) {
+                          videoRef.current.play()
+                          setIsPaused(false)
+                        } else {
+                          videoRef.current.pause()
+                          setIsPaused(true)
+                        }
+                      }
+                    }}
+                    className="bg-black/60 hover:bg-black/80 text-white h-8 w-8 p-0"
+                  >
+                    {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      if (videoRef.current) {
+                        videoRef.current.muted = !videoRef.current.muted
+                        setIsMuted(videoRef.current.muted)
+                      }
+                    }}
+                    className="bg-black/60 hover:bg-black/80 text-white h-8 w-8 p-0"
+                  >
+                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </Button>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      if (videoRef.current) {
+                        videoRef.current.load() // Reload the video
+                      }
+                    }}
+                    className="bg-black/60 hover:bg-black/80 text-white h-8 w-8 p-0"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ) : stream ? (
