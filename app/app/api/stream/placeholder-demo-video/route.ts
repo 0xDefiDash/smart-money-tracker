@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // List of available video files from your uploads
@@ -13,7 +16,7 @@ export async function GET(request: NextRequest) {
     
     // Select a random video file to simulate different streams
     const selectedVideo = videoFiles[Math.floor(Math.random() * videoFiles.length)]
-    const videoPath = join(process.cwd(), '..', 'Uploads', selectedVideo)
+    const videoPath = join(process.cwd(), 'public', 'videos', selectedVideo)
     
     if (!existsSync(videoPath)) {
       return new NextResponse('Video not found', { status: 404 })

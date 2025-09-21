@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { streamerId: string } }
@@ -12,6 +15,7 @@ export async function GET(
     
     // Map streamers to their video content
     const streamerVideos: { [key: string]: string } = {
+      'demo_1': '51bc0967-834a-4440-ba3c-8c17d3ce43ab_0780159e12e96b0a676be5a09c7b20fa.mp4',
       'streamer_1': '51bc0967-834a-4440-ba3c-8c17d3ce43ab_0780159e12e96b0a676be5a09c7b20fa.mp4',
       'streamer_2': 'c581c8b6-21de-4b7e-a1e9-2a5bf0bda69b_4a2e3d1774800e58c0f0375b5784b2f4.mp4',
       'streamer_3': '51bc0967-834a-4440-ba3c-8c17d3ce43ab_0780159e12e96b0a676be5a09c7b20fa.mp4',
@@ -19,7 +23,7 @@ export async function GET(
     }
     
     const videoFile = streamerVideos[streamerId] || streamerVideos['streamer_1']
-    const videoPath = join(process.cwd(), '..', 'Uploads', videoFile)
+    const videoPath = join(process.cwd(), 'public', 'videos', videoFile)
     
     if (!existsSync(videoPath)) {
       return new NextResponse('Stream not found', { status: 404 })
