@@ -137,43 +137,111 @@ export default function GoLivePage() {
     return () => clearInterval(interval)
   }
 
-  const handleGoLive = () => {
+  const handleGoLive = async () => {
     if (!streamSettings.title || !streamSettings.category) {
       alert('Please fill in all required fields')
       return
     }
 
-    setIsLive(true)
-    setActiveTab('dashboard')
-    localStorage.setItem('isLive', 'true')
-    
-    // Initialize stream stats
-    setStreamStats({
-      viewers: Math.floor(Math.random() * 5) + 1,
-      likes: 0,
-      chatMessages: 0,
-      giftsReceived: 0,
-      streamDuration: 0,
-      peakViewers: 0
-    })
+    try {
+      // Register the stream with the live streams API
+      const streamerId = `user_${session?.user?.email?.split('@')[0] || 'anonymous'}_${Date.now()}`
+      const streamData = {
+        name: session?.user?.name || 'Anonymous Streamer',
+        username: `@${session?.user?.email?.split('@')[0] || 'anonymous'}`,
+        avatar: '🎮',
+        followers: userStats.followers,
+        streamTitle: streamSettings.title,
+        category: streamSettings.category,
+        description: streamSettings.description,
+        tags: streamSettings.tags,
+        isPublic: streamSettings.isPublic,
+        allowChat: streamSettings.allowChat,
+        allowGifts: streamSettings.allowGifts,
+        maturityRating: streamSettings.maturityRating,
+        gameLevel: userStats.level,
+        totalBlocks: userStats.totalBlocks,
+        rank: userStats.rank,
+        isVerified: false
+      }
 
-    startStreamStatsSimulation()
+      const response = await fetch('/api/stream/live-streams', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ streamerId, streamData })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to register stream')
+      }
+
+      // Store the streamer ID for later cleanup
+      localStorage.setItem('currentStreamerId', streamerId)
+      localStorage.setItem('isLive', 'true')
+
+      setIsLive(true)
+      setActiveTab('dashboard')
+      
+      // Initialize stream stats
+      setStreamStats({
+        viewers: Math.floor(Math.random() * 5) + 1,
+        likes: 0,
+        chatMessages: 0,
+        giftsReceived: 0,
+        streamDuration: 0,
+        peakViewers: 0
+      })
+
+      startStreamStatsSimulation()
+      
+      console.log('Successfully went live with stream ID:', streamerId)
+    } catch (error) {
+      console.error('Failed to go live:', error)
+      alert('Failed to start stream. Please try again.')
+    }
   }
 
-  const handleEndStream = () => {
-    setIsLive(false)
-    setActiveTab('setup')
-    localStorage.removeItem('isLive')
-    
-    // Reset stream stats
-    setStreamStats({
-      viewers: 0,
-      likes: 0,
-      chatMessages: 0,
-      giftsReceived: 0,
-      streamDuration: 0,
-      peakViewers: 0
-    })
+  const handleEndStream = async () => {
+    try {
+      // Unregister the stream from the live streams API
+      const currentStreamerId = localStorage.getItem('currentStreamerId')
+      if (currentStreamerId) {
+        const response = await fetch('/api/stream/live-streams', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ streamerId: currentStreamerId })
+        })
+
+        if (!response.ok) {
+          console.error('Failed to unregister stream')
+        }
+      }
+
+      localStorage.removeItem('currentStreamerId')
+      localStorage.removeItem('isLive')
+
+      setIsLive(false)
+      setActiveTab('setup')
+      
+      // Reset stream stats
+      setStreamStats({
+        viewers: 0,
+        likes: 0,
+        chatMessages: 0,
+        giftsReceived: 0,
+        streamDuration: 0,
+        peakViewers: 0
+      })
+
+      console.log('Stream ended successfully')
+    } catch (error) {
+      console.error('Failed to end stream:', error)
+      // Still end the local stream even if API call fails
+      setIsLive(false)
+      setActiveTab('setup')
+      localStorage.removeItem('currentStreamerId')
+      localStorage.removeItem('isLive')
+    }
   }
 
   const formatDuration = (seconds: number) => {

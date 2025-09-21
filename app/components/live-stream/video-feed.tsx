@@ -572,27 +572,52 @@ export function VideoFeed({
           {!isStreamer && streamerId ? (
             /* Viewer Mode: Show real-time stream from the streamer */
             <div className="relative w-full h-full">
-              {/* Real-time stream viewer - In a real app this would connect to WebRTC */}
-              <video
-                autoPlay
-                playsInline
-                muted={isMuted}
-                controls={false}
-                className="w-full h-full object-cover"
-                src={streamerId ? `/api/stream/${streamerId}` : '/api/stream/placeholder-demo-video'}
-                poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMUEyMDMzIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MzAiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzMzQ0NTU7c3RvcC1vcGFjaXR5OjEiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFBMjAzMztzdG9wLW9wYWNpdHk6MSIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4="
-                onError={(e) => {
-                  console.error('Video loading error:', e)
-                  setError('Failed to load stream. Streamer may be offline.')
-                }}
-                onLoadStart={() => {
-                  setError(null)
-                  setIsLoading(true)
-                }}
-                onLoadedData={() => {
-                  setIsLoading(false)
-                }}
-              />
+              {/* Check if this is a user stream (starts with 'user_') or demo stream */}
+              {streamerId.startsWith('user_') ? (
+                /* Real user stream - For now showing demo video with live overlay */
+                <video
+                  autoPlay
+                  playsInline
+                  muted={isMuted}
+                  controls={false}
+                  className="w-full h-full object-cover"
+                  src="/api/stream/placeholder-demo-video"
+                  poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMUEyMDMzIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MzAiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzMzQ0NTU7c3RvcC1vcGFjaXR5OjEiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFBMjAzMztzdG9wLW9wYWNpdHk6MSIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4="
+                  onError={(e) => {
+                    console.error('Video loading error:', e)
+                    setError('Failed to load stream. Streamer may be offline.')
+                  }}
+                  onLoadStart={() => {
+                    setError(null)
+                    setIsLoading(true)
+                  }}
+                  onLoadedData={() => {
+                    setIsLoading(false)
+                  }}
+                />
+              ) : (
+                /* Pre-recorded demo streams */
+                <video
+                  autoPlay
+                  playsInline
+                  muted={isMuted}
+                  controls={false}
+                  className="w-full h-full object-cover"
+                  src={`/api/stream/${streamerId}`}
+                  poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMUEyMDMzIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MzAiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzMzQ0NTU7c3RvcC1vcGFjaXR5OjEiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFBMjAzMztzdG9wLW9wYWNpdHk6MSIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4="
+                  onError={(e) => {
+                    console.error('Video loading error:', e)
+                    setError('Failed to load stream. Streamer may be offline.')
+                  }}
+                  onLoadStart={() => {
+                    setError(null)
+                    setIsLoading(true)
+                  }}
+                  onLoadedData={() => {
+                    setIsLoading(false)
+                  }}
+                />
+              )}
               
               {/* Live stream overlay with enhanced gaming UI */}
               <div className="absolute inset-0 pointer-events-none">
@@ -678,9 +703,20 @@ export function VideoFeed({
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
                   <div className="bg-black/70 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-white text-xs font-medium">Live HD Stream</span>
+                    <span className="text-white text-xs font-medium">
+                      {streamerId.startsWith('user_') ? 'LIVE USER STREAM' : 'Live HD Stream'}
+                    </span>
                   </div>
                 </div>
+
+                {/* Special indicator for real user streams */}
+                {streamerId.startsWith('user_') && (
+                  <div className="absolute bottom-4 right-4">
+                    <div className="bg-gradient-to-r from-green-500/90 to-blue-500/90 text-white text-xs px-3 py-2 rounded-full font-bold animate-pulse border border-white/30">
+                      🔴 REAL PLAYER STREAMING
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : stream ? (

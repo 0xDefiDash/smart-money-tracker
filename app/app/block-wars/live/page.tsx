@@ -69,88 +69,91 @@ export default function BlockWarsLivePage() {
   const { data: session, status } = useSession() || {}
   const router = useRouter()
   
-  const [activeStreamers] = useState<Streamer[]>([
-    {
-      id: 'streamer_1',
-      name: 'CryptoKing',
-      username: '@cryptoking_bw',
-      avatar: '👑',
-      followers: 15420,
-      isLive: true,
-      streamTitle: '🔥 Going for Top 10 Leaderboard! Epic Block Hunt!',
-      gameLevel: 47,
-      totalBlocks: 156,
-      monthlyEarnings: 45000,
-      rank: 3,
-      badges: ['🏆 Top 10', '💎 Legendary Hunter', '🚀 Early Adopter'],
-      isVerified: true,
-      viewerCount: 1247,
-      likes: 892,
-      startTime: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
-      category: 'Block Hunting'
-    },
-    {
-      id: 'streamer_2',
-      name: 'BlockBeast',
-      username: '@blockbeast_live',
-      avatar: '🐉',
-      followers: 8930,
-      isLive: true,
-      streamTitle: 'Secret Block Farming Strategy - 500k+ Monthly!',
-      gameLevel: 32,
-      totalBlocks: 89,
-      monthlyEarnings: 28000,
-      rank: 12,
-      badges: ['🎯 Strategy Master', '💰 Money Maker'],
-      isVerified: false,
-      viewerCount: 634,
-      likes: 445,
-      startTime: Date.now() - (45 * 60 * 1000), // 45 minutes ago
-      category: 'Strategy'
-    },
-    {
-      id: 'streamer_3',
-      name: 'WhaleStalker',
-      username: '@whalestalker_bw',
-      avatar: '🐋',
-      followers: 23100,
-      isLive: true,
-      streamTitle: '🎮 Live PvP Battles - Stealing Legendary Blocks!',
-      gameLevel: 61,
-      totalBlocks: 203,
-      monthlyEarnings: 72000,
-      rank: 1,
-      badges: ['👑 #1 Player', '⚔️ PvP Champion', '🔥 Unstoppable'],
-      isVerified: true,
-      viewerCount: 2156,
-      likes: 1834,
-      startTime: Date.now() - (3.5 * 60 * 60 * 1000), // 3.5 hours ago
-      category: 'PvP Battle'
-    },
-    {
-      id: 'streamer_4',
-      name: 'DefidashQueen',
-      username: '@defidash_queen',
-      avatar: '👸',
-      followers: 11750,
-      isLive: true,
-      streamTitle: 'Teaching Newbies - From Zero to Hero Guide!',
-      gameLevel: 28,
-      totalBlocks: 67,
-      monthlyEarnings: 18500,
-      rank: 25,
-      badges: ['🎓 Teacher', '💎 Community Hero'],
-      isVerified: true,
-      viewerCount: 389,
-      likes: 312,
-      startTime: Date.now() - (1.2 * 60 * 60 * 1000), // 1.2 hours ago
-      category: 'Tutorial'
-    }
-  ])
+  const [activeStreamers, setActiveStreamers] = useState<Streamer[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const [selectedStreamer, setSelectedStreamer] = useState<Streamer>(activeStreamers[0])
+  // Fetch live streams from the API
+  const fetchLiveStreams = async () => {
+    try {
+      const response = await fetch('/api/stream/live-streams')
+      const data = await response.json()
+      
+      if (data.streams && data.streams.length > 0) {
+        // Convert API streams to Streamer format
+        const liveStreamers = data.streams.map((stream: any, index: number) => ({
+          id: stream.streamerId,
+          name: stream.name,
+          username: stream.username,
+          avatar: stream.avatar,
+          followers: stream.followers || Math.floor(Math.random() * 10000) + 1000,
+          isLive: true,
+          streamTitle: stream.streamTitle,
+          gameLevel: stream.gameLevel || Math.floor(Math.random() * 50) + 1,
+          totalBlocks: stream.totalBlocks || Math.floor(Math.random() * 200) + 50,
+          monthlyEarnings: Math.floor(Math.random() * 50000) + 10000,
+          rank: stream.rank || Math.floor(Math.random() * 100) + 1,
+          badges: ['🎮 Live Streamer', '⚡ Real-time'],
+          isVerified: stream.isVerified || false,
+          viewerCount: Math.floor(Math.random() * 1000) + 10,
+          likes: Math.floor(Math.random() * 500) + 5,
+          startTime: stream.startTime,
+          category: stream.category || 'Gaming'
+        }))
+        
+        setActiveStreamers(liveStreamers)
+      } else {
+        // Fallback to demo streamers if no live streams
+        setActiveStreamers([
+          {
+            id: 'demo_1',
+            name: 'Demo Streamer',
+            username: '@demo_user',
+            avatar: '🎮',
+            followers: 5420,
+            isLive: true,
+            streamTitle: '🎬 Demo Stream - Join the Fun!',
+            gameLevel: 25,
+            totalBlocks: 76,
+            monthlyEarnings: 15000,
+            rank: 15,
+            badges: ['🎬 Demo', '👋 Welcome'],
+            isVerified: false,
+            viewerCount: 127,
+            likes: 89,
+            startTime: Date.now() - (30 * 60 * 1000), // 30 minutes ago
+            category: 'Demo'
+          }
+        ])
+      }
+    } catch (error) {
+      console.error('Error fetching live streams:', error)
+      // Fallback to demo data on error
+      setActiveStreamers([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Fetch streams on component mount and set up polling
+  useEffect(() => {
+    fetchLiveStreams()
+    
+    // Poll for new streams every 10 seconds
+    const interval = setInterval(fetchLiveStreams, 10000)
+    
+    return () => clearInterval(interval)
+  }, [])
+
+  const [selectedStreamer, setSelectedStreamer] = useState<Streamer | null>(null)
   const [followedStreamers, setFollowedStreamers] = useState<string[]>([])
   const [likedStreams, setLikedStreams] = useState<string[]>([])
+
+  // Update selected streamer when activeStreamers changes
+  useEffect(() => {
+    if (activeStreamers.length > 0 && !selectedStreamer) {
+      setSelectedStreamer(activeStreamers[0])
+    }
+  }, [activeStreamers, selectedStreamer])
 
   const handleFollow = (streamerId: string) => {
     setFollowedStreamers(prev => 
@@ -189,6 +192,79 @@ export default function BlockWarsLivePage() {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-tech-gradient flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <h3 className="text-xl font-bold text-white">Loading Live Streams...</h3>
+          <p className="text-muted-foreground">Finding active Block Wars players</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeStreamers.length === 0) {
+    return (
+      <div className="min-h-screen bg-tech-gradient p-2 sm:p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <Card className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500/30 glow-red">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center glow-hover flex-shrink-0">
+                    <Radio className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate">
+                      Block Wars Live
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground truncate">No active streams right now</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => router.push('/block-wars/go-live')}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-4 py-2 sm:px-6 sm:py-3"
+                >
+                  <Radio className="w-4 h-4 mr-2" />
+                  Go Live
+                </Button>
+              </div>
+            </CardHeader>
+          </Card>
+          
+          {/* No streams message */}
+          <Card className="bg-slate-900/80 border-slate-700/50">
+            <CardContent className="p-12 text-center space-y-6">
+              <div className="w-24 h-24 bg-gradient-to-br from-gray-500/20 to-gray-600/20 rounded-full flex items-center justify-center mx-auto">
+                <Radio className="w-12 h-12 text-gray-400" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-white">No Live Streams</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  No Block Wars players are currently streaming. Be the first to go live and showcase your epic gameplay!
+                </p>
+              </div>
+              <Button
+                onClick={() => router.push('/block-wars/go-live')}
+                size="lg"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 py-3"
+              >
+                <Radio className="w-5 h-5 mr-2" />
+                Start Your Stream
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  if (!selectedStreamer) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-tech-gradient p-2 sm:p-4">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
@@ -213,7 +289,7 @@ export default function BlockWarsLivePage() {
                   <div className="text-xs sm:text-sm text-muted-foreground">Live Streamers</div>
                 </div>
                 <Button
-                  onClick={() => router.push('/block-wars/stream')}
+                  onClick={() => router.push('/block-wars/go-live')}
                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-4 py-2 sm:px-6 sm:py-3"
                 >
                   <Radio className="w-4 h-4 mr-2" />
