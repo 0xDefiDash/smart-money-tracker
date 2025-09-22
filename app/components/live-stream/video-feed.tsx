@@ -215,6 +215,32 @@ export function VideoFeed({
     }
   }, [autoStart, isStreamer])
 
+  // Listen for stream events from the go-live page
+  useEffect(() => {
+    if (isStreamer) {
+      const handleGoLive = (event: any) => {
+        const { streamerId: newStreamerId } = event.detail
+        console.log('Received go live event for streamer:', newStreamerId)
+        if (!stream) {
+          startDesktopCapture()
+        }
+      }
+
+      const handleStreamEnd = (event: any) => {
+        console.log('Received stream end event')
+        stopVideo()
+      }
+
+      window.addEventListener('streamGoLive', handleGoLive)
+      window.addEventListener('streamEnd', handleStreamEnd)
+
+      return () => {
+        window.removeEventListener('streamGoLive', handleGoLive)
+        window.removeEventListener('streamEnd', handleStreamEnd)
+      }
+    }
+  }, [isStreamer, stream])
+
   // For viewers: Connect to live stream when component mounts
   useEffect(() => {
     if (!isStreamer && streamerId && videoRef.current) {
@@ -311,13 +337,37 @@ export function VideoFeed({
       setIsStreaming(true)
       setError(null)
       
-      // If this is a streamer, register the stream in the bridge
+      // If this is a streamer, register the stream in the bridge AND API
       if (isStreamer && streamerId) {
         const success = registerLiveStream(streamerId, newStream, {
           name: 'Live Streamer',
           quality: streamQuality,
           startTime: Date.now()
         })
+        
+        // Also register in the API for persistence
+        const apiData = {
+          streamerId: streamerId,
+          streamData: {
+            name: 'Live Player',
+            username: `@player_${streamerId.slice(0, 6)}`,
+            avatar: '🎮',
+            isLive: true,
+            streamTitle: '🔴 LIVE: Desktop Camera Stream',
+            category: 'Gaming',
+            gameLevel: Math.floor(Math.random() * 50) + 1,
+            totalBlocks: Math.floor(Math.random() * 200) + 50,
+            quality: streamQuality,
+            isVerified: false,
+            startTime: Date.now()
+          }
+        }
+
+        fetch('/api/stream/live-streams', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(apiData)
+        }).catch(err => console.error('Failed to register stream in API:', err))
         
         if (success) {
           console.log('Stream registered successfully for broadcasting')
@@ -440,6 +490,13 @@ export function VideoFeed({
       // Unregister from bridge if streamer
       if (isStreamer && streamerId) {
         stopLiveStream(streamerId)
+        
+        // Also remove from API
+        fetch('/api/stream/live-streams', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ streamerId })
+        }).catch(err => console.error('Failed to unregister stream from API:', err))
       }
     }
     if (videoRef.current) {

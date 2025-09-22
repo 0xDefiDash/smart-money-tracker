@@ -32,6 +32,7 @@ import { ViewersList } from '@/components/live-stream/viewers-list'
 import { VideoFeed } from '@/components/live-stream/video-feed'
 import { StreamManager } from '@/components/live-stream/stream-manager'
 import { cn } from '@/lib/utils'
+import { getAllLiveStreams } from '@/lib/stream-bridge'
 
 interface Streamer {
   id: string
@@ -72,34 +73,81 @@ export default function BlockWarsLivePage() {
   const [activeStreamers, setActiveStreamers] = useState<Streamer[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch live streams from the API
+  // Fetch live streams from both API and stream bridge
   const fetchLiveStreams = async () => {
     try {
+      // Get streams from API
       const response = await fetch('/api/stream/live-streams')
-      const data = await response.json()
+      const apiData = await response.json()
       
-      if (data.streams && data.streams.length > 0) {
-        // Convert API streams to Streamer format
-        const liveStreamers = data.streams.map((stream: any, index: number) => ({
-          id: stream.streamerId,
-          name: stream.name,
-          username: stream.username,
-          avatar: stream.avatar,
-          followers: stream.followers || Math.floor(Math.random() * 10000) + 1000,
-          isLive: true,
-          streamTitle: stream.streamTitle,
-          gameLevel: stream.gameLevel || Math.floor(Math.random() * 50) + 1,
-          totalBlocks: stream.totalBlocks || Math.floor(Math.random() * 200) + 50,
-          monthlyEarnings: Math.floor(Math.random() * 50000) + 10000,
-          rank: stream.rank || Math.floor(Math.random() * 100) + 1,
-          badges: ['🎮 Live Streamer', '⚡ Real-time'],
-          isVerified: stream.isVerified || false,
-          viewerCount: Math.floor(Math.random() * 1000) + 10,
-          likes: Math.floor(Math.random() * 500) + 5,
-          startTime: stream.startTime,
-          category: stream.category || 'Gaming'
-        }))
+      // Get active streams from bridge
+      const bridgeStreams = getAllLiveStreams()
+      console.log('Bridge streams:', bridgeStreams)
+      console.log('API streams:', apiData)
+      
+      const allStreamers: Streamer[] = []
+      
+      // Process API streams and merge with bridge data
+      if (apiData.streams && apiData.streams.length > 0) {
+        const liveStreamers = apiData.streams.map((stream: any) => {
+          // Find corresponding bridge stream for real-time data
+          const bridgeStream = bridgeStreams.find(b => b.streamerId === stream.streamerId)
+          const isActivelyStreaming = bridgeStream?.metadata?.isLive || false
+          
+          return {
+            id: stream.streamerId,
+            name: stream.name || 'Live Player',
+            username: stream.username || `@player_${stream.streamerId.slice(0, 6)}`,
+            avatar: stream.avatar || '🎮',
+            followers: stream.followers || Math.floor(Math.random() * 10000) + 1000,
+            isLive: isActivelyStreaming,
+            streamTitle: stream.streamTitle || '🔴 LIVE: Desktop Camera Stream',
+            gameLevel: stream.gameLevel || Math.floor(Math.random() * 50) + 1,
+            totalBlocks: stream.totalBlocks || Math.floor(Math.random() * 200) + 50,
+            monthlyEarnings: Math.floor(Math.random() * 50000) + 10000,
+            rank: stream.rank || Math.floor(Math.random() * 100) + 1,
+            badges: ['🎮 Live Streamer', '⚡ Real-time'],
+            isVerified: stream.isVerified || false,
+            viewerCount: bridgeStream?.viewerCount || Math.floor(Math.random() * 100) + 5,
+            likes: Math.floor(Math.random() * 500) + 5,
+            startTime: stream.startTime || Date.now(),
+            category: stream.category || 'Gaming'
+          }
+        })
         
+        allStreamers.push(...liveStreamers)
+      }
+      
+      // Add bridge-only streams (streams not yet in API)
+      bridgeStreams.forEach(bridgeStream => {
+        const existsInApi = allStreamers.find(s => s.id === bridgeStream.streamerId)
+        if (!existsInApi) {
+          allStreamers.push({
+            id: bridgeStream.streamerId,
+            name: bridgeStream.metadata?.name || 'Live Player',
+            username: `@player_${bridgeStream.streamerId.slice(0, 6)}`,
+            avatar: '🎮',
+            followers: Math.floor(Math.random() * 10000) + 1000,
+            isLive: true,
+            streamTitle: '🔴 LIVE: Desktop Camera Stream',
+            gameLevel: Math.floor(Math.random() * 50) + 1,
+            totalBlocks: Math.floor(Math.random() * 200) + 50,
+            monthlyEarnings: Math.floor(Math.random() * 50000) + 10000,
+            rank: Math.floor(Math.random() * 100) + 1,
+            badges: ['🎮 Live Streamer', '⚡ Real-time'],
+            isVerified: false,
+            viewerCount: bridgeStream.viewerCount,
+            likes: Math.floor(Math.random() * 500) + 5,
+            startTime: bridgeStream.metadata?.startTime || Date.now(),
+            category: 'Gaming'
+          })
+        }
+      })
+      
+      // Filter to only show actually live streams
+      const liveStreamers = allStreamers.filter(s => s.isLive)
+      
+      if (liveStreamers.length > 0) {
         setActiveStreamers(liveStreamers)
       } else {
         // Fallback to demo streamers if no live streams
@@ -127,8 +175,37 @@ export default function BlockWarsLivePage() {
       }
     } catch (error) {
       console.error('Error fetching live streams:', error)
-      // Fallback to demo data on error
-      setActiveStreamers([])
+      // Try to get just bridge streams as fallback
+      try {
+        const bridgeStreams = getAllLiveStreams()
+        if (bridgeStreams.length > 0) {
+          const fallbackStreamers = bridgeStreams.map(bridgeStream => ({
+            id: bridgeStream.streamerId,
+            name: bridgeStream.metadata?.name || 'Live Player',
+            username: `@player_${bridgeStream.streamerId.slice(0, 6)}`,
+            avatar: '🎮',
+            followers: Math.floor(Math.random() * 10000) + 1000,
+            isLive: true,
+            streamTitle: '🔴 LIVE: Desktop Camera Stream',
+            gameLevel: Math.floor(Math.random() * 50) + 1,
+            totalBlocks: Math.floor(Math.random() * 200) + 50,
+            monthlyEarnings: Math.floor(Math.random() * 50000) + 10000,
+            rank: Math.floor(Math.random() * 100) + 1,
+            badges: ['🎮 Live Streamer', '⚡ Real-time'],
+            isVerified: false,
+            viewerCount: bridgeStream.viewerCount,
+            likes: Math.floor(Math.random() * 500) + 5,
+            startTime: bridgeStream.metadata?.startTime || Date.now(),
+            category: 'Gaming'
+          }))
+          setActiveStreamers(fallbackStreamers)
+        } else {
+          setActiveStreamers([])
+        }
+      } catch (bridgeError) {
+        console.error('Error fetching bridge streams:', bridgeError)
+        setActiveStreamers([])
+      }
     } finally {
       setIsLoading(false)
     }
@@ -353,9 +430,11 @@ export default function BlockWarsLivePage() {
                   <div className="relative">
                     {/* Live Video Feed Component */}
                     <div className="relative">
-                      <StreamManager 
+                      <VideoFeed 
                         isStreamer={false}
                         streamerId={selectedStreamer.id}
+                        showControls={false}
+                        autoStart={true}
                         className="border-0"
                       />
                       
