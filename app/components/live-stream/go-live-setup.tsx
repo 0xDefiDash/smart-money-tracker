@@ -284,45 +284,79 @@ export function GoLiveSetup({
           </CardContent>
         </Card>
 
-        {/* Go Live Button */}
-        <Card className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-500/30">
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">Ready to Go Live?</h3>
-                <p className="text-muted-foreground">
-                  Make sure your camera and microphone are working properly
-                </p>
-              </div>
-              
-              <Button
-                onClick={onGoLive}
-                disabled={!streamSettings.title || !streamSettings.category || isLive}
-                size="lg"
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 py-3 w-full"
-              >
-                {isLive ? (
-                  <>
-                    <Radio className="w-5 h-5 mr-2 animate-pulse" />
-                    You're Live!
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-5 h-5 mr-2" />
-                    Start Streaming
-                  </>
-                )}
-              </Button>
-
-              {(!streamSettings.title || !streamSettings.category) && (
-                <div className="flex items-center space-x-2 text-sm text-yellow-400">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>Please fill in the required fields above</span>
+        {/* Go Live Button / Stream Status */}
+        {!isLive ? (
+          <Card className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-500/30">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold">Ready to Go Live?</h3>
+                  <p className="text-muted-foreground">
+                    Make sure your camera and microphone are working properly
+                  </p>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                
+                <Button
+                  onClick={onGoLive}
+                  disabled={!streamSettings.title || !streamSettings.category}
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 py-3 w-full"
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  Start Streaming
+                </Button>
+
+                {(!streamSettings.title || !streamSettings.category) && (
+                  <div className="flex items-center space-x-2 text-sm text-yellow-400">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Please fill in the required fields above</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500/30">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                    <h3 className="text-xl font-bold text-red-400">You're Live!</h3>
+                  </div>
+                  <p className="text-muted-foreground">
+                    Your stream is now broadcasting. You can end it anytime from the controls below.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="bg-black/20 rounded-lg p-3">
+                    <div className="text-sm text-muted-foreground mb-1">Stream Title</div>
+                    <div className="font-semibold">{streamSettings.title}</div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => {
+                      // Confirm before ending
+                      if (confirm('Are you sure you want to end your live stream? This action cannot be undone.')) {
+                        // Dispatch event to notify video feed and other components
+                        window.dispatchEvent(new CustomEvent('streamEnd', { 
+                          detail: { streamerId: localStreamerId } 
+                        }))
+                      }
+                    }}
+                    variant="destructive"
+                    size="lg"
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3 w-full"
+                  >
+                    <Radio className="w-5 h-5 mr-2" />
+                    End Live Stream
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Camera Preview */}

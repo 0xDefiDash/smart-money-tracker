@@ -30,7 +30,8 @@ import {
   Download,
   Play,
   Pause,
-  Users
+  Users,
+  Square
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { 
@@ -1056,49 +1057,87 @@ export function VideoFeed({
           </div>
         )}
 
-        {/* Detailed Controls - Only for streamers with active stream */}
+        {/* Stream Control Section - Only for streamers with active stream */}
         {showControls && stream && isStreamer && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-            <Button
-              onClick={toggleVideo}
-              variant={isVideoEnabled ? "default" : "outline"}
-              size="sm"
-              className="flex items-center space-x-2"
-            >
-              {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
-              <span className="text-xs">{isVideoEnabled ? 'Video On' : 'Video Off'}</span>
-            </Button>
+          <div className="space-y-4">
+            {/* Prominent End Stream Button */}
+            <Card className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                      <Radio className="w-5 h-5 text-red-400 animate-pulse" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-red-400">You're Live!</h3>
+                      <p className="text-sm text-muted-foreground">Broadcasting to {viewerCount} viewers</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      // Confirm before ending stream
+                      if (confirm('Are you sure you want to end your live stream?')) {
+                        stopVideo()
+                        // Dispatch event to notify other components
+                        window.dispatchEvent(new CustomEvent('streamEnd', { 
+                          detail: { streamerId } 
+                        }))
+                      }
+                    }}
+                    variant="destructive"
+                    size="lg"
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2"
+                  >
+                    <Square className="w-4 h-4 mr-2" />
+                    End Stream
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-            <Button
-              onClick={toggleAudio}
-              variant={isAudioEnabled ? "default" : "outline"}
-              size="sm"
-              className="flex items-center space-x-2"
-            >
-              {isAudioEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-              <span className="text-xs">{isAudioEnabled ? 'Mic On' : 'Mic Off'}</span>
-            </Button>
+            {/* Detailed Controls */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              <Button
+                onClick={toggleVideo}
+                variant={isVideoEnabled ? "default" : "outline"}
+                size="sm"
+                className="flex items-center space-x-2"
+              >
+                {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+                <span className="text-xs">{isVideoEnabled ? 'Video On' : 'Video Off'}</span>
+              </Button>
 
-            <Button
-              onClick={refreshStream}
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-2"
-              disabled={isLoading}
-            >
-              <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-              <span className="text-xs">Refresh</span>
-            </Button>
+              <Button
+                onClick={toggleAudio}
+                variant={isAudioEnabled ? "default" : "outline"}
+                size="sm"
+                className="flex items-center space-x-2"
+              >
+                {isAudioEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                <span className="text-xs">{isAudioEnabled ? 'Mic On' : 'Mic Off'}</span>
+              </Button>
 
-            <Button
-              onClick={stopVideo}
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-2 text-red-400 hover:text-red-300"
-            >
-              <CameraOff className="w-4 h-4" />
-              <span className="text-xs">Stop</span>
-            </Button>
+              <Button
+                onClick={refreshStream}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2"
+                disabled={isLoading}
+              >
+                <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+                <span className="text-xs">Refresh</span>
+              </Button>
+
+              <Button
+                onClick={stopVideo}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2 text-red-400 hover:text-red-300"
+              >
+                <CameraOff className="w-4 h-4" />
+                <span className="text-xs">Stop Camera</span>
+              </Button>
+            </div>
           </div>
         )}
 
