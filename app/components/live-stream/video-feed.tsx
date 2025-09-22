@@ -1,5 +1,4 @@
 
-
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
@@ -30,9 +29,17 @@ import {
   Upload,
   Download,
   Play,
-  Pause
+  Pause,
+  Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { 
+  registerLiveStream, 
+  stopLiveStream, 
+  connectToLiveStream, 
+  disconnectFromLiveStream,
+  getLiveStreamStatus 
+} from '@/lib/stream-bridge'
 
 interface VideoFeedProps {
   isStreamer?: boolean
@@ -64,6 +71,7 @@ export function VideoFeed({
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false)
+  const [isConnected, setIsConnected] = useState(false)
   const [streamQuality, setStreamQuality] = useState<'480p' | '720p' | '1080p'>('720p')
   const [permissions, setPermissions] = useState({
     camera: 'prompt',
@@ -89,6 +97,7 @@ export function VideoFeed({
     focus: 60
   })
   const [isPaused, setIsPaused] = useState(false)
+  const [viewerCount, setViewerCount] = useState(0)
 
   // Detect device type and capabilities
   useEffect(() => {
@@ -206,6 +215,42 @@ export function VideoFeed({
     }
   }, [autoStart, isStreamer])
 
+  // For viewers: Connect to live stream when component mounts
+  useEffect(() => {
+    if (!isStreamer && streamerId && videoRef.current) {
+      setIsLoading(true)
+      const connected = connectToLiveStream(streamerId, videoRef.current)
+      if (connected) {
+        setIsConnected(true)
+        setError(null)
+        console.log('Connected to live stream:', streamerId)
+      } else {
+        setError('Live stream not available. Streamer may not be broadcasting.')
+        console.log('Failed to connect to live stream:', streamerId)
+      }
+      setIsLoading(false)
+
+      // Cleanup on unmount
+      return () => {
+        if (videoRef.current) {
+          disconnectFromLiveStream(streamerId, videoRef.current)
+        }
+      }
+    }
+  }, [isStreamer, streamerId])
+
+  // Monitor viewer count for streamers
+  useEffect(() => {
+    if (isStreamer && streamerId) {
+      const interval = setInterval(() => {
+        const status = getLiveStreamStatus(streamerId)
+        setViewerCount(status.viewerCount)
+      }, 2000)
+
+      return () => clearInterval(interval)
+    }
+  }, [isStreamer, streamerId])
+
   const getQualityConstraints = (quality: string) => {
     switch (quality) {
       case '1080p':
@@ -266,9 +311,19 @@ export function VideoFeed({
       setIsStreaming(true)
       setError(null)
       
-      // If this is a streamer, also start sending the stream to the server
-      if (isStreamer) {
-        await startStreamBroadcast(newStream)
+      // If this is a streamer, register the stream in the bridge
+      if (isStreamer && streamerId) {
+        const success = registerLiveStream(streamerId, newStream, {
+          name: 'Live Streamer',
+          quality: streamQuality,
+          startTime: Date.now()
+        })
+        
+        if (success) {
+          console.log('Stream registered successfully for broadcasting')
+        } else {
+          console.error('Failed to register stream for broadcasting')
+        }
       }
     } catch (err: any) {
       console.error('Failed to start desktop capture:', err)
@@ -358,41 +413,19 @@ export function VideoFeed({
         setError('Screen sharing ended')
       }
       
-      if (isStreamer) {
-        await startStreamBroadcast(screenStream)
+      // If this is a streamer, register the stream in the bridge
+      if (isStreamer && streamerId) {
+        registerLiveStream(streamerId, screenStream, {
+          name: 'Screen Share',
+          quality: streamQuality,
+          startTime: Date.now()
+        })
       }
     } catch (err: any) {
       console.error('Failed to start screen share:', err)
       setError(`Screen sharing error: ${err.message || 'Failed to capture screen'}`)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const startStreamBroadcast = async (mediaStream: MediaStream) => {
-    try {
-      // In a real implementation, this would send the stream to a WebRTC server
-      // For now, we'll simulate the broadcast
-      console.log('Starting stream broadcast for streamer mode...')
-      
-      // Simulate sending stream data to server
-      const streamData = {
-        streamerId: 'current-user-id',
-        quality: streamQuality,
-        hasVideo: mediaStream.getVideoTracks().length > 0,
-        hasAudio: mediaStream.getAudioTracks().length > 0,
-        timestamp: Date.now()
-      }
-      
-      // In a real app, you would send this to your streaming server
-      // await fetch('/api/stream/start', {
-      //   method: 'POST',
-      //   body: JSON.stringify(streamData)
-      // })
-      
-      console.log('Stream broadcast started:', streamData)
-    } catch (err) {
-      console.error('Failed to start stream broadcast:', err)
     }
   }
 
@@ -403,6 +436,11 @@ export function VideoFeed({
       })
       setStream(null)
       setIsStreaming(false)
+      
+      // Unregister from bridge if streamer
+      if (isStreamer && streamerId) {
+        stopLiveStream(streamerId)
+      }
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null
@@ -527,20 +565,41 @@ export function VideoFeed({
   }
 
   const refreshStream = async () => {
-    stopVideo()
-    setTimeout(() => {
-      if (isVideoEnabled || isAudioEnabled) {
-        startDesktopCapture()
-      }
-    }, 100)
+    if (!isStreamer && streamerId && videoRef.current) {
+      // For viewers: reconnect to stream
+      disconnectFromLiveStream(streamerId, videoRef.current)
+      setTimeout(() => {
+        if (videoRef.current) {
+          const connected = connectToLiveStream(streamerId, videoRef.current)
+          setIsConnected(connected)
+          if (!connected) {
+            setError('Unable to connect to live stream')
+          } else {
+            setError(null)
+          }
+        }
+      }, 100)
+    } else {
+      // For streamers: restart their own stream
+      stopVideo()
+      setTimeout(() => {
+        if (isVideoEnabled || isAudioEnabled) {
+          startDesktopCapture()
+        }
+      }, 100)
+    }
   }
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      stopVideo()
+      if (isStreamer && streamerId) {
+        stopVideo()
+      } else if (!isStreamer && streamerId && videoRef.current) {
+        disconnectFromLiveStream(streamerId, videoRef.current)
+      }
     }
-  }, [])
+  }, [isStreamer, streamerId])
 
   return (
     <Card className={cn("bg-slate-900/80 border-slate-700/50", className)}>
@@ -555,10 +614,15 @@ export function VideoFeed({
               </Badge>
             </CardTitle>
             <div className="flex items-center space-x-2">
-              {isStreaming && (
+              {(isStreaming || isConnected) && (
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1"></div>
                   LIVE
+                </Badge>
+              )}
+              {isStreamer && viewerCount > 0 && (
+                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                  {viewerCount} viewers
                 </Badge>
               )}
               {permissions.camera === 'granted' && (
@@ -580,178 +644,119 @@ export function VideoFeed({
                 ref={videoRef}
                 autoPlay
                 playsInline
-                loop
                 muted={false} // Set to false initially to allow audio
                 controls={false}
                 className="w-full h-full object-cover bg-slate-800"
-                onLoadStart={() => {
-                  console.log('Video loading started for streamerId:', streamerId)
-                  setError(null)
-                  setIsLoading(true)
-                }}
                 onLoadedMetadata={() => {
-                  console.log('Video metadata loaded')
+                  console.log('Live stream connected and ready to play')
                   setIsLoading(false)
-                  // Try to play the video
-                  if (videoRef.current) {
-                    videoRef.current.play().catch(e => {
-                      console.log('Autoplay failed, user interaction required:', e)
-                      // This is normal - browsers prevent autoplay without user interaction
-                    })
-                  }
-                }}
-                onLoadedData={() => {
-                  console.log('Video data loaded')
-                  setIsLoading(false)
-                }}
-                onCanPlay={() => {
-                  console.log('Video can play')
-                  setIsLoading(false)
+                  setIsConnected(true)
                 }}
                 onPlay={() => {
-                  console.log('Video started playing')
+                  console.log('Live stream started playing')
                   setIsLoading(false)
+                  setIsConnected(true)
                 }}
                 onError={(e) => {
-                  const videoElement = e.target as HTMLVideoElement
-                  console.error('Video loading error:', {
-                    error: videoElement.error,
-                    networkState: videoElement.networkState,
-                    readyState: videoElement.readyState,
-                    src: videoElement.src
-                  })
-                  setError(`Failed to load video stream. Error: ${videoElement.error?.message || 'Unknown error'}`)
+                  console.error('Live stream error:', e)
+                  setError('Failed to connect to live stream')
                   setIsLoading(false)
-                }}
-                onStalled={() => {
-                  console.warn('Video stalled')
-                }}
-                onWaiting={() => {
-                  console.log('Video waiting for data')
-                  setIsLoading(true)
-                }}
-                onEmptied={() => {
-                  console.log('Video emptied')
-                }}
-                onAbort={() => {
-                  console.log('Video loading aborted')
+                  setIsConnected(false)
                 }}
               >
-                {/* Multiple source fallbacks */}
-                <source 
-                  src={streamerId.startsWith('user_') ? "/api/stream/placeholder-demo-video" : `/api/stream/${streamerId}`} 
-                  type="video/mp4" 
-                />
-                <source 
-                  src="/api/stream/direct/51bc0967-834a-4440-ba3c-8c17d3ce43ab_0780159e12e96b0a676be5a09c7b20fa.mp4" 
-                  type="video/mp4" 
-                />
-                <source 
-                  src="/videos/51bc0967-834a-4440-ba3c-8c17d3ce43ab_0780159e12e96b0a676be5a09c7b20fa.mp4" 
-                  type="video/mp4" 
-                />
                 Your browser does not support the video tag.
               </video>
               
-              {/* Live stream overlay with enhanced gaming UI */}
-              <div className="absolute inset-0 pointer-events-none">
-                {/* Real-time gaming stats overlay */}
-                <div className="absolute top-4 right-4 space-y-2">
-                  <div className="bg-green-500/90 text-white text-xs px-3 py-1 rounded-full font-bold animate-pulse">
-                    +{gameStats.xp} XP
+              {/* Live stream overlay with enhanced gaming UI - only show if connected */}
+              {isConnected && (
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Real-time gaming stats overlay */}
+                  <div className="absolute top-4 right-4 space-y-2">
+                    <div className="bg-green-500/90 text-white text-xs px-3 py-1 rounded-full font-bold animate-pulse">
+                      +{gameStats.xp} XP
+                    </div>
+                    <div className="bg-yellow-500/90 text-black text-xs px-3 py-1 rounded-full font-bold">
+                      Block Mined! 💎
+                    </div>
                   </div>
-                  <div className="bg-yellow-500/90 text-black text-xs px-3 py-1 rounded-full font-bold">
-                    Block Mined! 💎
+                  
+                  <div className="absolute bottom-20 left-4 space-y-2">
+                    <div className="bg-purple-500/90 text-white text-xs px-3 py-1 rounded-full font-bold animate-bounce">
+                      Epic Battle! ⚔️
+                    </div>
+                    <div className="bg-blue-500/90 text-white text-xs px-3 py-1 rounded-full font-bold">
+                      Strategy Mode
+                    </div>
                   </div>
-                </div>
-                
-                <div className="absolute bottom-20 left-4 space-y-2">
-                  <div className="bg-purple-500/90 text-white text-xs px-3 py-1 rounded-full font-bold animate-bounce">
-                    Epic Battle! ⚔️
-                  </div>
-                  <div className="bg-blue-500/90 text-white text-xs px-3 py-1 rounded-full font-bold">
-                    Strategy Mode
-                  </div>
-                </div>
 
-                {/* Player health/energy bars */}
-                <div className="absolute top-6 left-6 space-y-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
-                      <div 
-                        className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-500 animate-pulse"
-                        style={{ width: `${Math.max(0, Math.min(100, gameStats.health))}%` }}
-                      ></div>
+                  {/* Player health/energy bars */}
+                  <div className="absolute top-6 left-6 space-y-2">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
+                        <div 
+                          className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-500 animate-pulse"
+                          style={{ width: `${Math.max(0, Math.min(100, gameStats.health))}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-white font-bold drop-shadow-lg">Health</span>
                     </div>
-                    <span className="text-xs text-white font-bold drop-shadow-lg">Health</span>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
+                        <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300"
+                          style={{ width: `${Math.max(0, Math.min(100, gameStats.energy))}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-white font-bold drop-shadow-lg">Energy</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
+                        <div 
+                          className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-700"
+                          style={{ width: `${Math.max(0, Math.min(100, gameStats.focus))}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-white font-bold drop-shadow-lg">Focus</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
-                      <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300"
-                        style={{ width: `${Math.max(0, Math.min(100, gameStats.energy))}%` }}
-                      ></div>
+
+                  {/* Combat indicators */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="bg-black/70 backdrop-blur-sm rounded-xl px-6 py-4 text-center border border-red-500/30">
+                      <div className="flex items-center justify-center space-x-3 mb-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="text-red-400 font-bold text-lg">LIVE PLAYER</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-yellow-400">Blocks: </span>
+                          <span className="text-white font-bold">{gameStats.blocks}</span>
+                        </div>
+                        <div>
+                          <span className="text-blue-400">Level: </span>
+                          <span className="text-white font-bold">{gameStats.level}</span>
+                        </div>
+                        <div>
+                          <span className="text-green-400">Wins: </span>
+                          <span className="text-white font-bold">{gameStats.wins}</span>
+                        </div>
+                        <div>
+                          <span className="text-purple-400">Rank: </span>
+                          <span className="text-white font-bold">#{gameStats.rank}</span>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-xs text-white font-bold drop-shadow-lg">Energy</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-20 h-3 bg-gray-800/90 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600">
-                      <div 
-                        className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-700"
-                        style={{ width: `${Math.max(0, Math.min(100, gameStats.focus))}%` }}
-                      ></div>
+
+                  {/* Stream quality indicator for viewers */}
+                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-black/70 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-white text-xs font-medium">LIVE DESKTOP STREAM</span>
                     </div>
-                    <span className="text-xs text-white font-bold drop-shadow-lg">Focus</span>
                   </div>
                 </div>
-
-                {/* Combat indicators */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <div className="bg-black/70 backdrop-blur-sm rounded-xl px-6 py-4 text-center border border-red-500/30">
-                    <div className="flex items-center justify-center space-x-3 mb-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-red-400 font-bold text-lg">LIVE GAMEPLAY</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-yellow-400">Blocks: </span>
-                        <span className="text-white font-bold">{gameStats.blocks}</span>
-                      </div>
-                      <div>
-                        <span className="text-blue-400">Level: </span>
-                        <span className="text-white font-bold">{gameStats.level}</span>
-                      </div>
-                      <div>
-                        <span className="text-green-400">Wins: </span>
-                        <span className="text-white font-bold">{gameStats.wins}</span>
-                      </div>
-                      <div>
-                        <span className="text-purple-400">Rank: </span>
-                        <span className="text-white font-bold">#{gameStats.rank}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stream quality indicator for viewers */}
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-black/70 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-white text-xs font-medium">
-                      {streamerId.startsWith('user_') ? 'LIVE USER STREAM' : 'Live HD Stream'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Special indicator for real user streams */}
-                {streamerId.startsWith('user_') && (
-                  <div className="absolute bottom-4 right-4">
-                    <div className="bg-gradient-to-r from-green-500/90 to-blue-500/90 text-white text-xs px-3 py-2 rounded-full font-bold animate-pulse border border-white/30">
-                      🔴 REAL PLAYER STREAMING
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
 
               {/* Video Controls for Viewers - always show basic controls */}
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
@@ -794,11 +799,7 @@ export function VideoFeed({
                   <Button
                     size="sm"
                     variant="secondary"
-                    onClick={() => {
-                      if (videoRef.current) {
-                        videoRef.current.load() // Reload the video
-                      }
-                    }}
+                    onClick={refreshStream}
                     className="bg-black/60 hover:bg-black/80 text-white h-8 w-8 p-0"
                   >
                     <RefreshCw className="w-4 h-4" />
@@ -821,12 +822,22 @@ export function VideoFeed({
               <div className="absolute top-4 right-4">
                 <Badge className="bg-red-500/90 text-white text-xs px-3 py-1 animate-pulse">
                   <Radio className="w-3 h-3 mr-1" />
-                  STREAMING LIVE
+                  BROADCASTING LIVE
                 </Badge>
               </div>
               
+              {/* Viewer count */}
+              {viewerCount > 0 && (
+                <div className="absolute top-4 left-4">
+                  <Badge className="bg-blue-500/90 text-white text-xs px-3 py-1">
+                    <Users className="w-3 h-3 mr-1" />
+                    {viewerCount} watching
+                  </Badge>
+                </div>
+              )}
+              
               {/* Stream quality indicator */}
-              <div className="absolute top-4 left-4">
+              <div className="absolute bottom-20 right-4">
                 <Badge className="bg-black/70 text-white text-xs px-2 py-1">
                   {streamQuality.toUpperCase()}
                 </Badge>
@@ -847,12 +858,33 @@ export function VideoFeed({
                 </div>
                 <div>
                   <p className="font-semibold text-gray-400">
-                    {isLoading ? 'Starting Camera...' : error ? 'Camera Error' : isStreamer ? 'Camera Ready' : 'Waiting for Stream'}
+                    {isLoading 
+                      ? (isStreamer ? 'Starting Camera...' : 'Connecting to Live Stream...') 
+                      : error 
+                      ? 'Connection Error' 
+                      : isStreamer 
+                      ? 'Camera Ready' 
+                      : 'Waiting for Stream'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {error || (isLoading ? 'Please wait...' : isStreamer ? 'Click buttons below to start streaming' : 'Stream will appear here when live')}
+                    {error || (isLoading 
+                      ? 'Please wait...' 
+                      : isStreamer 
+                      ? 'Click buttons below to start streaming' 
+                      : 'Streamer is not currently broadcasting')}
                   </p>
                 </div>
+                {!isStreamer && !isLoading && (
+                  <Button
+                    onClick={refreshStream}
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Try Again
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -925,7 +957,7 @@ export function VideoFeed({
                 <div>
                   <div className="font-semibold text-sm">Desktop Camera</div>
                   <div className="text-xs text-muted-foreground">
-                    {stream && deviceType === 'desktop' ? 'Active' : 'Start Webcam'}
+                    {stream && deviceType === 'desktop' ? 'Broadcasting' : 'Start Webcam'}
                   </div>
                 </div>
               </Button>
@@ -1044,7 +1076,7 @@ export function VideoFeed({
               <div className="flex justify-between">
                 <span>Stream Status:</span>
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                  Broadcasting
+                  Broadcasting to {viewerCount} viewers
                 </Badge>
               </div>
             )}
@@ -1052,15 +1084,30 @@ export function VideoFeed({
         )}
 
         {/* Viewer Info - Show streaming quality info for viewers */}
-        {!isStreamer && streamerId && (
+        {!isStreamer && streamerId && isConnected && (
           <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-lg p-4">
             <div className="flex items-center justify-center space-x-3">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-green-400 font-semibold">Watching Live Stream</span>
+              <span className="text-green-400 font-semibold">Connected to Live Stream</span>
             </div>
             <div className="text-center mt-2">
               <p className="text-sm text-muted-foreground">
-                HD Quality • Real-time Block Wars Action
+                Real-time desktop camera feed • HD Quality
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Connection Failed Info for viewers */}
+        {!isStreamer && streamerId && !isConnected && !isLoading && (
+          <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-lg p-4">
+            <div className="flex items-center justify-center space-x-3">
+              <AlertCircle className="w-4 h-4 text-red-400" />
+              <span className="text-red-400 font-semibold">Stream Not Available</span>
+            </div>
+            <div className="text-center mt-2">
+              <p className="text-sm text-muted-foreground">
+                The streamer is not currently broadcasting. Please try again later.
               </p>
             </div>
           </div>

@@ -71,6 +71,7 @@ export default function GoLivePage() {
   const [streamKey, setStreamKey] = useState('')
   const [activeTab, setActiveTab] = useState('setup')
   const [previewMode, setPreviewMode] = useState(false)
+  const [currentStreamerId, setCurrentStreamerId] = useState('')
   
   // Mock user stats
   const [userStats] = useState<UserStats>({
@@ -108,10 +109,12 @@ export default function GoLivePage() {
     // Generate stream key
     setStreamKey(`stream_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
     
-    // If user is already live, show dashboard
+    // If user is already live, show dashboard and restore stream ID
     const savedStreamState = localStorage.getItem('isLive')
-    if (savedStreamState === 'true') {
+    const savedStreamerId = localStorage.getItem('currentStreamerId')
+    if (savedStreamState === 'true' && savedStreamerId) {
       setIsLive(true)
+      setCurrentStreamerId(savedStreamerId)
       setActiveTab('dashboard')
       startStreamStatsSimulation()
     }
@@ -144,7 +147,7 @@ export default function GoLivePage() {
     }
 
     try {
-      // Register the stream with the live streams API
+      // Generate a consistent streamer ID for this session
       const streamerId = `user_${session?.user?.email?.split('@')[0] || 'anonymous'}_${Date.now()}`
       const streamData = {
         name: session?.user?.name || 'Anonymous Streamer',
@@ -162,7 +165,8 @@ export default function GoLivePage() {
         gameLevel: userStats.level,
         totalBlocks: userStats.totalBlocks,
         rank: userStats.rank,
-        isVerified: false
+        isVerified: false,
+        startTime: Date.now()
       }
 
       const response = await fetch('/api/stream/live-streams', {
@@ -175,11 +179,13 @@ export default function GoLivePage() {
         throw new Error('Failed to register stream')
       }
 
-      // Store the streamer ID for later cleanup
+      // Store the streamer ID for later cleanup and cross-page access
       localStorage.setItem('currentStreamerId', streamerId)
       localStorage.setItem('isLive', 'true')
+      localStorage.setItem('streamData', JSON.stringify(streamData))
 
       setIsLive(true)
+      setCurrentStreamerId(streamerId)
       setActiveTab('dashboard')
       
       // Initialize stream stats
@@ -195,6 +201,11 @@ export default function GoLivePage() {
       startStreamStatsSimulation()
       
       console.log('Successfully went live with stream ID:', streamerId)
+      
+      // Notify that we're going live (this will be used by the VideoFeed component)
+      window.dispatchEvent(new CustomEvent('streamGoLive', { 
+        detail: { streamerId, streamData } 
+      }))
     } catch (error) {
       console.error('Failed to go live:', error)
       alert('Failed to start stream. Please try again.')
@@ -204,23 +215,30 @@ export default function GoLivePage() {
   const handleEndStream = async () => {
     try {
       // Unregister the stream from the live streams API
-      const currentStreamerId = localStorage.getItem('currentStreamerId')
-      if (currentStreamerId) {
+      const streamerId = currentStreamerId || localStorage.getItem('currentStreamerId')
+      if (streamerId) {
         const response = await fetch('/api/stream/live-streams', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ streamerId: currentStreamerId })
+          body: JSON.stringify({ streamerId })
         })
 
         if (!response.ok) {
           console.error('Failed to unregister stream')
         }
+
+        // Notify that stream is ending
+        window.dispatchEvent(new CustomEvent('streamEnd', { 
+          detail: { streamerId } 
+        }))
       }
 
       localStorage.removeItem('currentStreamerId')
       localStorage.removeItem('isLive')
+      localStorage.removeItem('streamData')
 
       setIsLive(false)
+      setCurrentStreamerId('')
       setActiveTab('setup')
       
       // Reset stream stats
@@ -238,9 +256,11 @@ export default function GoLivePage() {
       console.error('Failed to end stream:', error)
       // Still end the local stream even if API call fails
       setIsLive(false)
+      setCurrentStreamerId('')
       setActiveTab('setup')
       localStorage.removeItem('currentStreamerId')
       localStorage.removeItem('isLive')
+      localStorage.removeItem('streamData')
     }
   }
 
@@ -466,6 +486,7 @@ export default function GoLivePage() {
               streamSettings={streamSettings}
               setStreamSettings={setStreamSettings}
               streamKey={streamKey}
+              streamerId={currentStreamerId}
               onGoLive={handleGoLive}
               isLive={isLive}
             />
