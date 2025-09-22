@@ -7,7 +7,7 @@ import { MobileHeader } from '@/components/layout/mobile-header'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as HotToaster } from 'react-hot-toast'
-import { DefidashAgent } from '@/components/chat/defidash-agent'
+import { EnhancedDefidashAgent } from '@/components/chat/enhanced-defidash-agent'
 import { RollingBanner } from '@/components/ui/rolling-banner'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { WalletProvider } from '@/contexts/WalletContext'
@@ -86,8 +86,8 @@ export default function RootLayout({
           </div>
           <Toaster />
           <HotToaster position="top-right" />
-          {/* Defidash Agent Chat */}
-          <DefidashAgent />
+          {/* Enhanced Defidash Agent Chat */}
+          <EnhancedDefidashAgent />
         </ThemeProvider>
           </WalletProvider>
         </AuthProvider>
