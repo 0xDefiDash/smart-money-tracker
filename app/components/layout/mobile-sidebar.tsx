@@ -16,7 +16,9 @@ import {
   Target,
   Rocket,
   Globe,
-  Gamepad2
+  Gamepad2,
+  Radio,
+  Video
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 
@@ -32,14 +34,19 @@ const sidebarItems = [
     icon: Gamepad2,
   },
   {
+    title: 'Block Wars Live',
+    href: '/block-wars/live',
+    icon: Radio,
+  },
+  {
+    title: 'Go Live',
+    href: '/block-wars/go-live',
+    icon: Video,
+  },
+  {
     title: 'Block Wars Players Guide',
     href: '/block-wars-guide',
     icon: Target,
-  },
-  {
-    title: 'Live Market',
-    href: '/market',
-    icon: TrendingUp,
   },
   {
     title: 'Token Charts',

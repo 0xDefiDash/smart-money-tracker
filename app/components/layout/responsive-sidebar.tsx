@@ -18,7 +18,8 @@ import {
   Rocket,
   Gamepad2,
   Radio,
-  Video
+  Video,
+  Globe
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 
@@ -73,7 +74,11 @@ const sidebarItems = [
     href: '/bonkfun',
     icon: Rocket,
   },
-
+  {
+    title: 'ZORA Tracker',
+    href: '/zora',
+    icon: Globe,
+  },
   {
     title: 'Wallet Analytics',
     href: '/wallet',

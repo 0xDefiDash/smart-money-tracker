@@ -16,7 +16,8 @@ import {
   Rocket,
   Gamepad2,
   Radio,
-  Video
+  Video,
+  Globe
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -46,6 +47,11 @@ const sidebarItems = [
     icon: Target,
   },
   {
+    title: 'Token Charts',
+    href: '/token-charts',
+    icon: TrendingUp,
+  },
+  {
     title: 'Whale Tracker',
     href: '/whale-tracker',
     icon: Activity,
@@ -66,9 +72,19 @@ const sidebarItems = [
     icon: Rocket,
   },
   {
-    title: 'Wallet Monitor',
-    href: '/wallet-monitor',
+    title: 'ZORA Tracker',
+    href: '/zora',
+    icon: Globe,
+  },
+  {
+    title: 'Wallet Analytics',
+    href: '/wallet',
     icon: Wallet,
+  },
+  {
+    title: 'Wallet Dashboard',
+    href: '/wallet-dashboard',
+    icon: Activity,
   },
 ]
 
