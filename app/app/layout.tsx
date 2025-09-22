@@ -39,14 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link 
-          rel="stylesheet" 
-          href="https://cdn.jsdelivr.net/gh/loomlayorg/widget-public@latest/chat.css"
-        />
-        <script 
-          src="https://cdn.jsdelivr.net/gh/loomlayorg/widget-public@latest/chat.min.js"
-          async
-        />
+        {/* Removed legacy Loomlay scripts as we now use the new AI-powered chat widget */}
       </head>
       <body className={inter.className}>
         <AuthProvider>

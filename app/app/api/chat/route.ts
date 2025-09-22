@@ -11,10 +11,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Fetch real-time market context
+    // Fetch real-time market context with timeout and error handling
     let marketContext = '';
     try {
-      const marketResponse = await fetch(`${request.nextUrl.origin}/api/market-context?type=all`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const marketResponse = await fetch(`${request.nextUrl.origin}/api/market-context?type=all`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
       if (marketResponse.ok) {
         const marketData = await marketResponse.json();
         marketContext = `
@@ -44,6 +51,11 @@ Last Updated: ${new Date().toLocaleTimeString()}`;
       }
     } catch (error) {
       console.error('Failed to fetch market context:', error);
+      // Continue without market context - the AI can still function
+      marketContext = `
+
+## Market Context:
+*Real-time market data is temporarily unavailable. I can still help with platform features and general crypto knowledge.*`;
     }
 
     // Build context-aware system prompt
