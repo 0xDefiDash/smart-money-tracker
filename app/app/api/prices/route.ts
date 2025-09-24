@@ -1,4 +1,5 @@
 
+
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get search params
     const { searchParams } = new URL(request.url);
-    const symbols = searchParams.get('symbols') || 'bitcoin,ethereum,cardano,solana,binancecoin,tether,usd-coin,the-open-network,sui,avalanche-2';
+    const symbols = searchParams.get('symbols') || 'bitcoin,ethereum,cardano,solana,binancecoin,tether,usd-coin,ripple,dogecoin,chainlink,avalanche-2,sui';
     
     // CoinGecko API to get current prices with timeout and retry logic
     const controller = new AbortController();
@@ -57,97 +58,115 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching prices:', error);
     
-    // Enhanced fallback data for September 24, 2025
+    // Updated fallback data with current September 24, 2025 prices
     const fallbackData = [
       { 
         id: 'bitcoin', 
         symbol: 'BTC',
-        price: 66750, 
-        change_24h: 2.8, 
-        change_1h: 0.5,
-        market_cap: 1318000000000, 
-        volume_24h: 28900000000 
+        price: 111438, 
+        change_24h: -0.69, 
+        change_1h: 0.2,
+        market_cap: 2221083498980, 
+        volume_24h: 43118128985 
       },
       { 
         id: 'ethereum', 
         symbol: 'ETH',
-        price: 2650, 
-        change_24h: 1.9, 
-        change_1h: 0.4,
-        market_cap: 318500000000, 
-        volume_24h: 15200000000 
+        price: 4101.94, 
+        change_24h: -1.79, 
+        change_1h: 0.1,
+        market_cap: 495001372321, 
+        volume_24h: 28252237841 
       },
       { 
         id: 'tether', 
         symbol: 'USDT',
         price: 1.000, 
-        change_24h: -0.01, 
+        change_24h: -0.05, 
         change_1h: 0.001,
-        market_cap: 120800000000, 
-        volume_24h: 45000000000 
+        market_cap: 172794458855, 
+        volume_24h: 97274819129 
       },
       { 
-        id: 'solana', 
-        symbol: 'SOL',
-        price: 152.30, 
-        change_24h: 4.7, 
-        change_1h: 0.8,
-        market_cap: 71200000000, 
-        volume_24h: 3200000000 
+        id: 'ripple', 
+        symbol: 'XRP',
+        price: 2.81, 
+        change_24h: -1.42, 
+        change_1h: 0.3,
+        market_cap: 167971672795, 
+        volume_24h: 5209407199 
       },
       { 
         id: 'binancecoin', 
         symbol: 'BNB',
-        price: 610, 
-        change_24h: 1.8, 
-        change_1h: 0.3,
-        market_cap: 88500000000, 
-        volume_24h: 2100000000 
+        price: 1002.14, 
+        change_24h: 2.13, 
+        change_1h: 0.5,
+        market_cap: 139491668263, 
+        volume_24h: 2956351116 
+      },
+      { 
+        id: 'solana', 
+        symbol: 'SOL',
+        price: 206.37, 
+        change_24h: -4.49, 
+        change_1h: -0.2,
+        market_cap: 112153522612, 
+        volume_24h: 6491536237 
       },
       { 
         id: 'usd-coin', 
         symbol: 'USDC',
-        price: 0.999, 
-        change_24h: 0.01, 
+        price: 0.9997, 
+        change_24h: -0.001, 
         change_1h: 0.001,
-        market_cap: 33800000000, 
-        volume_24h: 6200000000 
+        market_cap: 73954679236, 
+        volume_24h: 9504798023 
       },
       { 
-        id: 'the-open-network', 
-        symbol: 'TON',
-        price: 6.12, 
-        change_24h: 5.6, 
-        change_1h: 1.2,
-        market_cap: 15600000000, 
-        volume_24h: 320000000 
-      },
-      { 
-        id: 'sui', 
-        symbol: 'SUI',
-        price: 1.95, 
-        change_24h: 8.9, 
-        change_1h: 2.1,
-        market_cap: 5420000000, 
-        volume_24h: 520000000 
+        id: 'dogecoin', 
+        symbol: 'DOGE',
+        price: 0.234053, 
+        change_24h: -2.56, 
+        change_1h: -0.1,
+        market_cap: 35248733509, 
+        volume_24h: 2716430172 
       },
       { 
         id: 'cardano', 
         symbol: 'ADA',
-        price: 0.382, 
-        change_24h: 2.4, 
-        change_1h: 0.6,
-        market_cap: 13400000000, 
-        volume_24h: 340000000 
+        price: 0.798089, 
+        change_24h: -2.70, 
+        change_1h: -0.3,
+        market_cap: 29144771183, 
+        volume_24h: 1429660809 
+      },
+      { 
+        id: 'chainlink', 
+        symbol: 'LINK',
+        price: 21.21, 
+        change_24h: -1.34, 
+        change_1h: 0.2,
+        market_cap: 14349079962, 
+        volume_24h: 784885948 
       },
       { 
         id: 'avalanche-2', 
         symbol: 'AVAX',
-        price: 28.75, 
-        change_24h: 3.8, 
-        change_1h: 0.9,
-        market_cap: 11850000000, 
-        volume_24h: 398000000 
+        price: 33.32, 
+        change_24h: -3.92, 
+        change_1h: -0.1,
+        market_cap: 14052988678, 
+        volume_24h: 1745972080 
+      },
+      { 
+        id: 'sui', 
+        symbol: 'SUI',
+        price: 3.28, 
+        change_24h: -2.42, 
+        change_1h: 0.1,
+        market_cap: 11647688958, 
+        volume_24h: 1050212609 
       }
     ];
 
@@ -166,13 +185,15 @@ function getSymbolFromId(id: string): string {
     'bitcoin': 'BTC',
     'ethereum': 'ETH',
     'tether': 'USDT',
-    'solana': 'SOL',
+    'ripple': 'XRP',
     'binancecoin': 'BNB',
+    'solana': 'SOL',
     'usd-coin': 'USDC',
-    'the-open-network': 'TON',
-    'sui': 'SUI',
+    'dogecoin': 'DOGE',
     'cardano': 'ADA',
-    'avalanche-2': 'AVAX'
+    'chainlink': 'LINK',
+    'avalanche-2': 'AVAX',
+    'sui': 'SUI'
   };
   return symbolMap[id] || id.toUpperCase();
 }

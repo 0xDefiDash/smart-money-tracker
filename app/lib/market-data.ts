@@ -87,92 +87,92 @@ export const getTopCryptos = async (): Promise<MarketData[]> => {
     { 
       symbol: 'BTC', 
       name: 'Bitcoin',
-      price: 66750, 
-      change24h: 2.8, 
-      change7d: 5.2,
-      volume24h: 28900000000, 
-      marketCap: 1318000000000,
+      price: 111438, 
+      change24h: -0.69, 
+      change7d: -2.1,
+      volume24h: 43118128985, 
+      marketCap: 2221083498980,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 66750 + (Math.random() - 0.5) * 2000,
-        volume: 1200000000 + Math.random() * 500000000
+        price: 111438 + (Math.random() - 0.5) * 3000,
+        volume: 1800000000 + Math.random() * 700000000
       })),
-      supportLevel: 64000,
-      resistanceLevel: 69000,
-      rsi: 61.2,
-      sentiment: 'bullish' as const
+      supportLevel: 108000,
+      resistanceLevel: 115000,
+      rsi: 51.8,
+      sentiment: 'neutral' as const
     },
     { 
       symbol: 'ETH', 
       name: 'Ethereum',
-      price: 2650, 
-      change24h: 1.9, 
-      change7d: 3.8,
-      volume24h: 15200000000, 
-      marketCap: 318500000000,
+      price: 4101.94, 
+      change24h: -1.79, 
+      change7d: 1.2,
+      volume24h: 28252237841, 
+      marketCap: 495001372321,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 2650 + (Math.random() - 0.5) * 150,
-        volume: 630000000 + Math.random() * 200000000
+        price: 4101.94 + (Math.random() - 0.5) * 200,
+        volume: 1180000000 + Math.random() * 400000000
       })),
-      supportLevel: 2500,
-      resistanceLevel: 2800,
-      rsi: 58.7,
-      sentiment: 'bullish' as const
+      supportLevel: 3900,
+      resistanceLevel: 4300,
+      rsi: 48.3,
+      sentiment: 'neutral' as const
     },
     { 
       symbol: 'SOL', 
       name: 'Solana',
-      price: 152.30, 
-      change24h: 4.7, 
-      change7d: 9.1,
-      volume24h: 3200000000, 
-      marketCap: 71200000000,
+      price: 206.37, 
+      change24h: -4.49, 
+      change7d: -2.8,
+      volume24h: 6491536237, 
+      marketCap: 112153522612,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 152.30 + (Math.random() - 0.5) * 20,
-        volume: 133000000 + Math.random() * 50000000
+        price: 206.37 + (Math.random() - 0.5) * 25,
+        volume: 270000000 + Math.random() * 100000000
       })),
-      supportLevel: 145,
-      resistanceLevel: 160,
-      rsi: 68.9,
-      sentiment: 'bullish' as const
+      supportLevel: 195,
+      resistanceLevel: 220,
+      rsi: 42.5,
+      sentiment: 'bearish' as const
     },
     { 
       symbol: 'BNB', 
       name: 'BNB',
-      price: 610, 
-      change24h: 1.8, 
-      change7d: 0.5,
-      volume24h: 2100000000, 
-      marketCap: 88500000000,
+      price: 1002.14, 
+      change24h: 2.13, 
+      change7d: 4.8,
+      volume24h: 2956351116, 
+      marketCap: 139491668263,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 610 + (Math.random() - 0.5) * 40,
-        volume: 87000000 + Math.random() * 25000000
+        price: 1002.14 + (Math.random() - 0.5) * 50,
+        volume: 123000000 + Math.random() * 40000000
       })),
-      supportLevel: 590,
-      resistanceLevel: 630,
-      rsi: 52.8,
-      sentiment: 'neutral' as const
+      supportLevel: 980,
+      resistanceLevel: 1020,
+      rsi: 62.4,
+      sentiment: 'bullish' as const
     },
     { 
       symbol: 'SUI', 
       name: 'Sui',
-      price: 1.95, 
-      change24h: 8.9, 
-      change7d: 15.6,
-      volume24h: 520000000, 
-      marketCap: 5420000000,
+      price: 3.28, 
+      change24h: -2.42, 
+      change7d: 8.5,
+      volume24h: 1050212609, 
+      marketCap: 11647688958,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 1.95 + (Math.random() - 0.5) * 0.3,
-        volume: 21000000 + Math.random() * 10000000
+        price: 3.28 + (Math.random() - 0.5) * 0.4,
+        volume: 43000000 + Math.random() * 20000000
       })),
-      supportLevel: 1.75,
-      resistanceLevel: 2.15,
-      rsi: 74.1,
-      sentiment: 'bullish' as const
+      supportLevel: 3.10,
+      resistanceLevel: 3.50,
+      rsi: 45.7,
+      sentiment: 'neutral' as const
     },
   ];
 };

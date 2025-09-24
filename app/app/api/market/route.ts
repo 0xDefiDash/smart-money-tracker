@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server'
 import { CoinAPIClient, CoinGeckoAPI } from '@/lib/api-clients'
 import { prisma } from '@/lib/db'
@@ -41,20 +42,22 @@ export async function GET(request: Request) {
         dataSource = 'CoinAPI'
       } catch (coinApiError) {
         console.warn('CoinAPI also failed:', coinApiError)
-        // Use fallback data - Updated for September 24, 2025
+        // Use fallback data - Updated with current September 24, 2025 prices
         cryptos = [
-          { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', current_price: 66750, price_change_24h: 1820, price_change_percentage_24h: 2.8, market_cap: 1318000000000, total_volume: 28900000000, market_cap_rank: 1, image: '' },
-          { id: 'ethereum', symbol: 'eth', name: 'Ethereum', current_price: 2650, price_change_percentage_24h: 1.9, price_change_24h: 49.4, market_cap: 318500000000, total_volume: 15200000000, market_cap_rank: 2, image: '' },
-          { id: 'tether', symbol: 'usdt', name: 'Tether', current_price: 1.000, price_change_percentage_24h: -0.01, price_change_24h: -0.0001, market_cap: 120800000000, total_volume: 45000000000, market_cap_rank: 3, image: '' },
-          { id: 'solana', symbol: 'sol', name: 'Solana', current_price: 152.30, price_change_percentage_24h: 4.7, price_change_24h: 6.85, market_cap: 71200000000, total_volume: 3200000000, market_cap_rank: 4, image: '' },
-          { id: 'bnb', symbol: 'bnb', name: 'BNB', current_price: 610, price_change_percentage_24h: 1.8, price_change_24h: 10.8, market_cap: 88500000000, total_volume: 2100000000, market_cap_rank: 5, image: '' },
-          { id: 'the-open-network', symbol: 'ton', name: 'Toncoin', current_price: 6.12, price_change_percentage_24h: 5.6, price_change_24h: 0.324, market_cap: 15600000000, total_volume: 320000000, market_cap_rank: 6, image: '' },
-          { id: 'usd-coin', symbol: 'usdc', name: 'USD Coin', current_price: 0.999, price_change_percentage_24h: 0.01, price_change_24h: 0.0001, market_cap: 33800000000, total_volume: 6200000000, market_cap_rank: 7, image: '' },
-          { id: 'sui', symbol: 'sui', name: 'Sui', current_price: 1.95, price_change_percentage_24h: 8.9, price_change_24h: 0.159, market_cap: 5420000000, total_volume: 520000000, market_cap_rank: 8, image: '' },
-          { id: 'cardano', symbol: 'ada', name: 'Cardano', current_price: 0.382, price_change_percentage_24h: 2.4, price_change_24h: 0.009, market_cap: 13400000000, total_volume: 340000000, market_cap_rank: 9, image: '' },
-          { id: 'avalanche-2', symbol: 'avax', name: 'Avalanche', current_price: 28.75, price_change_percentage_24h: 3.8, price_change_24h: 1.05, market_cap: 11850000000, total_volume: 398000000, market_cap_rank: 10, image: '' }
+          { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', current_price: 111438, price_change_24h: -764.2, price_change_percentage_24h: -0.69, market_cap: 2221083498980, total_volume: 43118128985, market_cap_rank: 1, image: '' },
+          { id: 'ethereum', symbol: 'eth', name: 'Ethereum', current_price: 4101.94, price_change_percentage_24h: -1.79, price_change_24h: -74.7, market_cap: 495001372321, total_volume: 28252237841, market_cap_rank: 2, image: '' },
+          { id: 'tether', symbol: 'usdt', name: 'Tether', current_price: 1.000, price_change_percentage_24h: -0.05, price_change_24h: -0.0005, market_cap: 172794458855, total_volume: 97274819129, market_cap_rank: 3, image: '' },
+          { id: 'ripple', symbol: 'xrp', name: 'XRP', current_price: 2.81, price_change_percentage_24h: -1.42, price_change_24h: -0.04, market_cap: 167971672795, total_volume: 5209407199, market_cap_rank: 4, image: '' },
+          { id: 'binancecoin', symbol: 'bnb', name: 'BNB', current_price: 1002.14, price_change_percentage_24h: 2.13, price_change_24h: 20.9, market_cap: 139491668263, total_volume: 2956351116, market_cap_rank: 5, image: '' },
+          { id: 'solana', symbol: 'sol', name: 'Solana', current_price: 206.37, price_change_percentage_24h: -4.49, price_change_24h: -9.7, market_cap: 112153522612, total_volume: 6491536237, market_cap_rank: 6, image: '' },
+          { id: 'usd-coin', symbol: 'usdc', name: 'USDC', current_price: 0.9997, price_change_percentage_24h: -0.001, price_change_24h: -0.00001, market_cap: 73954679236, total_volume: 9504798023, market_cap_rank: 7, image: '' },
+          { id: 'dogecoin', symbol: 'doge', name: 'Dogecoin', current_price: 0.234053, price_change_percentage_24h: -2.56, price_change_24h: -0.0061, market_cap: 35248733509, total_volume: 2716430172, market_cap_rank: 8, image: '' },
+          { id: 'cardano', symbol: 'ada', name: 'Cardano', current_price: 0.798089, price_change_percentage_24h: -2.70, price_change_24h: -0.0222, market_cap: 29144771183, total_volume: 1429660809, market_cap_rank: 11, image: '' },
+          { id: 'chainlink', symbol: 'link', name: 'Chainlink', current_price: 21.21, price_change_percentage_24h: -1.34, price_change_24h: -0.29, market_cap: 14349079962, total_volume: 784885948, market_cap_rank: 15, image: '' },
+          { id: 'avalanche-2', symbol: 'avax', name: 'Avalanche', current_price: 33.32, price_change_percentage_24h: -3.92, price_change_24h: -1.36, market_cap: 14052988678, total_volume: 1745972080, market_cap_rank: 17, image: '' },
+          { id: 'sui', symbol: 'sui', name: 'Sui', current_price: 3.28, price_change_percentage_24h: -2.42, price_change_24h: -0.081, market_cap: 11647688958, total_volume: 1050212609, market_cap_rank: 20, image: '' }
         ]
-        console.info('Using fallback market data due to API limitations')
+        console.info('Using updated fallback market data with current September 2025 prices')
         dataSource = 'Fallback'
       }
     }

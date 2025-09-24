@@ -1,19 +1,20 @@
 
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  // Enhanced fallback data for September 24, 2025
+  // Updated fallback data with current September 24, 2025 prices
   const fallbackData = [
     { 
       id: 'bitcoin', 
       symbol: 'BTC', 
       name: 'Bitcoin', 
-      current_price: 66750, 
-      price_change_percentage_24h: 2.8, 
-      total_volume: 28900000000, 
-      market_cap: 1318000000000,
+      current_price: 111438, 
+      price_change_percentage_24h: -0.69, 
+      total_volume: 43118128985, 
+      market_cap: 2221083498980,
       image: '', 
       market_cap_rank: 1,
       circulating_supply: 19748000
@@ -22,133 +23,133 @@ export async function GET(request: NextRequest) {
       id: 'ethereum', 
       symbol: 'ETH', 
       name: 'Ethereum', 
-      current_price: 2650, 
-      price_change_percentage_24h: 1.9, 
-      total_volume: 15200000000, 
-      market_cap: 318500000000,
+      current_price: 4101.94, 
+      price_change_percentage_24h: -1.79, 
+      total_volume: 28252237841, 
+      market_cap: 495001372321,
       image: '', 
       market_cap_rank: 2,
-      circulating_supply: 120280000
+      circulating_supply: 120700000
     },
     { 
       id: 'tether', 
       symbol: 'USDT', 
       name: 'Tether', 
       current_price: 1.000, 
-      price_change_percentage_24h: -0.01, 
-      total_volume: 45000000000, 
-      market_cap: 120800000000,
+      price_change_percentage_24h: -0.05, 
+      total_volume: 97274819129, 
+      market_cap: 172794458855,
       image: '', 
       market_cap_rank: 3,
-      circulating_supply: 120800000000
+      circulating_supply: 172794458855
     },
     { 
-      id: 'solana', 
-      symbol: 'SOL', 
-      name: 'Solana', 
-      current_price: 152.30, 
-      price_change_percentage_24h: 4.7, 
-      total_volume: 3200000000, 
-      market_cap: 71200000000,
+      id: 'ripple', 
+      symbol: 'XRP', 
+      name: 'XRP', 
+      current_price: 2.81, 
+      price_change_percentage_24h: -1.42, 
+      total_volume: 5209407199, 
+      market_cap: 167971672795,
       image: '', 
       market_cap_rank: 4,
-      circulating_supply: 467500000
+      circulating_supply: 59800000000
     },
     { 
       id: 'binancecoin', 
       symbol: 'BNB', 
       name: 'BNB', 
-      current_price: 610, 
-      price_change_percentage_24h: 1.8, 
-      total_volume: 2100000000, 
-      market_cap: 88500000000,
+      current_price: 1002.14, 
+      price_change_percentage_24h: 2.13, 
+      total_volume: 2956351116, 
+      market_cap: 139491668263,
       image: '', 
       market_cap_rank: 5,
-      circulating_supply: 145000000
+      circulating_supply: 139200000
+    },
+    { 
+      id: 'solana', 
+      symbol: 'SOL', 
+      name: 'Solana', 
+      current_price: 206.37, 
+      price_change_percentage_24h: -4.49, 
+      total_volume: 6491536237, 
+      market_cap: 112153522612,
+      image: '', 
+      market_cap_rank: 6,
+      circulating_supply: 543600000
     },
     { 
       id: 'usd-coin', 
       symbol: 'USDC', 
-      name: 'USD Coin', 
-      current_price: 0.999, 
-      price_change_percentage_24h: 0.01, 
-      total_volume: 6200000000, 
-      market_cap: 33800000000,
-      image: '', 
-      market_cap_rank: 6,
-      circulating_supply: 33800000000
-    },
-    { 
-      id: 'the-open-network', 
-      symbol: 'TON', 
-      name: 'Toncoin', 
-      current_price: 6.12, 
-      price_change_percentage_24h: 5.6, 
-      total_volume: 320000000, 
-      market_cap: 15600000000,
+      name: 'USDC', 
+      current_price: 0.9997, 
+      price_change_percentage_24h: -0.001, 
+      total_volume: 9504798023, 
+      market_cap: 73954679236,
       image: '', 
       market_cap_rank: 7,
-      circulating_supply: 2550000000
+      circulating_supply: 73954679236
     },
     { 
-      id: 'sui', 
-      symbol: 'SUI', 
-      name: 'Sui', 
-      current_price: 1.95, 
-      price_change_percentage_24h: 8.9, 
-      total_volume: 520000000, 
-      market_cap: 5420000000,
+      id: 'dogecoin', 
+      symbol: 'DOGE', 
+      name: 'Dogecoin', 
+      current_price: 0.234053, 
+      price_change_percentage_24h: -2.56, 
+      total_volume: 2716430172, 
+      market_cap: 35248733509,
       image: '', 
       market_cap_rank: 8,
-      circulating_supply: 2780000000
+      circulating_supply: 150650000000
     },
     { 
       id: 'cardano', 
       symbol: 'ADA', 
       name: 'Cardano', 
-      current_price: 0.382, 
-      price_change_percentage_24h: 2.4, 
-      total_volume: 340000000, 
-      market_cap: 13400000000,
+      current_price: 0.798089, 
+      price_change_percentage_24h: -2.70, 
+      total_volume: 1429660809, 
+      market_cap: 29144771183,
       image: '', 
-      market_cap_rank: 9,
-      circulating_supply: 35070000000
-    },
-    { 
-      id: 'avalanche-2', 
-      symbol: 'AVAX', 
-      name: 'Avalanche', 
-      current_price: 28.75, 
-      price_change_percentage_24h: 3.8, 
-      total_volume: 398000000, 
-      market_cap: 11850000000,
-      image: '', 
-      market_cap_rank: 10,
-      circulating_supply: 412500000
+      market_cap_rank: 11,
+      circulating_supply: 36520000000
     },
     { 
       id: 'chainlink', 
       symbol: 'LINK', 
       name: 'Chainlink', 
-      current_price: 12.45, 
-      price_change_percentage_24h: 6.2, 
-      total_volume: 620000000, 
-      market_cap: 7540000000,
+      current_price: 21.21, 
+      price_change_percentage_24h: -1.34, 
+      total_volume: 784885948, 
+      market_cap: 14349079962,
       image: '', 
-      market_cap_rank: 11,
-      circulating_supply: 604500000
+      market_cap_rank: 15,
+      circulating_supply: 676600000
     },
     { 
-      id: 'polygon-ecosystem-token', 
-      symbol: 'POL', 
-      name: 'Polygon Ecosystem Token', 
-      current_price: 0.435, 
-      price_change_percentage_24h: 1.5, 
-      total_volume: 158000000, 
-      market_cap: 4280000000,
+      id: 'avalanche-2', 
+      symbol: 'AVAX', 
+      name: 'Avalanche', 
+      current_price: 33.32, 
+      price_change_percentage_24h: -3.92, 
+      total_volume: 1745972080, 
+      market_cap: 14052988678,
       image: '', 
-      market_cap_rank: 12,
-      circulating_supply: 9850000000
+      market_cap_rank: 17,
+      circulating_supply: 421800000
+    },
+    { 
+      id: 'sui', 
+      symbol: 'SUI', 
+      name: 'Sui', 
+      current_price: 3.28, 
+      price_change_percentage_24h: -2.42, 
+      total_volume: 1050212609, 
+      market_cap: 11647688958,
+      image: '', 
+      market_cap_rank: 20,
+      circulating_supply: 3550000000
     }
   ];
 
