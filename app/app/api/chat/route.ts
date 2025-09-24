@@ -11,13 +11,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Fetch real-time market context with timeout and error handling
+    // Fetch enhanced real-time market context with timeout and error handling
     let marketContext = '';
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout for enhanced data
       
-      const marketResponse = await fetch(`${request.nextUrl.origin}/api/market-context?type=all`, {
+      const marketResponse = await fetch(`${request.nextUrl.origin}/api/market-context?type=enhanced`, {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -26,36 +26,82 @@ export async function POST(request: NextRequest) {
         const marketData = await marketResponse.json();
         marketContext = `
 
-## Current Market Context (Real-time):
-**Top Cryptocurrencies:**
+## 🚀 ENHANCED MARKET INTELLIGENCE (Real-time):
+
+### 📊 **Top Cryptocurrencies & Technical Analysis:**
 ${marketData.cryptos?.map((crypto: any) => 
-  `- ${crypto.symbol}: ${crypto.price >= 1 ? `$${crypto.price.toLocaleString()}` : `$${crypto.price.toFixed(8)}`} (${crypto.change24h >= 0 ? '+' : ''}${crypto.change24h.toFixed(2)}%)`
-).join('\n') || 'Loading...'}
+  `- **${crypto.name} (${crypto.symbol})**: $${crypto.price >= 1 ? crypto.price.toLocaleString() : crypto.price.toFixed(8)} (${crypto.change24h >= 0 ? '+' : ''}${crypto.change24h.toFixed(2)}% 24h, ${crypto.change7d >= 0 ? '+' : ''}${crypto.change7d?.toFixed(2)}% 7d)
+    • RSI: ${crypto.rsi} | Support: $${crypto.supportLevel?.toLocaleString()} | Resistance: $${crypto.resistanceLevel?.toLocaleString()}
+    • Sentiment: ${crypto.sentiment?.toUpperCase()} | Vol: $${(crypto.volume24h / 1000000000).toFixed(2)}B`
+).join('\n') || 'Loading technical data...'}
 
-**Recent Whale Activity:**
+### 🐋 **Whale Transaction Intelligence:**
 ${marketData.whaleTransactions?.map((tx: any) => 
-  `- ${tx.type.toUpperCase()}: ${tx.value.toLocaleString()} ${tx.token} (${Math.floor((Date.now() - new Date(tx.timestamp).getTime()) / 60000)}m ago)`
-).join('\n') || 'Loading...'}
+  `- **${tx.impact.toUpperCase()} IMPACT**: ${tx.walletLabel || 'Unknown Whale'} ${tx.type.toUpperCase()} $${(tx.usdValue / 1000000).toFixed(2)}M ${tx.token} via ${tx.exchange || 'Unknown'} (${Math.floor((Date.now() - new Date(tx.timestamp).getTime()) / 60000)}m ago)`
+).join('\n') || 'Loading whale data...'}
 
-**Trending Tokens:**
+### 🔥 **Trending Meme/Alt Tokens:**
 ${marketData.trendingTokens?.map((token: any) => 
-  `- ${token.symbol} (${token.platform}): ${token.price >= 1 ? `$${token.price.toFixed(2)}` : `$${token.price.toFixed(8)}`} (+${token.change24h.toFixed(1)}%)`
-).join('\n') || 'Loading...'}
+  `- **${token.name} (${token.symbol})** on ${token.platform}: $${token.price >= 1 ? token.price.toFixed(2) : token.price.toFixed(8)} (${token.change24h >= 0 ? '+' : ''}${token.change24h.toFixed(1)}%)
+    • MCap: $${(token.marketCap / 1000000).toFixed(1)}M | Holders: ${token.holders.toLocaleString()} | Risk: ${token.riskLevel.toUpperCase()} | Social: ${token.socialScore}/10`
+).join('\n') || 'Loading trending tokens...'}
 
-**Market Sentiment:**
-- Fear & Greed Index: ${marketData.marketSentiment?.fearGreedIndex || 'N/A'} (${marketData.marketSentiment?.sentiment || 'N/A'})
-- BTC Dominance: ${marketData.marketSentiment?.dominance?.btc || 'N/A'}%
-- Total Market Cap: $${marketData.marketSentiment?.totalMarketCap ? (marketData.marketSentiment.totalMarketCap / 1000000000000).toFixed(2) + 'T' : 'N/A'}
+### 💹 **DeFi Protocol Performance:**
+${marketData.defiProtocols?.map((protocol: any) => 
+  `- **${protocol.name}** (${protocol.chain}): $${(protocol.tvl / 1000000000).toFixed(2)}B TVL | ${protocol.apy.toFixed(1)}% APY | Risk Score: ${protocol.riskScore}/5 (${protocol.change24h >= 0 ? '+' : ''}${protocol.change24h.toFixed(1)}%)`
+).join('\n') || 'Loading DeFi data...'}
 
-Last Updated: ${new Date().toLocaleTimeString()}`;
+### ⛓️ **On-Chain Metrics:**
+- Active Addresses: ${marketData.onChainMetrics?.activeAddresses?.toLocaleString()}
+- Daily Transactions: ${marketData.onChainMetrics?.transactionCount?.toLocaleString()}
+- Network Hash Rate: ${marketData.onChainMetrics?.networkHashRate ? (marketData.onChainMetrics.networkHashRate / 1000000).toFixed(0) + 'M' : 'N/A'} TH/s
+- Avg Gas Price: ${marketData.onChainMetrics?.gasPrice} gwei
+- DEX Volume: $${marketData.onChainMetrics?.dexVolume ? (marketData.onChainMetrics.dexVolume / 1000000000).toFixed(2) + 'B' : 'N/A'}
+- Bridge Activity: $${marketData.onChainMetrics?.bridgeInflows ? (marketData.onChainMetrics.bridgeInflows / 1000000).toFixed(0) + 'M' : 'N/A'} in, $${marketData.onChainMetrics?.bridgeOutflows ? (marketData.onChainMetrics.bridgeOutflows / 1000000).toFixed(0) + 'M' : 'N/A'} out
+
+### 🤖 **AI Market Insights:**
+${marketData.aiInsights?.map((insight: any) => 
+  `- **${insight.type.toUpperCase()}** (${(insight.confidence * 100).toFixed(0)}% confidence): ${insight.title}
+    ${insight.description} | Timeframe: ${insight.timeframe} | Related: ${insight.relatedTokens.join(', ')}`
+).join('\n') || 'Loading AI insights...'}
+
+### 📈 **Market Sentiment Overview:**
+- **Fear & Greed Index**: ${marketData.marketSentiment?.fearGreedIndex}/100 (${marketData.marketSentiment?.sentiment})
+- **Market Dominance**: BTC ${marketData.marketSentiment?.dominance?.btc}% | ETH ${marketData.marketSentiment?.dominance?.eth}% | Others ${marketData.marketSentiment?.dominance?.others}%
+- **Total Market Cap**: $${marketData.marketSentiment?.totalMarketCap ? (marketData.marketSentiment.totalMarketCap / 1000000000000).toFixed(2) + 'T' : 'N/A'} (${marketData.marketSentiment?.marketCapChange24h >= 0 ? '+' : ''}${marketData.marketSentiment?.marketCapChange24h?.toFixed(1)}% 24h)
+- **24h Volume**: $${marketData.marketSentiment?.totalVolume24h ? (marketData.marketSentiment.totalVolume24h / 1000000000).toFixed(1) + 'B' : 'N/A'}
+- **DeFi TVL**: $${marketData.marketSentiment?.defiTvl ? (marketData.marketSentiment.defiTvl / 1000000000).toFixed(1) + 'B' : 'N/A'}
+- **Altcoin Season**: ${marketData.marketSentiment?.altcoinSeason ? '✅ ACTIVE' : '❌ INACTIVE'}
+
+**Last Updated**: ${new Date().toLocaleTimeString()} | Market Status: ${marketData.marketSentiment?.altcoinSeason ? '🚀 ALTCOIN SEASON' : '🔶 BTC DOMINANCE'}`;
       }
     } catch (error) {
-      console.error('Failed to fetch market context:', error);
-      // Continue without market context - the AI can still function
-      marketContext = `
+      console.error('Failed to fetch enhanced market context:', error);
+      // Fallback to basic market context
+      try {
+        const fallbackResponse = await fetch(`${request.nextUrl.origin}/api/market-context?type=all`);
+        if (fallbackResponse.ok) {
+          const basicData = await fallbackResponse.json();
+          marketContext = `
 
-## Market Context:
-*Real-time market data is temporarily unavailable. I can still help with platform features and general crypto knowledge.*`;
+## 📊 Basic Market Context (Fallback):
+**Top Cryptocurrencies:**
+${basicData.cryptos?.map((crypto: any) => 
+  `- ${crypto.symbol}: $${crypto.price >= 1 ? crypto.price.toLocaleString() : crypto.price.toFixed(8)} (${crypto.change24h >= 0 ? '+' : ''}${crypto.change24h.toFixed(2)}%)`
+).join('\n') || 'Loading...'}
+
+*Enhanced market data temporarily unavailable. I can still provide comprehensive crypto analysis and platform guidance.*`;
+        }
+      } catch (fallbackError) {
+        marketContext = `
+
+## 🤖 AI Mode:
+*Market data feeds temporarily offline. I'm still your expert crypto advisor with deep knowledge of:
+- Technical analysis and trading strategies
+- DeFi protocols and yield opportunities  
+- Smart Money Tracker platform features
+- Risk management and portfolio optimization*`;
+      }
     }
 
     // Build context-aware system prompt

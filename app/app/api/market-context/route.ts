@@ -1,6 +1,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getTopCryptos, getRecentWhaleTransactions, getTrendingTokens, getMarketSentiment } from '@/lib/market-data';
+import { 
+  getTopCryptos, 
+  getRecentWhaleTransactions, 
+  getTrendingTokens, 
+  getMarketSentiment,
+  getDeFiProtocols,
+  getOnChainMetrics,
+  getAIMarketInsights
+} from '@/lib/market-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +33,49 @@ export async function GET(request: NextRequest) {
       case 'market-sentiment':
         const sentiment = await getMarketSentiment();
         return NextResponse.json(sentiment);
+
+      case 'defi-protocols':
+        const defiProtocols = await getDeFiProtocols();
+        return NextResponse.json(defiProtocols);
+
+      case 'onchain-metrics':
+        const onchainMetrics = await getOnChainMetrics();
+        return NextResponse.json(onchainMetrics);
+
+      case 'ai-insights':
+        const aiInsights = await getAIMarketInsights();
+        return NextResponse.json(aiInsights);
+
+      case 'enhanced':
+        // Enhanced data set for AI analysis
+        const [
+          enhancedCryptos, 
+          enhancedWhales, 
+          enhancedTrending, 
+          enhancedSentiment,
+          defiData,
+          onchainData,
+          aiInsightsData
+        ] = await Promise.all([
+          getTopCryptos(),
+          getRecentWhaleTransactions(),
+          getTrendingTokens(),
+          getMarketSentiment(),
+          getDeFiProtocols(),
+          getOnChainMetrics(),
+          getAIMarketInsights()
+        ]);
+
+        return NextResponse.json({
+          cryptos: enhancedCryptos,
+          whaleTransactions: enhancedWhales,
+          trendingTokens: enhancedTrending,
+          marketSentiment: enhancedSentiment,
+          defiProtocols: defiData,
+          onChainMetrics: onchainData,
+          aiInsights: aiInsightsData,
+          lastUpdated: new Date().toISOString()
+        });
 
       case 'all':
       default:

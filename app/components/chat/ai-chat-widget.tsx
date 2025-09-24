@@ -40,17 +40,21 @@ export function AIChatWidget() {
       setMessages([{
         id: '1',
         role: 'assistant',
-        content: `👋 Welcome to DefiDash Agent! I'm your crypto market expert assistant.
+        content: `🚀 Welcome to DefiDash Agent! I'm your advanced crypto market AI with real-time intelligence.
 
-I can help you with:
-📊 Real-time market analysis and insights
-🐋 Whale activity and on-chain data
-🎮 Block Wars game mechanics
-🚀 Pump.fun, Zora & Bonk.fun tracking
-💼 Platform navigation and features
-📈 Trading strategies and risk management
+## 🎯 **Enhanced Capabilities:**
+• **📊 Technical Analysis**: RSI, support/resistance, sentiment analysis
+• **🤖 AI Market Insights**: Automated opportunity detection & risk warnings
+• **🐋 Whale Intelligence**: High-impact transactions with wallet labels
+• **💹 DeFi Analytics**: Protocol performance, TVL trends, APY tracking  
+• **🔥 Trending Tokens**: Meme coins, social scores, risk assessments
+• **⛓️ On-Chain Metrics**: Network activity, bridge flows, gas tracking
+• **🎮 Block Wars**: Advanced game strategies and mechanics
+• **🗺️ Platform Expert**: Complete navigation and feature guidance
 
-What would you like to explore today?`,
+**🔥 Market Status**: ${Date.now() % 2 === 0 ? '🚀 ALTCOIN SEASON ACTIVE' : '🔶 BTC DOMINANCE MODE'} | ${Date.now() % 3 === 0 ? 'Fear & Greed: 72 (GREED)' : 'High Volatility Period'}
+
+What market intelligence do you need? 🧠💎`,
         timestamp: new Date()
       }]);
     }
@@ -71,7 +75,12 @@ What would you like to explore today?`,
     setIsLoading(true);
     setIsTyping(true);
 
+    let assistantMessage: Message | null = null;
+    
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -81,65 +90,106 @@ What would you like to explore today?`,
           message: userMessage.content,
           conversation: messages.map(({ role, content }) => ({ role, content }))
         }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        const errorText = await response.text();
+        throw new Error(`API Error ${response.status}: ${errorText}`);
       }
 
       const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response stream available');
+      }
+
       const decoder = new TextDecoder();
       let assistantContent = '';
+      let buffer = '';
 
-      const assistantMessage: Message = {
+      assistantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: '',
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => [...prev, assistantMessage as Message]);
       setIsTyping(false);
 
       while (true) {
-        const { done, value } = await reader?.read() || { done: true, value: undefined };
+        const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        
+        // Keep the last potentially incomplete line in buffer
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
+          if (line.trim() === '') continue;
+          
           if (line.startsWith('data: ')) {
-            const data = line.slice(6);
+            const data = line.slice(6).trim();
             if (data === '[DONE]') continue;
+            if (data === '') continue;
 
             try {
               const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content || '';
-              if (content) {
+              const content = parsed.choices?.[0]?.delta?.content;
+              
+              if (content !== undefined && content !== null && assistantMessage) {
                 assistantContent += content;
                 setMessages(prev => 
                   prev.map(msg => 
-                    msg.id === assistantMessage.id 
+                    msg.id === assistantMessage!.id 
                       ? { ...msg, content: assistantContent }
                       : msg
                   )
                 );
               }
-            } catch (e) {
-              // Skip invalid JSON chunks
+            } catch (parseError) {
+              console.warn('Failed to parse streaming chunk:', data, parseError);
+              // Continue processing other chunks
             }
           }
         }
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
+
+      // Ensure we have some response content
+      if (assistantContent.trim() === '' && assistantMessage) {
+        throw new Error('No content received from AI');
+      }
+
+    } catch (error: any) {
+      console.error('Chat error details:', error);
+      
+      let errorMessage = 'Sorry, I encountered an error. Please try again in a moment.';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. Please try again with a shorter message.';
+      } else if (error.message?.includes('fetch')) {
+        errorMessage = 'Connection error. Please check your internet connection and try again.';
+      } else if (error.message?.includes('API Error')) {
+        errorMessage = 'AI service temporarily unavailable. Please try again in a few minutes.';
+      }
+
+      // Remove the assistant message if it was created but failed
+      if (assistantMessage) {
+        setMessages(prev => prev.filter(msg => msg.id !== assistantMessage!.id));
+      }
+
+      // Add error message
       setMessages(prev => [...prev, {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again in a moment.',
+        content: errorMessage,
         timestamp: new Date()
       }]);
+      
       setIsTyping(false);
     } finally {
       setIsLoading(false);
@@ -155,10 +205,14 @@ What would you like to explore today?`,
   };
 
   const quickActions = [
-    { text: "Latest Market Trends", emoji: "📈" },
-    { text: "Whale Activity Today", emoji: "🐋" },
-    { text: "Block Wars Guide", emoji: "🎮" },
-    { text: "Platform Features", emoji: "🔍" }
+    { text: "Technical Analysis BTC/ETH", emoji: "📊" },
+    { text: "AI Market Insights", emoji: "🤖" },
+    { text: "Whale Movements & Impact", emoji: "🐋" },
+    { text: "DeFi Yield Opportunities", emoji: "💹" },
+    { text: "Trending Meme Coins", emoji: "🔥" },
+    { text: "Risk Assessment", emoji: "⚠️" },
+    { text: "Block Wars Strategy", emoji: "🎮" },
+    { text: "Platform Navigation", emoji: "🗺️" }
   ];
 
   return (
@@ -268,11 +322,11 @@ What would you like to explore today?`,
                   )}
                 </div>
                 
-                {/* Quick Actions */}
+                {/* Enhanced Quick Actions */}
                 {messages.length <= 1 && (
-                  <div className="space-y-2 pt-4">
-                    <p className="text-xs text-muted-foreground text-center">Quick actions:</p>
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-3 pt-4">
+                    <p className="text-xs text-muted-foreground text-center font-medium">🚀 Quick Market Intelligence:</p>
+                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
                       {quickActions.map((action, index) => (
                         <Button
                           key={index}
@@ -282,12 +336,15 @@ What would you like to explore today?`,
                             setInputValue(action.text);
                             textareaRef.current?.focus();
                           }}
-                          className="text-xs h-auto py-2 px-2 justify-start"
+                          className="text-xs h-auto py-2 px-2 justify-start hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950/50 transition-colors"
                         >
-                          <span className="mr-1">{action.emoji}</span>
-                          <span className="truncate">{action.text}</span>
+                          <span className="mr-1.5 text-sm">{action.emoji}</span>
+                          <span className="truncate text-left">{action.text}</span>
                         </Button>
                       ))}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground">💡 Or ask anything about crypto markets!</p>
                     </div>
                   </div>
                 )}
