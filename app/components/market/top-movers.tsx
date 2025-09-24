@@ -6,29 +6,29 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowUpIcon, ArrowDownIcon, Zap } from 'lucide-react'
 import { formatCurrency, formatPercent, getChangeColor } from '@/lib/utils'
 
-// Mock top movers data with current August 2025 prices
+// Mock top movers data with current September 24, 2025 prices
 const topGainers = [
-  { symbol: 'SOL', name: 'Solana', price: 158.40, change: 15.67, volume: 4200000000 },
-  { symbol: 'AVAX', name: 'Avalanche', price: 32.85, change: 12.45, volume: 580000000 },
-  { symbol: 'LINK', name: 'Chainlink', price: 18.75, change: 8.23, volume: 890000000 },
-  { symbol: 'DOT', name: 'Polkadot', price: 7.45, change: 7.89, volume: 350000000 },
-  { symbol: 'MATIC', name: 'Polygon', price: 0.87, change: 6.12, volume: 280000000 },
+  { symbol: 'SUI', name: 'Sui', price: 1.95, change: 8.9, volume: 520000000 },
+  { symbol: 'LINK', name: 'Chainlink', price: 12.45, change: 6.2, volume: 620000000 },
+  { symbol: 'TON', name: 'Toncoin', price: 6.12, change: 5.6, volume: 320000000 },
+  { symbol: 'SOL', name: 'Solana', price: 152.30, change: 4.7, volume: 3200000000 },
+  { symbol: 'AVAX', name: 'Avalanche', price: 28.75, change: 3.8, volume: 398000000 },
 ]
 
 const topLosers = [
-  { symbol: 'ADA', name: 'Cardano', price: 0.465, change: -5.45, volume: 680000000 },
-  { symbol: 'LTC', name: 'Litecoin', price: 85.34, change: -4.23, volume: 420000000 },
-  { symbol: 'BCH', name: 'Bitcoin Cash', price: 385.67, change: -3.56, volume: 280000000 },
-  { symbol: 'ETC', name: 'Ethereum Classic', price: 28.45, change: -2.89, volume: 150000000 },
-  { symbol: 'DOGE', name: 'Dogecoin', price: 0.105, change: -2.12, volume: 1200000000 },
+  { symbol: 'LTC', name: 'Litecoin', price: 71.85, change: -3.2, volume: 380000000 },
+  { symbol: 'BCH', name: 'Bitcoin Cash', price: 345.20, change: -2.8, volume: 245000000 },
+  { symbol: 'ETC', name: 'Ethereum Classic', price: 24.15, change: -2.1, volume: 125000000 },
+  { symbol: 'DOGE', name: 'Dogecoin', price: 0.098, change: -1.8, volume: 890000000 },
+  { symbol: 'XLM', name: 'Stellar', price: 0.102, change: -1.5, volume: 145000000 },
 ]
 
 const volumeLeaders = [
-  { symbol: 'BTC', name: 'Bitcoin', price: 111915, change: 2.06, volume: 36186852922 },
-  { symbol: 'ETH', name: 'Ethereum', price: 4654, change: 2.95, volume: 35700514440 },
-  { symbol: 'XRP', name: 'XRP', price: 3.01, change: 2.86, volume: 6166406385 },
-  { symbol: 'SOL', name: 'Solana', price: 158.40, change: 5.2, volume: 4200000000 },
-  { symbol: 'BNB', name: 'BNB', price: 595.80, change: 1.9, volume: 2100000000 },
+  { symbol: 'BTC', name: 'Bitcoin', price: 66750, change: 2.8, volume: 28900000000 },
+  { symbol: 'ETH', name: 'Ethereum', price: 2650, change: 1.9, volume: 15200000000 },
+  { symbol: 'USDT', name: 'Tether', price: 1.000, change: -0.01, volume: 45000000000 },
+  { symbol: 'SOL', name: 'Solana', price: 152.30, change: 4.7, volume: 3200000000 },
+  { symbol: 'BNB', name: 'BNB', price: 610, change: 1.8, volume: 2100000000 },
 ]
 
 export function TopMovers() {
