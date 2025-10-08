@@ -6,29 +6,29 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowUpIcon, ArrowDownIcon, Zap } from 'lucide-react'
 import { formatCurrency, formatPercent, getChangeColor } from '@/lib/utils'
 
-// Current market data with September 24, 2025 prices
+// Current market data with October 8, 2025 prices
 const topGainers = [
-  { symbol: 'BNB', name: 'BNB', price: 1002.14, change: 2.13, volume: 2956351116 },
-  { symbol: 'USDC', name: 'USDC', price: 0.9997, change: -0.001, volume: 9504798023 },
-  { symbol: 'XRP', name: 'XRP', price: 2.81, change: -1.42, volume: 5209407199 },
-  { symbol: 'LINK', name: 'Chainlink', price: 21.21, change: -1.34, volume: 784885948 },
-  { symbol: 'TETHER', name: 'Tether', price: 1.000, change: -0.05, volume: 97274819129 },
+  { symbol: 'BNB', name: 'BNB', price: 1274.99, change: 3.85, volume: 10433000157 },
+  { symbol: 'LTC', name: 'Litecoin', price: 117.02, change: -0.97, volume: 712579851 },
+  { symbol: 'BTC', name: 'Bitcoin', price: 121470, change: -2.27, volume: 77457181529 },
+  { symbol: 'XRP', name: 'XRP', price: 2.85, change: -4.56, volume: 7181503772 },
+  { symbol: 'ATOM', name: 'Cosmos', price: 4.03, change: -4.86, volume: 142141870 },
 ]
 
 const topLosers = [
-  { symbol: 'SOL', name: 'Solana', price: 206.37, change: -4.49, volume: 6491536237 },
-  { symbol: 'AVAX', name: 'Avalanche', price: 33.32, change: -3.92, volume: 1745972080 },
-  { symbol: 'ADA', name: 'Cardano', price: 0.798089, change: -2.70, volume: 1429660809 },
-  { symbol: 'DOGE', name: 'Dogecoin', price: 0.234053, change: -2.56, volume: 2716430172 },
-  { symbol: 'SUI', name: 'Sui', price: 3.28, change: -2.42, volume: 1050212609 },
+  { symbol: 'DOGE', name: 'Dogecoin', price: 0.244979, change: -7.99, volume: 3892232080 },
+  { symbol: 'AVAX', name: 'Avalanche', price: 28.01, change: -7.66, volume: 1121049189 },
+  { symbol: 'UNI', name: 'Uniswap', price: 7.74, change: -7.05, volume: 414251170 },
+  { symbol: 'LINK', name: 'Chainlink', price: 21.78, change: -6.77, volume: 1249934980 },
+  { symbol: 'ADA', name: 'Cardano', price: 0.815063, change: -6.19, volume: 1880332688 },
 ]
 
 const volumeLeaders = [
-  { symbol: 'USDT', name: 'Tether', price: 1.000, change: -0.05, volume: 97274819129 },
-  { symbol: 'BTC', name: 'Bitcoin', price: 111438, change: -0.69, volume: 43118128985 },
-  { symbol: 'ETH', name: 'Ethereum', price: 4101.94, change: -1.79, volume: 28252237841 },
-  { symbol: 'USDC', name: 'USDC', price: 0.9997, change: -0.001, volume: 9504798023 },
-  { symbol: 'SOL', name: 'Solana', price: 206.37, change: -4.49, volume: 6491536237 },
+  { symbol: 'BTC', name: 'Bitcoin', price: 121470, change: -2.27, volume: 77457181529 },
+  { symbol: 'ETH', name: 'Ethereum', price: 4442.52, change: -5.21, volume: 51552953255 },
+  { symbol: 'BNB', name: 'BNB', price: 1274.99, change: 3.85, volume: 10433000157 },
+  { symbol: 'SOL', name: 'Solana', price: 219.25, change: -6.02, volume: 9672562305 },
+  { symbol: 'XRP', name: 'XRP', price: 2.85, change: -4.56, volume: 7181503772 },
 ]
 
 export function TopMovers() {

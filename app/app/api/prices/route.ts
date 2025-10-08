@@ -58,115 +58,115 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching prices:', error);
     
-    // Updated fallback data with current September 24, 2025 prices
+    // Updated fallback data with current October 8, 2025 prices
     const fallbackData = [
       { 
         id: 'bitcoin', 
         symbol: 'BTC',
-        price: 111438, 
-        change_24h: -0.69, 
-        change_1h: 0.2,
-        market_cap: 2221083498980, 
-        volume_24h: 43118128985 
+        price: 121470, 
+        change_24h: -2.27, 
+        change_1h: 0.3,
+        market_cap: 2421063383823, 
+        volume_24h: 77457181529 
       },
       { 
         id: 'ethereum', 
         symbol: 'ETH',
-        price: 4101.94, 
-        change_24h: -1.79, 
-        change_1h: 0.1,
-        market_cap: 495001372321, 
-        volume_24h: 28252237841 
-      },
-      { 
-        id: 'tether', 
-        symbol: 'USDT',
-        price: 1.000, 
-        change_24h: -0.05, 
-        change_1h: 0.001,
-        market_cap: 172794458855, 
-        volume_24h: 97274819129 
-      },
-      { 
-        id: 'ripple', 
-        symbol: 'XRP',
-        price: 2.81, 
-        change_24h: -1.42, 
-        change_1h: 0.3,
-        market_cap: 167971672795, 
-        volume_24h: 5209407199 
+        price: 4442.52, 
+        change_24h: -5.21, 
+        change_1h: -0.2,
+        market_cap: 536510427363, 
+        volume_24h: 51552953255 
       },
       { 
         id: 'binancecoin', 
         symbol: 'BNB',
-        price: 1002.14, 
-        change_24h: 2.13, 
-        change_1h: 0.5,
-        market_cap: 139491668263, 
-        volume_24h: 2956351116 
+        price: 1274.99, 
+        change_24h: 3.85, 
+        change_1h: 0.8,
+        market_cap: 177322781508, 
+        volume_24h: 10433000157 
+      },
+      { 
+        id: 'ripple', 
+        symbol: 'XRP',
+        price: 2.85, 
+        change_24h: -4.56, 
+        change_1h: -0.1,
+        market_cap: 170648139474, 
+        volume_24h: 7181503772 
       },
       { 
         id: 'solana', 
         symbol: 'SOL',
-        price: 206.37, 
-        change_24h: -4.49, 
-        change_1h: -0.2,
-        market_cap: 112153522612, 
-        volume_24h: 6491536237 
-      },
-      { 
-        id: 'usd-coin', 
-        symbol: 'USDC',
-        price: 0.9997, 
-        change_24h: -0.001, 
-        change_1h: 0.001,
-        market_cap: 73954679236, 
-        volume_24h: 9504798023 
+        price: 219.25, 
+        change_24h: -6.02, 
+        change_1h: -0.4,
+        market_cap: 119725546634, 
+        volume_24h: 9672562305 
       },
       { 
         id: 'dogecoin', 
         symbol: 'DOGE',
-        price: 0.234053, 
-        change_24h: -2.56, 
-        change_1h: -0.1,
-        market_cap: 35248733509, 
-        volume_24h: 2716430172 
+        price: 0.244979, 
+        change_24h: -7.99, 
+        change_1h: -0.5,
+        market_cap: 37092126612, 
+        volume_24h: 3892232080 
       },
       { 
         id: 'cardano', 
         symbol: 'ADA',
-        price: 0.798089, 
-        change_24h: -2.70, 
-        change_1h: -0.3,
-        market_cap: 29144771183, 
-        volume_24h: 1429660809 
+        price: 0.815063, 
+        change_24h: -6.19, 
+        change_1h: -0.2,
+        market_cap: 29811816998, 
+        volume_24h: 1880332688 
       },
       { 
         id: 'chainlink', 
         symbol: 'LINK',
-        price: 21.21, 
-        change_24h: -1.34, 
-        change_1h: 0.2,
-        market_cap: 14349079962, 
-        volume_24h: 784885948 
+        price: 21.78, 
+        change_24h: -6.77, 
+        change_1h: -0.3,
+        market_cap: 14776675848, 
+        volume_24h: 1249934980 
       },
       { 
         id: 'avalanche-2', 
         symbol: 'AVAX',
-        price: 33.32, 
-        change_24h: -3.92, 
-        change_1h: -0.1,
-        market_cap: 14052988678, 
-        volume_24h: 1745972080 
+        price: 28.01, 
+        change_24h: -7.66, 
+        change_1h: -0.4,
+        market_cap: 11825211745, 
+        volume_24h: 1121049189 
       },
       { 
-        id: 'sui', 
-        symbol: 'SUI',
-        price: 3.28, 
-        change_24h: -2.42, 
+        id: 'litecoin', 
+        symbol: 'LTC',
+        price: 117.02, 
+        change_24h: -0.97, 
         change_1h: 0.1,
-        market_cap: 11647688958, 
-        volume_24h: 1050212609 
+        market_cap: 8939614918, 
+        volume_24h: 712579851 
+      },
+      { 
+        id: 'shiba-inu', 
+        symbol: 'SHIB',
+        price: 0.0000121, 
+        change_24h: -5.45, 
+        change_1h: -0.2,
+        market_cap: 7131630179, 
+        volume_24h: 232324913 
+      },
+      { 
+        id: 'polkadot', 
+        symbol: 'DOT',
+        price: 4.10, 
+        change_24h: -6.09, 
+        change_1h: -0.3,
+        market_cap: 6240900615, 
+        volume_24h: 336006693 
       }
     ];
 
