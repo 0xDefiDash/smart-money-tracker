@@ -334,12 +334,12 @@ export default function GoLivePage() {
                         ? "from-red-400 to-pink-400" 
                         : "from-blue-400 to-purple-400"
                     )}>
-                      {isLive ? 'You\'re Live!' : 'Go Live - Block Wars'}
+                      {isLive ? 'You\'re Live!' : 'Go Live - Dash Wars'}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground truncate">
                       {isLive 
                         ? `Streaming for ${formatDuration(streamStats.streamDuration)}` 
-                        : 'Start your Block Wars live stream'}
+                        : 'Start your Dash Wars live stream'}
                     </p>
                   </div>
                 </div>

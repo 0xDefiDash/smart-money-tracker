@@ -275,7 +275,7 @@ export default function BlockWarsLivePage() {
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <h3 className="text-xl font-bold text-white">Loading Live Streams...</h3>
-          <p className="text-muted-foreground">Finding active Block Wars players</p>
+          <p className="text-muted-foreground">Finding active Dash Wars players</p>
         </div>
       </div>
     )
@@ -295,7 +295,7 @@ export default function BlockWarsLivePage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate">
-                      Block Wars Live
+                      Dash Wars Live
                     </CardTitle>
                     <p className="text-sm text-muted-foreground truncate">No active streams right now</p>
                   </div>
@@ -320,7 +320,7 @@ export default function BlockWarsLivePage() {
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold text-white">No Live Streams</h3>
                 <p className="text-muted-foreground max-w-md mx-auto">
-                  No Block Wars players are currently streaming. Be the first to go live and showcase your epic gameplay!
+                  No Dash Wars players are currently streaming. Be the first to go live and showcase your epic gameplay!
                 </p>
               </div>
               <Button
@@ -355,7 +355,7 @@ export default function BlockWarsLivePage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate">
-                    Block Wars Live
+                    Dash Wars Live
                   </CardTitle>
                   <p className="text-sm text-muted-foreground truncate">Watch top players battle for legendary blocks</p>
                 </div>

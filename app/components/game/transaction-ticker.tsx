@@ -138,7 +138,7 @@ export function TransactionTicker({ className }: TransactionTickerProps) {
         <div className="flex items-center justify-center py-2">
           <div className="flex items-center space-x-2 text-purple-400">
             <TrendingUp className="w-4 h-4 animate-pulse" />
-            <span className="text-sm">Loading Block Wars activity...</span>
+            <span className="text-sm">Loading Dash Wars activity...</span>
           </div>
         </div>
       </Card>
@@ -151,7 +151,7 @@ export function TransactionTicker({ className }: TransactionTickerProps) {
         <div className="flex items-center justify-center py-2">
           <div className="flex items-center space-x-2 text-slate-400">
             <TrendingUp className="w-4 h-4" />
-            <span className="text-sm">No recent Block Wars activity</span>
+            <span className="text-sm">No recent Dash Wars activity</span>
           </div>
         </div>
       </Card>
@@ -162,7 +162,7 @@ export function TransactionTicker({ className }: TransactionTickerProps) {
     <Card className={cn("p-2 bg-gradient-to-r from-slate-800/50 to-purple-800/50 border-purple-500/20 overflow-hidden", className)}>
       <div className="flex items-center space-x-2 mb-2">
         <TrendingUp className="w-4 h-4 text-purple-400" />
-        <span className="text-sm font-semibold text-purple-400">Block Wars Live Feed</span>
+        <span className="text-sm font-semibold text-purple-400">Dash Wars Live Feed</span>
         <Badge variant="secondary" className="text-xs">
           {transactions.length} recent
         </Badge>

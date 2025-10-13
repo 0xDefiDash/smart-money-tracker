@@ -120,7 +120,7 @@ ${basicData.cryptos?.map((crypto: any) =>
 ## Smart Money Tracker Platform Features:
 - **Dashboard**: Real-time whale transactions, exchange flows, market stats
 - **Whale Tracker**: Monitor large wallet movements, whale rankings
-- **Block Wars**: Gamified trading system with leaderboards
+- **Dash Wars**: Gamified trading system with leaderboards
 - **Pump.fun Tracker**: Track trending meme coins and new launches
 - **Zora Tracker**: Monitor NFT collections and artist activity
 - **Bonk.fun Tracker**: Solana ecosystem token tracking

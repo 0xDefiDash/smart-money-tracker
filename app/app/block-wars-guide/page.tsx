@@ -91,7 +91,7 @@ export default function BlockWarsGuide() {
             </div>
             <div className="text-center">
               <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-neon-green-bright via-neon-blue-bright to-purple-400 bg-clip-text text-transparent">
-                Block Wars
+                Dash Wars
               </h1>
               <p className="text-xl lg:text-2xl text-neon-green-bright font-semibold mt-2">Players Guide</p>
             </div>
@@ -922,7 +922,7 @@ export default function BlockWarsGuide() {
       <Card className="bg-gradient-to-r from-neon-green/10 via-neon-blue/10 to-purple-600/10 border border-neon-green/30 glow-green mt-8">
         <CardContent className="text-center p-8">
           <h3 className="text-3xl font-bold bg-gradient-to-r from-neon-green-bright via-neon-blue-bright to-purple-400 bg-clip-text text-transparent mb-4">
-            Ready to Dominate Block Wars?
+            Ready to Dominate Dash Wars?
           </h3>
           <p className="text-slate-300 text-lg mb-6">
             Apply these strategies and climb to the top of the leaderboard!

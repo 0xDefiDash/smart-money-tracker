@@ -186,7 +186,7 @@ export default function ProfileDemoPage() {
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="text-center p-4 rounded-lg bg-slate-700/30">
-                <h4 className="text-white font-medium mb-2">Block Wars Game</h4>
+                <h4 className="text-white font-medium mb-2">Dash Wars Game</h4>
                 <p className="text-sm text-slate-400 mb-3">
                   Profile images in user boards and game interfaces
                 </p>

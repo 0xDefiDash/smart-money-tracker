@@ -766,7 +766,7 @@ export function EnhancedBattleArena({
                 </Badge>
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Real-time battles happening across the Block Wars universe
+                Real-time battles happening across the Dash Wars universe
               </p>
             </CardHeader>
             <CardContent>

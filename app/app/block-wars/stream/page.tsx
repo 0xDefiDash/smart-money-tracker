@@ -79,9 +79,9 @@ export default function StreamSetupPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent truncate">
-                    Block Wars Streaming Studio
+                    Dash Wars Streaming Studio
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground truncate">Stream your Block Wars gameplay live to the world</p>
+                  <p className="text-sm text-muted-foreground truncate">Stream your Dash Wars gameplay live to the world</p>
                 </div>
               </div>
               <div className="text-center flex-shrink-0">
@@ -176,7 +176,7 @@ export default function StreamSetupPage() {
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
                         You're Live! 🎉
                       </h2>
-                      <p className="text-muted-foreground">Broadcasting to the Block Wars community</p>
+                      <p className="text-muted-foreground">Broadcasting to the Dash Wars community</p>
                     </div>
                   </div>
                   

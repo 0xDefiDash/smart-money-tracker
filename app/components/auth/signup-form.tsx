@@ -90,7 +90,7 @@ export function SignupForm() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            Join Block Wars
+            Join Dash Wars
           </CardTitle>
           <p className="text-slate-400 text-sm">Create your account and start collecting blocks</p>
         </CardHeader>

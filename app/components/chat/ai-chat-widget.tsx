@@ -49,7 +49,7 @@ export function AIChatWidget() {
 • **💹 DeFi Analytics**: Protocol performance, TVL trends, APY tracking  
 • **🔥 Trending Tokens**: Meme coins, social scores, risk assessments
 • **⛓️ On-Chain Metrics**: Network activity, bridge flows, gas tracking
-• **🎮 Block Wars**: Advanced game strategies and mechanics
+• **🎮 Dash Wars**: Advanced game strategies and mechanics
 • **🗺️ Platform Expert**: Complete navigation and feature guidance
 
 **🔥 Market Status**: ${Date.now() % 2 === 0 ? '🚀 ALTCOIN SEASON ACTIVE' : '🔶 BTC DOMINANCE MODE'} | ${Date.now() % 3 === 0 ? 'Fear & Greed: 72 (GREED)' : 'High Volatility Period'}
@@ -211,7 +211,7 @@ What market intelligence do you need? 🧠💎`,
     { text: "DeFi Yield Opportunities", emoji: "💹" },
     { text: "Trending Meme Coins", emoji: "🔥" },
     { text: "Risk Assessment", emoji: "⚠️" },
-    { text: "Block Wars Strategy", emoji: "🎮" },
+    { text: "Dash Wars Strategy", emoji: "🎮" },
     { text: "Platform Navigation", emoji: "🗺️" }
   ];
 

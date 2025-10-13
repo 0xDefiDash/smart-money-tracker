@@ -282,7 +282,7 @@ export default function BlockWarsPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-gray-900 to-slate-950">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-neon-green-bright mx-auto mb-4" />
-          <p className="text-slate-300">Loading Block Wars...</p>
+          <p className="text-slate-300">Loading Dash Wars...</p>
         </div>
       </div>
     )
@@ -587,7 +587,7 @@ export default function BlockWarsPage() {
     })
     
     setSpawnedBlocks([])
-    setBattleLog([`🔄 Game reset! Welcome to Block Wars! You'll compete for blocks in the global arena.`])
+    setBattleLog([`🔄 Game reset! Welcome to Dash Wars! You'll compete for blocks in the global arena.`])
     
     // Fetch fresh global blocks after reset
     setTimeout(() => {
@@ -1590,7 +1590,7 @@ export default function BlockWarsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-neon-green-bright to-neon-blue-bright bg-clip-text text-transparent leading-tight">
-                    Block Wars
+                    Dash Wars
                   </CardTitle>
                   <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">🆓 Common blocks are FREE • 💳 Premium blocks cost money • 💰 All blocks earn money passively!</p>
                   <p className="text-xs text-muted-foreground sm:hidden">🆓 FREE blocks • 💳 Premium blocks • 💰 Passive income!</p>
@@ -2159,7 +2159,7 @@ export default function BlockWarsPage() {
                   </p>
                 ))}
                 {battleLog.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Welcome to Block Wars! Start claiming blocks to see activity here.</p>
+                  <p className="text-sm text-muted-foreground">Welcome to Dash Wars! Start claiming blocks to see activity here.</p>
                 )}
               </div>
             </ScrollArea>

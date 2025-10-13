@@ -51,10 +51,10 @@ export default function SettingsDemoPage() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-            Block Wars Profile Settings Demo
+            Dash Wars Profile Settings Demo
           </h1>
           <p className="text-slate-400">
-            Experience the enhanced profile settings system for Block Wars
+            Experience the enhanced profile settings system for Dash Wars
           </p>
         </div>
 
@@ -245,7 +245,7 @@ export default function SettingsDemoPage() {
               <h3 className="text-white font-semibold mb-2">Settings Button Fixed!</h3>
               <p className="text-slate-400 text-sm mb-4">
                 The settings feature next to the user name now works perfectly. Click the settings icon (⚙️) 
-                in the user board above to experience the new Block Wars profile management system.
+                in the user board above to experience the new Dash Wars profile management system.
               </p>
               <div className="grid md:grid-cols-3 gap-4 text-center">
                 <div>

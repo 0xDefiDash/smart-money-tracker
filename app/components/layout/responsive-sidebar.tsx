@@ -30,12 +30,12 @@ const sidebarItems = [
     icon: Home,
   },
   {
-    title: 'Block Wars',
+    title: 'Dash Wars',
     href: '/block-wars',
     icon: Gamepad2,
   },
   {
-    title: 'Block Wars Live',
+    title: 'Dash Wars Live',
     href: '/block-wars/live',
     icon: Radio,
   },
@@ -45,7 +45,7 @@ const sidebarItems = [
     icon: Video,
   },
   {
-    title: 'Block Wars Players Guide',
+    title: 'Dash Wars Players Guide',
     href: '/block-wars-guide',
     icon: Target,
   },

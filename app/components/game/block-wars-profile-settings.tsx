@@ -174,7 +174,7 @@ export function BlockWarsProfileSettings({
                 <Gamepad2 className="h-5 w-5 text-purple-400" />
               </div>
               <div>
-                <CardTitle className="text-xl font-bold text-white">Block Wars Profile</CardTitle>
+                <CardTitle className="text-xl font-bold text-white">Dash Wars Profile</CardTitle>
                 <p className="text-sm text-slate-400">Customize your warrior identity</p>
               </div>
             </div>
