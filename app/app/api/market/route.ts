@@ -42,25 +42,25 @@ export async function GET(request: Request) {
         dataSource = 'CoinAPI'
       } catch (coinApiError) {
         console.warn('CoinAPI also failed:', coinApiError)
-        // Use fallback data - Updated with current October 8, 2025 prices
+        // Use fallback data - Updated with current October 13, 2025 prices
         cryptos = [
-          { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', current_price: 121470, price_change_24h: -2751.2, price_change_percentage_24h: -2.27, market_cap: 2421063383823, total_volume: 77457181529, market_cap_rank: 1, image: '' },
-          { id: 'ethereum', symbol: 'eth', name: 'Ethereum', current_price: 4442.52, price_change_percentage_24h: -5.21, price_change_24h: -231.5, market_cap: 536510427363, total_volume: 51552953255, market_cap_rank: 2, image: '' },
-          { id: 'binancecoin', symbol: 'bnb', name: 'BNB', current_price: 1274.99, price_change_percentage_24h: 3.85, price_change_24h: 49.1, market_cap: 177322781508, total_volume: 10433000157, market_cap_rank: 3, image: '' },
-          { id: 'ripple', symbol: 'xrp', name: 'XRP', current_price: 2.85, price_change_percentage_24h: -4.56, price_change_24h: -0.13, market_cap: 170648139474, total_volume: 7181503772, market_cap_rank: 4, image: '' },
-          { id: 'solana', symbol: 'sol', name: 'Solana', current_price: 219.25, price_change_percentage_24h: -6.02, price_change_24h: -13.2, market_cap: 119725546634, total_volume: 9672562305, market_cap_rank: 5, image: '' },
-          { id: 'dogecoin', symbol: 'doge', name: 'Dogecoin', current_price: 0.244979, price_change_percentage_24h: -7.99, price_change_24h: -0.0196, market_cap: 37092126612, total_volume: 3892232080, market_cap_rank: 6, image: '' },
-          { id: 'cardano', symbol: 'ada', name: 'Cardano', current_price: 0.815063, price_change_percentage_24h: -6.19, price_change_24h: -0.0505, market_cap: 29811816998, total_volume: 1880332688, market_cap_rank: 7, image: '' },
-          { id: 'chainlink', symbol: 'link', name: 'Chainlink', current_price: 21.78, price_change_percentage_24h: -6.77, price_change_24h: -1.47, market_cap: 14776675848, total_volume: 1249934980, market_cap_rank: 8, image: '' },
-          { id: 'avalanche-2', symbol: 'avax', name: 'Avalanche', current_price: 28.01, price_change_percentage_24h: -7.66, price_change_24h: -2.15, market_cap: 11825211745, total_volume: 1121049189, market_cap_rank: 9, image: '' },
-          { id: 'litecoin', symbol: 'ltc', name: 'Litecoin', current_price: 117.02, price_change_percentage_24h: -0.97, price_change_24h: -1.13, market_cap: 8939614918, total_volume: 712579851, market_cap_rank: 10, image: '' },
-          { id: 'shiba-inu', symbol: 'shib', name: 'Shiba Inu', current_price: 0.0000121, price_change_percentage_24h: -5.45, price_change_24h: -0.0000007, market_cap: 7131630179, total_volume: 232324913, market_cap_rank: 11, image: '' },
-          { id: 'polkadot', symbol: 'dot', name: 'Polkadot', current_price: 4.10, price_change_percentage_24h: -6.09, price_change_24h: -0.25, market_cap: 6240900615, total_volume: 336006693, market_cap_rank: 12, image: '' },
-          { id: 'uniswap', symbol: 'uni', name: 'Uniswap', current_price: 7.74, price_change_percentage_24h: -7.05, price_change_24h: -0.55, market_cap: 4648438976, total_volume: 414251170, market_cap_rank: 13, image: '' },
-          { id: 'cosmos', symbol: 'atom', name: 'Cosmos Hub', current_price: 4.03, price_change_percentage_24h: -4.86, price_change_24h: -0.20, market_cap: 1903561811, total_volume: 142141870, market_cap_rank: 14, image: '' },
-          { id: 'polygon', symbol: 'matic', name: 'Polygon', current_price: 0.235553, price_change_percentage_24h: -5.00, price_change_24h: -0.0118, market_cap: 0, total_volume: 728711, market_cap_rank: 15, image: '' }
+          { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', current_price: 115440, price_change_24h: 5120.27, price_change_percentage_24h: 4.64, market_cap: 2300575639970, total_volume: 93844409035, market_cap_rank: 1, image: '' },
+          { id: 'ethereum', symbol: 'eth', name: 'Ethereum', current_price: 4164.35, price_change_percentage_24h: 11.72, price_change_24h: 436.84, market_cap: 502419395592, total_volume: 58014422026, market_cap_rank: 2, image: '' },
+          { id: 'binancecoin', symbol: 'bnb', name: 'BNB', current_price: 1300.4, price_change_percentage_24h: 16.57, price_change_24h: 184.87, market_cap: 181086523397, total_volume: 9338349967, market_cap_rank: 3, image: '' },
+          { id: 'ripple', symbol: 'xrp', name: 'XRP', current_price: 2.55, price_change_percentage_24h: 9.29, price_change_24h: 0.217, market_cap: 152642030857, total_volume: 9607779499, market_cap_rank: 4, image: '' },
+          { id: 'solana', symbol: 'sol', name: 'Solana', current_price: 196.7, price_change_percentage_24h: 12.05, price_change_24h: 21.16, market_cap: 107502010615, total_volume: 12437194712, market_cap_rank: 5, image: '' },
+          { id: 'dogecoin', symbol: 'doge', name: 'Dogecoin', current_price: 0.208276, price_change_percentage_24h: 13.76, price_change_24h: 0.0252, market_cap: 31480810721, total_volume: 4997667791, market_cap_rank: 6, image: '' },
+          { id: 'cardano', symbol: 'ada', name: 'Cardano', current_price: 0.707726, price_change_percentage_24h: 13.36, price_change_24h: 0.0834, market_cap: 25845951197, total_volume: 1981499230, market_cap_rank: 7, image: '' },
+          { id: 'chainlink', symbol: 'link', name: 'Chainlink', current_price: 19.05, price_change_percentage_24h: 13.13, price_change_24h: 2.21, market_cap: 13272044887, total_volume: 1370006718, market_cap_rank: 8, image: '' },
+          { id: 'tron', symbol: 'trx', name: 'TRON', current_price: 0.323922, price_change_percentage_24h: 3.66, price_change_24h: 0.0114, market_cap: 30659978545, total_volume: 991589171, market_cap_rank: 9, image: '' },
+          { id: 'stellar', symbol: 'xlm', name: 'Stellar', current_price: 0.341056, price_change_percentage_24h: 7.74, price_change_24h: 0.0245, market_cap: 10917042707, total_volume: 336793361, market_cap_rank: 10, image: '' },
+          { id: 'bitcoin-cash', symbol: 'bch', name: 'Bitcoin Cash', current_price: 541.49, price_change_percentage_24h: 8.03, price_change_24h: 40.23, market_cap: 10807411943, total_volume: 355940534, market_cap_rank: 11, image: '' },
+          { id: 'wrapped-bitcoin', symbol: 'wbtc', name: 'Wrapped Bitcoin', current_price: 115330, price_change_percentage_24h: 4.76, price_change_24h: 5245.26, market_cap: 14650792574, total_volume: 519798193, market_cap_rank: 12, image: '' },
+          { id: 'usd-coin', symbol: 'usdc', name: 'USDC', current_price: 0.999905, price_change_percentage_24h: 0.01, price_change_24h: 0.000082, market_cap: 75713368843, total_volume: 16255725009, market_cap_rank: 13, image: '' },
+          { id: 'tether', symbol: 'usdt', name: 'Tether', current_price: 1.001, price_change_percentage_24h: -0.01, price_change_24h: -0.0001, market_cap: 179988224764, total_volume: 178923369364, market_cap_rank: 14, image: '' },
+          { id: 'staked-ether', symbol: 'steth', name: 'Lido Staked Ether', current_price: 4164.27, price_change_percentage_24h: 11.79, price_change_24h: 439.28, market_cap: 35404425190, total_volume: 86316348, market_cap_rank: 15, image: '' }
         ]
-        console.info('Using updated fallback market data with current October 8, 2025 prices')
+        console.info('Using updated fallback market data with current October 13, 2025 prices')
         dataSource = 'Fallback'
       }
     }

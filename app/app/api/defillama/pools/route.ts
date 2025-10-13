@@ -27,7 +27,7 @@ interface YieldPool {
 
 export async function GET(request: NextRequest) {
   try {
-    // Enhanced yield pool data for September 20, 2025
+    // Enhanced yield pool data for October 13, 2025
     const currentYieldPools: YieldPool[] = [
       // High-Yield Liquid Staking Opportunities
       {
@@ -35,35 +35,35 @@ export async function GET(request: NextRequest) {
         chain: 'Ethereum',
         project: 'Lido',
         symbol: 'stETH',
-        tvlUsd: 28950000000,
-        apy: 3.85,
-        apyBase: 3.85,
+        tvlUsd: 31250000000,
+        apy: 4.15,
+        apyBase: 4.15,
         apyReward: 0,
         poolMeta: 'Liquid staking',
         url: 'https://lido.fi',
         stablecoin: false,
         predictedClass: 'Stable',
-        apyPct1D: 0.02,
-        apyPct7D: 0.15,
-        apyPct30D: 0.45
+        apyPct1D: 0.03,
+        apyPct7D: 0.18,
+        apyPct30D: 0.52
       },
       {
         pool: 'eigenlayer-restaked-eth',
         chain: 'Ethereum',
         project: 'EigenLayer',
         symbol: 'restETH',
-        tvlUsd: 12850000000,
-        apy: 5.45,
-        apyBase: 3.85,
-        apyReward: 1.60,
+        tvlUsd: 14250000000,
+        apy: 6.25,
+        apyBase: 4.35,
+        apyReward: 1.90,
         rewardTokens: ['EIGEN'],
         poolMeta: 'Restaking protocol',
         url: 'https://eigenlayer.xyz',
         stablecoin: false,
         predictedClass: 'Stable',
-        apyPct1D: 0.12,
-        apyPct7D: 0.85,
-        apyPct30D: 2.45
+        apyPct1D: 0.15,
+        apyPct7D: 0.95,
+        apyPct30D: 2.85
       },
       {
         pool: 'rocket-pool-reth',
@@ -513,8 +513,8 @@ export async function GET(request: NextRequest) {
         summary,
         topPools: filteredPools.slice(0, 25),
         lastUpdated: new Date().toISOString(),
-        dataSource: 'enhanced-defillama-yields-sept2025',
-        marketConditions: 'favorable',
+        dataSource: 'enhanced-defillama-yields-oct2025',
+        marketConditions: 'bullish-recovery',
         riskWarning: 'High APY pools may carry additional risks including impermanent loss, smart contract risk, and token volatility.'
       }
     })

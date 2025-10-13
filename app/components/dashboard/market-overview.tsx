@@ -108,16 +108,16 @@ export function MarketOverview() {
           hour12: false 
         })
         
-        // Updated price data for October 8, 2025
-        const btcBase = 121470  // Current BTC price 
-        const ethBase = 4442.52   // Current ETH price
+        // Updated price data for October 13, 2025
+        const btcBase = 115440  // Current BTC price 
+        const ethBase = 4164.35   // Current ETH price
         const variation = (Math.random() - 0.5) * 0.015 // ±1.5% variation
         
         initialData.push({
           time: timeString,
           btc: btcBase * (1 + variation),
           eth: ethBase * (1 + variation),
-          total: 4.02 * (1 + variation * 0.4), // Updated total market cap in trillions
+          total: 3.82 * (1 + variation * 0.4), // Updated total market cap in trillions
           timestamp: time.getTime()
         })
       }
