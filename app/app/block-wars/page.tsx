@@ -23,7 +23,8 @@ import {
   Star,
   TrendingUp,
   Users,
-  Loader2
+  Loader2,
+  Gift
 } from 'lucide-react'
 import { BlockCharacter } from '@/components/game/block-character'
 import { GameStats } from '@/components/game/game-stats'
@@ -33,6 +34,14 @@ import { EnhancedBattleArena } from '@/components/game/enhanced-battle-arena'
 import { SpawnArea } from '@/components/game/spawn-area'
 import { UserBoard } from '@/components/game/user-board'
 import { TransactionTicker } from '@/components/game/transaction-ticker'
+import { AchievementsPanel } from '@/components/game/achievements-panel'
+import { DailyQuests } from '@/components/game/daily-quests'
+import { ComboTracker } from '@/components/game/combo-tracker'
+import { PowerUpsShop } from '@/components/game/power-ups-shop'
+import { DailyRewards } from '@/components/game/daily-rewards'
+import { ParticleEffects } from '@/components/game/particle-effects'
+import { CelebrationModal } from '@/components/game/celebration-modal'
+import { BattleAnimation } from '@/components/game/battle-animation'
 
 interface GameState {
   playerId: string
@@ -202,6 +211,44 @@ export default function BlockWarsPage() {
   const [storeItems, setStoreItems] = useState<any[]>([])
   const [storeCategories, setStoreCategories] = useState<any>({})
   const [selectedCategory, setSelectedCategory] = useState<'power' | 'defense' | 'special' | 'crypto'>('power')
+  
+  // New feature states
+  const [comboCount, setComboCount] = useState(0)
+  const [maxCombo, setMaxCombo] = useState(0)
+  const [comboMultiplier, setComboMultiplier] = useState(1)
+  const [dailyStreak, setDailyStreak] = useState(0)
+  const [celebrationModal, setCelebrationModal] = useState<{
+    isOpen: boolean
+    type: 'levelup' | 'achievement' | 'quest' | 'streak'
+    title: string
+    message: string
+    rewards?: Array<{ type: string; amount: number }>
+  }>({
+    isOpen: false,
+    type: 'achievement',
+    title: '',
+    message: '',
+    rewards: []
+  })
+  const [battleAnimation, setBattleAnimation] = useState<{
+    isActive: boolean
+    attackerName: string
+    defenderName: string
+    result: 'win' | 'loss'
+  }>({
+    isActive: false,
+    attackerName: '',
+    defenderName: '',
+    result: 'win'
+  })
+  const [particleEffect, setParticleEffect] = useState<{
+    trigger: boolean
+    type: 'success' | 'failure' | 'levelup' | 'combo'
+  }>({
+    trigger: false,
+    type: 'success'
+  })
+  const [activePowerUps, setActivePowerUps] = useState<string[]>([])
 
   // Update game state when session is available
   useEffect(() => {
@@ -990,46 +1037,74 @@ export default function BlockWarsPage() {
     
     const success = Math.random() * 100 < finalSuccessRate
     
-    if (success) {
-      // Apply money multiplier bonus if available
-      const moneyMultiplier = 1 + (gameState.upgradeEffects?.moneyMultiplierBonus || 0)
-      const finalSteal = Math.floor(potentialSteal * moneyMultiplier)
-      
-      setGameState(prev => ({
-        ...prev,
-        money: prev.money - actualCost + finalSteal, // Lose cost, gain stolen money
-        experience: prev.experience + (20 + (powerAdvantage * 1.5)), // XP based on difficulty
-        lastMoneyUpdate: Date.now()
-      }))
-      
-      let successMessage = `💰 ${attackInfo.name} SUCCESS! Stole $${finalSteal.toLocaleString()} from ${enemyData.name}!`
-      if (moneyMultiplier > 1) {
-        successMessage += ` Money multiplier bonus applied! (+${Math.round((moneyMultiplier - 1) * 100)}%)`
-      }
-      successMessage += ` (+${20 + Math.floor(powerAdvantage * 1.5)} XP)`
-      
-      setBattleLog(prev => [...prev, successMessage])
-    } else {
-      // Handle steal insurance refund
-      const refundAmount = gameState.upgradeEffects?.stealInsurance ? Math.floor(actualCost * 0.5) : 0
-      const finalCost = actualCost - refundAmount
-      
-      setGameState(prev => ({
-        ...prev,
-        money: prev.money - finalCost,
-        experience: prev.experience + 3 // Small consolation XP
-      }))
-      
-      let failMessage = `💥 ${attackInfo.name} failed against ${enemyData.name}! Lost $${actualCost.toLocaleString()}.`
-      if (refundAmount > 0) {
-        failMessage += ` Steal Insurance refunded $${refundAmount.toLocaleString()}!`
-      }
-      failMessage += ` (+3 XP)`
-      
-      setBattleLog(prev => [...prev, failMessage])
-    }
+    // Trigger battle animation
+    setBattleAnimation({
+      isActive: true,
+      attackerName: 'You',
+      defenderName: enemyData.name,
+      result: success ? 'win' : 'loss'
+    })
     
-    setIsLoading(false)
+    // Wait for animation to complete
+    setTimeout(() => {
+      if (success) {
+        // Apply money multiplier bonus if available
+        const moneyMultiplier = 1 + (gameState.upgradeEffects?.moneyMultiplierBonus || 0)
+        const finalSteal = Math.floor(potentialSteal * moneyMultiplier * comboMultiplier)
+        
+        setGameState(prev => ({
+          ...prev,
+          money: prev.money - actualCost + finalSteal, // Lose cost, gain stolen money
+          experience: prev.experience + (20 + (powerAdvantage * 1.5)), // XP based on difficulty
+          lastMoneyUpdate: Date.now()
+        }))
+        
+        // Handle combo system
+        handleSuccessfulRaid()
+        
+        // Trigger success particle effects
+        setParticleEffect({ trigger: true, type: 'success' })
+        setTimeout(() => setParticleEffect({ trigger: false, type: 'success' }), 2000)
+        
+        let successMessage = `💰 ${attackInfo.name} SUCCESS! Stole $${finalSteal.toLocaleString()} from ${enemyData.name}!`
+        if (comboMultiplier > 1) {
+          successMessage += ` ${comboCount}x COMBO BONUS!`
+        }
+        if (moneyMultiplier > 1) {
+          successMessage += ` Money multiplier bonus applied! (+${Math.round((moneyMultiplier - 1) * 100)}%)`
+        }
+        successMessage += ` (+${20 + Math.floor(powerAdvantage * 1.5)} XP)`
+        
+        setBattleLog(prev => [...prev, successMessage])
+      } else {
+        // Handle steal insurance refund
+        const refundAmount = gameState.upgradeEffects?.stealInsurance ? Math.floor(actualCost * 0.5) : 0
+        const finalCost = actualCost - refundAmount
+        
+        setGameState(prev => ({
+          ...prev,
+          money: prev.money - finalCost,
+          experience: prev.experience + 3 // Small consolation XP
+        }))
+        
+        // Handle combo break
+        handleFailedRaid()
+        
+        // Trigger failure particle effects
+        setParticleEffect({ trigger: true, type: 'failure' })
+        setTimeout(() => setParticleEffect({ trigger: false, type: 'failure' }), 2000)
+        
+        let failMessage = `💥 ${attackInfo.name} failed against ${enemyData.name}! Lost $${actualCost.toLocaleString()}.`
+        if (refundAmount > 0) {
+          failMessage += ` Steal Insurance refunded $${refundAmount.toLocaleString()}!`
+        }
+        failMessage += ` (+3 XP)`
+        
+        setBattleLog(prev => [...prev, failMessage])
+      }
+      
+      setIsLoading(false)
+    }, 3500) // Wait for battle animation
   }
 
   const toggleAdminMode = () => {
@@ -1168,6 +1243,193 @@ export default function BlockWarsPage() {
     
     setIsLoading(false)
   }
+
+  // New feature handlers
+  const handleClaimAchievementReward = (achievementId: string) => {
+    // Award achievement rewards
+    const achievementRewards: Record<string, any> = {
+      first_block: { type: 'money', amount: 5000 },
+      block_master: { type: 'money', amount: 50000 },
+      raid_master: { type: 'money', amount: 100000 },
+      level_10: { type: 'xp', amount: 500 },
+      money_maker: { type: 'money', amount: 25000 }
+    }
+
+    const reward = achievementRewards[achievementId]
+    if (reward) {
+      setGameState(prev => ({
+        ...prev,
+        money: reward.type === 'money' ? prev.money + reward.amount : prev.money,
+        experience: reward.type === 'xp' ? prev.experience + reward.amount : prev.experience
+      }))
+      
+      setCelebrationModal({
+        isOpen: true,
+        type: 'achievement',
+        title: '🏆 Achievement Unlocked!',
+        message: 'You\'ve completed an epic achievement!',
+        rewards: [reward]
+      })
+      
+      setBattleLog(prev => [...prev, `🏆 Achievement unlocked! +${reward.amount} ${reward.type}`])
+    }
+  }
+
+  const handleCompleteQuest = (questId: string) => {
+    // Award quest rewards
+    const questRewards: Record<string, any> = {
+      daily_claim_3: { type: 'money', amount: 10000 },
+      daily_win_battle: { type: 'xp', amount: 200 },
+      daily_earn_money: { type: 'money', amount: 15000 },
+      daily_upgrade: { type: 'coins', amount: 500 },
+      daily_defense: { type: 'money', amount: 20000 }
+    }
+
+    const reward = questRewards[questId]
+    if (reward) {
+      setGameState(prev => ({
+        ...prev,
+        money: reward.type === 'money' ? prev.money + reward.amount : prev.money,
+        coins: reward.type === 'coins' ? prev.coins + reward.amount : prev.coins,
+        experience: reward.type === 'xp' ? prev.experience + reward.amount : prev.experience
+      }))
+      
+      setCelebrationModal({
+        isOpen: true,
+        type: 'quest',
+        title: '⭐ Quest Complete!',
+        message: 'Daily quest completed successfully!',
+        rewards: [reward]
+      })
+      
+      setParticleEffect({ trigger: true, type: 'success' })
+      setTimeout(() => setParticleEffect({ trigger: false, type: 'success' }), 2000)
+      
+      setBattleLog(prev => [...prev, `⭐ Daily quest completed! +${reward.amount} ${reward.type}`])
+    }
+  }
+
+  const handlePurchasePowerUp = (powerUpId: string) => {
+    const powerUpPrices: Record<string, number> = {
+      double_xp: 15000,
+      money_boost: 25000,
+      shield_protection: 35000,
+      attack_surge: 20000,
+      lucky_strike: 50000,
+      time_warp: 30000,
+      eagle_eye: 18000
+    }
+
+    const price = powerUpPrices[powerUpId]
+    if (gameState.money >= price) {
+      setGameState(prev => ({
+        ...prev,
+        money: prev.money - price
+      }))
+      
+      setActivePowerUps(prev => [...prev, powerUpId])
+      
+      setCelebrationModal({
+        isOpen: true,
+        type: 'achievement',
+        title: '⚡ Power-Up Activated!',
+        message: 'You\'re now supercharged!',
+        rewards: []
+      })
+      
+      setBattleLog(prev => [...prev, `⚡ Power-up activated: ${powerUpId.replace('_', ' ')}`])
+      
+      // Remove power-up after duration
+      setTimeout(() => {
+        setActivePowerUps(prev => prev.filter(id => id !== powerUpId))
+        setBattleLog(prev => [...prev, `⏰ Power-up expired: ${powerUpId.replace('_', ' ')}`])
+      }, 60000) // 1 minute for demo
+    }
+  }
+
+  const handleClaimDailyReward = (day: number) => {
+    const rewards: Record<number, any> = {
+      1: { type: 'money', amount: 10000 },
+      2: { type: 'coins', amount: 500 },
+      3: { type: 'xp', amount: 300 },
+      4: { type: 'money', amount: 25000 },
+      5: { type: 'powerup', amount: 1 },
+      6: { type: 'money', amount: 50000 },
+      7: { type: 'money', amount: 100000 }
+    }
+
+    const reward = rewards[day]
+    if (reward) {
+      setGameState(prev => ({
+        ...prev,
+        money: reward.type === 'money' ? prev.money + reward.amount : prev.money,
+        coins: reward.type === 'coins' ? prev.coins + reward.amount : prev.coins,
+        experience: reward.type === 'xp' ? prev.experience + reward.amount : prev.experience
+      }))
+      
+      setDailyStreak(day)
+      
+      setCelebrationModal({
+        isOpen: true,
+        type: 'streak',
+        title: `🎁 Day ${day} Reward!`,
+        message: `Keep the streak going! Come back tomorrow!`,
+        rewards: reward.type !== 'powerup' ? [reward] : []
+      })
+      
+      setBattleLog(prev => [...prev, `🎁 Day ${day} reward claimed!`])
+    }
+  }
+
+  // Handle successful raid with combo
+  const handleSuccessfulRaid = () => {
+    setComboCount(prev => {
+      const newCombo = prev + 1
+      if (newCombo > maxCombo) {
+        setMaxCombo(newCombo)
+      }
+      
+      // Calculate multiplier
+      const multiplier = 1 + (newCombo * 0.1) // +10% per combo
+      setComboMultiplier(multiplier)
+      
+      if (newCombo >= 5) {
+        setParticleEffect({ trigger: true, type: 'combo' })
+        setTimeout(() => setParticleEffect({ trigger: false, type: 'combo' }), 2000)
+      }
+      
+      return newCombo
+    })
+  }
+
+  // Handle failed raid (reset combo)
+  const handleFailedRaid = () => {
+    if (comboCount > 0) {
+      setBattleLog(prev => [...prev, `💥 Combo broken! Lost ${comboCount}x streak`])
+    }
+    setComboCount(0)
+    setComboMultiplier(1)
+  }
+
+  // Trigger level up celebration
+  useEffect(() => {
+    const experienceNeeded = gameState.level * 100
+    if (gameState.experience >= experienceNeeded && gameState.level > 1) {
+      setCelebrationModal({
+        isOpen: true,
+        type: 'levelup',
+        title: '🎉 LEVEL UP!',
+        message: `You've reached level ${gameState.level}!`,
+        rewards: [
+          { type: 'attack', amount: 5 },
+          { type: 'defense', amount: 10 }
+        ]
+      })
+      
+      setParticleEffect({ trigger: true, type: 'levelup' })
+      setTimeout(() => setParticleEffect({ trigger: false, type: 'levelup' }), 3000)
+    }
+  }, [gameState.level])
 
   // Purchase crypto secret with $DEFIDASH tokens
   const purchaseCryptoSecret = async (itemId: string) => {
@@ -1520,47 +1782,73 @@ export default function BlockWarsPage() {
           {/* Main Game Area */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="arena" className="w-full">
-              {/* Mobile-optimized tabs */}
-              <TabsList className="grid w-full grid-cols-5 h-12 sm:h-auto bg-black/50">
+              {/* Mobile-optimized tabs with new features */}
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1 h-auto bg-black/50 p-2">
                 <TabsTrigger 
                   value="arena" 
-                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
                 >
-                  <Target className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Arena</span>
-                  <span className="sm:hidden text-xs">🎯</span>
+                  <Target className="w-5 h-5 mb-1" />
+                  <span>Arena</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="rewards" 
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black relative"
+                >
+                  <Gift className="w-5 h-5 mb-1 animate-bounce" />
+                  <span>Rewards</span>
+                  {dailyStreak > 0 && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white">
+                      {dailyStreak}
+                    </div>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="quests" 
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                >
+                  <Star className="w-5 h-5 mb-1" />
+                  <span>Quests</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="collection" 
-                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
                 >
-                  <Crown className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Collection</span>
-                  <span className="sm:hidden text-xs">👑</span>
+                  <Crown className="w-5 h-5 mb-1" />
+                  <span>Collection</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="store" 
-                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                  value="powerups" 
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black relative"
                 >
-                  <Coins className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Store</span>
-                  <span className="sm:hidden text-xs">🛒</span>
+                  <Zap className="w-5 h-5 mb-1" />
+                  <span>Power-Ups</span>
+                  {activePowerUps.length > 0 && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center text-[10px] text-white animate-pulse">
+                      {activePowerUps.length}
+                    </div>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="achievements" 
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                >
+                  <Trophy className="w-5 h-5 mb-1" />
+                  <span>Achievements</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="battles" 
-                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
                 >
-                  <Sword className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Battles</span>
-                  <span className="sm:hidden text-xs">⚔️</span>
+                  <Sword className="w-5 h-5 mb-1" />
+                  <span>Battles</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="leaderboard" 
-                  className="flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 p-2 sm:p-3 text-xs sm:text-sm touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
+                  className="flex flex-col items-center justify-center p-2 text-xs touch-manipulation data-[state=active]:bg-neon-gradient data-[state=active]:text-black"
                 >
-                  <Users className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Leaderboard</span>
-                  <span className="sm:hidden text-xs">🏆</span>
+                  <Users className="w-5 h-5 mb-1" />
+                  <span>Leaders</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -1576,12 +1864,40 @@ export default function BlockWarsPage() {
                 />
               </TabsContent>
 
+              <TabsContent value="rewards" className="mt-4 sm:mt-6">
+                <DailyRewards 
+                  currentStreak={dailyStreak}
+                  onClaimReward={handleClaimDailyReward}
+                />
+              </TabsContent>
+
+              <TabsContent value="quests" className="mt-4 sm:mt-6">
+                <DailyQuests 
+                  gameState={gameState}
+                  onCompleteQuest={handleCompleteQuest}
+                />
+              </TabsContent>
+
               <TabsContent value="collection" className="mt-4 sm:mt-6">
                 <BlockCollection 
                   ownedBlocks={gameState.ownedBlocks}
                   coins={gameState.coins}
                   onSellBlock={sellBlock}
                   isLoading={isLoading}
+                />
+              </TabsContent>
+
+              <TabsContent value="powerups" className="mt-4 sm:mt-6">
+                <PowerUpsShop 
+                  gameState={gameState}
+                  onPurchasePowerUp={handlePurchasePowerUp}
+                />
+              </TabsContent>
+
+              <TabsContent value="achievements" className="mt-4 sm:mt-6">
+                <AchievementsPanel 
+                  gameState={gameState}
+                  onClaimReward={handleClaimAchievementReward}
                 />
               </TabsContent>
 
@@ -1850,6 +2166,35 @@ export default function BlockWarsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Overlay Components */}
+      <ComboTracker 
+        comboCount={comboCount}
+        maxCombo={maxCombo}
+        multiplier={comboMultiplier}
+      />
+
+      <ParticleEffects 
+        trigger={particleEffect.trigger}
+        type={particleEffect.type}
+      />
+
+      <CelebrationModal 
+        isOpen={celebrationModal.isOpen}
+        type={celebrationModal.type}
+        title={celebrationModal.title}
+        message={celebrationModal.message}
+        rewards={celebrationModal.rewards}
+        onClose={() => setCelebrationModal({ ...celebrationModal, isOpen: false })}
+      />
+
+      <BattleAnimation 
+        isActive={battleAnimation.isActive}
+        attackerName={battleAnimation.attackerName}
+        defenderName={battleAnimation.defenderName}
+        result={battleAnimation.result}
+        onComplete={() => setBattleAnimation({ ...battleAnimation, isActive: false })}
+      />
     </div>
   )
 }
