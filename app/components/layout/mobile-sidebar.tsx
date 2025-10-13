@@ -64,16 +64,6 @@ const sidebarItems = [
     icon: Building2,
   },
   {
-    title: 'Pump.fun Tracker',
-    href: '/pumpfun',
-    icon: Target,
-  },
-  {
-    title: 'Bonk.fun Tracker',
-    href: '/bonkfun',
-    icon: Rocket,
-  },
-  {
     title: 'ZORA Tracker',
     href: '/zora',
     icon: Globe,
