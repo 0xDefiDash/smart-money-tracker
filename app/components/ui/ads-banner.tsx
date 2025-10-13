@@ -20,61 +20,61 @@ export function AdsBanner() {
   const [currentAdIndex, setCurrentAdIndex] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
 
-  // Placeholder ads - replace with real ads when you have advertisers
+  // Defidash Products and Services
   const ads: Ad[] = [
     {
       id: '1',
-      title: '🚀 Featured Trading Bot',
-      description: 'Automated crypto trading with AI-powered strategies. Join 10,000+ traders.',
-      link: '#',
-      badge: 'SPONSORED',
+      title: '👊 Dashpuncher Telegram Bot',
+      description: 'Advanced trading bot for Telegram. Execute trades, track portfolios & get instant market alerts.',
+      link: 'https://t.me/Dashpuncherbot',
+      badge: 'FEATURED',
       bgGradient: 'from-blue-600/20 to-purple-600/20',
       icon: '🤖'
     },
     {
       id: '2',
-      title: '💎 Premium Crypto Signals',
-      description: 'Get exclusive whale alerts and market insights. 95% accuracy rate.',
-      link: '#',
-      badge: 'SPONSORED',
+      title: '💎 Defidash DEX',
+      description: 'Trade crypto with the best rates. Lightning-fast swaps, low fees & maximum security.',
+      link: 'https://defidash.finance',
+      badge: 'FEATURED',
       bgGradient: 'from-emerald-600/20 to-teal-600/20',
-      icon: '📊'
+      icon: '⚡'
     },
     {
       id: '3',
-      title: '🔥 NFT Marketplace Launch',
-      description: 'Trade rare NFTs with zero gas fees. Early access available now.',
-      link: '#',
-      badge: 'SPONSORED',
+      title: '🎯 Defidash Trading Agent',
+      description: 'AI-powered trading assistant on Telegram. Smart strategies, real-time analysis & automated execution.',
+      link: 'https://t.me/Defidash_bot',
+      badge: 'FEATURED',
       bgGradient: 'from-orange-600/20 to-red-600/20',
-      icon: '🎨'
+      icon: '🧠'
     },
     {
       id: '4',
-      title: '⚡ DeFi Lending Platform',
-      description: 'Earn up to 20% APY on your crypto. Secure & audited smart contracts.',
-      link: '#',
-      badge: 'SPONSORED',
+      title: '👊 Dashpuncher - Your Trading Partner',
+      description: 'Never miss a trade opportunity. Get whale alerts, price movements & trading signals instantly.',
+      link: 'https://t.me/Dashpuncherbot',
+      badge: 'FEATURED',
       bgGradient: 'from-violet-600/20 to-pink-600/20',
-      icon: '💰'
+      icon: '🚀'
     },
     {
       id: '5',
-      title: '🎯 Crypto Portfolio Tracker',
-      description: 'Track 10,000+ coins across 50+ exchanges. Real-time portfolio analytics.',
-      link: '#',
-      badge: 'SPONSORED',
+      title: '💰 Defidash DEX - Trade Smarter',
+      description: 'Access deep liquidity across multiple chains. Best execution guaranteed on every trade.',
+      link: 'https://defidash.finance',
+      badge: 'FEATURED',
       bgGradient: 'from-cyan-600/20 to-blue-600/20',
-      icon: '📈'
+      icon: '💎'
     },
     {
       id: '6',
-      title: '🛡️ Hardware Wallet Sale',
-      description: 'Secure your crypto with military-grade security. 30% off limited time.',
-      link: '#',
-      badge: 'SPONSORED',
-      bgGradient: 'from-slate-600/20 to-gray-600/20',
-      icon: '🔐'
+      title: '🔥 Defidash Trading Agent - AI Power',
+      description: 'Let AI handle your trades. Advanced algorithms, risk management & 24/7 market monitoring.',
+      link: 'https://t.me/Defidash_bot',
+      badge: 'FEATURED',
+      bgGradient: 'from-pink-600/20 to-rose-600/20',
+      icon: '🎯'
     }
   ]
 
@@ -106,7 +106,11 @@ export function AdsBanner() {
   const handleAdClick = (ad: Ad) => {
     // Track ad click - integrate with your analytics
     console.log('Ad clicked:', ad.id, ad.title)
-    // window.open(ad.link, '_blank')
+    
+    // Open link in new tab
+    if (ad.link && ad.link !== '#') {
+      window.open(ad.link, '_blank', 'noopener,noreferrer')
+    }
   }
 
   // Don't render until mounted to prevent hydration errors
