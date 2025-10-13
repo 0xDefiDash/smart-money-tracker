@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as HotToaster } from 'react-hot-toast'
 import { EnhancedDefidashAgent } from '@/components/chat/enhanced-defidash-agent'
+import { AdsBanner } from '@/components/ui/ads-banner'
 import { RollingBanner } from '@/components/ui/rolling-banner'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { WalletProvider } from '@/contexts/WalletContext'
@@ -54,7 +55,10 @@ export default function RootLayout({
             {/* Mobile Header */}
             <MobileHeader />
             
-            {/* Rolling Banner - Full width */}
+            {/* Ads Banner - Revenue Generation */}
+            <AdsBanner />
+            
+            {/* Rolling Banner - Market Data */}
             <RollingBanner />
             
             {/* Main Layout - Sidebar + Content */}
