@@ -32,7 +32,7 @@ const sidebarItems = [
     icon: Gamepad2,
   },
   {
-    title: 'Dash Wars Live',
+    title: 'Dash TV',
     href: '/block-wars/live',
     icon: Radio,
   },
