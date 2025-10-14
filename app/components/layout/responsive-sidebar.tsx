@@ -45,6 +45,11 @@ const sidebarItems = [
     icon: Video,
   },
   {
+    title: 'Dash TV',
+    href: '/dash-tv',
+    icon: Video,
+  },
+  {
     title: 'Dash Wars Players Guide',
     href: '/block-wars-guide',
     icon: Target,

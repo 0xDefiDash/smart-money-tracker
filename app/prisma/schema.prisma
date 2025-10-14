@@ -203,3 +203,154 @@ model BlockTransaction {
   @@index([timestamp])
   @@index([playerId])
 }
+
+// Dash TV Models
+model StreamerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  displayName     String
+  username        String   @unique
+  bio             String?
+  avatar          String?  // URL to avatar image
+  bannerImage     String?  // Profile banner
+  twitterHandle   String?
+  telegramHandle  String?
+  discordHandle   String?
+  websiteUrl      String?
+  category        String?  // Crypto Trading, DeFi, NFTs, etc.
+  isVerified      Boolean  @default(false)
+  followersCount  Int      @default(0)
+  followingCount  Int      @default(0)
+  totalStreams    Int      @default(0)
+  totalViews      Int      @default(0)
+  totalLikes      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  streams         Stream[]
+  videos          Video[]
+  likes           Like[]
+  comments        Comment[]
+  followers       Follow[]  @relation("Followers")
+  following       Follow[]  @relation("Following")
+  
+  @@map("streamer_profiles")
+  @@index([username])
+  @@index([userId])
+}
+
+model Stream {
+  id              String   @id @default(cuid())
+  streamerId      String
+  title           String
+  description     String?
+  category        String
+  thumbnailUrl    String?
+  isLive          Boolean  @default(false)
+  viewerCount     Int      @default(0)
+  peakViewers     Int      @default(0)
+  likesCount      Int      @default(0)
+  commentsCount   Int      @default(0)
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
+  duration        Int?     // In seconds
+  streamKey       String?  @unique
+  tags            String[]
+  isPublic        Boolean  @default(true)
+  allowChat       Boolean  @default(true)
+  allowGifts      Boolean  @default(true)
+  recordingUrl    String?  // URL to recorded stream
+  
+  streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  likes           Like[]
+  comments        Comment[]
+  
+  @@map("streams")
+  @@index([streamerId, startedAt])
+  @@index([isLive])
+  @@index([category])
+}
+
+model Video {
+  id              String   @id @default(cuid())
+  streamerId      String
+  title           String
+  description     String?
+  videoUrl        String   // Cloud storage path
+  thumbnailUrl    String?
+  category        String
+  duration        Int?     // In seconds
+  viewCount       Int      @default(0)
+  likesCount      Int      @default(0)
+  commentsCount   Int      @default(0)
+  tags            String[]
+  isPublic        Boolean  @default(true)
+  uploadedAt      DateTime @default(now())
+  
+  streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  likes           Like[]
+  comments        Comment[]
+  
+  @@map("videos")
+  @@index([streamerId, uploadedAt])
+  @@index([category])
+}
+
+model Like {
+  id          String   @id @default(cuid())
+  userId      String
+  streamId    String?
+  videoId     String?
+  createdAt   DateTime @default(now())
+  
+  user        StreamerProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stream      Stream?         @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  video       Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, streamId])
+  @@unique([userId, videoId])
+  @@map("likes")
+  @@index([streamId])
+  @@index([videoId])
+  @@index([userId])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  userId      String
+  streamId    String?
+  videoId     String?
+  content     String
+  parentId    String?  // For nested replies
+  likesCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        StreamerProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stream      Stream?         @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  video       Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  parent      Comment?        @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[]       @relation("CommentReplies")
+  
+  @@map("comments")
+  @@index([streamId, createdAt])
+  @@index([videoId, createdAt])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  
+  follower    StreamerProfile @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   StreamerProfile @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  @@unique([followerId, followingId])
+  @@map("follows")
+  @@index([followerId])
+  @@index([followingId])
+}
