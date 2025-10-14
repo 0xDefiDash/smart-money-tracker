@@ -42,6 +42,10 @@ import { DailyRewards } from '@/components/game/daily-rewards'
 import { ParticleEffects } from '@/components/game/particle-effects'
 import { CelebrationModal } from '@/components/game/celebration-modal'
 import { BattleAnimation } from '@/components/game/battle-animation'
+import { WelcomeTutorial } from '@/components/game/welcome-tutorial'
+import { ProgressDashboard } from '@/components/game/progress-dashboard'
+import { HelpTooltip } from '@/components/game/help-tooltip'
+import { BeginnerTips } from '@/components/game/beginner-tips'
 
 interface GameState {
   playerId: string
@@ -249,6 +253,7 @@ export default function BlockWarsPage() {
     type: 'success'
   })
   const [activePowerUps, setActivePowerUps] = useState<string[]>([])
+  const [showTutorial, setShowTutorial] = useState(false)
 
   // Update game state when session is available
   useEffect(() => {
@@ -1579,6 +1584,9 @@ export default function BlockWarsPage() {
 
   return (
     <div className="min-h-screen bg-tech-gradient p-2 sm:p-4">
+      {/* Welcome Tutorial */}
+      <WelcomeTutorial onComplete={() => setShowTutorial(false)} />
+      
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header - Mobile Optimized */}
         <Card className="bg-gradient-to-r from-neon-green/20 to-neon-blue/20 border-neon-green/30 glow-green">
@@ -1612,19 +1620,37 @@ export default function BlockWarsPage() {
                   </div>
                 </div>
                 
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={resetGame}
-                  className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300 text-xs sm:text-sm px-2 sm:px-3 touch-manipulation"
-                >
-                  <span className="hidden sm:inline">Reset Game</span>
-                  <span className="sm:hidden">Reset</span>
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      localStorage.removeItem('dashWars_tutorial_completed')
+                      window.location.reload()
+                    }}
+                    className="bg-neon-blue/10 hover:bg-neon-blue/20 border-neon-blue/20 text-neon-blue-bright hover:text-neon-blue text-xs sm:text-sm px-2 sm:px-3 touch-manipulation"
+                  >
+                    <span className="hidden sm:inline">Tutorial</span>
+                    <span className="sm:hidden">Help</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={resetGame}
+                    className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400 hover:text-red-300 text-xs sm:text-sm px-2 sm:px-3 touch-manipulation"
+                  >
+                    <span className="hidden sm:inline">Reset Game</span>
+                    <span className="sm:hidden">Reset</span>
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
         </Card>
+
+        {/* Beginner Tips */}
+        <BeginnerTips />
 
         {/* Defidash Rewards Section - Mobile Optimized */}
         <Card className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-yellow-500/30 shadow-lg">
@@ -1719,6 +1745,10 @@ export default function BlockWarsPage() {
                 <CardTitle className="text-lg flex items-center space-x-2">
                   <Target className="w-5 h-5 text-green-500" />
                   <span>Economy Status</span>
+                  <HelpTooltip 
+                    content="Your blocks automatically generate money every minute! Collect more blocks to increase your passive income. Premium blocks earn much more than common blocks."
+                    side="right"
+                  />
                 </CardTitle>
               </div>
               <div className="text-right">
@@ -1776,6 +1806,7 @@ export default function BlockWarsPage() {
               twitterHandle={gameState.twitterHandle}
               onProfileUpdate={handleProfileUpdate}
             />
+            <ProgressDashboard gameState={gameState} />
             <GameStats gameState={gameState} />
           </div>
 
