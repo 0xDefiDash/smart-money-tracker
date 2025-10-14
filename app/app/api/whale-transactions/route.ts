@@ -4,21 +4,21 @@ import { NextRequest } from 'next/server'
 
 export const dynamic = "force-dynamic"
 
-// Enhanced whale transaction generator for September 20, 2025
+// Enhanced whale transaction generator for October 14, 2025
 const generateWhaleTransactions = (limit: number = 50) => {
   const baseTimestamp = new Date().getTime();
   
   const cryptoData = [
-    { symbol: 'BTC', price: 63500, name: 'Bitcoin' },
-    { symbol: 'ETH', price: 2485, name: 'Ethereum' },
-    { symbol: 'SOL', price: 145.80, name: 'Solana' },
-    { symbol: 'USDC', price: 0.999, name: 'USD Coin' },
+    { symbol: 'BTC', price: 111888, name: 'Bitcoin' },
+    { symbol: 'ETH', price: 3988.53, name: 'Ethereum' },
+    { symbol: 'SOL', price: 197.75, name: 'Solana' },
+    { symbol: 'USDC', price: 0.999902, name: 'USD Coin' },
     { symbol: 'USDT', price: 1.001, name: 'Tether' },
-    { symbol: 'TON', price: 5.84, name: 'Toncoin' },
-    { symbol: 'AVAX', price: 26.45, name: 'Avalanche' },
-    { symbol: 'ADA', price: 0.365, name: 'Cardano' },
-    { symbol: 'WBTC', price: 63200, name: 'Wrapped Bitcoin' },
-    { symbol: 'BNB', price: 588, name: 'BNB' }
+    { symbol: 'TON', price: 2.26, name: 'Toncoin' },
+    { symbol: 'AVAX', price: 22.5, name: 'Avalanche' },
+    { symbol: 'ADA', price: 0.683446, name: 'Cardano' },
+    { symbol: 'WBTC', price: 111881, name: 'Wrapped Bitcoin' },
+    { symbol: 'BNB', price: 1186.98, name: 'BNB' }
   ];
 
   const blockchains = ['ethereum', 'bitcoin', 'solana', 'avalanche', 'cardano', 'polygon', 'arbitrum', 'base'];
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
       summary,
       total: transactions.length,
       timestamp: new Date().toISOString(),
-      source: 'live-simulation-sept2025'
+      source: 'live-simulation-oct2025'
     })
 
   } catch (error) {
