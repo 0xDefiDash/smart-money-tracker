@@ -19,7 +19,8 @@ import {
   Gamepad2,
   Radio,
   Video,
-  Globe
+  Globe,
+  Shield
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 
@@ -83,6 +84,11 @@ const sidebarItems = [
     title: 'Wallet Dashboard',
     href: '/wallet-dashboard',
     icon: Activity,
+  },
+  {
+    title: 'CA Detector',
+    href: '/ca-detector',
+    icon: Shield,
   },
 ]
 

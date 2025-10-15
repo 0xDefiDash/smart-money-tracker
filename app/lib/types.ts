@@ -1,4 +1,6 @@
 
+import { Prisma } from '@prisma/client'
+
 export interface CryptoData {
   id: string;
   symbol: string;
@@ -48,44 +50,140 @@ export interface DailyReportData {
   date: Date;
   totalWhaleTransactions: number;
   totalWhaleVolumeUsd: number;
-  topCryptoByVolume?: string;
-  largestTransactionUsd?: number;
-  topExchangeInflow?: string;
-  topExchangeOutflow?: string;
-  marketSentiment?: 'bullish' | 'bearish' | 'neutral';
-  reportData?: any;
-  createdAt: Date;
+  topCryptocurrencies: string[];
+  sentimentScore?: number;
+  marketMovers?: string[];
+  majorAlerts?: string[];
 }
 
-export interface MarketStats {
-  totalMarketCap: number;
-  totalVolume: number;
-  dominance: {
-    bitcoin: number;
-    ethereum: number;
-  };
-  whaleActivityCount: number;
-  largeTransactionValue: number;
+export interface PrismaUserData {
+  id: string
+  email: string
+  name?: string | null
+  emailVerified?: Date | null
+  image?: string | null
+  password?: string | null
+  preferences?: Prisma.JsonValue | null
+  watchlist?: Prisma.JsonValue | null
+  alertsEnabled?: boolean
+  createdAt: Date
+  updatedAt: Date
 }
 
-export interface ChartDataPoint {
-  timestamp: string;
-  value: number;
-  volume?: number;
-  transactions?: number;
+export interface TrendingToken {
+  id: string
+  name: string
+  symbol: string
+  address: string
+  blockchain: string
+  price: number
+  priceChange24h: number
+  volume24h: number
+  liquidity: number
+  holders: number
+  marketCap: number
+  platform: string
+  isVerified: boolean
+  firstSeen: string
+  socialLinks?: {
+    twitter?: string
+    telegram?: string
+    website?: string
+  }
 }
 
-export interface AlertConfig {
-  id?: string;
-  email: string;
-  alertType: 'whale_transaction' | 'exchange_flow' | 'daily_report';
-  thresholdUsd?: number;
-  cryptocurrencies: string[];
-  isActive: boolean;
+export interface BlockWarsPlayer {
+  id: string
+  username: string
+  avatar: string
+  level: number
+  xp: number
+  rank: string
+  score: number
+  wins: number
+  losses: number
+  winRate: number
+  badges: string[]
+  joinDate: string
 }
 
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  status: 'success' | 'error';
+// CA Detector Types
+export interface ContractInfo {
+  name: string
+  symbol: string
+  totalSupply: string
+  decimals: number
+  isVerified: boolean
+  age: string
+}
+
+export interface SecurityCheck {
+  name: string
+  description: string
+  passed: boolean
+  severity: 'critical' | 'warning' | 'info'
+  details?: string
+}
+
+export interface TopHolder {
+  address: string
+  percentage: number
+  balance: string
+  label?: string
+}
+
+export interface HolderAnalysis {
+  totalHolders: number
+  top10Percentage: number
+  contractHoldings: number
+  topHolders: TopHolder[]
+}
+
+export interface LiquidityPool {
+  dex: string
+  pair: string
+  liquidityUSD: string
+  volume24h: string
+}
+
+export interface LiquidityInfo {
+  totalLiquidityUSD: string
+  isLocked: boolean
+  lockUntil?: string
+  pools: LiquidityPool[]
+}
+
+export interface TransactionAnomaly {
+  type: string
+  description: string
+  timestamp: string
+}
+
+export interface TransactionAnalysis {
+  totalTransactions: number
+  uniqueWallets: number
+  volume24h: string
+  avgBuySize: string
+  avgSellSize: string
+  buySellRatio: string
+  anomalies: TransactionAnomaly[]
+}
+
+export interface ContractReport {
+  criticalConcerns: string[]
+  warnings: string[]
+  positiveIndicators: string[]
+  recommendation: string
+}
+
+export interface ContractAnalysisResult {
+  contractAddress: string
+  blockchain: string
+  riskScore: number
+  contractInfo: ContractInfo
+  securityChecks: SecurityCheck[]
+  holderAnalysis: HolderAnalysis
+  liquidityInfo: LiquidityInfo
+  transactionAnalysis: TransactionAnalysis
+  report: ContractReport
 }
