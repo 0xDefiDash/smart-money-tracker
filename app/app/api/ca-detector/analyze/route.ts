@@ -162,18 +162,35 @@ async function checkHoneypot(contractAddress: string, blockchain: string) {
 async function getTopHolders(contractAddress: string, blockchain: string) {
   try {
     const config = getExplorerConfig(blockchain)
+    
+    // Check if API key is configured (not the default placeholder)
+    if (config.key === 'YourApiKeyToken') {
+      console.warn(`${config.name} API key not configured. Cannot fetch holder data.`)
+      return null // Return null to indicate API key is missing (different from empty array)
+    }
+    
     const url = `${config.apiUrl}?module=token&action=tokenholderlist&contractaddress=${contractAddress}&page=1&offset=10&apikey=${config.key}`
     
     const response = await fetch(url)
     const data = await response.json()
     
-    if (data.status === '1' && data.result) {
+    // Check for rate limiting or API errors
+    if (data.status === '0') {
+      console.error(`${config.name} API error:`, data.message || data.result)
+      if (data.result && typeof data.result === 'string' && data.result.includes('rate limit')) {
+        console.warn('API rate limit exceeded')
+        return null // Return null for rate limiting
+      }
+    }
+    
+    if (data.status === '1' && data.result && Array.isArray(data.result)) {
       return data.result
     }
-    return []
+    
+    return [] // Return empty array if no holders found (legitimate case)
   } catch (error) {
     console.error('Error fetching top holders:', error)
-    return []
+    return null // Return null for errors
   }
 }
 
@@ -754,8 +771,12 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
   let top10Percentage = 0
   const knownScammers: KnownScammerWallet[] = []
   let walletPatternAlerts: WalletPatternAlert[] = []
+  let holdersDataUnavailable = false
   
-  if (holdersData && holdersData.length > 0) {
+  // Check if holders data is unavailable due to missing API keys
+  if (holdersData === null) {
+    holdersDataUnavailable = true
+  } else if (holdersData && holdersData.length > 0) {
     // Calculate total supply from all holders
     const totalSupply = holdersData.reduce((sum: number, h: any) => {
       return sum + parseFloat(h.TokenHolderQuantity || '0')
@@ -1066,7 +1087,8 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
       totalHolders: totalHoldersCount || dexData?.schemaVersion ? 100 : 0, // Fallback estimate
       top10Percentage: parseFloat(top10Percentage.toFixed(1)),
       contractHoldings: 0, // Would need additional API call to determine
-      topHolders
+      topHolders,
+      holdersDataUnavailable
     },
     liquidityInfo: {
       totalLiquidityUSD: totalLiquidityFormatted,

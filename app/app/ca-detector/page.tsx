@@ -450,6 +450,22 @@ export default function CADetectorPage() {
 
             {/* Holders Tab */}
             <TabsContent value="holders" className="space-y-4">
+              {/* API Key Configuration Alert for Holders */}
+              {analysis.holderAnalysis.holdersDataUnavailable && (
+                <Alert className="border-2 border-blue-500 bg-blue-50/10">
+                  <Info className="h-5 w-5" />
+                  <AlertDescription className="space-y-2">
+                    <div className="font-bold">Blockchain Explorer API Keys Not Configured</div>
+                    <p className="text-sm">
+                      Wallet holder data requires blockchain explorer API keys. Please see the <strong>Top 10 Wallets</strong> tab for detailed setup instructions.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Free API keys are available from Etherscan, BSCScan, PolygonScan, Arbiscan, and BaseScan.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               {/* Known Scammers Alert */}
               {analysis.transactionAnalysis.knownScammers && analysis.transactionAnalysis.knownScammers.length > 0 && (
                 <Alert variant="destructive" className="border-2 border-red-500">
@@ -615,6 +631,48 @@ export default function CADetectorPage() {
 
             {/* Top 10 Wallets Tab */}
             <TabsContent value="top10" className="space-y-4">
+              {/* API Key Configuration Alert */}
+              {analysis.holderAnalysis.holdersDataUnavailable && (
+                <Alert className="border-2 border-orange-500 bg-orange-50/10">
+                  <AlertTriangle className="h-5 w-5" />
+                  <AlertDescription className="space-y-3">
+                    <div className="font-bold text-lg">⚠️ Blockchain Explorer API Keys Required</div>
+                    <p className="text-sm">
+                      To display detailed wallet holder analysis, you need to configure API keys for blockchain explorers. 
+                      This allows the system to fetch transaction history and holder data from the blockchain.
+                    </p>
+                    <div className="mt-3 p-3 bg-muted rounded">
+                      <div className="font-semibold mb-2">How to Configure API Keys:</div>
+                      <ol className="list-decimal list-inside space-y-2 text-sm">
+                        <li>Get free API keys from:
+                          <ul className="list-disc list-inside ml-6 mt-1 space-y-1">
+                            <li><strong>Ethereum:</strong> <a href="https://etherscan.io/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Etherscan API</a></li>
+                            <li><strong>BSC:</strong> <a href="https://bscscan.com/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">BscScan API</a></li>
+                            <li><strong>Polygon:</strong> <a href="https://polygonscan.com/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">PolygonScan API</a></li>
+                            <li><strong>Arbitrum:</strong> <a href="https://arbiscan.io/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Arbiscan API</a></li>
+                            <li><strong>Base:</strong> <a href="https://basescan.org/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">BaseScan API</a></li>
+                          </ul>
+                        </li>
+                        <li className="mt-2">Add the API keys to your <code className="bg-background px-1 rounded">.env</code> file:
+                          <pre className="mt-2 p-2 bg-background rounded text-xs overflow-x-auto">
+{`ETHERSCAN_API_KEY=your_etherscan_key
+BSCSCAN_API_KEY=your_bscscan_key
+POLYGONSCAN_API_KEY=your_polygonscan_key
+ARBISCAN_API_KEY=your_arbiscan_key
+BASESCAN_API_KEY=your_basescan_key`}
+                          </pre>
+                        </li>
+                        <li>Restart the application to load the new API keys</li>
+                      </ol>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-3">
+                      <strong>Note:</strong> All listed explorer APIs offer free tiers that are sufficient for personal use.
+                      Without these keys, you can still view other analysis features like security checks, liquidity info, and transaction patterns.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -626,6 +684,20 @@ export default function CADetectorPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {analysis.holderAnalysis.topHolders.length === 0 && !analysis.holderAnalysis.holdersDataUnavailable ? (
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        No wallet holder data available for this token. This could be due to:
+                        <ul className="list-disc list-inside mt-2 text-xs">
+                          <li>Token is newly launched with no established holders yet</li>
+                          <li>Token holder list is not publicly available on blockchain explorers</li>
+                          <li>Data synchronization delay from blockchain to explorer APIs</li>
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  ) : null}
+                  
                   {analysis.holderAnalysis.topHolders.map((holder, index) => {
                     const detailedAnalysis = holder.detailedAnalysis
                     

@@ -170,6 +170,7 @@ export interface HolderAnalysis {
   top10Percentage: number
   contractHoldings: number
   topHolders: TopHolder[]
+  holdersDataUnavailable?: boolean
 }
 
 export interface LiquidityPool {
