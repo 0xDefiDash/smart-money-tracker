@@ -39,6 +39,9 @@ import {
 import { cn } from '@/lib/utils'
 import { GoLiveSetup } from '@/components/live-stream/go-live-setup'
 import { StreamDashboard } from '@/components/live-stream/stream-dashboard'
+import { TipButton } from '@/components/dash-tv/tip-button'
+import { RecentTips } from '@/components/dash-tv/recent-tips'
+import { WalletSetup } from '@/components/dash-tv/wallet-setup'
 
 interface StreamSettings {
   title: string
@@ -466,22 +469,33 @@ export default function GoLivePage() {
               streamSettings={streamSettings}
               userStats={userStats}
               onEndStream={handleEndStream}
+              streamerId={currentStreamerId}
             />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-3 sm:space-y-4 md:space-y-6">
-            <Card className="bg-slate-900/80 border-slate-700/50">
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Stream Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 space-y-4">
-                <div className="text-center py-8">
-                  <Settings className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm sm:text-base text-muted-foreground">Advanced streaming settings will be available here.</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-2">Coming soon!</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+              <WalletSetup streamerId={currentStreamerId} />
+              
+              <Card className="bg-slate-900/80 border-slate-700/50">
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Stream Preferences
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6 space-y-4">
+                  <div className="text-center py-8">
+                    <p className="text-sm sm:text-base text-muted-foreground">Advanced streaming settings will be available here.</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-2">Coming soon!</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4 md:gap-6">
+              <RecentTips streamerId={currentStreamerId} showStats={true} limit={10} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

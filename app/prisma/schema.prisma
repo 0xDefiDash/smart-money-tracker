@@ -234,6 +234,8 @@ model StreamerProfile {
   comments        Comment[]
   followers       Follow[]  @relation("Followers")
   following       Follow[]  @relation("Following")
+  tipsReceived    Tip[]     @relation("ReceivedTips")
+  walletConnection WalletConnection?
   
   @@map("streamer_profiles")
   @@index([username])
@@ -265,6 +267,7 @@ model Stream {
   streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
   likes           Like[]
   comments        Comment[]
+  tips            Tip[]
   
   @@map("streams")
   @@index([streamerId, startedAt])
@@ -291,6 +294,7 @@ model Video {
   streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
   likes           Like[]
   comments        Comment[]
+  tips            Tip[]
   
   @@map("videos")
   @@index([streamerId, uploadedAt])
@@ -353,4 +357,54 @@ model Follow {
   @@map("follows")
   @@index([followerId])
   @@index([followingId])
+}
+
+model Tip {
+  id              String   @id @default(cuid())
+  fromUserId      String   // User sending the tip
+  toStreamerId    String   // Streamer receiving the tip
+  streamId        String?  // Optional: tip during a live stream
+  videoId         String?  // Optional: tip on a video
+  amount          Float    // Amount in crypto
+  amountUsd       Float    // USD equivalent at time of tip
+  cryptocurrency  String   // BTC, ETH, SOL, etc.
+  txHash          String?  // Blockchain transaction hash
+  walletAddress   String?  // Sender's wallet address
+  message         String?  // Optional message with tip
+  status          String   @default("pending") // pending, completed, failed
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  
+  toStreamer      StreamerProfile @relation("ReceivedTips", fields: [toStreamerId], references: [id], onDelete: Cascade)
+  stream          Stream?         @relation(fields: [streamId], references: [id], onDelete: SetNull)
+  video           Video?          @relation(fields: [videoId], references: [id], onDelete: SetNull)
+  
+  @@map("tips")
+  @@index([toStreamerId, createdAt])
+  @@index([fromUserId])
+  @@index([streamId])
+  @@index([videoId])
+  @@index([status])
+}
+
+model WalletConnection {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  streamerId      String   @unique
+  walletAddress   String   // Primary wallet address for receiving tips
+  walletType      String   // metamask, phantom, coinbase, etc.
+  blockchain      String   // ethereum, solana, polygon, etc.
+  qrCode          String?  // QR code image URL
+  isVerified      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  totalTipsReceived Float  @default(0)
+  totalTipsReceivedUsd Float @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  
+  @@map("wallet_connections")
+  @@index([streamerId])
+  @@index([walletAddress])
 }

@@ -32,6 +32,7 @@ import {
   Download
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { RecentTips } from '@/components/dash-tv/recent-tips'
 
 interface StreamStats {
   viewers: number
@@ -69,6 +70,7 @@ interface StreamDashboardProps {
   streamSettings: StreamSettings
   userStats: UserStats
   onEndStream: () => void
+  streamerId?: string
 }
 
 interface ChatMessage {
@@ -84,7 +86,8 @@ export function StreamDashboard({
   streamStats, 
   streamSettings, 
   userStats, 
-  onEndStream 
+  onEndStream,
+  streamerId 
 }: StreamDashboardProps) {
   const [isMuted, setIsMuted] = useState(false)
   const [isCameraOn, setIsCameraOn] = useState(true)
@@ -389,6 +392,15 @@ export function StreamDashboard({
               </div>
             </CardContent>
           </Card>
+
+          {/* Recent Tips */}
+          {streamerId && (
+            <RecentTips 
+              streamerId={streamerId} 
+              showStats={false} 
+              limit={5} 
+            />
+          )}
 
           {/* Export Options */}
           <Card className="bg-slate-900/80 border-slate-700/50">
