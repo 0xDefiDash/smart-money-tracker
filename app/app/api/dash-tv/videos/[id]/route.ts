@@ -37,7 +37,7 @@ export async function GET(
     // Increment view count
     await prisma.video.update({
       where: { id: params.id },
-      data: { viewCount: { increment: 1 } }
+      data: { viewsCount: { increment: 1 } }
     })
 
     return NextResponse.json(video)

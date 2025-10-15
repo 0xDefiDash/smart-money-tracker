@@ -10,23 +10,21 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  username      String?  @unique
-  email         String?  @unique
-  name          String?
-  password      String?
-  profileImage  String?  // URL to profile image
-  xHandle       String?  // X (formerly Twitter) handle
-  gameMoney     Int      @default(0)  // Changed from gameCoins to gameMoney
-  gameLevel     Int      @default(1)
-  gameExp       Int      @default(0)
-  isAdmin       Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // NextAuth fields for compatibility
-  accounts      Account[]
-  sessions      Session[]
+  id           String    @id @default(cuid())
+  email        String?   @unique
+  name         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  gameExp      Int       @default(0)
+  gameLevel    Int       @default(1)
+  isAdmin      Boolean   @default(false)
+  password     String?
+  profileImage String?
+  username     String?   @unique
+  gameMoney    Int       @default(0)
+  xHandle      String?
+  accounts     Account[]
+  sessions     Session[]
 
   @@map("users")
 }
@@ -44,8 +42,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -83,7 +80,6 @@ model Cryptocurrency {
   isActive          Boolean            @default(true)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  
   priceHistories    PriceHistory[]
   whaleTransactions WhaleTransaction[]
 
@@ -97,127 +93,126 @@ model PriceHistory {
   marketCap      BigInt?
   volume         Float?
   timestamp      DateTime
-  
   cryptocurrency Cryptocurrency @relation(fields: [cryptoId], references: [id], onDelete: Cascade)
-  
-  @@map("price_histories")
+
   @@index([cryptoId, timestamp])
+  @@map("price_histories")
 }
 
 model WhaleTransaction {
-  id                String         @id @default(cuid())
-  txHash            String         @unique
-  blockNumber       BigInt?
-  cryptoId          String
-  fromAddress       String
-  toAddress         String
-  value             String         // Store as string to handle large numbers
-  valueUsd          Float
-  gasUsed           BigInt?
-  gasPrice          BigInt?
-  timestamp         DateTime
-  blockchain        String
-  isAlert           Boolean        @default(false)
-  alertThreshold    Float?         // USD threshold that triggered alert
-  
-  cryptocurrency    Cryptocurrency @relation(fields: [cryptoId], references: [id], onDelete: Cascade)
-  
-  @@map("whale_transactions")
+  id             String         @id @default(cuid())
+  txHash         String         @unique
+  blockNumber    BigInt?
+  cryptoId       String
+  fromAddress    String
+  toAddress      String
+  value          String
+  valueUsd       Float
+  gasUsed        BigInt?
+  gasPrice       BigInt?
+  timestamp      DateTime
+  blockchain     String
+  isAlert        Boolean        @default(false)
+  alertThreshold Float?
+  cryptocurrency Cryptocurrency @relation(fields: [cryptoId], references: [id], onDelete: Cascade)
+
   @@index([cryptoId, timestamp])
   @@index([valueUsd, timestamp])
   @@index([fromAddress])
   @@index([toAddress])
+  @@map("whale_transactions")
 }
 
 model ExchangeFlow {
-  id              String   @id @default(cuid())
-  exchangeName    String
-  cryptocurrency  String
-  flowType        String   // "inflow" or "outflow"
-  amount          String   // Store as string to handle large numbers
-  amountUsd       Float
-  timestamp       DateTime
-  
-  @@map("exchange_flows")
+  id             String   @id @default(cuid())
+  exchangeName   String
+  cryptocurrency String
+  flowType       String
+  amount         String
+  amountUsd      Float
+  timestamp      DateTime
+
   @@index([exchangeName, cryptocurrency, timestamp])
   @@index([flowType, timestamp])
+  @@map("exchange_flows")
 }
 
 model WalletWatch {
-  id          String   @id @default(cuid())
-  address     String   @unique
-  label       String?
-  blockchain  String
-  isWhale     Boolean  @default(false)
-  balance     String?  // Current balance as string
-  balanceUsd  Float?
-  lastActive  DateTime?
-  createdAt   DateTime @default(now())
-  
-  @@map("wallet_watches")
+  id         String    @id @default(cuid())
+  address    String    @unique
+  label      String?
+  blockchain String
+  isWhale    Boolean   @default(false)
+  balance    String?
+  balanceUsd Float?
+  lastActive DateTime?
+  createdAt  DateTime  @default(now())
+
   @@index([blockchain, isWhale])
+  @@map("wallet_watches")
 }
 
 model DailyReport {
-  id                    String   @id @default(cuid())
-  date                  DateTime @unique @db.Date
+  id                     String   @id @default(cuid())
+  date                   DateTime @unique @db.Date
   totalWhaleTransactions Int      @default(0)
-  totalWhaleVolumeUsd   Float    @default(0)
-  topCryptoByVolume     String?
-  largestTransactionUsd Float?
-  topExchangeInflow     String?
-  topExchangeOutflow    String?
-  marketSentiment       String?  // "bullish", "bearish", "neutral"
-  reportData            Json?    // Store detailed report data
-  createdAt             DateTime @default(now())
-  
+  totalWhaleVolumeUsd    Float    @default(0)
+  topCryptoByVolume      String?
+  largestTransactionUsd  Float?
+  topExchangeInflow      String?
+  topExchangeOutflow     String?
+  marketSentiment        String?
+  reportData             Json?
+  createdAt              DateTime @default(now())
+
   @@map("daily_reports")
 }
 
 model AlertSubscription {
-  id              String   @id @default(cuid())
-  email           String
-  alertType       String   // "whale_transaction", "exchange_flow", "daily_report"
-  thresholdUsd    Float?   // Alert threshold in USD
-  cryptocurrencies String[] // Array of crypto symbols to monitor
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  
+  id               String   @id @default(cuid())
+  email            String
+  alertType        String
+  thresholdUsd     Float?
+  cryptocurrencies String[]
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
   @@map("alert_subscriptions")
 }
 
 model BlockTransaction {
-  id            String   @id @default(cuid())
-  playerId      String
-  playerName    String?  // Store player name for display
-  blockId       String
-  blockName     String
-  blockType     String   // btc, eth, sol, etc.
-  blockRarity   String   // common, rare, epic, legendary, secret
-  transactionType String // "claim", "purchase", "steal", "sell"
-  price         Int?     // Price paid (null for free claims)
-  value         Int      // Block value in coins
-  timestamp     DateTime @default(now())
-  
-  @@map("block_transactions")
+  id              String   @id @default(cuid())
+  playerId        String
+  playerName      String?
+  blockId         String
+  blockName       String
+  blockType       String
+  blockRarity     String
+  transactionType String
+  price           Int?
+  value           Int
+  timestamp       DateTime @default(now())
+
   @@index([timestamp])
   @@index([playerId])
+  @@map("block_transactions")
 }
 
-// Dash TV Models
+// ============ Dash TV / Streaming Models ============
+
 model StreamerProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
   displayName     String
   username        String   @unique
   bio             String?
-  avatar          String?  // URL to avatar image
-  bannerImage     String?  // Profile banner
+  avatar          String?
+  bannerImage     String?
   twitterHandle   String?
   telegramHandle  String?
   discordHandle   String?
   websiteUrl      String?
-  category        String?  // Crypto Trading, DeFi, NFTs, etc.
+  category        String?
   isVerified      Boolean  @default(false)
   followersCount  Int      @default(0)
   followingCount  Int      @default(0)
@@ -227,7 +222,6 @@ model StreamerProfile {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
-  // Relations
   streams         Stream[]
   videos          Video[]
   likes           Like[]
@@ -256,13 +250,8 @@ model Stream {
   commentsCount   Int      @default(0)
   startedAt       DateTime @default(now())
   endedAt         DateTime?
-  duration        Int?     // In seconds
+  duration        Int?
   streamKey       String?  @unique
-  tags            String[]
-  isPublic        Boolean  @default(true)
-  allowChat       Boolean  @default(true)
-  allowGifts      Boolean  @default(true)
-  recordingUrl    String?  // URL to recorded stream
   
   streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
   likes           Like[]
@@ -270,9 +259,9 @@ model Stream {
   tips            Tip[]
   
   @@map("streams")
-  @@index([streamerId, startedAt])
+  @@index([streamerId])
   @@index([isLive])
-  @@index([category])
+  @@index([startedAt])
 }
 
 model Video {
@@ -280,15 +269,15 @@ model Video {
   streamerId      String
   title           String
   description     String?
-  videoUrl        String   // Cloud storage path
-  thumbnailUrl    String?
   category        String
-  duration        Int?     // In seconds
-  viewCount       Int      @default(0)
+  thumbnailUrl    String?
+  videoUrl        String
+  duration        Int
+  viewsCount      Int      @default(0)
   likesCount      Int      @default(0)
   commentsCount   Int      @default(0)
-  tags            String[]
   isPublic        Boolean  @default(true)
+  tags            String[] @default([])
   uploadedAt      DateTime @default(now())
   
   streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
@@ -297,61 +286,58 @@ model Video {
   tips            Tip[]
   
   @@map("videos")
-  @@index([streamerId, uploadedAt])
-  @@index([category])
+  @@index([streamerId])
+  @@index([uploadedAt])
 }
 
 model Like {
-  id          String   @id @default(cuid())
-  userId      String
-  streamId    String?
-  videoId     String?
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  userId          String
+  streamId        String?
+  videoId         String?
+  createdAt       DateTime @default(now())
   
-  user        StreamerProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stream      Stream?         @relation(fields: [streamId], references: [id], onDelete: Cascade)
-  video       Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user            StreamerProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stream          Stream?         @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  video           Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
   
-  @@unique([userId, streamId])
-  @@unique([userId, videoId])
   @@map("likes")
-  @@index([streamId])
   @@index([videoId])
+  @@index([streamId])
   @@index([userId])
 }
 
 model Comment {
-  id          String   @id @default(cuid())
-  userId      String
-  streamId    String?
-  videoId     String?
-  content     String
-  parentId    String?  // For nested replies
-  likesCount  Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  streamId        String?
+  videoId         String?
+  content         String
+  parentId        String?
+  createdAt       DateTime @default(now())
   
-  user        StreamerProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stream      Stream?         @relation(fields: [streamId], references: [id], onDelete: Cascade)
-  video       Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  parent      Comment?        @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies     Comment[]       @relation("CommentReplies")
+  user            StreamerProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stream          Stream?         @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  video           Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  parent          Comment?        @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies         Comment[]       @relation("CommentReplies")
   
   @@map("comments")
-  @@index([streamId, createdAt])
-  @@index([videoId, createdAt])
+  @@index([videoId])
+  @@index([streamId])
   @@index([userId])
   @@index([parentId])
+  @@index([createdAt])
 }
 
 model Follow {
-  id          String   @id @default(cuid())
-  followerId  String
-  followingId String
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  followerId      String
+  followingId     String
+  createdAt       DateTime @default(now())
   
-  follower    StreamerProfile @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
-  following   StreamerProfile @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  follower        StreamerProfile @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following       StreamerProfile @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
   
   @@unique([followerId, followingId])
   @@map("follows")
@@ -361,48 +347,47 @@ model Follow {
 
 model Tip {
   id              String   @id @default(cuid())
-  fromUserId      String   // User sending the tip
-  toStreamerId    String   // Streamer receiving the tip
-  streamId        String?  // Optional: tip during a live stream
-  videoId         String?  // Optional: tip on a video
-  amount          Float    // Amount in crypto
-  amountUsd       Float    // USD equivalent at time of tip
-  cryptocurrency  String   // BTC, ETH, SOL, etc.
-  txHash          String?  // Blockchain transaction hash
-  walletAddress   String?  // Sender's wallet address
-  message         String?  // Optional message with tip
-  status          String   @default("pending") // pending, completed, failed
+  fromUserId      String?
+  toStreamerId    String
+  streamId        String?
+  videoId         String?
+  amount          Float
+  cryptocurrency  String
+  amountUsd       Float
+  walletAddress   String?
+  message         String?
+  txHash          String?
+  status          String   @default("completed")
   completedAt     DateTime?
   createdAt       DateTime @default(now())
   
-  toStreamer      StreamerProfile @relation("ReceivedTips", fields: [toStreamerId], references: [id], onDelete: Cascade)
-  stream          Stream?         @relation(fields: [streamId], references: [id], onDelete: SetNull)
-  video           Video?          @relation(fields: [videoId], references: [id], onDelete: SetNull)
+  recipient       StreamerProfile @relation("ReceivedTips", fields: [toStreamerId], references: [id], onDelete: Cascade)
+  stream          Stream?         @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  video           Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
   
   @@map("tips")
-  @@index([toStreamerId, createdAt])
-  @@index([fromUserId])
+  @@index([toStreamerId])
   @@index([streamId])
   @@index([videoId])
-  @@index([status])
+  @@index([createdAt])
 }
 
 model WalletConnection {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  streamerId      String   @unique
-  walletAddress   String   // Primary wallet address for receiving tips
-  walletType      String   // metamask, phantom, coinbase, etc.
-  blockchain      String   // ethereum, solana, polygon, etc.
-  qrCode          String?  // QR code image URL
-  isVerified      Boolean  @default(false)
-  isActive        Boolean  @default(true)
-  totalTipsReceived Float  @default(0)
-  totalTipsReceivedUsd Float @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  userId                  String?
+  streamerId              String   @unique
+  walletAddress           String
+  walletType              String
+  blockchain              String
+  qrCode                  String?
+  isVerified              Boolean  @default(false)
+  isActive                Boolean  @default(true)
+  totalTipsReceived       Float    @default(0)
+  totalTipsReceivedUsd    Float    @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
   
-  streamer        StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  streamer                StreamerProfile @relation(fields: [streamerId], references: [id], onDelete: Cascade)
   
   @@map("wallet_connections")
   @@index([streamerId])

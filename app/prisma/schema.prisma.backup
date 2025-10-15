@@ -1,0 +1,199 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "/home/ubuntu/smart_money_tracker/app/node_modules/.prisma/client"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String?   @unique
+  name         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  gameExp      Int       @default(0)
+  gameLevel    Int       @default(1)
+  isAdmin      Boolean   @default(false)
+  password     String?
+  profileImage String?
+  username     String?   @unique
+  gameMoney    Int       @default(0)
+  xHandle      String?
+  accounts     Account[]
+  sessions     Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Cryptocurrency {
+  id                String             @id @default(cuid())
+  symbol            String             @unique
+  name              String
+  coinGeckoId       String             @unique
+  marketCap         BigInt?
+  price             Float?
+  volume24h         Float?
+  priceChange24h    Float?
+  rank              Int?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  priceHistories    PriceHistory[]
+  whaleTransactions WhaleTransaction[]
+
+  @@map("cryptocurrencies")
+}
+
+model PriceHistory {
+  id             String         @id @default(cuid())
+  cryptoId       String
+  price          Float
+  marketCap      BigInt?
+  volume         Float?
+  timestamp      DateTime
+  cryptocurrency Cryptocurrency @relation(fields: [cryptoId], references: [id], onDelete: Cascade)
+
+  @@index([cryptoId, timestamp])
+  @@map("price_histories")
+}
+
+model WhaleTransaction {
+  id             String         @id @default(cuid())
+  txHash         String         @unique
+  blockNumber    BigInt?
+  cryptoId       String
+  fromAddress    String
+  toAddress      String
+  value          String
+  valueUsd       Float
+  gasUsed        BigInt?
+  gasPrice       BigInt?
+  timestamp      DateTime
+  blockchain     String
+  isAlert        Boolean        @default(false)
+  alertThreshold Float?
+  cryptocurrency Cryptocurrency @relation(fields: [cryptoId], references: [id], onDelete: Cascade)
+
+  @@index([cryptoId, timestamp])
+  @@index([valueUsd, timestamp])
+  @@index([fromAddress])
+  @@index([toAddress])
+  @@map("whale_transactions")
+}
+
+model ExchangeFlow {
+  id             String   @id @default(cuid())
+  exchangeName   String
+  cryptocurrency String
+  flowType       String
+  amount         String
+  amountUsd      Float
+  timestamp      DateTime
+
+  @@index([exchangeName, cryptocurrency, timestamp])
+  @@index([flowType, timestamp])
+  @@map("exchange_flows")
+}
+
+model WalletWatch {
+  id         String    @id @default(cuid())
+  address    String    @unique
+  label      String?
+  blockchain String
+  isWhale    Boolean   @default(false)
+  balance    String?
+  balanceUsd Float?
+  lastActive DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([blockchain, isWhale])
+  @@map("wallet_watches")
+}
+
+model DailyReport {
+  id                     String   @id @default(cuid())
+  date                   DateTime @unique @db.Date
+  totalWhaleTransactions Int      @default(0)
+  totalWhaleVolumeUsd    Float    @default(0)
+  topCryptoByVolume      String?
+  largestTransactionUsd  Float?
+  topExchangeInflow      String?
+  topExchangeOutflow     String?
+  marketSentiment        String?
+  reportData             Json?
+  createdAt              DateTime @default(now())
+
+  @@map("daily_reports")
+}
+
+model AlertSubscription {
+  id               String   @id @default(cuid())
+  email            String
+  alertType        String
+  thresholdUsd     Float?
+  cryptocurrencies String[]
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  @@map("alert_subscriptions")
+}
+
+model BlockTransaction {
+  id              String   @id @default(cuid())
+  playerId        String
+  playerName      String?
+  blockId         String
+  blockName       String
+  blockType       String
+  blockRarity     String
+  transactionType String
+  price           Int?
+  value           Int
+  timestamp       DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([playerId])
+  @@map("block_transactions")
+}

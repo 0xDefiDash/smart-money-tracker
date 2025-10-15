@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
       take: limit,
       include: {
-        toStreamer: {
+        recipient: {
           select: {
             displayName: true,
             avatar: true,
