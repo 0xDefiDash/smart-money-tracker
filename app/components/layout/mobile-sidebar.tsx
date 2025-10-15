@@ -64,11 +64,6 @@ const sidebarItems = [
     icon: Building2,
   },
   {
-    title: 'ZORA Tracker',
-    href: '/zora',
-    icon: Globe,
-  },
-  {
     title: 'Wallet Analytics',
     href: '/wallet',
     icon: Wallet,
