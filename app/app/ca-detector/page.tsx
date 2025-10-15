@@ -631,48 +631,6 @@ export default function CADetectorPage() {
 
             {/* Top 10 Wallets Tab */}
             <TabsContent value="top10" className="space-y-6">
-              {/* API Key Configuration Alert */}
-              {analysis.holderAnalysis.holdersDataUnavailable && (
-                <Alert className="border-2 border-orange-500/50 bg-gradient-to-r from-orange-50/10 to-amber-50/10 dark:from-orange-950/20 dark:to-amber-950/20">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
-                  <AlertDescription className="space-y-3">
-                    <div className="font-bold text-lg">⚠️ Blockchain Explorer API Keys Required</div>
-                    <p className="text-sm">
-                      To display detailed wallet holder analysis, you need to configure API keys for blockchain explorers. 
-                      This allows the system to fetch transaction history and holder data from the blockchain.
-                    </p>
-                    <div className="mt-3 p-3 bg-muted/50 rounded-lg backdrop-blur">
-                      <div className="font-semibold mb-2">How to Configure API Keys:</div>
-                      <ol className="list-decimal list-inside space-y-2 text-sm">
-                        <li>Get free API keys from:
-                          <ul className="list-disc list-inside ml-6 mt-1 space-y-1">
-                            <li><strong>Ethereum:</strong> <a href="https://etherscan.io/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Etherscan API</a></li>
-                            <li><strong>BSC:</strong> <a href="https://bscscan.com/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">BscScan API</a></li>
-                            <li><strong>Polygon:</strong> <a href="https://polygonscan.com/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">PolygonScan API</a></li>
-                            <li><strong>Arbitrum:</strong> <a href="https://arbiscan.io/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Arbiscan API</a></li>
-                            <li><strong>Base:</strong> <a href="https://basescan.org/apis" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">BaseScan API</a></li>
-                          </ul>
-                        </li>
-                        <li className="mt-2">Add the API keys to your <code className="bg-background px-1 rounded">.env</code> file:
-                          <pre className="mt-2 p-2 bg-background rounded text-xs overflow-x-auto">
-{`ETHERSCAN_API_KEY=your_etherscan_key
-BSCSCAN_API_KEY=your_bscscan_key
-POLYGONSCAN_API_KEY=your_polygonscan_key
-ARBISCAN_API_KEY=your_arbiscan_key
-BASESCAN_API_KEY=your_basescan_key`}
-                          </pre>
-                        </li>
-                        <li>Restart the application to load the new API keys</li>
-                      </ol>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-3">
-                      <strong>Note:</strong> All listed explorer APIs offer free tiers that are sufficient for personal use.
-                      Without these keys, you can still view other analysis features like security checks, liquidity info, and transaction patterns.
-                    </p>
-                  </AlertDescription>
-                </Alert>
-              )}
-              
               {/* Header Card */}
               <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
                 <CardHeader>
