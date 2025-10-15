@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
 import { 
   Trophy, 
   Crown, 
@@ -16,8 +17,10 @@ import {
   Shield,
   DollarSign,
   Clock,
-  Gem
+  Gem,
+  Eye
 } from 'lucide-react'
+import { PlayerProfileModal } from './player-profile-modal'
 
 interface LeaderboardEntry {
   playerId: string
@@ -74,6 +77,18 @@ export default function Leaderboard({ gameState }: LeaderboardProps) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<string>('')
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  
+  const handlePlayerClick = (playerId: string) => {
+    setSelectedPlayerId(playerId)
+    setIsProfileModalOpen(true)
+  }
+  
+  const closeProfileModal = () => {
+    setIsProfileModalOpen(false)
+    setSelectedPlayerId(null)
+  }
 
   // Real-time polling interval
   useEffect(() => {
@@ -181,9 +196,10 @@ export default function Leaderboard({ gameState }: LeaderboardProps) {
           {leaderboard.map((entry) => (
             <div
               key={entry.playerId}
-              className={`relative p-4 rounded-xl bg-gradient-to-r ${getRankGradient(entry.rank)} border backdrop-blur-sm ${
+              className={`relative p-4 rounded-xl bg-gradient-to-r ${getRankGradient(entry.rank)} border backdrop-blur-sm transition-all hover:scale-[1.02] cursor-pointer group ${
                 entry.isCurrentPlayer ? 'ring-2 ring-blue-500/50' : ''
               }`}
+              onClick={() => handlePlayerClick(entry.playerId)}
             >
               {/* Rank Badge */}
               <div className="absolute -top-2 -left-2 z-10">
@@ -192,6 +208,22 @@ export default function Leaderboard({ gameState }: LeaderboardProps) {
                 }`}>
                   {getRankIcon(entry.rank)}
                 </div>
+              </div>
+              
+              {/* View Profile Button - shows on hover */}
+              <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button 
+                  size="sm" 
+                  variant="secondary"
+                  className="h-8 px-3 shadow-lg"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handlePlayerClick(entry.playerId)
+                  }}
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  View Profile
+                </Button>
               </div>
 
               <div className="ml-6 space-y-3">
@@ -324,6 +356,13 @@ export default function Leaderboard({ gameState }: LeaderboardProps) {
           </div>
         </div>
       </CardContent>
+      
+      {/* Player Profile Modal */}
+      <PlayerProfileModal 
+        playerId={selectedPlayerId}
+        isOpen={isProfileModalOpen}
+        onClose={closeProfileModal}
+      />
     </Card>
   )
 }
