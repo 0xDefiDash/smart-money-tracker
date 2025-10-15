@@ -246,9 +246,10 @@ export default function CADetectorPage() {
 
           {/* Detailed Analysis Tabs */}
           <Tabs defaultValue="security" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6">
               <TabsTrigger value="security">Security</TabsTrigger>
               <TabsTrigger value="holders">Holders</TabsTrigger>
+              <TabsTrigger value="top10">Top 10 Wallets</TabsTrigger>
               <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
               <TabsTrigger value="transactions">Transactions</TabsTrigger>
               <TabsTrigger value="report">Report</TabsTrigger>
@@ -452,6 +453,267 @@ export default function CADetectorPage() {
                       })}
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Top 10 Wallets Tab */}
+            <TabsContent value="top10" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Top 10 Wallet Holders - Detailed Analysis
+                  </CardTitle>
+                  <CardDescription>
+                    Comprehensive transaction history and risk analysis for each top wallet holder
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {analysis.holderAnalysis.topHolders.map((holder, index) => {
+                    const detailedAnalysis = holder.detailedAnalysis
+                    
+                    const riskColor = 
+                      holder.riskLevel === 'high' ? 'border-red-500' :
+                      holder.riskLevel === 'medium' ? 'border-orange-500' :
+                      holder.riskLevel === 'low' ? 'border-yellow-500' :
+                      'border-green-500'
+                    
+                    const riskBgColor = 
+                      holder.riskLevel === 'high' ? 'bg-red-50 dark:bg-red-950/20' :
+                      holder.riskLevel === 'medium' ? 'bg-orange-50 dark:bg-orange-950/20' :
+                      holder.riskLevel === 'low' ? 'bg-yellow-50 dark:bg-yellow-950/20' :
+                      'bg-green-50 dark:bg-green-950/20'
+                    
+                    return (
+                      <div key={index} className={`border-2 ${riskColor} ${riskBgColor} rounded-lg overflow-hidden`}>
+                        {/* Wallet Header */}
+                        <div className="p-4 border-b bg-background/50">
+                          <div className="flex items-center justify-between flex-wrap gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                #{index + 1}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-mono text-sm font-semibold">{holder.address}</span>
+                                  {holder.label && (
+                                    <Badge variant="secondary">{holder.label}</Badge>
+                                  )}
+                                  {holder.previousScams && holder.previousScams > 0 && (
+                                    <Badge variant="destructive">
+                                      ⚠️ {holder.previousScams} SCAMS
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-sm text-muted-foreground mt-1">
+                                  Holds {holder.percentage}% • {holder.balance} tokens
+                                  {holder.walletAge && ` • Wallet Age: ${holder.walletAge}`}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                holder.riskLevel === 'high' ? 'destructive' as const :
+                                holder.riskLevel === 'medium' ? 'secondary' as const :
+                                'outline' as const
+                              } className="text-xs">
+                                {holder.riskLevel?.toUpperCase()} RISK
+                              </Badge>
+                              {detailedAnalysis && (
+                                <Badge variant="outline" className="text-xs">
+                                  Risk Score: {detailedAnalysis.riskScore}/100
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Detailed Analysis Content */}
+                        {detailedAnalysis ? (
+                          <div className="p-4 space-y-4">
+                            {/* Key Metrics */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              <Card>
+                                <CardContent className="pt-4 pb-3">
+                                  <div className="text-xs text-muted-foreground mb-1">Total Transactions</div>
+                                  <div className="text-xl font-bold">{detailedAnalysis.totalTransactions}</div>
+                                </CardContent>
+                              </Card>
+                              <Card>
+                                <CardContent className="pt-4 pb-3">
+                                  <div className="text-xs text-muted-foreground mb-1">Trading Frequency</div>
+                                  <div className="text-sm font-semibold">{detailedAnalysis.tradingFrequency}</div>
+                                </CardContent>
+                              </Card>
+                              <Card>
+                                <CardContent className="pt-4 pb-3">
+                                  <div className="text-xs text-muted-foreground mb-1">Avg Hold Time</div>
+                                  <div className="text-xl font-bold">{detailedAnalysis.averageHoldTime}</div>
+                                </CardContent>
+                              </Card>
+                              <Card>
+                                <CardContent className="pt-4 pb-3">
+                                  <div className="text-xs text-muted-foreground mb-1">Current Profit</div>
+                                  <div className={`text-xl font-bold ${
+                                    detailedAnalysis.profitPercentage > 0 ? 'text-green-500' : 
+                                    detailedAnalysis.profitPercentage < 0 ? 'text-red-500' : ''
+                                  }`}>
+                                    {detailedAnalysis.currentProfit}
+                                  </div>
+                                  <div className={`text-xs ${
+                                    detailedAnalysis.profitPercentage > 0 ? 'text-green-500' : 
+                                    detailedAnalysis.profitPercentage < 0 ? 'text-red-500' : 'text-muted-foreground'
+                                  }`}>
+                                    {detailedAnalysis.profitPercentage > 0 ? '+' : ''}{detailedAnalysis.profitPercentage.toFixed(2)}%
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+
+                            {/* Trading Activity */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div className="p-3 rounded-lg border bg-background/50">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-muted-foreground">Total Bought</span>
+                                  <TrendingUp className="w-4 h-4 text-green-500" />
+                                </div>
+                                <div className="text-lg font-bold mt-1">{detailedAnalysis.totalBought}</div>
+                              </div>
+                              <div className="p-3 rounded-lg border bg-background/50">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-muted-foreground">Total Sold</span>
+                                  <TrendingDown className="w-4 h-4 text-red-500" />
+                                </div>
+                                <div className="text-lg font-bold mt-1">{detailedAnalysis.totalSold}</div>
+                              </div>
+                              <div className="p-3 rounded-lg border bg-background/50">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-muted-foreground">First Activity</span>
+                                  <Activity className="w-4 h-4 text-blue-500" />
+                                </div>
+                                <div className="text-sm font-semibold mt-1">{detailedAnalysis.firstTransaction}</div>
+                                <div className="text-xs text-muted-foreground">Last: {detailedAnalysis.lastTransaction}</div>
+                              </div>
+                            </div>
+
+                            {/* Suspicious Patterns */}
+                            {detailedAnalysis.suspiciousPatterns && detailedAnalysis.suspiciousPatterns.length > 0 && (
+                              <div>
+                                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                                  <AlertTriangle className="w-4 h-4" />
+                                  Pattern Analysis
+                                </h4>
+                                <div className="space-y-2">
+                                  {detailedAnalysis.suspiciousPatterns.map((pattern, pidx) => (
+                                    <div 
+                                      key={pidx} 
+                                      className={`p-2 rounded text-sm ${
+                                        pattern.includes('No suspicious') 
+                                          ? 'bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-800'
+                                          : 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-200 border border-yellow-300 dark:border-yellow-800'
+                                      }`}
+                                    >
+                                      {pattern.includes('No suspicious') ? '✅' : '⚠️'} {pattern}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Risk Flags from General Analysis */}
+                            {holder.riskFlags && holder.riskFlags.length > 0 && (
+                              <div>
+                                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                                  <Shield className="w-4 h-4" />
+                                  Risk Indicators
+                                </h4>
+                                <div className="space-y-2">
+                                  {holder.riskFlags.map((flag, fidx) => (
+                                    <div 
+                                      key={fidx} 
+                                      className={`p-2 rounded text-sm ${
+                                        flag.includes('✅') 
+                                          ? 'bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-800'
+                                          : flag.includes('🔴') || flag.includes('⚠️')
+                                          ? 'bg-red-100 dark:bg-red-950/30 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-800'
+                                          : 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-200 border border-yellow-300 dark:border-yellow-800'
+                                      }`}
+                                    >
+                                      {flag}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Recent Transactions */}
+                            <div>
+                              <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                                <FileText className="w-4 h-4" />
+                                Recent Transactions
+                              </h4>
+                              <div className="space-y-2">
+                                {detailedAnalysis.recentTransactions.slice(0, 5).map((tx, txidx) => (
+                                  <div key={txidx} className="p-3 rounded-lg border bg-background/50 hover:bg-background/80 transition-colors">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <Badge variant={tx.type === 'buy' ? 'default' : 'destructive'} className="text-xs">
+                                            {tx.type.toUpperCase()}
+                                          </Badge>
+                                          <span className="text-xs text-muted-foreground">{tx.timestamp}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                          <span className="text-sm font-semibold">{tx.amount}</span>
+                                          <span className="text-xs text-muted-foreground">≈ {tx.amountUsd}</span>
+                                          {tx.gasFee && (
+                                            <span className="text-xs text-muted-foreground">• Gas: {tx.gasFee}</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground mt-1 font-mono truncate">
+                                          {tx.hash}
+                                        </div>
+                                      </div>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="flex-shrink-0 h-8 w-8 p-0"
+                                        onClick={() => copyToClipboard(tx.hash)}
+                                      >
+                                        {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              {detailedAnalysis.recentTransactions.length > 5 && (
+                                <div className="text-center mt-3">
+                                  <span className="text-xs text-muted-foreground">
+                                    Showing 5 of {detailedAnalysis.recentTransactions.length} transactions
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-4">
+                            <Alert>
+                              <Info className="h-4 w-4" />
+                              <AlertDescription>
+                                Detailed transaction analysis not available for this wallet. This could be due to:
+                                <ul className="list-disc list-inside mt-2 text-xs">
+                                  <li>Initial token distribution (no buy/sell history)</li>
+                                  <li>Contract wallet or liquidity pool</li>
+                                  <li>API rate limits or data availability</li>
+                                </ul>
+                              </AlertDescription>
+                            </Alert>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </CardContent>
               </Card>
             </TabsContent>

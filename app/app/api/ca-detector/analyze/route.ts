@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server'
-import { ContractAnalysisResult, SecurityCheck, TopHolder, LiquidityPool, TransactionAnomaly, WalletPatternAlert, KnownScammerWallet } from '@/lib/types'
+import { ContractAnalysisResult, SecurityCheck, TopHolder, LiquidityPool, TransactionAnomaly, WalletPatternAlert, KnownScammerWallet, DetailedWalletAnalysis, WalletTransaction } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -191,6 +191,201 @@ async function getWalletTransactions(walletAddress: string, contractAddress: str
   } catch (error) {
     console.error('Error fetching wallet transactions:', error)
     return []
+  }
+}
+
+// Fetch detailed wallet transaction analysis
+async function getDetailedWalletAnalysis(
+  walletAddress: string, 
+  contractAddress: string, 
+  blockchain: string,
+  holdingPercentage: number,
+  currentBalance: number
+): Promise<DetailedWalletAnalysis | undefined> {
+  try {
+    const config = getExplorerConfig(blockchain)
+    // Fetch all token transactions for this wallet and contract
+    const url = `${config.apiUrl}?module=account&action=tokentx&contractaddress=${contractAddress}&address=${walletAddress}&page=1&offset=100&sort=asc&apikey=${config.key}`
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    if (data.status !== '1' || !data.result || data.result.length === 0) {
+      return undefined
+    }
+    
+    const transactions = data.result
+    const shortAddress = walletAddress.length > 20 
+      ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+      : walletAddress
+    
+    // Process transactions
+    const walletTxs: WalletTransaction[] = []
+    let totalBought = 0
+    let totalSold = 0
+    const buyTransactions: any[] = []
+    const sellTransactions: any[] = []
+    
+    transactions.forEach((tx: any) => {
+      const isBuy = tx.to?.toLowerCase() === walletAddress.toLowerCase()
+      const amount = parseFloat(tx.value || '0') / Math.pow(10, parseInt(tx.tokenDecimal || '18'))
+      
+      if (isBuy) {
+        totalBought += amount
+        buyTransactions.push(tx)
+      } else {
+        totalSold += amount
+        sellTransactions.push(tx)
+      }
+      
+      // Add to recent transactions (last 10)
+      if (walletTxs.length < 10) {
+        const formattedAmount = amount >= 1000000 
+          ? `${(amount / 1000000).toFixed(2)}M`
+          : amount >= 1000
+          ? `${(amount / 1000).toFixed(2)}K`
+          : amount.toFixed(2)
+        
+        walletTxs.push({
+          hash: tx.hash,
+          type: isBuy ? 'buy' : 'sell',
+          amount: formattedAmount,
+          amountUsd: `$${(amount * 0.001).toFixed(2)}`, // Approximate USD value
+          timestamp: new Date(parseInt(tx.timeStamp) * 1000).toLocaleString(),
+          from: tx.from,
+          to: tx.to,
+          gasFee: tx.gasUsed ? `${(parseFloat(tx.gasUsed) * parseFloat(tx.gasPrice || '0') / 1e18).toFixed(6)} ETH` : undefined
+        })
+      }
+    })
+    
+    // Calculate metrics
+    const firstTx = transactions[0]
+    const lastTx = transactions[transactions.length - 1]
+    const firstTimestamp = new Date(parseInt(firstTx.timeStamp) * 1000)
+    const lastTimestamp = new Date(parseInt(lastTx.timeStamp) * 1000)
+    
+    const walletAgeMs = Date.now() - firstTimestamp.getTime()
+    const walletAgeDays = Math.floor(walletAgeMs / (1000 * 60 * 60 * 24))
+    
+    // Calculate profit/loss
+    const currentHolding = currentBalance
+    const netProfit = (currentHolding + totalSold) - totalBought
+    const profitPercentage = totalBought > 0 ? (netProfit / totalBought) * 100 : 0
+    
+    // Calculate average hold time
+    let totalHoldTime = 0
+    let holdTimeCount = 0
+    sellTransactions.forEach(sell => {
+      const sellTime = parseInt(sell.timeStamp)
+      // Find corresponding buy
+      const correspondingBuy = buyTransactions.find(buy => parseInt(buy.timeStamp) < sellTime)
+      if (correspondingBuy) {
+        totalHoldTime += (sellTime - parseInt(correspondingBuy.timeStamp))
+        holdTimeCount++
+      }
+    })
+    const avgHoldTimeSeconds = holdTimeCount > 0 ? totalHoldTime / holdTimeCount : walletAgeMs / 1000
+    const avgHoldTimeDays = Math.floor(avgHoldTimeSeconds / 86400)
+    const avgHoldTimeHours = Math.floor((avgHoldTimeSeconds % 86400) / 3600)
+    
+    // Calculate trading frequency
+    const tradingFrequency = transactions.length / Math.max(walletAgeDays, 1)
+    const frequencyStr = tradingFrequency > 10 
+      ? `${tradingFrequency.toFixed(1)} trades/day (Very Active)`
+      : tradingFrequency > 1
+      ? `${tradingFrequency.toFixed(1)} trades/day (Active)`
+      : `${(tradingFrequency * 7).toFixed(1)} trades/week (Moderate)`
+    
+    // Detect suspicious patterns
+    const suspiciousPatterns: string[] = []
+    
+    // Pattern 1: Quick flip (buy and sell within 1 hour)
+    let quickFlips = 0
+    sellTransactions.forEach(sell => {
+      const sellTime = parseInt(sell.timeStamp)
+      const recentBuy = buyTransactions.find(buy => 
+        sellTime - parseInt(buy.timeStamp) < 3600 && sellTime > parseInt(buy.timeStamp)
+      )
+      if (recentBuy) quickFlips++
+    })
+    if (quickFlips > 2) {
+      suspiciousPatterns.push(`${quickFlips} quick flips detected (buy-sell within 1 hour)`)
+    }
+    
+    // Pattern 2: Large sells after small buys (possible airdrop dumping)
+    if (sellTransactions.length > 0 && buyTransactions.length > 0) {
+      const avgBuy = totalBought / buyTransactions.length
+      const avgSell = totalSold / sellTransactions.length
+      if (avgSell > avgBuy * 5) {
+        suspiciousPatterns.push('Selling much larger amounts than buying (possible airdrop dump)')
+      }
+    }
+    
+    // Pattern 3: Very high frequency trading (bot-like)
+    if (tradingFrequency > 20) {
+      suspiciousPatterns.push('Extremely high trading frequency (possible bot activity)')
+    }
+    
+    // Pattern 4: Only sells, no buys (possible insider/airdrop)
+    if (buyTransactions.length === 0 && sellTransactions.length > 0) {
+      suspiciousPatterns.push('Only sell transactions detected (possible insider/pre-sale tokens)')
+    }
+    
+    // Pattern 5: Consistent sell pressure
+    if (sellTransactions.length > buyTransactions.length * 2 && sellTransactions.length > 5) {
+      suspiciousPatterns.push('Continuous selling pressure without equivalent buying')
+    }
+    
+    // Calculate wallet risk score
+    let riskScore = 0
+    if (quickFlips > 2) riskScore += 20
+    if (suspiciousPatterns.includes('Only sell transactions detected (possible insider/pre-sale tokens)')) riskScore += 30
+    if (tradingFrequency > 20) riskScore += 15
+    if (holdingPercentage > 15) riskScore += 20
+    if (walletAgeDays < 7) riskScore += 15
+    if (profitPercentage > 500) riskScore += 10 // Massive profits could indicate insider knowledge
+    
+    // Format values
+    const formattedBought = totalBought >= 1000000 
+      ? `${(totalBought / 1000000).toFixed(2)}M`
+      : totalBought >= 1000
+      ? `${(totalBought / 1000).toFixed(2)}K`
+      : totalBought.toFixed(2)
+    
+    const formattedSold = totalSold >= 1000000 
+      ? `${(totalSold / 1000000).toFixed(2)}M`
+      : totalSold >= 1000
+      ? `${(totalSold / 1000).toFixed(2)}K`
+      : totalSold.toFixed(2)
+    
+    const formattedProfit = Math.abs(netProfit) >= 1000000 
+      ? `${netProfit >= 0 ? '+' : '-'}${(Math.abs(netProfit) / 1000000).toFixed(2)}M`
+      : Math.abs(netProfit) >= 1000
+      ? `${netProfit >= 0 ? '+' : '-'}${(Math.abs(netProfit) / 1000).toFixed(2)}K`
+      : `${netProfit >= 0 ? '+' : ''}${netProfit.toFixed(2)}`
+    
+    return {
+      address: shortAddress,
+      fullAddress: walletAddress,
+      totalTransactions: transactions.length,
+      firstTransaction: firstTimestamp.toLocaleDateString(),
+      lastTransaction: lastTimestamp.toLocaleDateString(),
+      totalBought: formattedBought,
+      totalSold: formattedSold,
+      currentProfit: formattedProfit,
+      profitPercentage: parseFloat(profitPercentage.toFixed(2)),
+      averageHoldTime: avgHoldTimeDays > 0 
+        ? `${avgHoldTimeDays}d ${avgHoldTimeHours}h`
+        : `${avgHoldTimeHours}h`,
+      tradingFrequency: frequencyStr,
+      suspiciousPatterns: suspiciousPatterns.length > 0 ? suspiciousPatterns : ['No suspicious patterns detected'],
+      recentTransactions: walletTxs.reverse(), // Most recent first
+      riskScore: Math.min(riskScore, 100)
+    }
+  } catch (error) {
+    console.error('Error getting detailed wallet analysis:', error)
+    return undefined
   }
 }
 
@@ -569,6 +764,15 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
         percentage
       )
       
+      // Get detailed transaction analysis for this wallet
+      const detailedAnalysis = await getDetailedWalletAnalysis(
+        fullAddress,
+        contractAddress,
+        blockchain,
+        percentage,
+        balance
+      )
+      
       // Check if wallet is known scammer and add to list
       if (walletAnalysis.previousScams > 0) {
         const scammerData = KNOWN_SCAMMER_WALLETS[fullAddress] || {
@@ -617,7 +821,8 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
         riskLevel: walletAnalysis.riskLevel,
         riskFlags: walletAnalysis.riskFlags,
         walletAge: walletAnalysis.walletAge,
-        previousScams: walletAnalysis.previousScams
+        previousScams: walletAnalysis.previousScams,
+        detailedAnalysis: detailedAnalysis
       }
     })
     

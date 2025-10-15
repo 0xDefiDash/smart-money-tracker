@@ -125,6 +125,34 @@ export interface SecurityCheck {
   details?: string
 }
 
+export interface WalletTransaction {
+  hash: string
+  type: 'buy' | 'sell' | 'transfer'
+  amount: string
+  amountUsd: string
+  timestamp: string
+  from: string
+  to: string
+  gasFee?: string
+}
+
+export interface DetailedWalletAnalysis {
+  address: string
+  fullAddress: string
+  totalTransactions: number
+  firstTransaction: string
+  lastTransaction: string
+  totalBought: string
+  totalSold: string
+  currentProfit: string
+  profitPercentage: number
+  averageHoldTime: string
+  tradingFrequency: string
+  suspiciousPatterns: string[]
+  recentTransactions: WalletTransaction[]
+  riskScore: number
+}
+
 export interface TopHolder {
   address: string
   percentage: number
@@ -134,6 +162,7 @@ export interface TopHolder {
   riskFlags?: string[]
   walletAge?: string
   previousScams?: number
+  detailedAnalysis?: DetailedWalletAnalysis
 }
 
 export interface HolderAnalysis {
