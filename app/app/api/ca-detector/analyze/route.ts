@@ -1,6 +1,9 @@
 
 import { NextResponse } from 'next/server'
 import { ContractAnalysisResult, SecurityCheck, TopHolder, LiquidityPool, TransactionAnomaly, WalletPatternAlert, KnownScammerWallet, DetailedWalletAnalysis, WalletTransaction } from '@/lib/types'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export const dynamic = 'force-dynamic'
 
@@ -1104,6 +1107,66 @@ export async function POST(request: Request) {
 
     const analysis = await analyzeContract(contractAddress, blockchain)
 
+    // Save or update scan in database
+    try {
+      const existingScan = await prisma.contractScan.findUnique({
+        where: {
+          contractAddress_blockchain: {
+            contractAddress: contractAddress.toLowerCase(),
+            blockchain
+          }
+        }
+      })
+
+      if (existingScan) {
+        // Update existing scan
+        await prisma.contractScan.update({
+          where: {
+            contractAddress_blockchain: {
+              contractAddress: contractAddress.toLowerCase(),
+              blockchain
+            }
+          },
+          data: {
+            contractName: analysis.contractInfo.name,
+            contractSymbol: analysis.contractInfo.symbol,
+            riskScore: analysis.riskScore,
+            riskLevel: analysis.riskScore >= 80 ? 'High Risk' : analysis.riskScore >= 50 ? 'Medium Risk' : 'Low Risk',
+            isVerified: analysis.contractInfo.isVerified,
+            totalSupply: analysis.contractInfo.totalSupply,
+            contractAge: analysis.contractInfo.age,
+            holdersCount: analysis.holderAnalysis.totalHolders,
+            liquidityUsd: parseFloat(analysis.liquidityInfo.totalLiquidityUSD.replace(/[$,KM]/g, '')) * (analysis.liquidityInfo.totalLiquidityUSD.includes('M') ? 1000000 : analysis.liquidityInfo.totalLiquidityUSD.includes('K') ? 1000 : 1),
+            scanCount: existingScan.scanCount + 1,
+            lastScannedAt: new Date(),
+            updatedAt: new Date()
+          }
+        })
+      } else {
+        // Create new scan
+        await prisma.contractScan.create({
+          data: {
+            contractAddress: contractAddress.toLowerCase(),
+            blockchain,
+            contractName: analysis.contractInfo.name,
+            contractSymbol: analysis.contractInfo.symbol,
+            riskScore: analysis.riskScore,
+            riskLevel: analysis.riskScore >= 80 ? 'High Risk' : analysis.riskScore >= 50 ? 'Medium Risk' : 'Low Risk',
+            isVerified: analysis.contractInfo.isVerified,
+            totalSupply: analysis.contractInfo.totalSupply,
+            contractAge: analysis.contractInfo.age,
+            holdersCount: analysis.holderAnalysis.totalHolders,
+            liquidityUsd: parseFloat(analysis.liquidityInfo.totalLiquidityUSD.replace(/[$,KM]/g, '')) * (analysis.liquidityInfo.totalLiquidityUSD.includes('M') ? 1000000 : analysis.liquidityInfo.totalLiquidityUSD.includes('K') ? 1000 : 1),
+            scanCount: 1,
+            lastScannedAt: new Date()
+          }
+        })
+      }
+    } catch (dbError) {
+      console.error('Error saving scan to database:', dbError)
+      // Continue even if database save fails
+    }
+
     return NextResponse.json(analysis)
   } catch (error) {
     console.error('Error analyzing contract:', error)
@@ -1111,5 +1174,7 @@ export async function POST(request: Request) {
       { error: 'Failed to analyze contract' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }

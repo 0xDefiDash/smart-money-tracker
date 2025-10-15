@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,9 +30,26 @@ import {
   Info,
   ExternalLink,
   Copy,
-  Check
+  Check,
+  Trophy,
+  Star,
+  Eye,
+  Target
 } from 'lucide-react'
 import { ContractAnalysisResult } from '@/lib/types'
+
+interface TopScan {
+  id: string
+  contractAddress: string
+  blockchain: string
+  contractName: string | null
+  contractSymbol: string | null
+  riskScore: number
+  riskLevel: string
+  isVerified: boolean
+  scanCount: number
+  lastScannedAt: string
+}
 
 export default function CADetectorPage() {
   const [contractAddress, setContractAddress] = useState('')
@@ -41,6 +58,27 @@ export default function CADetectorPage() {
   const [analysis, setAnalysis] = useState<ContractAnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [topScans, setTopScans] = useState<TopScan[]>([])
+  const [loadingTopScans, setLoadingTopScans] = useState(true)
+
+  // Fetch top scans on component mount
+  useEffect(() => {
+    const fetchTopScans = async () => {
+      try {
+        const response = await fetch('/api/ca-detector/top-scans')
+        if (response.ok) {
+          const data = await response.json()
+          setTopScans(data)
+        }
+      } catch (error) {
+        console.error('Error fetching top scans:', error)
+      } finally {
+        setLoadingTopScans(false)
+      }
+    }
+
+    fetchTopScans()
+  }, [])
 
   const handleAnalyze = async () => {
     if (!contractAddress) {
@@ -64,6 +102,13 @@ export default function CADetectorPage() {
 
       const data = await response.json()
       setAnalysis(data)
+      
+      // Refresh top scans after a new analysis
+      const topScansResponse = await fetch('/api/ca-detector/top-scans')
+      if (topScansResponse.ok) {
+        const topScansData = await topScansResponse.json()
+        setTopScans(topScansData)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -107,6 +152,117 @@ export default function CADetectorPage() {
           Analyze smart contracts for potential risks, manipulation, and security concerns
         </p>
       </div>
+
+      {/* Top 10 Scanned Contracts Leaderboard */}
+      <Card className="border-2 border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500">
+              <Trophy className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Top 10 Scanned Contracts</CardTitle>
+              <CardDescription>Most analyzed tokens with their risk scores</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loadingTopScans ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+          ) : topScans.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Target className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>No contracts scanned yet. Be the first to analyze a contract!</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {topScans.map((scan, index) => {
+                const getRankIcon = (rank: number) => {
+                  if (rank === 0) return '🥇'
+                  if (rank === 1) return '🥈'
+                  if (rank === 2) return '🥉'
+                  return `${rank + 1}`
+                }
+
+                const getRankColor = (rank: number) => {
+                  if (rank === 0) return 'from-yellow-400 to-orange-500'
+                  if (rank === 1) return 'from-gray-300 to-gray-400'
+                  if (rank === 2) return 'from-amber-600 to-amber-700'
+                  return 'from-blue-500 to-purple-500'
+                }
+
+                const getRiskBgColor = (score: number) => {
+                  if (score >= 80) return 'bg-red-500/10 border-red-500/30'
+                  if (score >= 50) return 'bg-yellow-500/10 border-yellow-500/30'
+                  return 'bg-green-500/10 border-green-500/30'
+                }
+
+                const getRiskTextColor = (score: number) => {
+                  if (score >= 80) return 'text-red-500'
+                  if (score >= 50) return 'text-yellow-500'
+                  return 'text-green-500'
+                }
+
+                return (
+                  <div
+                    key={scan.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 ${getRiskBgColor(scan.riskScore)} hover:shadow-lg transition-all cursor-pointer group`}
+                    onClick={() => {
+                      setContractAddress(scan.contractAddress)
+                      setBlockchain(scan.blockchain)
+                      window.scrollTo({ top: 400, behavior: 'smooth' })
+                    }}
+                  >
+                    {/* Rank */}
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${getRankColor(index)} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+                      {getRankIcon(index)}
+                    </div>
+
+                    {/* Contract Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-sm truncate group-hover:text-blue-500 transition-colors">
+                          {scan.contractSymbol || 'Unknown'} - {scan.contractName || 'Unknown Token'}
+                        </h3>
+                        {scan.isVerified && (
+                          <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs font-mono text-muted-foreground">
+                          {scan.contractAddress.slice(0, 6)}...{scan.contractAddress.slice(-4)}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {scan.blockchain}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Risk Score */}
+                    <div className="flex-shrink-0 text-right">
+                      <div className={`text-2xl font-bold ${getRiskTextColor(scan.riskScore)}`}>
+                        {scan.riskScore}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Risk Score</div>
+                    </div>
+
+                    {/* Scan Count */}
+                    <div className="flex-shrink-0 text-center">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Eye className="w-4 h-4" />
+                        <span className="font-semibold">{scan.scanCount}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">scans</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Analysis Form */}
       <Card>

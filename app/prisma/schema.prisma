@@ -393,3 +393,31 @@ model WalletConnection {
   @@index([streamerId])
   @@index([walletAddress])
 }
+
+// ============ CA Detector Models ============
+
+model ContractScan {
+  id                      String   @id @default(cuid())
+  contractAddress         String
+  blockchain              String
+  contractName            String?
+  contractSymbol          String?
+  riskScore               Int
+  riskLevel               String
+  isVerified              Boolean  @default(false)
+  totalSupply             String?
+  contractAge             String?
+  holdersCount            Int      @default(0)
+  liquidityUsd            Float    @default(0)
+  scanCount               Int      @default(1)
+  lastScannedAt           DateTime @default(now())
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  @@unique([contractAddress, blockchain])
+  @@map("contract_scans")
+  @@index([riskScore])
+  @@index([scanCount])
+  @@index([lastScannedAt])
+  @@index([blockchain])
+}
