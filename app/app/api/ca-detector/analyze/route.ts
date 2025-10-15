@@ -214,7 +214,27 @@ async function getDetailedWalletAnalysis(
     const data = await response.json()
     
     if (data.status !== '1' || !data.result || data.result.length === 0) {
-      return undefined
+      // Return a basic structure with minimal data when API fails
+      const shortAddress = walletAddress.length > 20 
+        ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+        : walletAddress
+      
+      return {
+        address: shortAddress,
+        fullAddress: walletAddress,
+        totalTransactions: 0,
+        firstTransaction: 'N/A',
+        lastTransaction: 'N/A',
+        totalBought: '0',
+        totalSold: '0',
+        currentProfit: '0',
+        profitPercentage: 0,
+        averageHoldTime: 'N/A',
+        tradingFrequency: 'No data available',
+        suspiciousPatterns: ['Unable to fetch transaction data from blockchain explorer'],
+        recentTransactions: [],
+        riskScore: 0
+      }
     }
     
     const transactions = data.result

@@ -687,6 +687,7 @@ export default function CADetectorPage() {
 
                         {/* Detailed Analysis Content */}
                         {detailedAnalysis ? (
+                          detailedAnalysis.totalTransactions > 0 ? (
                           <div className="p-4 space-y-4">
                             {/* Key Metrics */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -852,6 +853,26 @@ export default function CADetectorPage() {
                               )}
                             </div>
                           </div>
+                          ) : (
+                            <div className="p-4">
+                              <Alert variant="default">
+                                <Info className="h-4 w-4" />
+                                <AlertDescription>
+                                  <div className="font-semibold mb-2">No Transaction History Available</div>
+                                  <p className="text-sm">This wallet holder has no buy/sell transaction history for this token. Possible reasons:</p>
+                                  <ul className="list-disc list-inside mt-2 text-xs space-y-1">
+                                    <li>Initial token distribution or airdrop recipient</li>
+                                    <li>Pre-sale or private sale allocation</li>
+                                    <li>Contract wallet, liquidity pool, or exchange wallet</li>
+                                    <li>Tokens transferred from another wallet</li>
+                                  </ul>
+                                  <div className="mt-3 p-2 bg-muted rounded text-xs">
+                                    <strong>Current Holdings:</strong> {holder.percentage}% ({holder.balance} tokens)
+                                  </div>
+                                </AlertDescription>
+                              </Alert>
+                            </div>
+                          )
                         ) : (
                           <div className="p-4">
                             <Alert>
