@@ -171,6 +171,7 @@ export interface HolderAnalysis {
   contractHoldings: number
   topHolders: TopHolder[]
   holdersDataUnavailable?: boolean
+  holdersDataError?: string | null
 }
 
 export interface LiquidityPool {

@@ -166,31 +166,45 @@ async function getTopHolders(contractAddress: string, blockchain: string) {
     // Check if API key is configured (not the default placeholder)
     if (config.key === 'YourApiKeyToken') {
       console.warn(`${config.name} API key not configured. Cannot fetch holder data.`)
-      return null // Return null to indicate API key is missing (different from empty array)
+      return { error: 'API_KEY_MISSING', data: null }
     }
     
     const url = `${config.apiUrl}?module=token&action=tokenholderlist&contractaddress=${contractAddress}&page=1&offset=10&apikey=${config.key}`
     
+    console.log(`Fetching holders from ${config.name}:`, contractAddress)
     const response = await fetch(url)
     const data = await response.json()
     
+    console.log(`${config.name} response:`, JSON.stringify(data).substring(0, 500))
+    
     // Check for rate limiting or API errors
     if (data.status === '0') {
-      console.error(`${config.name} API error:`, data.message || data.result)
-      if (data.result && typeof data.result === 'string' && data.result.includes('rate limit')) {
-        console.warn('API rate limit exceeded')
-        return null // Return null for rate limiting
+      const errorMessage = data.message || data.result || 'Unknown error'
+      console.error(`${config.name} API error:`, errorMessage)
+      
+      // Check for specific error types
+      if (errorMessage.toLowerCase().includes('rate limit')) {
+        return { error: 'RATE_LIMIT', data: null, message: errorMessage }
+      } else if (errorMessage.toLowerCase().includes('invalid') && errorMessage.toLowerCase().includes('address')) {
+        return { error: 'INVALID_ADDRESS', data: null, message: errorMessage }
+      } else if (errorMessage.toLowerCase().includes('invalid api key')) {
+        return { error: 'INVALID_API_KEY', data: null, message: errorMessage }
+      } else if (errorMessage === 'No transactions found' || errorMessage === 'No records found') {
+        return { error: 'NO_HOLDERS', data: [], message: errorMessage }
       }
+      
+      return { error: 'API_ERROR', data: null, message: errorMessage }
     }
     
     if (data.status === '1' && data.result && Array.isArray(data.result)) {
-      return data.result
+      console.log(`Found ${data.result.length} holders`)
+      return { error: null, data: data.result }
     }
     
-    return [] // Return empty array if no holders found (legitimate case)
+    return { error: 'NO_DATA', data: [], message: 'No holder data available' }
   } catch (error) {
     console.error('Error fetching top holders:', error)
-    return null // Return null for errors
+    return { error: 'NETWORK_ERROR', data: null, message: error instanceof Error ? error.message : 'Network error' }
   }
 }
 
@@ -626,12 +640,17 @@ function detectWashTrading(transactions: any[]): WalletPatternAlert[] {
 
 async function analyzeContract(contractAddress: string, blockchain: string): Promise<ContractAnalysisResult> {
   // Fetch data from multiple sources in parallel
-  const [contractInfo, dexData, honeypotData, holdersData] = await Promise.all([
+  const [contractInfo, dexData, honeypotData, holdersResponse] = await Promise.all([
     getContractInfo(contractAddress, blockchain),
     getDexScreenerData(contractAddress, blockchain),
     checkHoneypot(contractAddress, blockchain),
     getTopHolders(contractAddress, blockchain)
   ])
+
+  // Extract holder data and error information
+  const holdersData = holdersResponse.data
+  const holdersError = holdersResponse.error
+  const holdersErrorMessage = holdersResponse.message || ''
 
   // Extract real data from API responses
   const tokenName = contractInfo?.name || 'Unknown Token'
@@ -772,10 +791,44 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
   const knownScammers: KnownScammerWallet[] = []
   let walletPatternAlerts: WalletPatternAlert[] = []
   let holdersDataUnavailable = false
+  let holdersDataError: string | null = null
   
-  // Check if holders data is unavailable due to missing API keys
-  if (holdersData === null) {
+  // Check if holders data is unavailable and determine the specific error
+  if (holdersError) {
     holdersDataUnavailable = true
+    
+    // Map error types to user-friendly messages
+    switch (holdersError) {
+      case 'API_KEY_MISSING':
+        holdersDataError = 'Blockchain explorer API key is not configured. Please add your API key to the .env file.'
+        break
+      case 'INVALID_API_KEY':
+        holdersDataError = 'Invalid API key. Please check your blockchain explorer API key configuration.'
+        break
+      case 'RATE_LIMIT':
+        holdersDataError = 'API rate limit exceeded. Please try again in a few minutes or upgrade your API plan.'
+        break
+      case 'INVALID_ADDRESS':
+        holdersDataError = 'Invalid contract address format. Please check the address and try again.'
+        break
+      case 'NO_HOLDERS':
+        holdersDataError = 'No holder data found for this token. The token may be newly launched or not yet indexed.'
+        holdersDataUnavailable = false // Not truly unavailable, just no data
+        break
+      case 'API_ERROR':
+        holdersDataError = `Blockchain explorer API error: ${holdersErrorMessage}`
+        break
+      case 'NETWORK_ERROR':
+        holdersDataError = 'Network error while fetching holder data. Please check your internet connection and try again.'
+        break
+      case 'NO_DATA':
+        holdersDataError = 'No holder data available from blockchain explorer. The token may not be indexed yet.'
+        break
+      default:
+        holdersDataError = 'Unable to fetch holder data. Please try again later.'
+    }
+    
+    console.log(`Holders data error: ${holdersError} - ${holdersDataError}`)
   } else if (holdersData && holdersData.length > 0) {
     // Calculate total supply from all holders
     const totalSupply = holdersData.reduce((sum: number, h: any) => {
@@ -1088,7 +1141,8 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
       top10Percentage: parseFloat(top10Percentage.toFixed(1)),
       contractHoldings: 0, // Would need additional API call to determine
       topHolders,
-      holdersDataUnavailable
+      holdersDataUnavailable,
+      holdersDataError
     },
     liquidityInfo: {
       totalLiquidityUSD: totalLiquidityFormatted,

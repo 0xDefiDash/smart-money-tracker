@@ -692,24 +692,62 @@ BASESCAN_API_KEY=your_basescan_key`}
                 </CardHeader>
               </Card>
 
-              {/* Empty State */}
-              {analysis.holderAnalysis.topHolders.length === 0 && !analysis.holderAnalysis.holdersDataUnavailable ? (
-                <Card className="border-dashed border-2">
+              {/* Empty State or Error Message */}
+              {analysis.holderAnalysis.topHolders.length === 0 ? (
+                <Card className={`border-2 ${analysis.holderAnalysis.holdersDataError ? 'border-amber-500/50' : 'border-dashed'}`}>
                   <CardContent className="pt-8 pb-8">
-                    <div className="text-center space-y-3">
-                      <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
-                        <Info className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-center space-y-4">
+                      <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${
+                        analysis.holderAnalysis.holdersDataError 
+                          ? 'bg-amber-100 dark:bg-amber-950' 
+                          : 'bg-muted'
+                      }`}>
+                        {analysis.holderAnalysis.holdersDataError ? (
+                          <AlertTriangle className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                        ) : (
+                          <Info className="h-8 w-8 text-muted-foreground" />
+                        )}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">No Wallet Holder Data Available</h3>
-                        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                          This could be due to several reasons:
-                        </p>
-                        <ul className="list-none mt-3 space-y-1 text-sm text-muted-foreground">
-                          <li>• Token is newly launched with no established holders yet</li>
-                          <li>• Token holder list is not publicly available on blockchain explorers</li>
-                          <li>• Data synchronization delay from blockchain to explorer APIs</li>
-                        </ul>
+                        <h3 className={`font-semibold text-lg mb-3 ${
+                          analysis.holderAnalysis.holdersDataError 
+                            ? 'text-amber-900 dark:text-amber-100' 
+                            : ''
+                        }`}>
+                          {analysis.holderAnalysis.holdersDataError ? 'Holder Data Unavailable' : 'No Wallet Holder Data Available'}
+                        </h3>
+                        {analysis.holderAnalysis.holdersDataError ? (
+                          <Alert className="max-w-2xl mx-auto border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+                            <AlertDescription>
+                              <p className="text-sm font-medium mb-2">{analysis.holderAnalysis.holdersDataError}</p>
+                              {analysis.holderAnalysis.holdersDataError.includes('API key') && (
+                                <div className="mt-3 p-3 bg-background/80 rounded border text-xs space-y-2">
+                                  <p className="font-semibold">How to configure API keys:</p>
+                                  <ol className="list-decimal list-inside space-y-1 text-left">
+                                    <li>Visit the blockchain explorer for your network (Etherscan, BSCScan, etc.)</li>
+                                    <li>Create a free account and generate an API key</li>
+                                    <li>Add the API key to your .env file (e.g., ETHERSCAN_API_KEY=your_key_here)</li>
+                                    <li>Restart the application</li>
+                                  </ol>
+                                </div>
+                              )}
+                              {analysis.holderAnalysis.holdersDataError.includes('rate limit') && (
+                                <p className="mt-2 text-xs">Try again in a few minutes or consider upgrading your API plan for higher rate limits.</p>
+                              )}
+                            </AlertDescription>
+                          </Alert>
+                        ) : (
+                          <>
+                            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-3">
+                              This could be due to several reasons:
+                            </p>
+                            <ul className="list-none space-y-1 text-sm text-muted-foreground max-w-md mx-auto">
+                              <li>• Token is newly launched with no established holders yet</li>
+                              <li>• Token holder list is not publicly available on blockchain explorers</li>
+                              <li>• Data synchronization delay from blockchain to explorer APIs</li>
+                            </ul>
+                          </>
+                        )}
                       </div>
                     </div>
                   </CardContent>
