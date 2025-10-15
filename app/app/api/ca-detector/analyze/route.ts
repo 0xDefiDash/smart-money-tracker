@@ -1,8 +1,34 @@
 
 import { NextResponse } from 'next/server'
-import { ContractAnalysisResult, SecurityCheck, TopHolder, LiquidityPool, TransactionAnomaly } from '@/lib/types'
+import { ContractAnalysisResult, SecurityCheck, TopHolder, LiquidityPool, TransactionAnomaly, WalletPatternAlert, KnownScammerWallet } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+// Known scammer wallet database (expandable)
+// This is a curated list of wallets known for pump and dump schemes, rug pulls, and scams
+const KNOWN_SCAMMER_WALLETS: Record<string, { scamCount: number; totalLoss: string; lastScam: string; scamTypes: string[] }> = {
+  // Example entries - in production, this would be fetched from a database
+  '0x0000000000000000000000000000000000000000': {
+    scamCount: 0,
+    totalLoss: '$0',
+    lastScam: 'N/A',
+    scamTypes: []
+  },
+  // Add more known scammer wallets here
+  // Format: 'wallet_address': { scamCount, totalLoss, lastScam, scamTypes }
+}
+
+// Suspicious wallet patterns to detect
+const SUSPICIOUS_PATTERNS = {
+  // Wallet created very recently (within 7 days)
+  NEW_WALLET_THRESHOLD: 7 * 24 * 60 * 60 * 1000,
+  // High concentration threshold (single wallet holding >20%)
+  HIGH_CONCENTRATION: 20,
+  // Coordinated trading threshold (multiple wallets with similar patterns)
+  COORDINATED_THRESHOLD: 0.85, // 85% similarity
+  // Bot-like behavior threshold (very fast transactions)
+  BOT_SPEED_THRESHOLD: 5000, // milliseconds
+}
 
 // Get the appropriate explorer API URL and key based on blockchain
 function getExplorerConfig(blockchain: string) {
@@ -148,6 +174,221 @@ async function getTopHolders(contractAddress: string, blockchain: string) {
   }
 }
 
+// Fetch wallet transactions to analyze patterns
+async function getWalletTransactions(walletAddress: string, contractAddress: string, blockchain: string) {
+  try {
+    const config = getExplorerConfig(blockchain)
+    // Fetch ERC20 token transfers for the wallet
+    const url = `${config.apiUrl}?module=account&action=tokentx&contractaddress=${contractAddress}&address=${walletAddress}&page=1&offset=100&sort=desc&apikey=${config.key}`
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    if (data.status === '1' && data.result) {
+      return data.result
+    }
+    return []
+  } catch (error) {
+    console.error('Error fetching wallet transactions:', error)
+    return []
+  }
+}
+
+// Analyze wallet for pump and dump patterns
+async function analyzeWalletForPumpDump(walletAddress: string, contractAddress: string, blockchain: string, holdingPercentage: number) {
+  const riskFlags: string[] = []
+  let riskLevel: 'high' | 'medium' | 'low' | 'clean' = 'clean'
+  let previousScams = 0
+  let walletAge = 'Unknown'
+  
+  try {
+    // 1. Check if wallet is in known scammer database
+    const fullAddress = walletAddress.length < 42 ? walletAddress : walletAddress // Use as-is
+    
+    // For display purposes, we'll use the shortened address
+    let checkAddress = walletAddress
+    // Try to find in database (in production, this would check against a real database)
+    Object.keys(KNOWN_SCAMMER_WALLETS).forEach(knownAddress => {
+      if (checkAddress.toLowerCase().includes(knownAddress.toLowerCase().slice(0, 10)) || 
+          knownAddress.toLowerCase().includes(checkAddress.toLowerCase().slice(0, 10))) {
+        const scammerData = KNOWN_SCAMMER_WALLETS[knownAddress]
+        previousScams = scammerData.scamCount
+        riskFlags.push(`⚠️ Known scammer: ${scammerData.scamCount} previous scams`)
+        riskLevel = 'high'
+      }
+    })
+    
+    // 2. Analyze wallet concentration
+    if (holdingPercentage > SUSPICIOUS_PATTERNS.HIGH_CONCENTRATION) {
+      riskFlags.push(`🔴 High concentration: Controls ${holdingPercentage.toFixed(1)}% of supply`)
+      if (riskLevel === 'clean') riskLevel = 'high'
+    } else if (holdingPercentage > 10) {
+      riskFlags.push(`🟡 Significant holder: ${holdingPercentage.toFixed(1)}% of supply`)
+      if (riskLevel === 'clean') riskLevel = 'medium'
+    }
+    
+    // 3. Fetch and analyze wallet transaction history
+    const transactions = await getWalletTransactions(fullAddress, contractAddress, blockchain)
+    
+    if (transactions && transactions.length > 0) {
+      // Analyze transaction patterns
+      const buys = transactions.filter((tx: any) => tx.to?.toLowerCase() === fullAddress.toLowerCase())
+      const sells = transactions.filter((tx: any) => tx.from?.toLowerCase() === fullAddress.toLowerCase())
+      
+      // Check for pump and dump pattern (quick buy and sell)
+      if (buys.length > 0 && sells.length > 0) {
+        const firstBuy = buys[buys.length - 1]
+        const latestSell = sells[0]
+        const timeDiff = parseInt(latestSell.timeStamp) - parseInt(firstBuy.timeStamp)
+        
+        // If bought and sold within 24 hours
+        if (timeDiff > 0 && timeDiff < 86400) {
+          riskFlags.push('📊 Quick flip pattern: Bought and sold within 24h')
+          if (riskLevel !== 'high' && riskLevel !== 'medium') riskLevel = 'medium'
+        }
+      }
+      
+      // Check for bot-like behavior (very fast sequential transactions)
+      let consecutiveFastTxs = 0
+      for (let i = 1; i < transactions.length; i++) {
+        const timeDiff = Math.abs(parseInt(transactions[i-1].timeStamp) - parseInt(transactions[i].timeStamp)) * 1000
+        if (timeDiff < SUSPICIOUS_PATTERNS.BOT_SPEED_THRESHOLD) {
+          consecutiveFastTxs++
+        }
+      }
+      
+      if (consecutiveFastTxs > 3) {
+        riskFlags.push('🤖 Bot-like trading: Multiple rapid transactions detected')
+        if (riskLevel === 'clean') riskLevel = 'medium'
+      }
+      
+      // Calculate wallet age from first transaction
+      if (transactions.length > 0) {
+        const oldestTx = transactions[transactions.length - 1]
+        const ageInDays = Math.floor((Date.now() / 1000 - parseInt(oldestTx.timeStamp)) / 86400)
+        walletAge = ageInDays === 0 ? 'Today' : `${ageInDays} day${ageInDays === 1 ? '' : 's'}`
+        
+        // Flag very new wallets with large holdings
+        if (ageInDays < 7 && holdingPercentage > 5) {
+          riskFlags.push(`🆕 New wallet with large holdings: Created ${walletAge} ago`)
+          if (riskLevel === 'clean') riskLevel = 'medium'
+        }
+      }
+      
+      // Check for unusual buy/sell pattern
+      const buyValue = buys.reduce((sum: number, tx: any) => sum + parseFloat(tx.value || '0'), 0)
+      const sellValue = sells.reduce((sum: number, tx: any) => sum + parseFloat(tx.value || '0'), 0)
+      
+      if (sellValue > buyValue * 2) {
+        riskFlags.push('💰 Unusual profit pattern: Sold more than 2x initial buy')
+        if (riskLevel !== 'high' && riskLevel !== 'medium') riskLevel = 'medium'
+      }
+    } else {
+      // No transaction history available
+      if (holdingPercentage > 5) {
+        riskFlags.push('❓ No transaction history found (may be initial distribution)')
+        if (riskLevel === 'clean') riskLevel = 'low'
+      }
+    }
+    
+    // If no risk flags, wallet is clean
+    if (riskFlags.length === 0) {
+      riskFlags.push('✅ No suspicious patterns detected')
+    }
+    
+  } catch (error) {
+    console.error('Error analyzing wallet:', error)
+    riskFlags.push('⚠️ Unable to complete full analysis')
+  }
+  
+  return {
+    riskLevel,
+    riskFlags,
+    walletAge,
+    previousScams
+  }
+}
+
+// Detect coordinated trading patterns
+function detectCoordinatedTrading(holders: any[]): WalletPatternAlert[] {
+  const alerts: WalletPatternAlert[] = []
+  
+  // Check for multiple wallets with similar holdings (potential sybil attack)
+  const holdingGroups: Record<string, string[]> = {}
+  
+  holders.forEach((holder: any) => {
+    const percentage = parseFloat(holder.percentage || '0')
+    const roundedPercentage = Math.floor(percentage * 10) / 10 // Round to 1 decimal
+    const key = roundedPercentage.toString()
+    
+    if (!holdingGroups[key]) {
+      holdingGroups[key] = []
+    }
+    holdingGroups[key].push(holder.address)
+  })
+  
+  // If multiple wallets have nearly identical holdings, flag as suspicious
+  Object.entries(holdingGroups).forEach(([percentage, wallets]) => {
+    if (wallets.length >= 3 && parseFloat(percentage) > 2) {
+      alerts.push({
+        alertType: 'coordinated_trading',
+        severity: 'high',
+        description: `${wallets.length} wallets detected with nearly identical holdings (~${percentage}% each). This may indicate coordinated manipulation or a single entity using multiple wallets.`,
+        wallets: wallets,
+        evidence: [
+          `All wallets hold approximately ${percentage}% of total supply`,
+          'Identical holding patterns suggest coordination',
+          'Possible sybil attack or single entity control'
+        ],
+        timestamp: new Date().toISOString()
+      })
+    }
+  })
+  
+  return alerts
+}
+
+// Detect wash trading patterns
+function detectWashTrading(transactions: any[]): WalletPatternAlert[] {
+  const alerts: WalletPatternAlert[] = []
+  
+  // Look for back-and-forth trading between same wallets
+  const tradePairs: Record<string, number> = {}
+  
+  transactions.forEach((tx: any, index: number) => {
+    if (index < transactions.length - 1) {
+      const nextTx = transactions[index + 1]
+      
+      // Check if this is a back-and-forth trade
+      if (tx.from === nextTx.to && tx.to === nextTx.from) {
+        const pairKey = [tx.from, tx.to].sort().join('-')
+        tradePairs[pairKey] = (tradePairs[pairKey] || 0) + 1
+      }
+    }
+  })
+  
+  // Flag pairs with multiple back-and-forth trades
+  Object.entries(tradePairs).forEach(([pair, count]) => {
+    if (count >= 3) {
+      const [wallet1, wallet2] = pair.split('-')
+      alerts.push({
+        alertType: 'wash_trading',
+        severity: 'critical',
+        description: `Detected ${count} back-and-forth trades between two wallets. This is a classic wash trading pattern used to fake volume and manipulate prices.`,
+        wallets: [wallet1, wallet2],
+        evidence: [
+          `${count} reciprocal trades detected`,
+          'Same wallets trading back and forth',
+          'Likely artificial volume creation'
+        ],
+        timestamp: new Date().toISOString()
+      })
+    }
+  })
+  
+  return alerts
+}
+
 async function analyzeContract(contractAddress: string, blockchain: string): Promise<ContractAnalysisResult> {
   // Fetch data from multiple sources in parallel
   const [contractInfo, dexData, honeypotData, holdersData] = await Promise.all([
@@ -289,10 +530,12 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
     }
   ]
 
-  // Process holders data
+  // Process holders data with wallet pattern analysis
   const totalHoldersCount = holdersData?.length || 0
   let topHolders: TopHolder[] = []
   let top10Percentage = 0
+  const knownScammers: KnownScammerWallet[] = []
+  let walletPatternAlerts: WalletPatternAlert[] = []
   
   if (holdersData && holdersData.length > 0) {
     // Calculate total supply from all holders
@@ -300,8 +543,8 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
       return sum + parseFloat(h.TokenHolderQuantity || '0')
     }, 0)
     
-    // Process top 10 holders
-    topHolders = holdersData.slice(0, 10).map((holder: any, index: number) => {
+    // Process top 10 holders with deep wallet analysis
+    const holderAnalysisPromises = holdersData.slice(0, 10).map(async (holder: any, index: number) => {
       const balance = parseFloat(holder.TokenHolderQuantity || '0')
       const percentage = totalSupply > 0 ? (balance / totalSupply) * 100 : 0
       
@@ -312,21 +555,97 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
         ? `${(balance / 1000).toFixed(2)}K`
         : balance.toFixed(2)
       
-      // Shorten address for display
-      const address = holder.TokenHolderAddress || 'Unknown'
-      const shortAddress = address.length > 20 
-        ? `${address.slice(0, 6)}...${address.slice(-4)}`
-        : address
+      // Get full and short address
+      const fullAddress = holder.TokenHolderAddress || 'Unknown'
+      const shortAddress = fullAddress.length > 20 
+        ? `${fullAddress.slice(0, 6)}...${fullAddress.slice(-4)}`
+        : fullAddress
+      
+      // Perform deep wallet analysis
+      const walletAnalysis = await analyzeWalletForPumpDump(
+        fullAddress,
+        contractAddress,
+        blockchain,
+        percentage
+      )
+      
+      // Check if wallet is known scammer and add to list
+      if (walletAnalysis.previousScams > 0) {
+        const scammerData = KNOWN_SCAMMER_WALLETS[fullAddress] || {
+          scamCount: walletAnalysis.previousScams,
+          totalLoss: 'Unknown',
+          lastScam: 'Unknown',
+          scamTypes: ['Pump and Dump']
+        }
+        
+        knownScammers.push({
+          address: shortAddress,
+          riskScore: 95,
+          scamCount: scammerData.scamCount,
+          totalLoss: scammerData.totalLoss,
+          lastScam: scammerData.lastScam,
+          scamTypes: scammerData.scamTypes
+        })
+      }
+      
+      // Create alert if wallet is high risk
+      if (walletAnalysis.riskLevel === 'high') {
+        walletPatternAlerts.push({
+          alertType: walletAnalysis.previousScams > 0 ? 'pump_dump_wallet' : 'suspicious_pattern',
+          severity: 'critical',
+          description: `High-risk wallet detected holding ${percentage.toFixed(1)}% of total supply. ${walletAnalysis.riskFlags.join('. ')}`,
+          wallets: [shortAddress],
+          evidence: walletAnalysis.riskFlags,
+          timestamp: new Date().toISOString()
+        })
+      } else if (walletAnalysis.riskLevel === 'medium' && percentage > 10) {
+        walletPatternAlerts.push({
+          alertType: 'suspicious_pattern',
+          severity: 'high',
+          description: `Suspicious wallet patterns detected for holder with ${percentage.toFixed(1)}% of supply.`,
+          wallets: [shortAddress],
+          evidence: walletAnalysis.riskFlags,
+          timestamp: new Date().toISOString()
+        })
+      }
       
       return {
         address: shortAddress,
         percentage: parseFloat(percentage.toFixed(2)),
         balance: formattedBalance,
-        label: index === 0 ? 'Top Holder' : undefined
+        label: index === 0 ? 'Top Holder' : undefined,
+        riskLevel: walletAnalysis.riskLevel,
+        riskFlags: walletAnalysis.riskFlags,
+        walletAge: walletAnalysis.walletAge,
+        previousScams: walletAnalysis.previousScams
       }
     })
     
+    // Wait for all wallet analyses to complete
+    topHolders = await Promise.all(holderAnalysisPromises)
     top10Percentage = topHolders.reduce((sum, holder) => sum + holder.percentage, 0)
+    
+    // Detect coordinated trading patterns
+    const coordinatedAlerts = detectCoordinatedTrading(topHolders)
+    walletPatternAlerts = [...walletPatternAlerts, ...coordinatedAlerts]
+    
+    // Adjust risk score based on wallet analysis
+    if (knownScammers.length > 0) {
+      riskScore += 35 // Known scammers are CRITICAL
+    }
+    if (walletPatternAlerts.some(a => a.severity === 'critical')) {
+      riskScore += 20 // Critical pattern alerts
+    }
+    if (walletPatternAlerts.some(a => a.severity === 'high')) {
+      riskScore += 10 // High severity pattern alerts
+    }
+    const highRiskHolders = topHolders.filter(h => h.riskLevel === 'high')
+    if (highRiskHolders.length > 0) {
+      riskScore += Math.min(highRiskHolders.length * 5, 15) // Add up to 15 points for high-risk holders
+    }
+    
+    // Re-cap risk score at 100
+    riskScore = Math.min(riskScore, 100)
   }
 
   // Process liquidity pools from DexScreener
@@ -392,7 +711,23 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
   const warnings: string[] = []
   const positiveIndicators: string[] = []
 
-  // Critical concerns
+  // Critical concerns - Known Scammers (HIGHEST PRIORITY)
+  if (knownScammers.length > 0) {
+    criticalConcerns.push(`🚨 KNOWN SCAMMERS DETECTED - ${knownScammers.length} wallet(s) with history of pump & dump schemes are holding tokens`)
+    knownScammers.forEach(scammer => {
+      criticalConcerns.push(`   └─ ${scammer.address}: ${scammer.scamCount} previous scams, ${scammer.totalLoss} in losses`)
+    })
+  }
+  
+  // Wallet Pattern Alerts
+  const criticalPatternAlerts = walletPatternAlerts.filter(a => a.severity === 'critical')
+  if (criticalPatternAlerts.length > 0) {
+    criticalPatternAlerts.forEach(alert => {
+      criticalConcerns.push(`🚨 ${alert.alertType.toUpperCase().replace('_', ' ')}: ${alert.description}`)
+    })
+  }
+
+  // Contract-level critical concerns
   if (riskFactors.honeypotDetected) {
     criticalConcerns.push('⚠️ HONEYPOT DETECTED - Token may not be sellable or has severe restrictions')
   }
@@ -404,6 +739,20 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
   }
 
   // Warnings
+  // Wallet Pattern Warnings
+  const highPatternAlerts = walletPatternAlerts.filter(a => a.severity === 'high')
+  if (highPatternAlerts.length > 0) {
+    highPatternAlerts.forEach(alert => {
+      warnings.push(`⚠️ ${alert.alertType.replace('_', ' ').toUpperCase()}: ${alert.description}`)
+    })
+  }
+  
+  // High-risk wallets in top holders
+  const highRiskHolders = topHolders.filter(h => h.riskLevel === 'high')
+  if (highRiskHolders.length > 0 && knownScammers.length === 0) {
+    warnings.push(`${highRiskHolders.length} high-risk wallet(s) detected among top holders with suspicious patterns`)
+  }
+  
   if (riskFactors.unverifiedContract) {
     warnings.push('Contract source code is not verified - Cannot audit for malicious code')
   }
@@ -514,7 +863,9 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
       buySellRatio: mainPair?.txns?.h24?.sells > 0
         ? (mainPair.txns.h24.buys / mainPair.txns.h24.sells).toFixed(2)
         : '0',
-      anomalies
+      anomalies,
+      walletPatternAlerts,
+      knownScammers
     },
     report: {
       criticalConcerns,

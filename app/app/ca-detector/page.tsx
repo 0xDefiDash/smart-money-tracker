@@ -293,6 +293,58 @@ export default function CADetectorPage() {
 
             {/* Holders Tab */}
             <TabsContent value="holders" className="space-y-4">
+              {/* Known Scammers Alert */}
+              {analysis.transactionAnalysis.knownScammers && analysis.transactionAnalysis.knownScammers.length > 0 && (
+                <Alert variant="destructive" className="border-2 border-red-500">
+                  <AlertTriangle className="h-5 w-5" />
+                  <AlertDescription className="space-y-2">
+                    <div className="font-bold text-lg">🚨 CRITICAL: KNOWN SCAMMERS DETECTED</div>
+                    <p className="text-sm">
+                      {analysis.transactionAnalysis.knownScammers.length} wallet(s) with documented history of pump & dump schemes are currently holding this token.
+                    </p>
+                    <div className="mt-3 space-y-2">
+                      {analysis.transactionAnalysis.knownScammers.map((scammer, idx) => (
+                        <div key={idx} className="p-3 bg-red-950/20 rounded border border-red-800">
+                          <div className="font-mono text-sm">{scammer.address}</div>
+                          <div className="text-xs mt-1 space-y-1">
+                            <div>• {scammer.scamCount} previous scams ({scammer.totalLoss} in losses)</div>
+                            <div>• Last scam: {scammer.lastScam}</div>
+                            <div>• Types: {scammer.scamTypes.join(', ')}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Wallet Pattern Alerts */}
+              {analysis.transactionAnalysis.walletPatternAlerts && analysis.transactionAnalysis.walletPatternAlerts.length > 0 && (
+                <Card className="border-2 border-orange-500 bg-orange-50/10">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-orange-500">
+                      <AlertTriangle className="w-5 h-5" />
+                      Suspicious Wallet Patterns Detected
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {analysis.transactionAnalysis.walletPatternAlerts.map((alert, idx) => (
+                      <Alert key={idx} variant={alert.severity === 'critical' ? 'destructive' : 'default'}>
+                        <AlertDescription className="space-y-2">
+                          <div className="font-semibold">{alert.alertType.replace(/_/g, ' ').toUpperCase()}</div>
+                          <p className="text-sm">{alert.description}</p>
+                          <div className="text-xs space-y-1 mt-2 pl-3 border-l-2 border-muted">
+                            {alert.evidence.map((evidence, eidx) => (
+                              <div key={eidx}>• {evidence}</div>
+                            ))}
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -334,27 +386,70 @@ export default function CADetectorPage() {
                   <Separator />
 
                   <div>
-                    <h4 className="font-semibold mb-3">Top Holders</h4>
+                    <h4 className="font-semibold mb-3">Top Holders with Risk Analysis</h4>
                     <div className="space-y-2">
-                      {analysis.holderAnalysis.topHolders.map((holder, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <div className="font-mono text-sm">{holder.address}</div>
-                              {holder.label && (
-                                <Badge variant="secondary" className="mt-1 text-xs">{holder.label}</Badge>
-                              )}
+                      {analysis.holderAnalysis.topHolders.map((holder, index) => {
+                        const riskColor = 
+                          holder.riskLevel === 'high' ? 'border-red-500 bg-red-50/10' :
+                          holder.riskLevel === 'medium' ? 'border-orange-500 bg-orange-50/10' :
+                          holder.riskLevel === 'low' ? 'border-yellow-500 bg-yellow-50/10' :
+                          'border-green-500 bg-green-50/10'
+                        
+                        const riskBadgeVariant = 
+                          holder.riskLevel === 'high' ? 'destructive' as const :
+                          holder.riskLevel === 'medium' ? 'secondary' as const :
+                          'outline' as const
+                        
+                        return (
+                          <div key={index} className={`p-3 rounded-lg border-2 ${riskColor}`}>
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3 flex-1">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                  {index + 1}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <div className="font-mono text-sm break-all">{holder.address}</div>
+                                    {holder.label && (
+                                      <Badge variant="secondary" className="text-xs">{holder.label}</Badge>
+                                    )}
+                                    {holder.riskLevel && (
+                                      <Badge variant={riskBadgeVariant} className="text-xs">
+                                        {holder.riskLevel.toUpperCase()} RISK
+                                      </Badge>
+                                    )}
+                                    {holder.previousScams && holder.previousScams > 0 && (
+                                      <Badge variant="destructive" className="text-xs">
+                                        ⚠️ {holder.previousScams} SCAMS
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  
+                                  {holder.walletAge && (
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      Wallet Age: {holder.walletAge}
+                                    </div>
+                                  )}
+                                  
+                                  {holder.riskFlags && holder.riskFlags.length > 0 && (
+                                    <div className="mt-2 space-y-1">
+                                      {holder.riskFlags.map((flag, fidx) => (
+                                        <div key={fidx} className="text-xs p-2 bg-muted rounded">
+                                          {flag}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-right ml-3 flex-shrink-0">
+                                <div className="font-semibold">{holder.percentage}%</div>
+                                <div className="text-xs text-muted-foreground">{holder.balance}</div>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-semibold">{holder.percentage}%</div>
-                            <div className="text-xs text-muted-foreground">{holder.balance}</div>
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 </CardContent>
@@ -622,6 +717,9 @@ export default function CADetectorPage() {
               <div className="space-y-2">
                 <h4 className="font-semibold">What does the CA Detector analyze?</h4>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                  <li><strong>Known Scammer Detection:</strong> Identifies wallets with history of pump & dump schemes</li>
+                  <li><strong>Wallet Pattern Analysis:</strong> Detects coordinated trading and wash trading</li>
+                  <li><strong>Holder Risk Profiling:</strong> Analyzes each top holder's transaction history and risk level</li>
                   <li>Honeypot and rug pull detection</li>
                   <li>Ownership and admin privileges</li>
                   <li>Token holder distribution and concentration</li>

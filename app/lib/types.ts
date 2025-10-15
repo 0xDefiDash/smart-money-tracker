@@ -130,6 +130,10 @@ export interface TopHolder {
   percentage: number
   balance: string
   label?: string
+  riskLevel?: 'high' | 'medium' | 'low' | 'clean'
+  riskFlags?: string[]
+  walletAge?: string
+  previousScams?: number
 }
 
 export interface HolderAnalysis {
@@ -157,6 +161,26 @@ export interface TransactionAnomaly {
   type: string
   description: string
   timestamp: string
+  severity?: 'critical' | 'high' | 'medium' | 'low'
+  affectedWallets?: string[]
+}
+
+export interface WalletPatternAlert {
+  alertType: 'pump_dump_wallet' | 'coordinated_trading' | 'wash_trading' | 'suspicious_pattern' | 'insider_wallet' | 'bot_activity'
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  description: string
+  wallets: string[]
+  evidence: string[]
+  timestamp: string
+}
+
+export interface KnownScammerWallet {
+  address: string
+  riskScore: number
+  scamCount: number
+  totalLoss: string
+  lastScam: string
+  scamTypes: string[]
 }
 
 export interface TransactionAnalysis {
@@ -167,6 +191,8 @@ export interface TransactionAnalysis {
   avgSellSize: string
   buySellRatio: string
   anomalies: TransactionAnomaly[]
+  walletPatternAlerts: WalletPatternAlert[]
+  knownScammers: KnownScammerWallet[]
 }
 
 export interface ContractReport {
