@@ -169,13 +169,26 @@ async function getTopHolders(contractAddress: string, blockchain: string) {
       return { error: 'API_KEY_MISSING', data: null }
     }
     
-    const url = `${config.apiUrl}?module=token&action=tokenholderlist&contractaddress=${contractAddress}&page=1&offset=10&apikey=${config.key}`
+    // For Etherscan-based APIs, use V2 endpoint if available
+    // V2 endpoint: https://api.etherscan.io/v2/api
+    // V1 endpoint (fallback): https://api.etherscan.io/api
+    let apiUrlBase = config.apiUrl
+    let url = ''
     
-    console.log(`Fetching holders from ${config.name}:`, contractAddress)
+    // Try V2 API first for Etherscan-based services
+    if (blockchain === 'ethereum' || blockchain === 'bsc' || blockchain === 'polygon' || blockchain === 'arbitrum' || blockchain === 'base') {
+      // Use V1 endpoint with different parameters since V2 might need different authentication
+      // Let's use the account module to get token transfers which can give us holder info
+      url = `${apiUrlBase}?module=account&action=tokentx&contractaddress=${contractAddress}&page=1&offset=1000&sort=desc&apikey=${config.key}`
+    } else {
+      url = `${apiUrlBase}?module=token&action=tokenholderlist&contractaddress=${contractAddress}&page=1&offset=10&apikey=${config.key}`
+    }
+    
+    console.log(`Fetching holder data from ${config.name}:`, contractAddress)
     const response = await fetch(url)
     const data = await response.json()
     
-    console.log(`${config.name} response:`, JSON.stringify(data).substring(0, 500))
+    console.log(`${config.name} response status:`, data.status, 'message:', data.message)
     
     // Check for rate limiting or API errors
     if (data.status === '0') {
@@ -191,12 +204,23 @@ async function getTopHolders(contractAddress: string, blockchain: string) {
         return { error: 'INVALID_API_KEY', data: null, message: errorMessage }
       } else if (errorMessage === 'No transactions found' || errorMessage === 'No records found') {
         return { error: 'NO_HOLDERS', data: [], message: errorMessage }
+      } else if (errorMessage.toLowerCase().includes('deprecated')) {
+        // API V1 is deprecated, try alternative approach
+        console.log('API V1 deprecated, using alternative method...')
+        return await getHoldersFromTransfers(contractAddress, blockchain)
       }
       
       return { error: 'API_ERROR', data: null, message: errorMessage }
     }
     
     if (data.status === '1' && data.result && Array.isArray(data.result)) {
+      // If we got transaction data, process it to extract top holders
+      if (url.includes('action=tokentx')) {
+        const holders = extractHoldersFromTransactions(data.result)
+        console.log(`Extracted ${holders.length} holders from transactions`)
+        return { error: null, data: holders }
+      }
+      
       console.log(`Found ${data.result.length} holders`)
       return { error: null, data: data.result }
     }
@@ -206,6 +230,61 @@ async function getTopHolders(contractAddress: string, blockchain: string) {
     console.error('Error fetching top holders:', error)
     return { error: 'NETWORK_ERROR', data: null, message: error instanceof Error ? error.message : 'Network error' }
   }
+}
+
+// Alternative method: Extract holders from transaction history
+async function getHoldersFromTransfers(contractAddress: string, blockchain: string) {
+  try {
+    const config = getExplorerConfig(blockchain)
+    
+    // Get recent token transfers
+    const url = `${config.apiUrl}?module=account&action=tokentx&contractaddress=${contractAddress}&page=1&offset=1000&sort=desc&apikey=${config.key}`
+    
+    console.log(`Fetching transfers from ${config.name} as alternative method`)
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    if (data.status === '1' && data.result && Array.isArray(data.result)) {
+      const holders = extractHoldersFromTransactions(data.result)
+      return { error: null, data: holders }
+    }
+    
+    return { error: 'NO_DATA', data: [], message: 'No holder data available' }
+  } catch (error) {
+    console.error('Error fetching holders from transfers:', error)
+    return { error: 'NETWORK_ERROR', data: null, message: error instanceof Error ? error.message : 'Network error' }
+  }
+}
+
+// Extract top holders from transaction data
+function extractHoldersFromTransactions(transactions: any[]) {
+  const holderBalances: Record<string, number> = {}
+  
+  // Process transactions to calculate balances
+  transactions.forEach(tx => {
+    const from = tx.from?.toLowerCase()
+    const to = tx.to?.toLowerCase()
+    const value = parseFloat(tx.value || '0')
+    
+    if (from && from !== '0x0000000000000000000000000000000000000000') {
+      holderBalances[from] = (holderBalances[from] || 0) - value
+    }
+    if (to && to !== '0x0000000000000000000000000000000000000000') {
+      holderBalances[to] = (holderBalances[to] || 0) + value
+    }
+  })
+  
+  // Filter out negative balances (shouldn't happen but just in case)
+  const positiveHolders = Object.entries(holderBalances)
+    .filter(([_, balance]) => balance > 0)
+    .sort(([_, a], [__, b]) => b - a)
+    .slice(0, 10)
+  
+  // Convert to expected format
+  return positiveHolders.map(([address, quantity]) => ({
+    TokenHolderAddress: address,
+    TokenHolderQuantity: quantity.toString()
+  }))
 }
 
 // Fetch wallet transactions to analyze patterns
