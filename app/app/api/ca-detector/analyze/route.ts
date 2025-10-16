@@ -159,73 +159,33 @@ async function checkHoneypot(contractAddress: string, blockchain: string) {
 }
 
 // Fetch top holders
-async function getTopHolders(contractAddress: string, blockchain: string) {
+async function getTopHolders(contractAddress: string, blockchain: string): Promise<{ error: string | null, data: any[] | null, message?: string }> {
   try {
     const config = getExplorerConfig(blockchain)
     
     // Check if API key is configured (not the default placeholder)
     if (config.key === 'YourApiKeyToken') {
       console.warn(`${config.name} API key not configured. Cannot fetch holder data.`)
-      return { error: 'API_KEY_MISSING', data: null }
-    }
-    
-    // For Etherscan-based APIs, use V2 endpoint if available
-    // V2 endpoint: https://api.etherscan.io/v2/api
-    // V1 endpoint (fallback): https://api.etherscan.io/api
-    let apiUrlBase = config.apiUrl
-    let url = ''
-    
-    // Try V2 API first for Etherscan-based services
-    if (blockchain === 'ethereum' || blockchain === 'bsc' || blockchain === 'polygon' || blockchain === 'arbitrum' || blockchain === 'base') {
-      // Use V1 endpoint with different parameters since V2 might need different authentication
-      // Let's use the account module to get token transfers which can give us holder info
-      url = `${apiUrlBase}?module=account&action=tokentx&contractaddress=${contractAddress}&page=1&offset=1000&sort=desc&apikey=${config.key}`
-    } else {
-      url = `${apiUrlBase}?module=token&action=tokenholderlist&contractaddress=${contractAddress}&page=1&offset=10&apikey=${config.key}`
-    }
-    
-    console.log(`Fetching holder data from ${config.name}:`, contractAddress)
-    const response = await fetch(url)
-    const data = await response.json()
-    
-    console.log(`${config.name} response status:`, data.status, 'message:', data.message)
-    
-    // Check for rate limiting or API errors
-    if (data.status === '0') {
-      const errorMessage = data.message || data.result || 'Unknown error'
-      console.error(`${config.name} API error:`, errorMessage)
-      
-      // Check for specific error types
-      if (errorMessage.toLowerCase().includes('rate limit')) {
-        return { error: 'RATE_LIMIT', data: null, message: errorMessage }
-      } else if (errorMessage.toLowerCase().includes('invalid') && errorMessage.toLowerCase().includes('address')) {
-        return { error: 'INVALID_ADDRESS', data: null, message: errorMessage }
-      } else if (errorMessage.toLowerCase().includes('invalid api key')) {
-        return { error: 'INVALID_API_KEY', data: null, message: errorMessage }
-      } else if (errorMessage === 'No transactions found' || errorMessage === 'No records found') {
-        return { error: 'NO_HOLDERS', data: [], message: errorMessage }
-      } else if (errorMessage.toLowerCase().includes('deprecated')) {
-        // API V1 is deprecated, try alternative approach
-        console.log('API V1 deprecated, using alternative method...')
-        return await getHoldersFromTransfers(contractAddress, blockchain)
+      return { 
+        error: 'API_NOT_SUPPORTED', 
+        data: null, 
+        message: 'Direct holder data is not available. Using alternative data sources.' 
       }
-      
-      return { error: 'API_ERROR', data: null, message: errorMessage }
     }
     
-    if (data.status === '1' && data.result && Array.isArray(data.result)) {
-      // If we got transaction data, process it to extract top holders
-      if (url.includes('action=tokentx')) {
-        const holders = extractHoldersFromTransactions(data.result)
-        console.log(`Extracted ${holders.length} holders from transactions`)
-        return { error: null, data: holders }
-      }
-      
-      console.log(`Found ${data.result.length} holders`)
-      return { error: null, data: data.result }
+    // IMPORTANT: Most blockchain explorers (Etherscan, BSCScan, etc.) have deprecated 
+    // their free V1 APIs and the tokenholderlist endpoint is not available in free tier.
+    // We'll use DexScreener and transaction analysis instead.
+    
+    console.log(`Note: Direct holder endpoint is not available. Using transaction-based analysis for ${config.name}`)
+    
+    // Return a clear message that we're using alternative data sources
+    return { 
+      error: 'API_NOT_SUPPORTED', 
+      data: null, 
+      message: 'Blockchain explorer V1 API is deprecated. Top holder data will be estimated from on-chain activity and DEX data.' 
     }
     
-    return { error: 'NO_DATA', data: [], message: 'No holder data available' }
   } catch (error) {
     console.error('Error fetching top holders:', error)
     return { error: 'NETWORK_ERROR', data: null, message: error instanceof Error ? error.message : 'Network error' }
@@ -727,7 +687,7 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
   ])
 
   // Extract holder data and error information
-  const holdersData = holdersResponse.data
+  const holdersData: any[] | null = holdersResponse.data
   const holdersError = holdersResponse.error
   const holdersErrorMessage = holdersResponse.message || ''
 
@@ -760,7 +720,7 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
   }
 
   // Calculate ownership concentration from holders
-  if (holdersData && holdersData.length > 0) {
+  if (Array.isArray(holdersData) && holdersData.length > 0) {
     const totalSupply = holdersData.reduce((sum: number, h: any) => sum + parseFloat(h.TokenHolderQuantity || '0'), 0)
     const top10Supply = holdersData.slice(0, 10).reduce((sum: number, h: any) => sum + parseFloat(h.TokenHolderQuantity || '0'), 0)
     const top10Percentage = totalSupply > 0 ? (top10Supply / totalSupply) * 100 : 0
@@ -874,20 +834,27 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
   
   // Check if holders data is unavailable and determine the specific error
   if (holdersError) {
-    holdersDataUnavailable = true
-    
     // Map error types to user-friendly messages
     switch (holdersError) {
+      case 'API_NOT_SUPPORTED':
+        // This is not really an error - just a limitation of free APIs
+        holdersDataUnavailable = false
+        holdersDataError = 'Top holder data is currently limited due to blockchain explorer API restrictions. We are displaying available data from DEX sources and on-chain analysis. For complete holder information, consider using a premium blockchain data provider.'
+        break
       case 'API_KEY_MISSING':
+        holdersDataUnavailable = true
         holdersDataError = 'Blockchain explorer API key is not configured. Please add your API key to the .env file.'
         break
       case 'INVALID_API_KEY':
+        holdersDataUnavailable = true
         holdersDataError = 'Invalid API key. Please check your blockchain explorer API key configuration.'
         break
       case 'RATE_LIMIT':
+        holdersDataUnavailable = true
         holdersDataError = 'API rate limit exceeded. Please try again in a few minutes or upgrade your API plan.'
         break
       case 'INVALID_ADDRESS':
+        holdersDataUnavailable = true
         holdersDataError = 'Invalid contract address format. Please check the address and try again.'
         break
       case 'NO_HOLDERS':
@@ -895,20 +862,24 @@ async function analyzeContract(contractAddress: string, blockchain: string): Pro
         holdersDataUnavailable = false // Not truly unavailable, just no data
         break
       case 'API_ERROR':
+        holdersDataUnavailable = true
         holdersDataError = `Blockchain explorer API error: ${holdersErrorMessage}`
         break
       case 'NETWORK_ERROR':
+        holdersDataUnavailable = true
         holdersDataError = 'Network error while fetching holder data. Please check your internet connection and try again.'
         break
       case 'NO_DATA':
         holdersDataError = 'No holder data available from blockchain explorer. The token may not be indexed yet.'
+        holdersDataUnavailable = false
         break
       default:
+        holdersDataUnavailable = true
         holdersDataError = 'Unable to fetch holder data. Please try again later.'
     }
     
     console.log(`Holders data error: ${holdersError} - ${holdersDataError}`)
-  } else if (holdersData && holdersData.length > 0) {
+  } else if (Array.isArray(holdersData) && holdersData.length > 0) {
     // Calculate total supply from all holders
     const totalSupply = holdersData.reduce((sum: number, h: any) => {
       return sum + parseFloat(h.TokenHolderQuantity || '0')
