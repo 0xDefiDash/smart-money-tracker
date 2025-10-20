@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db';
 const TRACKED_ACCOUNTS = [
   'CryptoExpert101',
   'JamesWynnReal',
+  'BullRunGravano',
   // Add more accounts here as needed
 ];
 

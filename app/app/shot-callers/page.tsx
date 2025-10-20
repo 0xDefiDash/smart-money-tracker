@@ -44,7 +44,8 @@ const topKOLs = [
     followers: '300K',
     category: 'Analyst',
     influence: 95,
-    recentAlpha: 'Alt season incoming - accumulate these 5 coins'
+    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @BullRunGravano',
+    isTracked: true
   },
   {
     id: '4',
@@ -275,7 +276,7 @@ export default function ShotCallersPage() {
               <p className="text-gray-400 text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Activity className="h-2 w-2 mr-1 animate-pulse" />
-                Tracking 2 KOLs
+                Tracking 3 KOLs
               </Badge>
             </div>
           </div>
