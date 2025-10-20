@@ -358,52 +358,8 @@ export default function ShotCallersPage() {
         </div>
       </div>
 
-      {/* Token Calls Tracking Section */}
-      <div className="space-y-4">
-        <Card className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-purple-500/30">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white mb-1">Live Token Calls Tracker</h3>
-                <p className="text-sm text-gray-400">Real-time tracking of tokens mentioned by shot callers with performance analytics</p>
-              </div>
-              <Button
-                onClick={async () => {
-                  toast.loading('Syncing token calls from Twitter...', { id: 'sync' });
-                  try {
-                    const response = await fetch('/api/shot-callers/sync', {
-                      method: 'POST'
-                    });
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                      toast.success(
-                        `Synced ${data.processed} tweets and created ${data.tokenCallsCreated} token calls`,
-                        { id: 'sync' }
-                      );
-                      // Refresh the token calls section
-                      window.location.reload();
-                    } else {
-                      toast.error('Failed to sync token calls', { id: 'sync' });
-                    }
-                  } catch (error) {
-                    toast.error('Error syncing token calls', { id: 'sync' });
-                  }
-                }}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-              >
-                <Database className="h-4 w-4 mr-2" />
-                Sync Token Calls
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <TokenCallsSection />
-      </div>
-
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* KOLs List */}
         <Card className="lg:col-span-1 bg-slate-900/50 border-slate-800">
           <CardHeader>
@@ -590,12 +546,59 @@ export default function ShotCallersPage() {
         </Card>
       </div>
 
+      {/* Compact Token Calls Section */}
+      <div className="mt-6">
+        <Card className="bg-slate-900/50 border-slate-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="h-5 w-5 text-purple-500" />
+                Token Calls Tracker
+              </CardTitle>
+              <Button
+                onClick={async () => {
+                  toast.loading('Syncing token calls from Twitter...', { id: 'sync' });
+                  try {
+                    const response = await fetch('/api/shot-callers/sync', {
+                      method: 'POST'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                      toast.success(
+                        `Synced ${data.processed} tweets and created ${data.tokenCallsCreated} token calls`,
+                        { id: 'sync' }
+                      );
+                      // Refresh the token calls section
+                      window.location.reload();
+                    } else {
+                      toast.error('Failed to sync token calls', { id: 'sync' });
+                    }
+                  } catch (error) {
+                    toast.error('Error syncing token calls', { id: 'sync' });
+                  }
+                }}
+                size="sm"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                <Database className="h-3 w-3 mr-1" />
+                Sync
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <TokenCallsSection />
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Floating Action Button */}
       <Button
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50"
         size="icon"
+        onClick={fetchLiveTweets}
       >
-        <Zap className="h-6 w-6" />
+        <RefreshCw className={`h-6 w-6 ${loading ? 'animate-spin' : ''}`} />
       </Button>
     </div>
   );
