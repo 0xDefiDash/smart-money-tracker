@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activity, Flame, Users, Zap, RefreshCw } from 'lucide-react';
+import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activity, Flame, Users, Zap, RefreshCw, Database } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -335,7 +335,48 @@ export default function ShotCallersPage() {
       </div>
 
       {/* Token Calls Tracking Section */}
-      <TokenCallsSection />
+      <div className="space-y-4">
+        <Card className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-purple-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-1">Live Token Calls Tracker</h3>
+                <p className="text-sm text-gray-400">Real-time tracking of tokens mentioned by shot callers with performance analytics</p>
+              </div>
+              <Button
+                onClick={async () => {
+                  toast.loading('Syncing token calls from Twitter...', { id: 'sync' });
+                  try {
+                    const response = await fetch('/api/shot-callers/sync', {
+                      method: 'POST'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                      toast.success(
+                        `Synced ${data.processed} tweets and created ${data.tokenCallsCreated} token calls`,
+                        { id: 'sync' }
+                      );
+                      // Refresh the token calls section
+                      window.location.reload();
+                    } else {
+                      toast.error('Failed to sync token calls', { id: 'sync' });
+                    }
+                  } catch (error) {
+                    toast.error('Error syncing token calls', { id: 'sync' });
+                  }
+                }}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                <Database className="h-4 w-4 mr-2" />
+                Sync Token Calls
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <TokenCallsSection />
+      </div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
