@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 
             if (kolProfile) {
               // Upsert tweet (create or update if exists)
-              await prisma.kOLTweet.upsert({
+              const storedTweet = await prisma.kOLTweet.upsert({
                 where: { tweetId: tweet.id },
                 create: {
                   kolId: kolProfile.id,
@@ -96,6 +96,22 @@ export async function GET(request: NextRequest) {
                   quoteCount: tweet.public_metrics?.quote_count || 0,
                 }
               });
+
+              // Create token calls if coins are mentioned
+              if (coins.length > 0) {
+                try {
+                  await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/shot-callers/token-calls`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      tweetId: tweet.id,
+                      kolUsername: username
+                    })
+                  });
+                } catch (error) {
+                  console.error('Error creating token calls:', error);
+                }
+              }
             }
 
             // Add to response

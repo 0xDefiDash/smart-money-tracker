@@ -12,6 +12,7 @@ import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activi
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import TokenCallsSection from '@/components/shot-callers/TokenCallsSection';
 
 // Top Crypto KOLs data
 const topKOLs = [
@@ -332,8 +333,11 @@ export default function ShotCallersPage() {
         </div>
       </div>
 
+      {/* Token Calls Tracking Section */}
+      <TokenCallsSection />
+
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         {/* KOLs List */}
         <Card className="lg:col-span-1 bg-slate-900/50 border-slate-800">
           <CardHeader>

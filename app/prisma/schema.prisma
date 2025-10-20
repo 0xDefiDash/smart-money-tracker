@@ -443,6 +443,8 @@ model KOLProfile {
   lastFetchedAt           DateTime?
   
   tweets                  KOLTweet[]
+  tokenCalls              TokenCall[]
+  stats                   KOLStats?
   
   @@map("kol_profiles")
   @@index([username])
@@ -469,6 +471,7 @@ model KOLTweet {
   fetchedAt               DateTime @default(now())
   
   kol                     KOLProfile @relation(fields: [kolId], references: [id], onDelete: Cascade)
+  tokenCalls              TokenCall[]
   
   @@map("kol_tweets")
   @@index([kolId])
@@ -476,4 +479,54 @@ model KOLTweet {
   @@index([category])
   @@index([isAlert])
   @@index([likeCount])
+}
+
+model TokenCall {
+  id                      String   @id @default(cuid())
+  kolId                   String
+  tweetId                 String
+  tokenSymbol             String
+  tokenName               String?
+  tokenAddress            String?
+  callPrice               Float?
+  currentPrice            Float?
+  priceChange             Float?
+  roi                     Float?
+  sentiment               String   @default("neutral")
+  calledAt                DateTime @default(now())
+  lastCheckedAt           DateTime @default(now())
+  isWin                   Boolean?
+  targetDays              Int      @default(7)
+  
+  kol                     KOLProfile @relation(fields: [kolId], references: [id], onDelete: Cascade)
+  tweet                   KOLTweet @relation(fields: [tweetId], references: [tweetId], onDelete: Cascade)
+  
+  @@map("token_calls")
+  @@index([kolId])
+  @@index([tokenSymbol])
+  @@index([calledAt])
+  @@index([sentiment])
+  @@index([isWin])
+  @@unique([tweetId, tokenSymbol])
+}
+
+model KOLStats {
+  id                      String   @id @default(cuid())
+  kolId                   String   @unique
+  totalCalls              Int      @default(0)
+  successfulCalls         Int      @default(0)
+  failedCalls             Int      @default(0)
+  pendingCalls            Int      @default(0)
+  winRate                 Float    @default(0)
+  averageROI              Float    @default(0)
+  bestCall                Float?
+  worstCall               Float?
+  totalFollowers          Int      @default(0)
+  lastUpdated             DateTime @default(now())
+  
+  kol                     KOLProfile @relation(fields: [kolId], references: [id], onDelete: Cascade)
+  
+  @@map("kol_stats")
+  @@index([winRate])
+  @@index([totalCalls])
 }
