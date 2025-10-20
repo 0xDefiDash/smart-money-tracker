@@ -76,6 +76,11 @@ const sidebarItems = [
     icon: Zap,
   },
   {
+    title: 'ETH Tracker',
+    href: '/eth-tracker',
+    icon: Activity,
+  },
+  {
     title: 'Exchange Flows',
     href: '/exchange-flows',
     icon: Building2,
