@@ -137,9 +137,12 @@ const generateWhaleTransactions = () => {
 export function WhaleActivity() {
   const [whaleTransactions, setWhaleTransactions] = useState(generateWhaleTransactions());
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
+    // Set initial lastUpdate on client
+    setLastUpdate(new Date());
+    
     // Update transactions every 2 minutes to simulate real-time data
     const interval = setInterval(() => {
       setWhaleTransactions(generateWhaleTransactions());
@@ -249,7 +252,7 @@ export function WhaleActivity() {
         
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-            <span>Last Updated: {lastUpdate.toLocaleTimeString()}</span>
+            <span>Last Updated: {lastUpdate ? lastUpdate.toLocaleTimeString() : 'Loading...'}</span>
             <span>Real-time monitoring active</span>
           </div>
           <button className="w-full text-sm text-primary hover:text-primary/80 transition-colors font-medium">

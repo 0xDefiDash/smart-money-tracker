@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { createCoinbaseCharge } from '@/lib/coinbase-commerce';
 
 export async function POST(
   request: NextRequest,
@@ -15,9 +16,7 @@ export async function POST(
       fromUserName, 
       amount, 
       cryptocurrency, 
-      amountUsd, 
-      message,
-      txHash 
+      message
     } = body;
 
     if (!kolUsername || !fromUserAddress || !amount || !cryptocurrency) {
@@ -39,43 +38,54 @@ export async function POST(
       );
     }
 
-    // Create tip record
+    // Create Coinbase Commerce charge
+    const charge = await createCoinbaseCharge({
+      name: `Tip for ${kolUsername}`,
+      description: message || `Tip for ${kolUsername}'s content on Smart Money Tracker`,
+      pricing_type: 'fixed_price',
+      local_price: {
+        amount: amount.toString(),
+        currency: 'USD'
+      },
+      metadata: {
+        tweetId,
+        kolUsername,
+        fromUserAddress,
+        fromUserName,
+        cryptocurrency,
+        message: message || ''
+      },
+      redirect_url: `${process.env.NEXTAUTH_URL}/shot-callers?tip_success=true`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/shot-callers?tip_cancelled=true`
+    });
+
+    // Create tip record with pending status
     const tip = await db.tweetTip.create({
       data: {
         tweetId,
         kolUsername,
         fromUserAddress,
         fromUserName,
-        amount,
+        amount: parseFloat(amount),
         cryptocurrency,
-        amountUsd,
+        amountUsd: parseFloat(amount),
         message,
-        txHash,
-        status: txHash ? 'completed' : 'pending',
-        completedAt: txHash ? new Date() : null
+        txHash: charge.data.code, // Store Coinbase charge code as reference
+        status: 'pending',
+        completedAt: null
       }
     });
 
-    // Update KOL wallet total if completed
-    if (txHash) {
-      await db.kOLWallet.update({
-        where: { kolUsername },
-        data: {
-          totalTipsReceived: {
-            increment: amount
-          },
-          totalTipsReceivedUsd: {
-            increment: amountUsd
-          }
-        }
-      });
-    }
-
-    return NextResponse.json(tip, { status: 201 });
+    return NextResponse.json({ 
+      tip,
+      checkoutUrl: charge.data.hosted_url,
+      chargeId: charge.data.id,
+      chargeCode: charge.data.code
+    }, { status: 201 });
   } catch (error) {
     console.error('Error creating tip:', error);
     return NextResponse.json(
-      { error: 'Failed to create tip' },
+      { error: 'Failed to create tip. Please try again.' },
       { status: 500 }
     );
   }
@@ -96,7 +106,7 @@ export async function GET(
     });
 
     const totalTips = tips.reduce((sum: number, tip: any) => sum + tip.amountUsd, 0);
-    const tipsCount = tips.length;
+    const tipsCount = tips.filter((tip: any) => tip.status === 'completed').length;
 
     return NextResponse.json({ 
       tips, 

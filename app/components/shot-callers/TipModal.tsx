@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DollarSign, Wallet, Send, Copy, Check } from 'lucide-react';
+import { DollarSign, Send, Loader2, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWeb3 } from '@/lib/web3-provider';
 
@@ -28,23 +27,7 @@ interface TipModalProps {
   };
 }
 
-const CRYPTO_OPTIONS = [
-  { value: 'ETH', label: 'Ethereum (ETH)', addressKey: 'ethAddress' },
-  { value: 'BNB', label: 'Binance Coin (BNB)', addressKey: 'bnbAddress' },
-  { value: 'SOL', label: 'Solana (SOL)', addressKey: 'solAddress' },
-  { value: 'USDC_ETH', label: 'USDC (Ethereum)', addressKey: 'usdcEthAddress' },
-  { value: 'USDC_BNB', label: 'USDC (BSC)', addressKey: 'usdcBnbAddress' },
-  { value: 'USDC_SOL', label: 'USDC (Solana)', addressKey: 'usdcSolAddress' },
-];
-
-const CRYPTO_PRICES: Record<string, number> = {
-  'ETH': 2500,
-  'BNB': 300,
-  'SOL': 140,
-  'USDC_ETH': 1,
-  'USDC_BNB': 1,
-  'USDC_SOL': 1,
-};
+const QUICK_AMOUNTS = [5, 10, 25, 50, 100];
 
 export default function TipModal({
   isOpen,
@@ -55,23 +38,12 @@ export default function TipModal({
   walletAddresses
 }: TipModalProps) {
   const { account, isConnected, connectWallet } = useWeb3();
-  const [selectedCrypto, setSelectedCrypto] = useState('ETH');
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [copied, setCopied] = useState(false);
 
-  const selectedOption = CRYPTO_OPTIONS.find(opt => opt.value === selectedCrypto);
-  const recipientAddress = walletAddresses?.[selectedOption?.addressKey as keyof typeof walletAddresses];
-  const usdValue = amount ? (parseFloat(amount) * CRYPTO_PRICES[selectedCrypto]).toFixed(2) : '0.00';
-
-  const handleCopyAddress = () => {
-    if (recipientAddress) {
-      navigator.clipboard.writeText(recipientAddress);
-      setCopied(true);
-      toast.success('Address copied to clipboard!');
-      setTimeout(() => setCopied(false), 2000);
-    }
+  const handleQuickAmount = (value: number) => {
+    setAmount(value.toString());
   };
 
   const handleSendTip = async () => {
@@ -85,16 +57,10 @@ export default function TipModal({
       return;
     }
 
-    if (!recipientAddress) {
-      toast.error(`No ${selectedCrypto} address found for this KOL`);
-      return;
-    }
-
     setIsSending(true);
 
     try {
-      // In a real implementation, you would send the transaction here
-      // For now, we'll just record the tip in the database
+      // Create Coinbase Commerce charge
       const response = await fetch(`/api/shot-callers/tweets/${tweetId}/tips`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,29 +69,31 @@ export default function TipModal({
           fromUserAddress: account,
           fromUserName: account?.slice(0, 6) + '...' + account?.slice(-4),
           amount: parseFloat(amount),
-          cryptocurrency: selectedCrypto,
-          amountUsd: parseFloat(usdValue),
-          message,
-          txHash: null // Would be the actual transaction hash
+          cryptocurrency: 'MULTI', // Coinbase Commerce supports multiple currencies
+          message
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to record tip');
+        throw new Error('Failed to create payment');
       }
 
-      toast.success(`Tip sent to ${kolDisplayName}! 🎉`, {
-        description: `You sent ${amount} ${selectedCrypto} (~$${usdValue})`
-      });
+      const data = await response.json();
 
-      // Reset form
-      setAmount('');
-      setMessage('');
-      onClose();
+      // Redirect to Coinbase Commerce checkout
+      if (data.checkoutUrl) {
+        toast.success('Redirecting to secure checkout...', {
+          description: 'Complete your payment with Coinbase Commerce'
+        });
+
+        // Open Coinbase Commerce checkout in same tab
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error('No checkout URL received');
+      }
     } catch (error) {
-      console.error('Error sending tip:', error);
-      toast.error('Failed to send tip. Please try again.');
-    } finally {
+      console.error('Error creating tip:', error);
+      toast.error('Failed to create payment. Please try again.');
       setIsSending(false);
     }
   };
@@ -139,32 +107,37 @@ export default function TipModal({
             Tip {kolDisplayName}
           </DialogTitle>
           <DialogDescription>
-            Show your appreciation with crypto! Tips go directly to the KOL.
+            Support your favorite KOL with crypto! Powered by Coinbase Commerce.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Crypto Selection */}
+          {/* Quick Amount Buttons */}
           <div className="space-y-2">
-            <Label htmlFor="crypto">Select Cryptocurrency</Label>
-            <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
-              <SelectTrigger id="crypto">
-                <SelectValue placeholder="Select crypto" />
-              </SelectTrigger>
-              <SelectContent>
-                {CRYPTO_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Quick amounts (USD)</Label>
+            <div className="grid grid-cols-5 gap-2">
+              {QUICK_AMOUNTS.map((value) => (
+                <Button
+                  key={value}
+                  type="button"
+                  variant={amount === value.toString() ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleQuickAmount(value)}
+                  className="h-10"
+                >
+                  ${value}
+                </Button>
+              ))}
+            </div>
           </div>
 
-          {/* Amount Input */}
+          {/* Custom Amount Input */}
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">Or enter custom amount (USD)</Label>
             <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                $
+              </span>
               <Input
                 id="amount"
                 type="number"
@@ -173,17 +146,9 @@ export default function TipModal({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="pr-20"
+                className="pl-7"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                {selectedCrypto.replace('_', ' ')}
-              </span>
             </div>
-            {amount && (
-              <p className="text-xs text-muted-foreground">
-                ≈ ${usdValue} USD
-              </p>
-            )}
           </div>
 
           {/* Message */}
@@ -195,52 +160,70 @@ export default function TipModal({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
+              maxLength={280}
             />
+            {message && (
+              <p className="text-xs text-muted-foreground text-right">
+                {message.length}/280
+              </p>
+            )}
           </div>
 
-          {/* Recipient Address */}
-          {recipientAddress ? (
-            <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
-              <Label className="text-xs text-muted-foreground">Recipient Address</Label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs break-all">
-                  {recipientAddress}
-                </code>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCopyAddress}
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
+          {/* Info Box */}
+          <div className="rounded-lg border bg-blue-500/10 border-blue-500/50 p-3">
+            <div className="flex items-start gap-2">
+              <CreditCard className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-blue-600 dark:text-blue-400">
+                <p className="font-medium mb-1">Secure Crypto Checkout</p>
+                <p className="text-blue-600/80 dark:text-blue-400/80">
+                  You'll be redirected to Coinbase Commerce to complete your payment securely. 
+                  Supports BTC, ETH, USDC, and more!
+                </p>
               </div>
             </div>
-          ) : (
-            <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-3">
-              <p className="text-xs text-yellow-600 dark:text-yellow-400">
-                No {selectedCrypto} address available for this KOL
-              </p>
-            </div>
-          )}
+          </div>
 
-          {/* Connect Wallet / Send Button */}
+          {/* Send Button */}
           {!isConnected ? (
             <Button onClick={connectWallet} className="w-full" size="lg">
-              <Wallet className="mr-2 h-4 w-4" />
-              Connect Wallet to Tip
+              <CreditCard className="mr-2 h-4 w-4" />
+              Connect Wallet to Continue
             </Button>
           ) : (
             <Button
               onClick={handleSendTip}
-              disabled={isSending || !recipientAddress || !amount || parseFloat(amount) <= 0}
-              className="w-full"
+              disabled={isSending || !amount || parseFloat(amount) <= 0}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
               size="lg"
             >
-              <Send className="mr-2 h-4 w-4" />
-              {isSending ? 'Sending...' : `Send ${amount || '0'} ${selectedCrypto.replace('_', ' ')}`}
+              {isSending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating payment...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send ${amount || '0'} Tip
+                </>
+              )}
             </Button>
           )}
+
+          {/* Powered by Coinbase */}
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">
+              Powered by{' '}
+              <a 
+                href="https://commerce.coinbase.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                Coinbase Commerce
+              </a>
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

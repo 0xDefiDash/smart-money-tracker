@@ -112,9 +112,12 @@ const colors = {
 export function ExchangeFlows() {
   const [exchangeFlows, setExchangeFlows] = useState(generateExchangeFlows());
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
+    // Set initial lastUpdate on client
+    setLastUpdate(new Date());
+    
     // Update flows every 90 seconds to simulate real-time data
     const interval = setInterval(() => {
       setExchangeFlows(generateExchangeFlows());
@@ -294,7 +297,7 @@ export function ExchangeFlows() {
 
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-            <span>Last Updated: {lastUpdate.toLocaleTimeString()}</span>
+            <span>Last Updated: {lastUpdate ? lastUpdate.toLocaleTimeString() : 'Loading...'}</span>
             <span>Auto-refresh every 90s</span>
           </div>
         </div>
