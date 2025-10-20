@@ -63,6 +63,11 @@ const sidebarItems = [
     icon: Activity,
   },
   {
+    title: 'Base Tracker',
+    href: '/base-tracker',
+    icon: Globe,
+  },
+  {
     title: 'Exchange Flows',
     href: '/exchange-flows',
     icon: Building2,
