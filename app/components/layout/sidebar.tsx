@@ -53,6 +53,11 @@ const sidebarItems = [
     icon: Target,
   },
   {
+    title: 'Shot Callers',
+    href: '/shot-callers',
+    icon: Target,
+  },
+  {
     title: 'Token Charts',
     href: '/token-charts',
     icon: TrendingUp,
