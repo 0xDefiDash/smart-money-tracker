@@ -71,6 +71,11 @@ const sidebarItems = [
     icon: Globe,
   },
   {
+    title: 'BSC Tracker',
+    href: '/bsc-tracker',
+    icon: Zap,
+  },
+  {
     title: 'Exchange Flows',
     href: '/exchange-flows',
     icon: Building2,
