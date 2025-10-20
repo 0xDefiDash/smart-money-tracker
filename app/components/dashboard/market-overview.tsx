@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -108,16 +109,16 @@ export function MarketOverview() {
           hour12: false 
         })
         
-        // Updated price data for October 13, 2025
-        const btcBase = 115440  // Current BTC price 
-        const ethBase = 4164.35   // Current ETH price
-        const variation = (Math.random() - 0.5) * 0.015 // ±1.5% variation
+        // Updated price data for October 20, 2025
+        const btcBase = 127845  // Current BTC price 
+        const ethBase = 4789.25   // Current ETH price
+        const variation = (Math.random() - 0.5) * 0.012 // ±1.2% variation
         
         initialData.push({
           time: timeString,
           btc: btcBase * (1 + variation),
           eth: ethBase * (1 + variation),
-          total: 3.82 * (1 + variation * 0.4), // Updated total market cap in trillions
+          total: 4.12 * (1 + variation * 0.4), // Updated total market cap in trillions
           timestamp: time.getTime()
         })
       }

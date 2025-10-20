@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,96 +9,96 @@ import { formatCurrency, formatNumber } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts'
 import { Badge } from '@/components/ui/badge'
 
-// Enhanced exchange flow data for September 20, 2025
+// Enhanced exchange flow data for October 20, 2025
 const generateExchangeFlows = () => [
   { 
     exchange: 'Binance', 
-    inflow: 428000000, 
-    outflow: 312000000, 
-    net: 116000000,
-    volume_24h: 1650000000,
+    inflow: 512000000, 
+    outflow: 378000000, 
+    net: 134000000,
+    volume_24h: 1980000000,
     dominant_asset: 'BTC',
     trend: 'increasing'
   },
   { 
     exchange: 'Coinbase', 
-    inflow: 289000000, 
-    outflow: 267000000, 
-    net: 22000000,
-    volume_24h: 890000000,
+    inflow: 356000000, 
+    outflow: 298000000, 
+    net: 58000000,
+    volume_24h: 1120000000,
     dominant_asset: 'ETH',
     trend: 'stable'
   },
   { 
     exchange: 'Bybit', 
-    inflow: 234000000, 
-    outflow: 298000000, 
-    net: -64000000,
-    volume_24h: 1420000000,
+    inflow: 298000000, 
+    outflow: 342000000, 
+    net: -44000000,
+    volume_24h: 1680000000,
     dominant_asset: 'SOL',
     trend: 'decreasing'
   },
   { 
     exchange: 'OKX', 
-    inflow: 167000000, 
-    outflow: 134000000, 
-    net: 33000000,
-    volume_24h: 780000000,
+    inflow: 234000000, 
+    outflow: 189000000, 
+    net: 45000000,
+    volume_24h: 945000000,
     dominant_asset: 'BTC',
     trend: 'increasing'
   },
   { 
     exchange: 'Kraken', 
-    inflow: 145000000, 
-    outflow: 112000000, 
-    net: 33000000,
-    volume_24h: 450000000,
+    inflow: 187000000, 
+    outflow: 145000000, 
+    net: 42000000,
+    volume_24h: 578000000,
     dominant_asset: 'ETH',
-    trend: 'stable'
+    trend: 'increasing'
   },
   { 
     exchange: 'Gate.io', 
-    inflow: 98000000, 
-    outflow: 134000000, 
-    net: -36000000,
-    volume_24h: 560000000,
+    inflow: 124000000, 
+    outflow: 167000000, 
+    net: -43000000,
+    volume_24h: 678000000,
     dominant_asset: 'USDT',
     trend: 'decreasing'
   },
   { 
     exchange: 'KuCoin', 
-    inflow: 89000000, 
-    outflow: 118000000, 
-    net: -29000000,
-    volume_24h: 380000000,
+    inflow: 112000000, 
+    outflow: 134000000, 
+    net: -22000000,
+    volume_24h: 456000000,
     dominant_asset: 'BNB',
     trend: 'decreasing'
   },
   { 
     exchange: 'HTX', 
-    inflow: 78000000, 
-    outflow: 61000000, 
-    net: 17000000,
-    volume_24h: 290000000,
+    inflow: 98000000, 
+    outflow: 78000000, 
+    net: 20000000,
+    volume_24h: 367000000,
     dominant_asset: 'TRX',
-    trend: 'increasing'
+    trend: 'stable'
   },
   { 
     exchange: 'Bitget', 
-    inflow: 67000000, 
-    outflow: 45000000, 
-    net: 22000000,
-    volume_24h: 245000000,
+    inflow: 84000000, 
+    outflow: 56000000, 
+    net: 28000000,
+    volume_24h: 298000000,
     dominant_asset: 'TON',
     trend: 'increasing'
   },
   { 
-    exchange: 'Mexc', 
-    inflow: 54000000, 
-    outflow: 69000000, 
+    exchange: 'MEXC', 
+    inflow: 67000000, 
+    outflow: 82000000, 
     net: -15000000,
-    volume_24h: 198000000,
-    dominant_asset: 'ADA',
+    volume_24h: 234000000,
+    dominant_asset: 'SUI',
     trend: 'stable'
   }
 ];

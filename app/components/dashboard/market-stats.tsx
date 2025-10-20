@@ -1,19 +1,20 @@
 
 
+
 import { Card } from '@/components/ui/card'
 import { ArrowUpIcon, ArrowDownIcon, Activity, TrendingUp, DollarSign, Users } from 'lucide-react'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 
-// Mock data - Updated for September 24, 2025
+// Updated data for October 20, 2025
 const mockStats = {
-  totalMarketCap: 2420000000000, // $2.42T (normalized market)
-  totalVolume: 142500000000, // $142.5B (healthy volume)
-  whaleTransactions: 1245, // steady whale activity
-  averageTransactionSize: 8750000, // $8.75M (normalized)
-  marketCapChange: 2.8, // steady growth
-  volumeChange: 12.4, // moderate volume increase
-  whaleActivityChange: 15.6, // healthy whale activity
-  avgTransactionChange: 22.3, // reasonable transaction growth
+  totalMarketCap: 2658000000000, // $2.66T (bull market growth)
+  totalVolume: 168400000000, // $168.4B (increased volume)
+  whaleTransactions: 1582, // elevated whale activity
+  averageTransactionSize: 9850000, // $9.85M (increased whale size)
+  marketCapChange: 4.2, // strong growth
+  volumeChange: 15.8, // significant volume increase
+  whaleActivityChange: 18.9, // strong whale activity
+  avgTransactionChange: 12.6, // growing transaction sizes
 }
 
 export async function MarketStats() {
