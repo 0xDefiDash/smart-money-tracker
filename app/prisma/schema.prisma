@@ -530,3 +530,93 @@ model KOLStats {
   @@index([winRate])
   @@index([totalCalls])
 }
+
+// ============ Shot Callers Engagement Models ============
+
+model KOLWallet {
+  id                      String   @id @default(cuid())
+  kolUsername             String   @unique
+  ethAddress              String?
+  bnbAddress              String?
+  solAddress              String?
+  usdcEthAddress          String?
+  usdcBnbAddress          String?
+  usdcSolAddress          String?
+  preferredCurrency       String   @default("ETH")
+  qrCodeUrl               String?
+  isVerified              Boolean  @default(false)
+  totalTipsReceived       Float    @default(0)
+  totalTipsReceivedUsd    Float    @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  tips                    TweetTip[]
+  
+  @@map("kol_wallets")
+  @@index([kolUsername])
+}
+
+model TweetLike {
+  id                      String   @id @default(cuid())
+  tweetId                 String
+  userId                  String?
+  userAddress             String?
+  userName                String?
+  createdAt               DateTime @default(now())
+  
+  @@unique([tweetId, userId])
+  @@unique([tweetId, userAddress])
+  @@map("tweet_likes")
+  @@index([tweetId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model TweetComment {
+  id                      String   @id @default(cuid())
+  tweetId                 String
+  userId                  String?
+  userAddress             String?
+  userName                String
+  userAvatar              String?
+  content                 String
+  parentId                String?
+  likesCount              Int      @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  parent                  TweetComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies                 TweetComment[] @relation("CommentReplies")
+  
+  @@map("tweet_comments")
+  @@index([tweetId])
+  @@index([userId])
+  @@index([userAddress])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+model TweetTip {
+  id                      String   @id @default(cuid())
+  tweetId                 String
+  kolUsername             String
+  fromUserAddress         String
+  fromUserName            String?
+  amount                  Float
+  cryptocurrency          String
+  amountUsd               Float
+  message                 String?
+  txHash                  String?
+  status                  String   @default("pending")
+  completedAt             DateTime?
+  createdAt               DateTime @default(now())
+  
+  kolWallet               KOLWallet @relation(fields: [kolUsername], references: [kolUsername], onDelete: Cascade)
+  
+  @@map("tweet_tips")
+  @@index([tweetId])
+  @@index([kolUsername])
+  @@index([fromUserAddress])
+  @@index([status])
+  @@index([createdAt])
+}

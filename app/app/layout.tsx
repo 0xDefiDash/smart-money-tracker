@@ -12,6 +12,7 @@ import { AdsBanner } from '@/components/ui/ads-banner'
 import { RollingBanner } from '@/components/ui/rolling-banner'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { WalletProvider } from '@/contexts/WalletContext'
+import { Web3Provider } from '@/lib/web3-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -45,12 +46,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <WalletProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
+            <Web3Provider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
             <div className="flex flex-col min-h-screen bg-background">
             {/* Mobile Header */}
             <MobileHeader />
@@ -86,6 +88,7 @@ export default function RootLayout({
           {/* Enhanced Defidash Agent Chat */}
           <EnhancedDefidashAgent />
         </ThemeProvider>
+            </Web3Provider>
           </WalletProvider>
         </AuthProvider>
       </body>

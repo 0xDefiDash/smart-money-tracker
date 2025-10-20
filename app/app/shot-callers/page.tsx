@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activity, Flame, Users, Zap, RefreshCw, Database } from 'lucide-react';
+import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activity, Flame, Users, Zap, RefreshCw, Database, Wallet, DollarSign } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import TokenCallsSection from '@/components/shot-callers/TokenCallsSection';
+import EnhancedTweetCard from '@/components/shot-callers/EnhancedTweetCard';
+import { useWeb3 } from '@/lib/web3-provider';
 
 // Top Crypto KOLs data
 const topKOLs = [
@@ -222,11 +224,35 @@ const mockTweets = [
 
 export default function ShotCallersPage() {
   const router = useRouter();
+  const { account, isConnected, connectWallet, disconnectWallet } = useWeb3();
   const [selectedKOL, setSelectedKOL] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const [tweets, setTweets] = useState(mockTweets);
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [kolWallets, setKolWallets] = useState<Record<string, any>>({});
+
+  // Seed KOL wallets on mount
+  useEffect(() => {
+    const seedWallets = async () => {
+      try {
+        const response = await fetch('/api/shot-callers/kols/wallets/seed', {
+          method: 'POST'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const walletsMap: Record<string, any> = {};
+          data.wallets.forEach((wallet: any) => {
+            walletsMap[wallet.kolUsername] = wallet;
+          });
+          setKolWallets(walletsMap);
+        }
+      } catch (error) {
+        console.error('Error seeding wallets:', error);
+      }
+    };
+    seedWallets();
+  }, []);
 
   // Fetch live tweets from tracked accounts
   const fetchLiveTweets = async () => {
@@ -304,6 +330,30 @@ export default function ShotCallersPage() {
               </Badge>
             </div>
           </div>
+          {/* Wallet Connection */}
+          {!isConnected ? (
+            <Button
+              onClick={connectWallet}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30 px-3 py-2">
+                <DollarSign className="h-4 w-4 mr-1" />
+                {account?.slice(0, 6)}...{account?.slice(-4)}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={disconnectWallet}
+              >
+                Disconnect
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Stats Bar */}
