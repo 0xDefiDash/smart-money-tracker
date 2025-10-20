@@ -8,7 +8,10 @@ const TRACKED_ACCOUNTS = [
   'CryptoExpert101',
   'JamesWynnReal',
   'BullRunGravano',
-  // Add more accounts here as needed
+  '100xDarren',
+  'elonmusk',
+  'cz_binance',
+  'four_meme_'
 ];
 
 // Analyze sentiment from tweet content

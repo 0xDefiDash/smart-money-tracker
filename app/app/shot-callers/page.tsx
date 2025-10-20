@@ -24,7 +24,8 @@ const topKOLs = [
     followers: '170M',
     category: 'Influencer',
     influence: 100,
-    recentAlpha: 'Major $DOGE movements incoming'
+    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @elonmusk',
+    isTracked: true
   },
   {
     id: '2',
@@ -34,10 +35,33 @@ const topKOLs = [
     followers: '500K',
     category: 'Trader',
     influence: 98,
-    recentAlpha: 'New gem on Solana - $XYZ looking bullish'
+    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @100xDarren',
+    isTracked: true
   },
   {
     id: '3',
+    username: 'cz_binance',
+    displayName: 'CZ Binance',
+    avatar: '/Uploads/QngrqCSC_400x400.jpg',
+    followers: '10M',
+    category: 'Influencer',
+    influence: 99,
+    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @cz_binance',
+    isTracked: true
+  },
+  {
+    id: '4',
+    username: 'four_meme_',
+    displayName: 'Four',
+    avatar: '/Uploads/UPaVddbm_400x400.jpg',
+    followers: '350K',
+    category: 'Meme Expert',
+    influence: 94,
+    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @four_meme_',
+    isTracked: true
+  },
+  {
+    id: '5',
     username: 'BullRunGravano',
     displayName: 'Bull Run Gravano',
     avatar: '/Uploads/bullrun Gravano.jpg',
@@ -48,7 +72,7 @@ const topKOLs = [
     isTracked: true
   },
   {
-    id: '4',
+    id: '6',
     username: 'JamesWynnReal',
     displayName: 'James Wynn',
     avatar: '/Uploads/James wynn.jpg',
@@ -59,7 +83,7 @@ const topKOLs = [
     isTracked: true
   },
   {
-    id: '5',
+    id: '7',
     username: 'CryptoExpert101',
     displayName: 'Crypto Expert',
     avatar: '/Uploads/cryptoExpert101.jpg',
@@ -70,7 +94,7 @@ const topKOLs = [
     isTracked: true
   },
   {
-    id: '6',
+    id: '8',
     username: '0xPoet',
     displayName: '0xPoet',
     avatar: '/Uploads/oxpoet.jpg',
@@ -80,7 +104,7 @@ const topKOLs = [
     recentAlpha: 'New DeFi protocol launching - audited contracts'
   },
   {
-    id: '7',
+    id: '9',
     username: '0xSweep',
     displayName: '0xSweep',
     avatar: '/Uploads/0xsweep.jpg',
@@ -90,7 +114,7 @@ const topKOLs = [
     recentAlpha: 'NFT floor sweep on blue chips incoming'
   },
   {
-    id: '8',
+    id: '10',
     username: 'Wendyy',
     displayName: 'Wendy O',
     avatar: '/Uploads/wendy.jpg',
@@ -276,7 +300,7 @@ export default function ShotCallersPage() {
               <p className="text-gray-400 text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Activity className="h-2 w-2 mr-1 animate-pulse" />
-                Tracking 3 KOLs
+                Tracking 7 KOLs
               </Badge>
             </div>
           </div>

@@ -8,7 +8,10 @@ const TRACKED_ACCOUNTS = [
   'CryptoExpert101',
   'JamesWynnReal',
   'BullRunGravano',
-  // Add more accounts here as needed
+  '100xDarren',
+  'elonmusk',
+  'cz_binance',
+  'four_meme_'
 ];
 
 export async function GET(request: NextRequest) {
@@ -197,6 +200,9 @@ function getDefaultAvatar(username: string): string {
     'JamesWynnReal': '/Uploads/James wynn.jpg',
     '100xDarren': '/Uploads/100xdarren.jpg',
     'BullRunGravano': '/Uploads/bullrun Gravano.jpg',
+    'elonmusk': '/Uploads/Trump.jpg',
+    'cz_binance': '/Uploads/QngrqCSC_400x400.jpg',
+    'four_meme_': '/Uploads/UPaVddbm_400x400.jpg',
   };
   return avatarMap[username] || '/Uploads/cryptoExpert101.jpg';
 }
