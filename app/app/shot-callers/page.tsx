@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activity, Flame, Users, Zap } from 'lucide-react';
+import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activity, Flame, Users, Zap, RefreshCw } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 // Top Crypto KOLs data
 const topKOLs = [
@@ -61,7 +62,8 @@ const topKOLs = [
     followers: '400K',
     category: 'Educator',
     influence: 90,
-    recentAlpha: 'Technical analysis: BTC targeting $75K'
+    recentAlpha: '🔴 LIVE TRACKED: Real-time tweets from @CryptoExpert101',
+    isTracked: true
   },
   {
     id: '6',
@@ -194,6 +196,41 @@ export default function ShotCallersPage() {
   const [selectedKOL, setSelectedKOL] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const [tweets, setTweets] = useState(mockTweets);
+  const [loading, setLoading] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  // Fetch live tweets from tracked accounts
+  const fetchLiveTweets = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/shot-callers/feed?limit=20`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.tweets && data.tweets.length > 0) {
+          setTweets(data.tweets);
+          setLastUpdate(new Date());
+          toast.success(`Loaded ${data.tweets.length} fresh tweets from ${data.tracked_accounts.join(', ')}`);
+        } else {
+          toast.info('No new tweets available. Showing sample data.');
+        }
+      } else {
+        console.error('Failed to fetch tweets');
+        toast.error('Failed to load live tweets. Showing sample data.');
+      }
+    } catch (error) {
+      console.error('Error fetching tweets:', error);
+      toast.error('Error loading tweets. Showing sample data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Auto-refresh tweets every 5 minutes
+  useEffect(() => {
+    fetchLiveTweets();
+    const interval = setInterval(fetchLiveTweets, 5 * 60 * 1000); // 5 minutes
+    return () => clearInterval(interval);
+  }, []);
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -226,11 +263,17 @@ export default function ShotCallersPage() {
             <Target className="h-10 w-10 text-purple-500" />
             <Flame className="h-5 w-5 text-orange-500 absolute -top-1 -right-1 animate-pulse" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text">
               Shot Callers
             </h1>
-            <p className="text-gray-400 text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
+            <div className="flex items-center gap-2 flex-wrap mt-1">
+              <p className="text-gray-400 text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                <Activity className="h-2 w-2 mr-1 animate-pulse" />
+                Tracking @CryptoExpert101
+              </Badge>
+            </div>
           </div>
         </div>
 
@@ -311,7 +354,7 @@ export default function ShotCallersPage() {
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <Avatar className="h-12 w-12 border-2 border-purple-500/50">
+                        <Avatar className={`h-12 w-12 border-2 ${(kol as any).isTracked ? 'border-green-500 ring-2 ring-green-500/30' : 'border-purple-500/50'}`}>
                           <AvatarImage src={kol.avatar} alt={kol.displayName} />
                           <AvatarFallback>{kol.displayName[0]}</AvatarFallback>
                         </Avatar>
@@ -323,7 +366,22 @@ export default function ShotCallersPage() {
                               <span className="text-xs font-bold">{kol.influence}</span>
                             </div>
                           </div>
-                          <p className="text-xs text-gray-400 mb-2">@{kol.username}</p>
+                          <div className="flex items-center gap-2 mb-2">
+                            <a 
+                              href={`https://x.com/${kol.username}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-400 hover:text-blue-300 hover:underline"
+                            >
+                              @{kol.username}
+                            </a>
+                            {(kol as any).isTracked && (
+                              <Badge className="text-xs bg-green-500/20 text-green-400 border-green-500/30">
+                                <Activity className="h-2 w-2 mr-1 animate-pulse" />
+                                LIVE
+                              </Badge>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2 mb-2">
                             <Badge variant="outline" className="text-xs">
                               {kol.category}
@@ -348,17 +406,26 @@ export default function ShotCallersPage() {
         <Card className="lg:col-span-2 bg-slate-900/50 border-slate-800">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Flame className="h-5 w-5 text-orange-500" />
-                Live Alpha Feed
-              </CardTitle>
+              <div>
+                <CardTitle className="flex items-center gap-2 mb-1">
+                  <Flame className="h-5 w-5 text-orange-500" />
+                  Live Alpha Feed
+                </CardTitle>
+                {lastUpdate && (
+                  <p className="text-xs text-gray-400">
+                    Last updated: {lastUpdate.toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
               <Button
                 variant="outline"
                 size="sm"
                 className="text-xs"
-                onClick={() => window.location.reload()}
+                onClick={fetchLiveTweets}
+                disabled={loading}
               >
-                Refresh
+                <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Loading...' : 'Refresh'}
               </Button>
             </div>
           </CardHeader>
@@ -425,9 +492,15 @@ export default function ShotCallersPage() {
                           <MessageCircle className="h-4 w-4" />
                           <span className="text-xs">{tweet.replies}</span>
                         </button>
-                        <button className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors">
+                        <a 
+                          href={`https://x.com/${tweet.username}/status/${tweet.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors"
+                        >
                           <ExternalLink className="h-4 w-4" />
-                        </button>
+                          <span className="text-xs">View on X</span>
+                        </a>
                       </div>
                     </CardContent>
                   </Card>
