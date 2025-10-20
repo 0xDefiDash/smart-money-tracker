@@ -58,11 +58,6 @@ const sidebarItems = [
     icon: Target,
   },
   {
-    title: 'Token Charts',
-    href: '/token-charts',
-    icon: TrendingUp,
-  },
-  {
     title: 'Whale Tracker',
     href: '/whale-tracker',
     icon: Activity,

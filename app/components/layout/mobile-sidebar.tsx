@@ -54,11 +54,6 @@ const sidebarItems = [
     icon: Target,
   },
   {
-    title: 'Token Charts',
-    href: '/token-charts',
-    icon: LineChart,
-  },
-  {
     title: 'Whale Tracker',
     href: '/whale-tracker',
     icon: Activity,
