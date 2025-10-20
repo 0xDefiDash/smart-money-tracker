@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TrendingUp, MessageCircle, Heart, Repeat2, ExternalLink, Target, Activity, Flame, Users, Zap, RefreshCw } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 // Top Crypto KOLs data
 const topKOLs = [
@@ -46,13 +47,14 @@ const topKOLs = [
   },
   {
     id: '4',
-    username: 'JamesWynn',
+    username: 'JamesWynnReal',
     displayName: 'James Wynn',
     avatar: '/Uploads/James wynn.jpg',
     followers: '250K',
     category: 'Trader',
     influence: 92,
-    recentAlpha: 'Breaking: Major CEX listing announcement'
+    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @JamesWynnReal',
+    isTracked: true
   },
   {
     id: '5',
@@ -193,6 +195,7 @@ const mockTweets = [
 ];
 
 export default function ShotCallersPage() {
+  const router = useRouter();
   const [selectedKOL, setSelectedKOL] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const [tweets, setTweets] = useState(mockTweets);
@@ -271,7 +274,7 @@ export default function ShotCallersPage() {
               <p className="text-gray-400 text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Activity className="h-2 w-2 mr-1 animate-pulse" />
-                Tracking @CryptoExpert101
+                Tracking 2 KOLs
               </Badge>
             </div>
           </div>
@@ -349,8 +352,14 @@ export default function ShotCallersPage() {
                       selectedKOL === kol.id
                         ? 'bg-purple-500/20 border-purple-500'
                         : 'bg-slate-800/50 border-slate-700 hover:border-purple-500/50'
-                    }`}
-                    onClick={() => setSelectedKOL(kol.id)}
+                    } ${(kol as any).isTracked ? 'ring-1 ring-green-500/30' : ''}`}
+                    onClick={() => {
+                      if ((kol as any).isTracked) {
+                        router.push(`/shot-callers/${kol.username}`);
+                      } else {
+                        setSelectedKOL(kol.id);
+                      }
+                    }}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
@@ -378,7 +387,7 @@ export default function ShotCallersPage() {
                             {(kol as any).isTracked && (
                               <Badge className="text-xs bg-green-500/20 text-green-400 border-green-500/30">
                                 <Activity className="h-2 w-2 mr-1 animate-pulse" />
-                                LIVE
+                                LIVE • Click to view
                               </Badge>
                             )}
                           </div>
@@ -480,18 +489,18 @@ export default function ShotCallersPage() {
 
                       {/* Tweet Actions */}
                       <div className="flex items-center gap-6 text-gray-400">
-                        <button className="flex items-center gap-1.5 hover:text-pink-500 transition-colors">
-                          <Heart className="h-4 w-4" />
+                        <div className="flex items-center gap-1.5">
+                          <Heart className="h-4 w-4 text-pink-500" />
                           <span className="text-xs">{tweet.likes.toLocaleString()}</span>
-                        </button>
-                        <button className="flex items-center gap-1.5 hover:text-green-500 transition-colors">
-                          <Repeat2 className="h-4 w-4" />
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Repeat2 className="h-4 w-4 text-green-500" />
                           <span className="text-xs">{tweet.retweets.toLocaleString()}</span>
-                        </button>
-                        <button className="flex items-center gap-1.5 hover:text-blue-500 transition-colors">
-                          <MessageCircle className="h-4 w-4" />
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <MessageCircle className="h-4 w-4 text-blue-500" />
                           <span className="text-xs">{tweet.replies}</span>
-                        </button>
+                        </div>
                         <a 
                           href={`https://x.com/${tweet.username}/status/${tweet.id}`}
                           target="_blank"

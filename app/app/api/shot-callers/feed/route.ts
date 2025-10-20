@@ -1,10 +1,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { twitterClient } from '@/lib/twitter-client';
+import { prisma } from '@/lib/db';
 
 // List of tracked KOL accounts
 const TRACKED_ACCOUNTS = [
   'CryptoExpert101',
+  'JamesWynnReal',
   // Add more accounts here as needed
 ];
 
@@ -14,35 +16,132 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    // Fetch tweets from all tracked accounts
+    // Fetch fresh tweets from Twitter API and store in database
     const allTweets: any[] = [];
     
     for (const username of TRACKED_ACCOUNTS) {
       try {
-        const response = await twitterClient.getUserTweets(username, 5);
+        // Ensure KOL profile exists in database
+        let kolProfile = await prisma.kOLProfile.findUnique({
+          where: { username }
+        });
+
+        const response = await twitterClient.getUserTweets(username, 10);
         
         if (response.data) {
           const user = response.includes?.users?.[0];
           
-          const processedTweets = response.data.map(tweet => ({
-            id: tweet.id,
-            author: user?.name || username,
-            username: username,
-            avatar: user?.profile_image_url || `/Uploads/cryptoExpert101.jpg`,
-            content: tweet.text,
-            timestamp: formatTimestamp(tweet.created_at),
-            likes: tweet.public_metrics?.like_count || 0,
-            retweets: tweet.public_metrics?.retweet_count || 0,
-            replies: tweet.public_metrics?.reply_count || 0,
-            category: twitterClient.categorizeTweet(tweet.text),
-            coins: twitterClient.extractCoinsFromTweet(tweet.text),
-          }));
-          
-          allTweets.push(...processedTweets);
+          // Create or update KOL profile
+          if (!kolProfile && user) {
+            kolProfile = await prisma.kOLProfile.create({
+              data: {
+                username,
+                displayName: user.name,
+                twitterUserId: user.id,
+                profileImageUrl: user.profile_image_url,
+                followersCount: user.public_metrics?.followers_count || 0,
+                followingCount: user.public_metrics?.following_count || 0,
+                tweetCount: user.public_metrics?.tweet_count || 0,
+                isVerified: user.verified || false,
+                isTracked: true,
+                lastFetchedAt: new Date(),
+              }
+            });
+          } else if (kolProfile && user) {
+            // Update existing profile
+            await prisma.kOLProfile.update({
+              where: { id: kolProfile.id },
+              data: {
+                displayName: user.name,
+                profileImageUrl: user.profile_image_url,
+                followersCount: user.public_metrics?.followers_count || 0,
+                followingCount: user.public_metrics?.following_count || 0,
+                tweetCount: user.public_metrics?.tweet_count || 0,
+                isVerified: user.verified || false,
+                lastFetchedAt: new Date(),
+              }
+            });
+          }
+
+          // Store tweets in database
+          for (const tweet of response.data) {
+            const category = twitterClient.categorizeTweet(tweet.text);
+            const coins = twitterClient.extractCoinsFromTweet(tweet.text);
+            const hashtags = tweet.entities?.hashtags?.map(h => h.tag) || [];
+            const mentions = tweet.entities?.mentions?.map(m => m.username) || [];
+
+            if (kolProfile) {
+              // Upsert tweet (create or update if exists)
+              await prisma.kOLTweet.upsert({
+                where: { tweetId: tweet.id },
+                create: {
+                  kolId: kolProfile.id,
+                  tweetId: tweet.id,
+                  content: tweet.text,
+                  createdAt: new Date(tweet.created_at),
+                  likeCount: tweet.public_metrics?.like_count || 0,
+                  retweetCount: tweet.public_metrics?.retweet_count || 0,
+                  replyCount: tweet.public_metrics?.reply_count || 0,
+                  quoteCount: tweet.public_metrics?.quote_count || 0,
+                  category,
+                  coins,
+                  hashtags,
+                  mentions,
+                  isAlert: category === 'alert',
+                },
+                update: {
+                  likeCount: tweet.public_metrics?.like_count || 0,
+                  retweetCount: tweet.public_metrics?.retweet_count || 0,
+                  replyCount: tweet.public_metrics?.reply_count || 0,
+                  quoteCount: tweet.public_metrics?.quote_count || 0,
+                }
+              });
+            }
+
+            // Add to response
+            allTweets.push({
+              id: tweet.id,
+              author: user?.name || username,
+              username: username,
+              avatar: user?.profile_image_url || getDefaultAvatar(username),
+              content: tweet.text,
+              timestamp: formatTimestamp(tweet.created_at),
+              likes: tweet.public_metrics?.like_count || 0,
+              retweets: tweet.public_metrics?.retweet_count || 0,
+              replies: tweet.public_metrics?.reply_count || 0,
+              category,
+              coins,
+            });
+          }
         }
       } catch (error) {
         console.error(`Error fetching tweets for ${username}:`, error);
       }
+    }
+
+    // If no tweets from API, fetch from database
+    if (allTweets.length === 0) {
+      const dbTweets = await prisma.kOLTweet.findMany({
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          kol: true
+        }
+      });
+
+      allTweets.push(...dbTweets.map(tweet => ({
+        id: tweet.tweetId,
+        author: tweet.kol.displayName,
+        username: tweet.kol.username,
+        avatar: tweet.kol.profileImageUrl || getDefaultAvatar(tweet.kol.username),
+        content: tweet.content,
+        timestamp: formatTimestamp(tweet.createdAt.toISOString()),
+        likes: tweet.likeCount,
+        retweets: tweet.retweetCount,
+        replies: tweet.replyCount,
+        category: tweet.category || 'general',
+        coins: tweet.coins,
+      })));
     }
 
     // Sort by timestamp (newest first)
@@ -73,6 +172,16 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function getDefaultAvatar(username: string): string {
+  const avatarMap: Record<string, string> = {
+    'CryptoExpert101': '/Uploads/cryptoExpert101.jpg',
+    'JamesWynnReal': '/Uploads/James wynn.jpg',
+    '100xDarren': '/Uploads/100xdarren.jpg',
+    'BullRunGravano': '/Uploads/bullrun Gravano.jpg',
+  };
+  return avatarMap[username] || '/Uploads/cryptoExpert101.jpg';
 }
 
 function formatTimestamp(isoString: string): string {

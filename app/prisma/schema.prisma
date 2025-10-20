@@ -421,3 +421,59 @@ model ContractScan {
   @@index([lastScannedAt])
   @@index([blockchain])
 }
+
+// ============ Shot Callers / KOL Tracking Models ============
+
+model KOLProfile {
+  id                      String   @id @default(cuid())
+  username                String   @unique
+  displayName             String
+  twitterUserId           String?  @unique
+  profileImageUrl         String?
+  followersCount          Int      @default(0)
+  followingCount          Int      @default(0)
+  tweetCount              Int      @default(0)
+  isVerified              Boolean  @default(false)
+  isTracked               Boolean  @default(true)
+  category                String?
+  influenceScore          Int      @default(0)
+  bio                     String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  lastFetchedAt           DateTime?
+  
+  tweets                  KOLTweet[]
+  
+  @@map("kol_profiles")
+  @@index([username])
+  @@index([isTracked])
+  @@index([influenceScore])
+}
+
+model KOLTweet {
+  id                      String   @id @default(cuid())
+  kolId                   String
+  tweetId                 String   @unique
+  content                 String
+  createdAt               DateTime
+  likeCount               Int      @default(0)
+  retweetCount            Int      @default(0)
+  replyCount              Int      @default(0)
+  quoteCount              Int      @default(0)
+  category                String?
+  coins                   String[] @default([])
+  hashtags                String[] @default([])
+  mentions                String[] @default([])
+  isAlert                 Boolean  @default(false)
+  sentiment               String?
+  fetchedAt               DateTime @default(now())
+  
+  kol                     KOLProfile @relation(fields: [kolId], references: [id], onDelete: Cascade)
+  
+  @@map("kol_tweets")
+  @@index([kolId])
+  @@index([createdAt])
+  @@index([category])
+  @@index([isAlert])
+  @@index([likeCount])
+}
