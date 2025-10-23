@@ -73,6 +73,12 @@ export async function GET(request: NextRequest) {
             const coins = twitterClient.extractCoinsFromTweet(tweet.text);
             const hashtags = tweet.entities?.hashtags?.map(h => h.tag) || [];
             const mentions = tweet.entities?.mentions?.map(m => m.username) || [];
+            
+            // Extract advanced metadata
+            const tradingSignals = twitterClient.extractTradingSignals(tweet.text);
+            const sentiment = twitterClient.extractSentiment(tweet.text);
+            const technicalData = twitterClient.extractTechnicalIndicators(tweet.text);
+            const alertMetadata = category === 'alert' ? twitterClient.extractAlertMetadata(tweet.text) : null;
 
             if (kolProfile) {
               // Upsert tweet (create or update if exists)
@@ -92,12 +98,24 @@ export async function GET(request: NextRequest) {
                   hashtags,
                   mentions,
                   isAlert: category === 'alert',
+                  metadata: {
+                    tradingSignals,
+                    sentiment,
+                    technicalData,
+                    alertMetadata,
+                  }
                 },
                 update: {
                   likeCount: tweet.public_metrics?.like_count || 0,
                   retweetCount: tweet.public_metrics?.retweet_count || 0,
                   replyCount: tweet.public_metrics?.reply_count || 0,
                   quoteCount: tweet.public_metrics?.quote_count || 0,
+                  metadata: {
+                    tradingSignals,
+                    sentiment,
+                    technicalData,
+                    alertMetadata,
+                  }
                 }
               });
 
@@ -131,6 +149,12 @@ export async function GET(request: NextRequest) {
               replies: tweet.public_metrics?.reply_count || 0,
               category,
               coins,
+              metadata: {
+                tradingSignals,
+                sentiment,
+                technicalData,
+                alertMetadata,
+              }
             });
           }
         }
@@ -161,6 +185,7 @@ export async function GET(request: NextRequest) {
         replies: tweet.replyCount,
         category: tweet.category || 'general',
         coins: tweet.coins,
+        metadata: (tweet as any).metadata || {},
       })));
     }
 

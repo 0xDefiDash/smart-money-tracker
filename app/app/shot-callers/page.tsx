@@ -14,6 +14,10 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import TokenCallsSection from '@/components/shot-callers/TokenCallsSection';
 import EnhancedTweetCard from '@/components/shot-callers/EnhancedTweetCard';
+import DetailedAlphaCard from '@/components/shot-callers/DetailedAlphaCard';
+import DetailedAlertCard from '@/components/shot-callers/DetailedAlertCard';
+import DetailedAnalysisCard from '@/components/shot-callers/DetailedAnalysisCard';
+import DetailedBullishCard from '@/components/shot-callers/DetailedBullishCard';
 import { useWeb3 } from '@/lib/web3-provider';
 
 // Top Crypto KOLs data
@@ -611,59 +615,7 @@ export default function ShotCallersPage() {
                 <ScrollArea className="h-[calc(100vh-400px)]">
                   <div className="space-y-4">
                     {filteredTweets.map((tweet) => (
-                      <Card key={tweet.id} className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3 mb-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={tweet.avatar} alt={tweet.author} />
-                              <AvatarFallback>{tweet.author[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-white">{tweet.author}</span>
-                                <span className="text-xs text-gray-400">@{tweet.username}</span>
-                                <span className="text-xs text-gray-500">• {tweet.timestamp}</span>
-                              </div>
-                              <Badge className={`text-xs ${getCategoryColor(tweet.category)}`}>
-                                {tweet.category}
-                              </Badge>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-300 mb-3 whitespace-pre-wrap">{tweet.content}</p>
-                          {tweet.coins.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {tweet.coins.map((coin) => (
-                                <Badge key={coin} variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/30">
-                                  ${coin}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-6 text-gray-400">
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="h-4 w-4 text-pink-500" />
-                              <span className="text-xs">{tweet.likes.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Repeat2 className="h-4 w-4 text-green-500" />
-                              <span className="text-xs">{tweet.retweets.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <MessageCircle className="h-4 w-4 text-blue-500" />
-                              <span className="text-xs">{tweet.replies}</span>
-                            </div>
-                            <a 
-                              href={`https://x.com/${tweet.username}/status/${tweet.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="text-xs">View on X</span>
-                            </a>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <DetailedBullishCard key={tweet.id} tweet={tweet} />
                     ))}
                   </div>
                 </ScrollArea>
@@ -673,59 +625,7 @@ export default function ShotCallersPage() {
                 <ScrollArea className="h-[calc(100vh-400px)]">
                   <div className="space-y-4">
                     {filteredTweets.map((tweet) => (
-                      <Card key={tweet.id} className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3 mb-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={tweet.avatar} alt={tweet.author} />
-                              <AvatarFallback>{tweet.author[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-white">{tweet.author}</span>
-                                <span className="text-xs text-gray-400">@{tweet.username}</span>
-                                <span className="text-xs text-gray-500">• {tweet.timestamp}</span>
-                              </div>
-                              <Badge className={`text-xs ${getCategoryColor(tweet.category)}`}>
-                                {tweet.category}
-                              </Badge>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-300 mb-3 whitespace-pre-wrap">{tweet.content}</p>
-                          {tweet.coins.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {tweet.coins.map((coin) => (
-                                <Badge key={coin} variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/30">
-                                  ${coin}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-6 text-gray-400">
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="h-4 w-4 text-pink-500" />
-                              <span className="text-xs">{tweet.likes.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Repeat2 className="h-4 w-4 text-green-500" />
-                              <span className="text-xs">{tweet.retweets.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <MessageCircle className="h-4 w-4 text-blue-500" />
-                              <span className="text-xs">{tweet.replies}</span>
-                            </div>
-                            <a 
-                              href={`https://x.com/${tweet.username}/status/${tweet.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="text-xs">View on X</span>
-                            </a>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <DetailedAlphaCard key={tweet.id} tweet={tweet} />
                     ))}
                   </div>
                 </ScrollArea>
@@ -735,59 +635,7 @@ export default function ShotCallersPage() {
                 <ScrollArea className="h-[calc(100vh-400px)]">
                   <div className="space-y-4">
                     {filteredTweets.map((tweet) => (
-                      <Card key={tweet.id} className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3 mb-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={tweet.avatar} alt={tweet.author} />
-                              <AvatarFallback>{tweet.author[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-white">{tweet.author}</span>
-                                <span className="text-xs text-gray-400">@{tweet.username}</span>
-                                <span className="text-xs text-gray-500">• {tweet.timestamp}</span>
-                              </div>
-                              <Badge className={`text-xs ${getCategoryColor(tweet.category)}`}>
-                                {tweet.category}
-                              </Badge>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-300 mb-3 whitespace-pre-wrap">{tweet.content}</p>
-                          {tweet.coins.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {tweet.coins.map((coin) => (
-                                <Badge key={coin} variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/30">
-                                  ${coin}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-6 text-gray-400">
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="h-4 w-4 text-pink-500" />
-                              <span className="text-xs">{tweet.likes.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Repeat2 className="h-4 w-4 text-green-500" />
-                              <span className="text-xs">{tweet.retweets.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <MessageCircle className="h-4 w-4 text-blue-500" />
-                              <span className="text-xs">{tweet.replies}</span>
-                            </div>
-                            <a 
-                              href={`https://x.com/${tweet.username}/status/${tweet.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="text-xs">View on X</span>
-                            </a>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <DetailedAlertCard key={tweet.id} tweet={tweet} />
                     ))}
                   </div>
                 </ScrollArea>
@@ -797,59 +645,7 @@ export default function ShotCallersPage() {
                 <ScrollArea className="h-[calc(100vh-400px)]">
                   <div className="space-y-4">
                     {filteredTweets.map((tweet) => (
-                      <Card key={tweet.id} className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3 mb-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={tweet.avatar} alt={tweet.author} />
-                              <AvatarFallback>{tweet.author[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-white">{tweet.author}</span>
-                                <span className="text-xs text-gray-400">@{tweet.username}</span>
-                                <span className="text-xs text-gray-500">• {tweet.timestamp}</span>
-                              </div>
-                              <Badge className={`text-xs ${getCategoryColor(tweet.category)}`}>
-                                {tweet.category}
-                              </Badge>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-300 mb-3 whitespace-pre-wrap">{tweet.content}</p>
-                          {tweet.coins.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {tweet.coins.map((coin) => (
-                                <Badge key={coin} variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/30">
-                                  ${coin}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-6 text-gray-400">
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="h-4 w-4 text-pink-500" />
-                              <span className="text-xs">{tweet.likes.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Repeat2 className="h-4 w-4 text-green-500" />
-                              <span className="text-xs">{tweet.retweets.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <MessageCircle className="h-4 w-4 text-blue-500" />
-                              <span className="text-xs">{tweet.replies}</span>
-                            </div>
-                            <a 
-                              href={`https://x.com/${tweet.username}/status/${tweet.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="text-xs">View on X</span>
-                            </a>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <DetailedAnalysisCard key={tweet.id} tweet={tweet} />
                     ))}
                   </div>
                 </ScrollArea>

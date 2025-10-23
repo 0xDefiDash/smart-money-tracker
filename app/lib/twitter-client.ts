@@ -170,26 +170,212 @@ class TwitterClient {
     return [...new Set(coins)]; // Remove duplicates
   }
 
+  extractTradingSignals(text: string): {
+    action?: 'buy' | 'sell' | 'hold';
+    priceTarget?: string;
+    timeframe?: string;
+    conviction?: 'high' | 'medium' | 'low';
+    riskLevel?: 'high' | 'medium' | 'low';
+  } {
+    const lowerText = text.toLowerCase();
+    const signals: any = {};
+
+    // Extract action
+    if (lowerText.includes('buy') || lowerText.includes('long') || lowerText.includes('accumulate')) {
+      signals.action = 'buy';
+    } else if (lowerText.includes('sell') || lowerText.includes('short') || lowerText.includes('exit')) {
+      signals.action = 'sell';
+    } else if (lowerText.includes('hold') || lowerText.includes('hodl')) {
+      signals.action = 'hold';
+    }
+
+    // Extract price targets
+    const priceMatch = text.match(/\$?(\d+[,.]?\d*[kKmMbB]?)/);
+    if (priceMatch) {
+      signals.priceTarget = priceMatch[0];
+    }
+
+    // Extract timeframe
+    if (lowerText.includes('short term') || lowerText.includes('intraday') || lowerText.includes('today')) {
+      signals.timeframe = 'short';
+    } else if (lowerText.includes('medium term') || lowerText.includes('weeks') || lowerText.includes('this month')) {
+      signals.timeframe = 'medium';
+    } else if (lowerText.includes('long term') || lowerText.includes('months') || lowerText.includes('hodl')) {
+      signals.timeframe = 'long';
+    }
+
+    // Extract conviction level
+    if (lowerText.includes('100%') || lowerText.includes('very bullish') || lowerText.includes('extremely confident')) {
+      signals.conviction = 'high';
+    } else if (lowerText.includes('might') || lowerText.includes('maybe') || lowerText.includes('possibly')) {
+      signals.conviction = 'low';
+    } else {
+      signals.conviction = 'medium';
+    }
+
+    // Extract risk level
+    if (lowerText.includes('high risk') || lowerText.includes('degen') || lowerText.includes('gamble')) {
+      signals.riskLevel = 'high';
+    } else if (lowerText.includes('low risk') || lowerText.includes('safe') || lowerText.includes('blue chip')) {
+      signals.riskLevel = 'low';
+    } else {
+      signals.riskLevel = 'medium';
+    }
+
+    return signals;
+  }
+
+  extractSentiment(text: string): {
+    sentiment: 'very_bullish' | 'bullish' | 'neutral' | 'bearish' | 'very_bearish';
+    confidence: number;
+    keywords: string[];
+  } {
+    const lowerText = text.toLowerCase();
+    
+    const bullishKeywords = ['moon', 'bullish', 'pump', 'rocket', 'ath', 'breakout', 'rally', 'surge', 'explode', 'parabolic', 'gains', 'profit', 'up', 'green'];
+    const bearishKeywords = ['dump', 'bearish', 'crash', 'drop', 'fall', 'red', 'loss', 'down', 'sell', 'panic', 'fud'];
+    
+    const foundBullish = bullishKeywords.filter(kw => lowerText.includes(kw));
+    const foundBearish = bearishKeywords.filter(kw => lowerText.includes(kw));
+    
+    const bullishScore = foundBullish.length;
+    const bearishScore = foundBearish.length;
+    const totalScore = bullishScore + bearishScore;
+    
+    let sentiment: 'very_bullish' | 'bullish' | 'neutral' | 'bearish' | 'very_bearish' = 'neutral';
+    let confidence = 0;
+    
+    if (bullishScore > bearishScore) {
+      sentiment = bullishScore >= 3 ? 'very_bullish' : 'bullish';
+      confidence = Math.min((bullishScore / (totalScore || 1)) * 100, 95);
+    } else if (bearishScore > bullishScore) {
+      sentiment = bearishScore >= 3 ? 'very_bearish' : 'bearish';
+      confidence = Math.min((bearishScore / (totalScore || 1)) * 100, 95);
+    } else {
+      confidence = 50;
+    }
+    
+    return {
+      sentiment,
+      confidence: Math.round(confidence),
+      keywords: [...foundBullish, ...foundBearish]
+    };
+  }
+
+  extractTechnicalIndicators(text: string): {
+    indicators: string[];
+    levels: { type: string; value: string }[];
+  } {
+    const lowerText = text.toLowerCase();
+    const indicators: string[] = [];
+    const levels: { type: string; value: string }[] = [];
+
+    // Common indicators
+    const indicatorPatterns = ['rsi', 'macd', 'ema', 'sma', 'bollinger', 'fibonacci', 'ichimoku', 'stoch'];
+    indicatorPatterns.forEach(indicator => {
+      if (lowerText.includes(indicator)) {
+        indicators.push(indicator.toUpperCase());
+      }
+    });
+
+    // Extract support/resistance levels
+    const supportMatch = text.match(/support\s+(?:at\s+)?\$?(\d+[,.]?\d*[kKmM]?)/i);
+    if (supportMatch) {
+      levels.push({ type: 'support', value: supportMatch[1] });
+    }
+
+    const resistanceMatch = text.match(/resistance\s+(?:at\s+)?\$?(\d+[,.]?\d*[kKmM]?)/i);
+    if (resistanceMatch) {
+      levels.push({ type: 'resistance', value: resistanceMatch[1] });
+    }
+
+    return { indicators, levels };
+  }
+
   categorizeTweet(text: string): string {
     const lowerText = text.toLowerCase();
     
-    if (lowerText.includes('alert') || lowerText.includes('breaking') || lowerText.includes('urgent')) {
+    // Priority-based categorization
+    // Alerts (highest priority)
+    if (lowerText.includes('🚨') || lowerText.includes('⚠️') || 
+        lowerText.includes('alert') || lowerText.includes('breaking') || 
+        lowerText.includes('urgent') || lowerText.includes('critical') ||
+        lowerText.includes('announcement') || lowerText.includes('news')) {
       return 'alert';
     }
-    if (lowerText.includes('bullish') || lowerText.includes('moon') || lowerText.includes('pump')) {
-      return 'bullish';
-    }
-    if (lowerText.includes('bearish') || lowerText.includes('dump') || lowerText.includes('crash')) {
-      return 'bearish';
-    }
-    if (lowerText.includes('alpha') || lowerText.includes('gem') || lowerText.includes('opportunity')) {
+    
+    // Alpha signals
+    if (lowerText.includes('alpha') || lowerText.includes('gem') || 
+        lowerText.includes('opportunity') || lowerText.includes('early') ||
+        lowerText.includes('hidden') || lowerText.includes('undervalued') ||
+        lowerText.includes('100x') || lowerText.includes('10x') ||
+        lowerText.includes('insider')) {
       return 'alpha';
     }
-    if (lowerText.includes('analysis') || lowerText.includes('technical') || lowerText.includes('chart')) {
+    
+    // Technical Analysis
+    if (lowerText.includes('analysis') || lowerText.includes('technical') || 
+        lowerText.includes('chart') || lowerText.includes('ta:') ||
+        lowerText.includes('rsi') || lowerText.includes('macd') ||
+        lowerText.includes('support') || lowerText.includes('resistance') ||
+        lowerText.includes('fibonacci') || lowerText.includes('pattern')) {
       return 'analysis';
     }
     
+    // Bullish sentiment
+    if (lowerText.includes('bullish') || lowerText.includes('moon') || 
+        lowerText.includes('pump') || lowerText.includes('🚀') ||
+        lowerText.includes('green') || lowerText.includes('gains') ||
+        lowerText.includes('breakout') || lowerText.includes('rally')) {
+      return 'bullish';
+    }
+    
+    // Bearish sentiment
+    if (lowerText.includes('bearish') || lowerText.includes('dump') || 
+        lowerText.includes('crash') || lowerText.includes('red') ||
+        lowerText.includes('loss') || lowerText.includes('warning')) {
+      return 'bearish';
+    }
+    
     return 'general';
+  }
+
+  extractAlertMetadata(text: string): {
+    alertType: 'listing' | 'price' | 'whale' | 'news' | 'technical' | 'general';
+    urgency: 'high' | 'medium' | 'low';
+    actionable: boolean;
+  } {
+    const lowerText = text.toLowerCase();
+    let alertType: 'listing' | 'price' | 'whale' | 'news' | 'technical' | 'general' = 'general';
+    let urgency: 'high' | 'medium' | 'low' = 'medium';
+    let actionable = false;
+
+    // Determine alert type
+    if (lowerText.includes('listing') || lowerText.includes('exchange')) {
+      alertType = 'listing';
+      actionable = true;
+    } else if (lowerText.includes('whale') || lowerText.includes('large transfer')) {
+      alertType = 'whale';
+    } else if (lowerText.includes('price') || lowerText.includes('ath') || lowerText.includes('atl')) {
+      alertType = 'price';
+    } else if (lowerText.includes('technical') || lowerText.includes('breakout') || lowerText.includes('breakdown')) {
+      alertType = 'technical';
+      actionable = true;
+    } else if (lowerText.includes('news') || lowerText.includes('announcement') || lowerText.includes('partnership')) {
+      alertType = 'news';
+    }
+
+    // Determine urgency
+    if (lowerText.includes('urgent') || lowerText.includes('critical') || lowerText.includes('now') || lowerText.includes('immediate')) {
+      urgency = 'high';
+      actionable = true;
+    } else if (lowerText.includes('soon') || lowerText.includes('upcoming') || lowerText.includes('watch')) {
+      urgency = 'medium';
+    } else {
+      urgency = 'low';
+    }
+
+    return { alertType, urgency, actionable };
   }
 }
 

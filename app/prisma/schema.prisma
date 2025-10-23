@@ -468,6 +468,7 @@ model KOLTweet {
   mentions                String[] @default([])
   isAlert                 Boolean  @default(false)
   sentiment               String?
+  metadata                Json?
   fetchedAt               DateTime @default(now())
   
   kol                     KOLProfile @relation(fields: [kolId], references: [id], onDelete: Cascade)
