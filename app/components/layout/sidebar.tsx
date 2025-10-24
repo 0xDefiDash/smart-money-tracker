@@ -63,21 +63,6 @@ const sidebarItems = [
     icon: Activity,
   },
   {
-    title: 'Base Tracker',
-    href: '/base-tracker',
-    icon: Globe,
-  },
-  {
-    title: 'BSC Tracker',
-    href: '/bsc-tracker',
-    icon: Zap,
-  },
-  {
-    title: 'ETH Tracker',
-    href: '/eth-tracker',
-    icon: Activity,
-  },
-  {
     title: 'Exchange Flows',
     href: '/exchange-flows',
     icon: Building2,
