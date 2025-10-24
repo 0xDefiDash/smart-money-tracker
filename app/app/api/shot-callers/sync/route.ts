@@ -9,6 +9,7 @@ const TRACKED_ACCOUNTS = [
   '100xDarren',
   'CryptoExpert101',
   'Bullrun_Gravano',
+  'CryptoWendyO',
   'elonmusk',
   'cz_binance',
   'four_meme_'
