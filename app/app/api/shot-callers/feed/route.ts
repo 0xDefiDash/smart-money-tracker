@@ -21,10 +21,18 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
     const limit = parseInt(searchParams.get('limit') || '20');
+    const forceRefresh = searchParams.get('refresh') === 'true';
+
+    console.log('🎯 Shot Callers Feed Request:', { category, limit, forceRefresh });
+    console.log('📱 Tracking accounts:', TRACKED_ACCOUNTS);
 
     // Fetch fresh tweets from Twitter API and store in database
     const allTweets: any[] = [];
+    let successCount = 0;
+    let errorCount = 0;
+    let fromCache = false;
     
+    // Try to fetch from Twitter API
     for (const username of TRACKED_ACCOUNTS) {
       try {
         // Ensure KOL profile exists in database
@@ -32,9 +40,48 @@ export async function GET(request: NextRequest) {
           where: { username }
         });
 
+        // Only fetch from API if force refresh or not recently fetched
+        const shouldFetchFromAPI = forceRefresh || 
+          !kolProfile?.lastFetchedAt || 
+          (Date.now() - kolProfile.lastFetchedAt.getTime()) > 5 * 60 * 1000; // 5 minutes
+
+        if (!shouldFetchFromAPI && kolProfile) {
+          console.log(`⚡ Using cached data for @${username}`);
+          fromCache = true;
+          
+          // Get cached tweets from database
+          const cachedTweets = await prisma.kOLTweet.findMany({
+            where: { kolId: kolProfile.id },
+            take: 10,
+            orderBy: { createdAt: 'desc' }
+          });
+
+          const cachedKolProfile = kolProfile; // Store reference for closure
+          cachedTweets.forEach(tweet => {
+            allTweets.push({
+              id: tweet.tweetId,
+              author: cachedKolProfile.displayName,
+              username: cachedKolProfile.username,
+              avatar: cachedKolProfile.profileImageUrl || getDefaultAvatar(cachedKolProfile.username),
+              content: tweet.content,
+              timestamp: formatTimestamp(tweet.createdAt.toISOString()),
+              likes: tweet.likeCount,
+              retweets: tweet.retweetCount,
+              replies: tweet.replyCount,
+              category: tweet.category || 'general',
+              coins: tweet.coins,
+              metadata: (tweet as any).metadata || {},
+            });
+          });
+
+          continue;
+        }
+
+        console.log(`🔄 Fetching fresh tweets for @${username}...`);
         const response = await twitterClient.getUserTweets(username, 10);
         
-        if (response.data) {
+        if (response.data && response.data.length > 0) {
+          successCount++;
           const user = response.includes?.users?.[0];
           
           // Create or update KOL profile
@@ -53,6 +100,7 @@ export async function GET(request: NextRequest) {
                 lastFetchedAt: new Date(),
               }
             });
+            console.log(`✅ Created profile for @${username}`);
           } else if (kolProfile && user) {
             // Update existing profile
             await prisma.kOLProfile.update({
@@ -67,6 +115,7 @@ export async function GET(request: NextRequest) {
                 lastFetchedAt: new Date(),
               }
             });
+            console.log(`✅ Updated profile for @${username}`);
           }
 
           // Store tweets in database
@@ -159,14 +208,21 @@ export async function GET(request: NextRequest) {
               }
             });
           }
+        } else {
+          errorCount++;
+          console.log(`⚠️ No tweets returned for @${username}`);
         }
       } catch (error) {
-        console.error(`Error fetching tweets for ${username}:`, error);
+        errorCount++;
+        console.error(`❌ Error fetching tweets for ${username}:`, error);
       }
     }
 
     // If no tweets from API, fetch from database
     if (allTweets.length === 0) {
+      console.log('📦 No fresh tweets available, loading from database...');
+      fromCache = true;
+      
       const dbTweets = await prisma.kOLTweet.findMany({
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -174,6 +230,8 @@ export async function GET(request: NextRequest) {
           kol: true
         }
       });
+
+      console.log(`📊 Loaded ${dbTweets.length} tweets from database`);
 
       allTweets.push(...dbTweets.map(tweet => ({
         id: tweet.tweetId,
@@ -207,17 +265,65 @@ export async function GET(request: NextRequest) {
     // Limit results
     const limitedTweets = filteredTweets.slice(0, limit);
 
+    console.log(`✅ Returning ${limitedTweets.length} tweets (${successCount} sources successful, ${errorCount} errors)`);
+
     return NextResponse.json({
       tweets: limitedTweets,
       count: limitedTweets.length,
       tracked_accounts: TRACKED_ACCOUNTS,
+      status: {
+        success: successCount,
+        errors: errorCount,
+        fromCache,
+        timestamp: new Date().toISOString()
+      }
     });
   } catch (error) {
-    console.error('Error fetching feed:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch feed' },
-      { status: 500 }
-    );
+    console.error('❌ Error fetching feed:', error);
+    
+    // Try to return cached data on error
+    try {
+      const dbTweets = await prisma.kOLTweet.findMany({
+        take: 20,
+        orderBy: { createdAt: 'desc' },
+        include: { kol: true }
+      });
+
+      return NextResponse.json({
+        tweets: dbTweets.map(tweet => ({
+          id: tweet.tweetId,
+          author: tweet.kol.displayName,
+          username: tweet.kol.username,
+          avatar: tweet.kol.profileImageUrl || getDefaultAvatar(tweet.kol.username),
+          content: tweet.content,
+          timestamp: formatTimestamp(tweet.createdAt.toISOString()),
+          likes: tweet.likeCount,
+          retweets: tweet.retweetCount,
+          replies: tweet.replyCount,
+          category: tweet.category || 'general',
+          coins: tweet.coins,
+          metadata: (tweet as any).metadata || {},
+        })),
+        count: dbTweets.length,
+        tracked_accounts: TRACKED_ACCOUNTS,
+        status: {
+          success: 0,
+          errors: TRACKED_ACCOUNTS.length,
+          fromCache: true,
+          error: 'Using cached data due to API error',
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (dbError) {
+      return NextResponse.json(
+        { 
+          error: 'Failed to fetch feed',
+          tweets: [],
+          count: 0
+        },
+        { status: 500 }
+      );
+    }
   }
 }
 

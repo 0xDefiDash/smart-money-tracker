@@ -49,6 +49,10 @@ interface TwitterApiResponse {
 class TwitterClient {
   private baseUrl = 'https://api.twitter.com/2';
   private accessToken: string | null = null;
+  private lastRequestTime: number = 0;
+  private minRequestInterval: number = 1000; // Minimum 1 second between requests
+  private rateLimitRemaining: number = 180;
+  private rateLimitReset: number = 0;
   
   private getAccessToken(): string {
     // Return cached token if available
@@ -64,6 +68,7 @@ class TwitterClient {
         const token = authSecrets.twitter?.secrets?.access_token?.value;
         if (token && typeof token === 'string') {
           this.accessToken = token;
+          console.log('✅ Twitter OAuth token loaded successfully');
           return token;
         }
       }
@@ -78,15 +83,48 @@ class TwitterClient {
       return envToken;
     }
 
-    throw new Error('Twitter OAuth access token not configured');
+    throw new Error('Twitter OAuth access token not configured. Please authenticate with Twitter.');
+  }
+
+  private async rateLimitDelay(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    
+    if (timeSinceLastRequest < this.minRequestInterval) {
+      const delay = this.minRequestInterval - timeSinceLastRequest;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    
+    this.lastRequestTime = Date.now();
+  }
+
+  private updateRateLimitInfo(headers: Headers): void {
+    const remaining = headers.get('x-rate-limit-remaining');
+    const reset = headers.get('x-rate-limit-reset');
+    
+    if (remaining) this.rateLimitRemaining = parseInt(remaining);
+    if (reset) this.rateLimitReset = parseInt(reset) * 1000;
+  }
+
+  private async handleRateLimit(): Promise<void> {
+    if (this.rateLimitRemaining <= 1 && this.rateLimitReset > Date.now()) {
+      const waitTime = this.rateLimitReset - Date.now();
+      console.log(`⏳ Rate limit reached. Waiting ${Math.ceil(waitTime / 1000)} seconds...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
   }
 
   async getUserByUsername(username: string): Promise<TwitterUser | null> {
     try {
+      await this.handleRateLimit();
+      await this.rateLimitDelay();
+      
       const accessToken = this.getAccessToken();
       const cleanUsername = username.replace('@', '');
       
       const url = `${this.baseUrl}/users/by/username/${cleanUsername}?user.fields=profile_image_url,public_metrics,verified`;
+      
+      console.log(`🔍 Fetching user info for @${cleanUsername}...`);
       
       const response = await fetch(url, {
         headers: {
@@ -94,31 +132,44 @@ class TwitterClient {
         },
       });
 
+      this.updateRateLimitInfo(response.headers);
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Twitter API error for user ${username}:`, response.status, errorText);
+        console.error(`❌ Twitter API error for user ${username}:`, response.status, errorText);
+        
+        if (response.status === 429) {
+          console.error('⚠️ Rate limit exceeded. Please wait before making more requests.');
+        }
+        
         return null;
       }
 
       const data = await response.json();
+      console.log(`✅ Successfully fetched user @${cleanUsername}`);
       return data.data || null;
     } catch (error) {
-      console.error('Error fetching user:', error);
+      console.error('❌ Error fetching user:', error);
       return null;
     }
   }
 
   async getUserTweets(username: string, maxResults: number = 10): Promise<TwitterApiResponse> {
     try {
+      await this.handleRateLimit();
+      await this.rateLimitDelay();
+      
       const accessToken = this.getAccessToken();
       const cleanUsername = username.replace('@', '');
       
       // First get user ID
       const user = await this.getUserByUsername(cleanUsername);
       if (!user) {
-        console.error(`User ${username} not found`);
-        throw new Error(`User ${username} not found`);
+        console.error(`❌ User ${username} not found`);
+        return { data: [] };
       }
+
+      console.log(`📱 Fetching ${maxResults} tweets from @${cleanUsername}...`);
 
       const url = `${this.baseUrl}/users/${user.id}/tweets?max_results=${maxResults}&tweet.fields=created_at,public_metrics,entities&expansions=author_id&user.fields=profile_image_url,public_metrics,verified`;
       
@@ -128,16 +179,26 @@ class TwitterClient {
         },
       });
 
+      this.updateRateLimitInfo(response.headers);
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Failed to fetch tweets for ${username}:`, response.status, errorText);
-        throw new Error(`Failed to fetch tweets: ${response.statusText}`);
+        console.error(`❌ Failed to fetch tweets for ${username}:`, response.status, errorText);
+        
+        if (response.status === 429) {
+          console.error('⚠️ Rate limit exceeded. Using cached data.');
+        }
+        
+        return { data: [] };
       }
 
       const data = await response.json();
+      console.log(`✅ Successfully fetched ${data.data?.length || 0} tweets from @${cleanUsername}`);
+      console.log(`📊 Rate limit remaining: ${this.rateLimitRemaining}`);
+      
       return data;
     } catch (error) {
-      console.error('Error fetching tweets:', error);
+      console.error('❌ Error fetching tweets:', error);
       return { data: [] };
     }
   }

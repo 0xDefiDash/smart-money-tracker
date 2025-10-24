@@ -250,6 +250,12 @@ export default function ShotCallersPage() {
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [kolWallets, setKolWallets] = useState<Record<string, any>>({});
+  const [feedStatus, setFeedStatus] = useState<{
+    success: number;
+    errors: number;
+    fromCache: boolean;
+    timestamp?: string;
+  } | null>(null);
 
   // Seed KOL wallets on mount
   useEffect(() => {
@@ -274,26 +280,45 @@ export default function ShotCallersPage() {
   }, []);
 
   // Fetch live tweets from tracked accounts
-  const fetchLiveTweets = async () => {
+  const fetchLiveTweets = async (forceRefresh = false) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/shot-callers/feed?limit=20`);
+      const url = forceRefresh 
+        ? `/api/shot-callers/feed?limit=20&refresh=true`
+        : `/api/shot-callers/feed?limit=20`;
+      
+      console.log('📱 Fetching tweets...', forceRefresh ? '(Force refresh)' : '');
+      
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
+        
+        // Update status
+        if (data.status) {
+          setFeedStatus(data.status);
+        }
+        
         if (data.tweets && data.tweets.length > 0) {
           setTweets(data.tweets);
           setLastUpdate(new Date());
-          toast.success(`Loaded ${data.tweets.length} fresh tweets from ${data.tracked_accounts.join(', ')}`);
+          
+          const statusMsg = data.status?.fromCache 
+            ? `📦 Loaded ${data.tweets.length} cached tweets`
+            : `✅ Loaded ${data.tweets.length} fresh tweets from X API (${data.status?.success || 0}/${data.tracked_accounts?.length || 0} sources)`;
+          
+          toast.success(statusMsg);
+          
+          console.log('📊 Feed status:', data.status);
         } else {
-          toast.info('No new tweets available. Showing sample data.');
+          toast.info('No tweets available at this time.');
         }
       } else {
-        console.error('Failed to fetch tweets');
-        toast.error('Failed to load live tweets. Showing sample data.');
+        console.error('Failed to fetch tweets', response.status);
+        toast.error('Failed to load tweets. Please try again.');
       }
     } catch (error) {
       console.error('Error fetching tweets:', error);
-      toast.error('Error loading tweets. Showing sample data.');
+      toast.error('Error connecting to X API. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -519,26 +544,56 @@ export default function ShotCallersPage() {
           <CardHeader className="pb-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
               <div className="flex-1 min-w-0">
-                <CardTitle className="flex items-center gap-2 mb-1 text-base sm:text-lg">
+                <CardTitle className="flex items-center gap-2 mb-1 text-base sm:text-lg flex-wrap">
                   <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
                   <span className="truncate">Live Alpha Feed</span>
+                  {feedStatus && (
+                    <Badge 
+                      className={`text-[10px] sm:text-xs ${
+                        feedStatus.fromCache 
+                          ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' 
+                          : 'bg-green-500/20 text-green-400 border-green-500/30'
+                      }`}
+                    >
+                      {feedStatus.fromCache ? '📦 Cached' : '🔴 Live'}
+                    </Badge>
+                  )}
                 </CardTitle>
                 {lastUpdate && (
-                  <p className="text-xs text-gray-400">
-                    Last updated: {lastUpdate.toLocaleTimeString()}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs text-gray-400">
+                      Last updated: {lastUpdate.toLocaleTimeString()}
+                    </p>
+                    {feedStatus && !feedStatus.fromCache && (
+                      <p className="text-xs text-green-400">
+                        • {feedStatus.success}/{feedStatus.success + feedStatus.errors} sources active
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs w-full sm:w-auto"
-                onClick={fetchLiveTweets}
-                disabled={loading}
-              >
-                <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Loading...' : 'Refresh'}
-              </Button>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs flex-1 sm:flex-initial"
+                  onClick={() => fetchLiveTweets(false)}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                  {loading ? 'Loading...' : 'Refresh'}
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="text-xs bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 flex-1 sm:flex-initial"
+                  onClick={() => fetchLiveTweets(true)}
+                  disabled={loading}
+                >
+                  <Activity className={`h-3 w-3 mr-1 ${loading ? 'animate-pulse' : ''}`} />
+                  Force Update
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="px-3 sm:px-6">
@@ -729,7 +784,8 @@ export default function ShotCallersPage() {
       <Button
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50 touch-manipulation"
         size="icon"
-        onClick={fetchLiveTweets}
+        onClick={() => fetchLiveTweets(true)}
+        title="Force refresh from X API"
       >
         <RefreshCw className={`h-5 w-5 sm:h-6 sm:w-6 ${loading ? 'animate-spin' : ''}`} />
       </Button>
