@@ -341,7 +341,10 @@ async function updateKOLStats(kolId: string) {
   const successfulCalls = calls.filter(c => c.isWin === true).length;
   const failedCalls = calls.filter(c => c.isWin === false).length;
   const pendingCalls = calls.filter(c => c.isWin === null).length;
-  const winRate = totalCalls > 0 ? (successfulCalls / (successfulCalls + failedCalls)) * 100 : 0;
+  
+  // Calculate win rate, handling division by zero
+  const completedCalls = successfulCalls + failedCalls;
+  const winRate = completedCalls > 0 ? (successfulCalls / completedCalls) * 100 : 0;
   
   const roiValues = calls.filter(c => c.roi !== null).map(c => c.roi!);
   const averageROI = roiValues.length > 0 
@@ -359,8 +362,8 @@ async function updateKOLStats(kolId: string) {
       successfulCalls,
       failedCalls,
       pendingCalls,
-      winRate,
-      averageROI,
+      winRate: isNaN(winRate) ? 0 : winRate,
+      averageROI: isNaN(averageROI) ? 0 : averageROI,
       bestCall,
       worstCall,
       lastUpdated: new Date()
@@ -370,8 +373,8 @@ async function updateKOLStats(kolId: string) {
       successfulCalls,
       failedCalls,
       pendingCalls,
-      winRate,
-      averageROI,
+      winRate: isNaN(winRate) ? 0 : winRate,
+      averageROI: isNaN(averageROI) ? 0 : averageROI,
       bestCall,
       worstCall,
       lastUpdated: new Date()

@@ -1,9 +1,7 @@
 
 // Twitter API v2 Client
-import crypto from 'crypto';
-
-const TWITTER_API_KEY = process.env.TWITTER_API_KEY || '';
-const TWITTER_API_SECRET = process.env.TWITTER_API_SECRET || '';
+import fs from 'fs';
+import path from 'path';
 
 interface TwitterUser {
   id: string;
@@ -50,70 +48,55 @@ interface TwitterApiResponse {
 
 class TwitterClient {
   private baseUrl = 'https://api.twitter.com/2';
-  private bearerToken: string | null = null;
-  private tokenExpiry: number = 0;
+  private accessToken: string | null = null;
   
-  private generateBearerToken(): string {
-    // For OAuth 1.0a (App-only auth), we need to get a bearer token
-    const credentials = Buffer.from(
-      `${encodeURIComponent(TWITTER_API_KEY)}:${encodeURIComponent(TWITTER_API_SECRET)}`
-    ).toString('base64');
-    
-    return credentials;
-  }
-
-  private async getBearerToken(): Promise<string> {
-    // Return cached token if still valid
-    if (this.bearerToken && Date.now() < this.tokenExpiry) {
-      return this.bearerToken;
+  private getAccessToken(): string {
+    // Return cached token if available
+    if (this.accessToken) {
+      return this.accessToken;
     }
 
+    // Try to get OAuth token from auth secrets file
     try {
-      if (!TWITTER_API_KEY || !TWITTER_API_SECRET) {
-        throw new Error('Twitter API credentials not configured');
+      const authSecretsPath = '/home/ubuntu/.config/abacusai_auth_secrets.json';
+      if (fs.existsSync(authSecretsPath)) {
+        const authSecrets = JSON.parse(fs.readFileSync(authSecretsPath, 'utf-8'));
+        const token = authSecrets.twitter?.secrets?.access_token?.value;
+        if (token && typeof token === 'string') {
+          this.accessToken = token;
+          return token;
+        }
       }
-
-      const response = await fetch('https://api.twitter.com/oauth2/token', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${this.generateBearerToken()}`,
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        },
-        body: 'grant_type=client_credentials',
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Twitter API auth error:', response.status, errorText);
-        throw new Error(`Failed to get bearer token: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      this.bearerToken = data.access_token;
-      // Tokens typically last 2 hours, cache for 1.5 hours to be safe
-      this.tokenExpiry = Date.now() + (90 * 60 * 1000);
-      return this.bearerToken || '';
-    } catch (error: any) {
-      console.error('Error getting bearer token:', error.message);
-      throw error;
+    } catch (error) {
+      console.error('Error reading OAuth token:', error);
     }
+
+    // Fallback to environment variable if available
+    const envToken = process.env.TWITTER_ACCESS_TOKEN;
+    if (envToken) {
+      this.accessToken = envToken;
+      return envToken;
+    }
+
+    throw new Error('Twitter OAuth access token not configured');
   }
 
   async getUserByUsername(username: string): Promise<TwitterUser | null> {
     try {
-      const bearerToken = await this.getBearerToken();
+      const accessToken = this.getAccessToken();
       const cleanUsername = username.replace('@', '');
       
       const url = `${this.baseUrl}/users/by/username/${cleanUsername}?user.fields=profile_image_url,public_metrics,verified`;
       
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${bearerToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
       if (!response.ok) {
-        console.error(`Twitter API error: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`Twitter API error for user ${username}:`, response.status, errorText);
         return null;
       }
 
@@ -127,12 +110,13 @@ class TwitterClient {
 
   async getUserTweets(username: string, maxResults: number = 10): Promise<TwitterApiResponse> {
     try {
-      const bearerToken = await this.getBearerToken();
+      const accessToken = this.getAccessToken();
       const cleanUsername = username.replace('@', '');
       
       // First get user ID
       const user = await this.getUserByUsername(cleanUsername);
       if (!user) {
+        console.error(`User ${username} not found`);
         throw new Error(`User ${username} not found`);
       }
 
@@ -140,11 +124,13 @@ class TwitterClient {
       
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${bearerToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Failed to fetch tweets for ${username}:`, response.status, errorText);
         throw new Error(`Failed to fetch tweets: ${response.statusText}`);
       }
 

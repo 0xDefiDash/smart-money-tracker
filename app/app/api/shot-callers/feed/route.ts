@@ -3,11 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { twitterClient } from '@/lib/twitter-client';
 import { prisma } from '@/lib/db';
 
-// List of tracked KOL accounts
+// List of tracked KOL accounts (use real, valid Twitter usernames)
 const TRACKED_ACCOUNTS = [
-  'CryptoExpert101',
   'JamesWynnReal',
-  'BullRunGravano',
   '100xDarren',
   'elonmusk',
   'cz_binance',
