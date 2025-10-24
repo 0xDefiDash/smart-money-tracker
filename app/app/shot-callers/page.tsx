@@ -329,98 +329,104 @@ export default function ShotCallersPage() {
     : tweets.filter(tweet => tweet.category === activeTab);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-3 sm:p-4 md:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="relative">
-            <Target className="h-10 w-10 text-purple-500" />
-            <Flame className="h-5 w-5 text-orange-500 absolute -top-1 -right-1 animate-pulse" />
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4">
+          <div className="relative flex-shrink-0">
+            <Target className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500" />
+            <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 absolute -top-1 -right-1 animate-pulse" />
           </div>
-          <div className="flex-1">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text truncate">
               Shot Callers
             </h1>
             <div className="flex items-center gap-2 flex-wrap mt-1">
-              <p className="text-gray-400 text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
-              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+              <p className="text-gray-400 text-xs sm:text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs whitespace-nowrap">
                 <Activity className="h-2 w-2 mr-1 animate-pulse" />
                 Tracking 7 KOLs
               </Badge>
             </div>
           </div>
           {/* Wallet Connection */}
-          {!isConnected ? (
-            <Button
-              onClick={connectWallet}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
-              <Wallet className="mr-2 h-4 w-4" />
-              Connect Wallet
-            </Button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30 px-3 py-2">
-                <DollarSign className="h-4 w-4 mr-1" />
-                {account?.slice(0, 6)}...{account?.slice(-4)}
-              </Badge>
+          <div className="w-full sm:w-auto flex-shrink-0">
+            {!isConnected ? (
               <Button
-                variant="ghost"
+                onClick={connectWallet}
+                className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-sm"
                 size="sm"
-                onClick={disconnectWallet}
               >
-                Disconnect
+                <Wallet className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Connect Wallet</span>
+                <span className="xs:hidden">Connect</span>
               </Button>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/30 px-2 sm:px-3 py-1 sm:py-2 text-xs flex-1 sm:flex-initial justify-center">
+                  <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  {account?.slice(0, 4)}...{account?.slice(-3)}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={disconnectWallet}
+                  className="text-xs"
+                >
+                  <span className="hidden sm:inline">Disconnect</span>
+                  <span className="sm:hidden">✕</span>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-400">Active KOLs</p>
-                  <p className="text-2xl font-bold text-purple-400">{topKOLs.length}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-400 truncate">Active KOLs</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-400">{topKOLs.length}</p>
                 </div>
-                <Activity className="h-8 w-8 text-purple-500" />
+                <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 flex-shrink-0 ml-2" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-pink-500/10 to-pink-600/5 border-pink-500/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-400">Alpha Signals</p>
-                  <p className="text-2xl font-bold text-pink-400">24</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-400 truncate">Alpha Signals</p>
+                  <p className="text-xl sm:text-2xl font-bold text-pink-400">24</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-pink-500" />
+                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-pink-500 flex-shrink-0 ml-2" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-400">Total Reach</p>
-                  <p className="text-2xl font-bold text-blue-400">172M</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-400 truncate">Total Reach</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-400">172M</p>
                 </div>
-                <MessageCircle className="h-8 w-8 text-blue-500" />
+                <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0 ml-2" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-400">Hot Takes</p>
-                  <p className="text-2xl font-bold text-orange-400">156</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-400 truncate">Hot Takes</p>
+                  <p className="text-xl sm:text-2xl font-bold text-orange-400">156</p>
                 </div>
-                <Flame className="h-8 w-8 text-orange-500" />
+                <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 flex-shrink-0 ml-2" />
               </div>
             </CardContent>
           </Card>
@@ -428,22 +434,22 @@ export default function ShotCallersPage() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* KOLs List */}
         <Card className="lg:col-span-1 bg-slate-900/50 border-slate-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-purple-500" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
               Top Shot Callers
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[calc(100vh-300px)]">
+          <CardContent className="px-3 sm:px-6">
+            <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-300px)]">
               <div className="space-y-3">
                 {topKOLs.map((kol) => (
                   <Card
                     key={kol.id}
-                    className={`cursor-pointer transition-all hover:scale-[1.02] ${
+                    className={`cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
                       selectedKOL === kol.id
                         ? 'bg-purple-500/20 border-purple-500'
                         : 'bg-slate-800/50 border-slate-700 hover:border-purple-500/50'
@@ -456,46 +462,48 @@ export default function ShotCallersPage() {
                       }
                     }}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <Avatar className={`h-12 w-12 border-2 ${(kol as any).isTracked ? 'border-green-500 ring-2 ring-green-500/30' : 'border-purple-500/50'}`}>
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <Avatar className={`h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 border-2 ${(kol as any).isTracked ? 'border-green-500 ring-2 ring-green-500/30' : 'border-purple-500/50'}`}>
                           <AvatarImage src={kol.avatar} alt={kol.displayName} />
                           <AvatarFallback>{kol.displayName[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <h3 className="font-bold text-white truncate">{kol.displayName}</h3>
-                            <div className={`flex items-center gap-1 ${getInfluenceColor(kol.influence)}`}>
-                              <Zap className="h-3 w-3" />
+                            <h3 className="font-bold text-white text-sm sm:text-base truncate">{kol.displayName}</h3>
+                            <div className={`flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-2 ${getInfluenceColor(kol.influence)}`}>
+                              <Zap className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               <span className="text-xs font-bold">{kol.influence}</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mb-1.5 sm:mb-2 flex-wrap">
                             <a 
                               href={`https://x.com/${kol.username}`} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-xs text-blue-400 hover:text-blue-300 hover:underline"
+                              className="text-xs text-blue-400 hover:text-blue-300 hover:underline truncate"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               @{kol.username}
                             </a>
                             {(kol as any).isTracked && (
-                              <Badge className="text-xs bg-green-500/20 text-green-400 border-green-500/30">
-                                <Activity className="h-2 w-2 mr-1 animate-pulse" />
-                                LIVE • Click to view
+                              <Badge className="text-[10px] sm:text-xs bg-green-500/20 text-green-400 border-green-500/30 whitespace-nowrap">
+                                <Activity className="h-2 w-2 mr-0.5 sm:mr-1 animate-pulse" />
+                                <span className="hidden xs:inline">LIVE • Click</span>
+                                <span className="xs:hidden">LIVE</span>
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className="text-xs">
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 flex-wrap">
+                            <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
                               {kol.category}
                             </Badge>
                             <div className="flex items-center gap-1 text-xs text-gray-400">
-                              <Users className="h-3 w-3" />
-                              {kol.followers}
+                              <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                              <span className="text-[10px] sm:text-xs">{kol.followers}</span>
                             </div>
                           </div>
-                          <p className="text-xs text-gray-300 line-clamp-2">{kol.recentAlpha}</p>
+                          <p className="text-[10px] sm:text-xs text-gray-300 line-clamp-2">{kol.recentAlpha}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -508,12 +516,12 @@ export default function ShotCallersPage() {
 
         {/* Tweets Feed */}
         <Card className="lg:col-span-2 bg-slate-900/50 border-slate-800">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 mb-1">
-                  <Flame className="h-5 w-5 text-orange-500" />
-                  Live Alpha Feed
+          <CardHeader className="pb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+              <div className="flex-1 min-w-0">
+                <CardTitle className="flex items-center gap-2 mb-1 text-base sm:text-lg">
+                  <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+                  <span className="truncate">Live Alpha Feed</span>
                 </CardTitle>
                 {lastUpdate && (
                   <p className="text-xs text-gray-400">
@@ -524,7 +532,7 @@ export default function ShotCallersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs"
+                className="text-xs w-full sm:w-auto"
                 onClick={fetchLiveTweets}
                 disabled={loading}
               >
@@ -533,19 +541,34 @@ export default function ShotCallersPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-              <TabsList className="grid grid-cols-6 w-full bg-slate-800/50">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="bullish">Bullish</TabsTrigger>
-                <TabsTrigger value="alpha">Alpha</TabsTrigger>
-                <TabsTrigger value="alert">Alerts</TabsTrigger>
-                <TabsTrigger value="analysis">Analysis</TabsTrigger>
-                <TabsTrigger value="bearish">Bearish</TabsTrigger>
+              <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full bg-slate-800/50 h-auto gap-1 p-1">
+                <TabsTrigger value="all" className="text-xs sm:text-sm py-2">All</TabsTrigger>
+                <TabsTrigger value="bullish" className="text-xs sm:text-sm py-2">
+                  <span className="hidden sm:inline">Bullish</span>
+                  <span className="sm:hidden">📈</span>
+                </TabsTrigger>
+                <TabsTrigger value="alpha" className="text-xs sm:text-sm py-2">
+                  <span className="hidden sm:inline">Alpha</span>
+                  <span className="sm:hidden">⚡</span>
+                </TabsTrigger>
+                <TabsTrigger value="alert" className="text-xs sm:text-sm py-2">
+                  <span className="hidden sm:inline">Alerts</span>
+                  <span className="sm:hidden">🚨</span>
+                </TabsTrigger>
+                <TabsTrigger value="analysis" className="text-xs sm:text-sm py-2">
+                  <span className="hidden sm:inline">Analysis</span>
+                  <span className="sm:hidden">📊</span>
+                </TabsTrigger>
+                <TabsTrigger value="bearish" className="text-xs sm:text-sm py-2">
+                  <span className="hidden sm:inline">Bearish</span>
+                  <span className="sm:hidden">📉</span>
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="mt-4">
-                <ScrollArea className="h-[calc(100vh-400px)]">
+                <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-400px)]">
                   {filteredTweets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <MessageCircle className="h-12 w-12 text-gray-600 mb-3" />
@@ -563,7 +586,7 @@ export default function ShotCallersPage() {
               </TabsContent>
 
               <TabsContent value="bullish" className="mt-4">
-                <ScrollArea className="h-[calc(100vh-400px)]">
+                <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-400px)]">
                   {filteredTweets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <TrendingUp className="h-12 w-12 text-gray-600 mb-3" />
@@ -581,7 +604,7 @@ export default function ShotCallersPage() {
               </TabsContent>
 
               <TabsContent value="alpha" className="mt-4">
-                <ScrollArea className="h-[calc(100vh-400px)]">
+                <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-400px)]">
                   {filteredTweets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <Target className="h-12 w-12 text-gray-600 mb-3" />
@@ -599,7 +622,7 @@ export default function ShotCallersPage() {
               </TabsContent>
 
               <TabsContent value="alert" className="mt-4">
-                <ScrollArea className="h-[calc(100vh-400px)]">
+                <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-400px)]">
                   {filteredTweets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <Activity className="h-12 w-12 text-gray-600 mb-3" />
@@ -617,7 +640,7 @@ export default function ShotCallersPage() {
               </TabsContent>
 
               <TabsContent value="analysis" className="mt-4">
-                <ScrollArea className="h-[calc(100vh-400px)]">
+                <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-400px)]">
                   {filteredTweets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <Activity className="h-12 w-12 text-gray-600 mb-3" />
@@ -635,7 +658,7 @@ export default function ShotCallersPage() {
               </TabsContent>
 
               <TabsContent value="bearish" className="mt-4">
-                <ScrollArea className="h-[calc(100vh-400px)]">
+                <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-400px)]">
                   {filteredTweets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <TrendingUp className="h-12 w-12 text-gray-600 mb-3" />
@@ -657,13 +680,13 @@ export default function ShotCallersPage() {
       </div>
 
       {/* Compact Token Calls Section */}
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         <Card className="bg-slate-900/50 border-slate-800">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <TrendingUp className="h-5 w-5 text-purple-500" />
-                Token Calls Tracker
+          <CardHeader className="pb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                <span className="truncate">Token Calls Tracker</span>
               </CardTitle>
               <Button
                 onClick={async () => {
@@ -689,14 +712,14 @@ export default function ShotCallersPage() {
                   }
                 }}
                 size="sm"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-xs w-full sm:w-auto"
               >
                 <Database className="h-3 w-3 mr-1" />
                 Sync
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6">
             <TokenCallsSection />
           </CardContent>
         </Card>
@@ -704,11 +727,11 @@ export default function ShotCallersPage() {
 
       {/* Floating Action Button */}
       <Button
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/50 touch-manipulation"
         size="icon"
         onClick={fetchLiveTweets}
       >
-        <RefreshCw className={`h-6 w-6 ${loading ? 'animate-spin' : ''}`} />
+        <RefreshCw className={`h-5 w-5 sm:h-6 sm:w-6 ${loading ? 'animate-spin' : ''}`} />
       </Button>
     </div>
   );
