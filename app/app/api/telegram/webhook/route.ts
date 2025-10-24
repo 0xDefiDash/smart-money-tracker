@@ -67,6 +67,13 @@ async function handleCommand(
       await telegramClient.sendWelcomeMessage(chatId, firstName);
       // Create or update user telegram connection
       await updateTelegramConnection(chatId, username, firstName);
+      // Send mini app launch button
+      await sendMiniAppButton(chatId);
+      break;
+
+    case '/app':
+    case '/miniapp':
+      await sendMiniAppButton(chatId);
       break;
 
     case '/help':
@@ -103,6 +110,32 @@ async function handleCommand(
         text: `Unknown command. Use /help to see available commands.`,
       });
   }
+}
+
+async function sendMiniAppButton(chatId: string) {
+  const miniAppUrl = 'https://defidashtracker.com/telegram-mini';
+  
+  await telegramClient.sendMessage({
+    chat_id: chatId,
+    text: `📱 *Launch DeFiDash Mini App*\n\nAccess real-time crypto data, whale tracking, and trending tokens directly in Telegram!`,
+    parse_mode: 'Markdown',
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: '🚀 Open Mini App',
+            web_app: { url: miniAppUrl },
+          },
+        ],
+        [
+          {
+            text: '🌐 Full Website',
+            url: 'https://defidashtracker.com',
+          },
+        ],
+      ],
+    },
+  });
 }
 
 async function updateTelegramConnection(

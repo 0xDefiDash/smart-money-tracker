@@ -248,15 +248,16 @@ ${summary.topMovers.map(m => `• ${m.symbol}: ${m.change > 0 ? '+' : ''}${m.cha
 
 I'm the DeFiDash Tracker Bot 🤖
 
-I'll keep you updated with:
-🐋 Whale transaction alerts
-⚔️ Block Wars game notifications
-💎 Alpha feeds from top KOLs
-📊 Market movement alerts
-📈 Daily market summaries
+🚀 *NEW: Telegram Mini App Available!*
+Launch our mobile-optimized app directly in Telegram for instant access to:
+📊 Live Market Data
+🐋 Whale Activity Tracking  
+🔥 Trending Tokens
+⚔️ Block Wars Game
 
-Use /help to see all available commands.
-Use /settings to customize your notifications.
+Use /app to launch the Mini App
+Use /help to see all available commands
+Use /settings to customize your notifications
 
 Let's track the smart money together! 🚀
     `.trim();
@@ -272,12 +273,19 @@ Let's track the smart money together! 🚀
     const message = `
 ℹ️ *DeFiDash Bot Commands*
 
+📱 *Mini App*
+/app - Launch the Telegram Mini App
+/miniapp - Same as /app
+
+📋 *Quick Commands*
 /start - Start the bot and get welcome message
 /help - Show this help message
 /settings - View and update notification preferences
 /connect - Link your Telegram to DeFiDash account
+
+📊 *Market Data*
 /whale - Get latest whale transactions
-/alpha - Get latest alpha feeds
+/alpha - Get latest alpha feeds from KOLs
 /market - Get current market overview
 /blockwars - Get your Block Wars stats
 
@@ -288,7 +296,9 @@ Let's track the smart money together! 🚀
 • Market Alerts - Significant price movements
 • Daily Summary - End-of-day market report
 
-Visit https://defidashtracker.com for full experience!
+💡 *Pro Tip:* Use the Mini App (/app) for the best mobile experience!
+
+🌐 Visit https://defidashtracker.com for full experience!
     `.trim();
 
     await this.sendMessage({
@@ -326,6 +336,52 @@ Visit https://defidashtracker.com for full experience!
       return data;
     } catch (error) {
       console.error('Error getting bot info:', error);
+      throw error;
+    }
+  }
+
+  async setMenuButton(menuButton?: {
+    type: 'commands' | 'web_app' | 'default';
+    text?: string;
+    web_app?: { url: string };
+  }): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/setChatMenuButton`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          menu_button: menuButton || {
+            type: 'web_app',
+            text: '📱 Open App',
+            web_app: { url: 'https://defidashtracker.com/telegram-mini' },
+          },
+        }),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error setting menu button:', error);
+      throw error;
+    }
+  }
+
+  async setMyCommands(commands: Array<{ command: string; description: string }>): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/setMyCommands`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ commands }),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error setting commands:', error);
       throw error;
     }
   }
