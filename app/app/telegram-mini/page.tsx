@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,8 @@ import {
   Flame,
   Clock,
   Eye,
+  Bell,
+  Settings,
 } from 'lucide-react';
 
 // Telegram WebApp types
@@ -86,6 +89,7 @@ interface TrendingToken {
 }
 
 export default function TelegramMiniApp() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('market');
   const [whaleTransactions, setWhaleTransactions] = useState<WhaleTransaction[]>([]);
   const [marketData, setMarketData] = useState<MarketData[]>([]);
@@ -112,6 +116,9 @@ export default function TelegramMiniApp() {
           tg.themeParams.bg_color
         );
       }
+
+      // Hide back button on main page
+      tg.BackButton.hide();
     }
 
     loadData();
@@ -177,6 +184,14 @@ export default function TelegramMiniApp() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10 h-8 w-8 p-0"
+              onClick={() => router.push('/telegram-mini/notifications')}
+            >
+              <Bell className="w-4 h-4" />
+            </Button>
             <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500">
               <Activity className="w-3 h-3 mr-1" />
               Live
@@ -381,10 +396,10 @@ export default function TelegramMiniApp() {
           <Activity className="w-4 h-4 mr-2" />
           Refresh Data
         </Button>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Button
             variant="outline"
-            className="flex-1 text-xs"
+            className="text-xs"
             onClick={() => window.open('https://defidashtracker.com', '_blank')}
           >
             <Eye className="w-4 h-4 mr-1" />
@@ -392,7 +407,15 @@ export default function TelegramMiniApp() {
           </Button>
           <Button
             variant="outline"
-            className="flex-1 text-xs"
+            className="text-xs"
+            onClick={() => router.push('/telegram-mini/notifications')}
+          >
+            <Settings className="w-4 h-4 mr-1" />
+            Settings
+          </Button>
+          <Button
+            variant="outline"
+            className="text-xs"
             onClick={() => setActiveTab('market')}
           >
             <Zap className="w-4 h-4 mr-1" />

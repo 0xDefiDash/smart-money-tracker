@@ -1,54 +1,57 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { PrismaClient } from '@prisma/client';
 import telegramClient from '@/lib/telegram-client';
 
-export const dynamic = 'force-dynamic';
+const prisma = new PrismaClient();
+
+interface TelegramMessage {
+  message_id: number;
+  from: {
+    id: number;
+    is_bot: boolean;
+    first_name: string;
+    last_name?: string;
+    username?: string;
+  };
+  chat: {
+    id: number;
+    type: string;
+    first_name?: string;
+    username?: string;
+  };
+  date: number;
+  text?: string;
+}
 
 interface TelegramUpdate {
   update_id: number;
-  message?: {
-    message_id: number;
-    from: {
-      id: number;
-      first_name: string;
-      last_name?: string;
-      username?: string;
-    };
-    chat: {
-      id: number;
-      type: 'private' | 'group' | 'supergroup' | 'channel';
-    };
-    text?: string;
-    date: number;
-  };
-  callback_query?: any;
+  message?: TelegramMessage;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const update: TelegramUpdate = await request.json();
-    
-    if (!update.message) {
-      return NextResponse.json({ ok: true });
-    }
 
-    const { message } = update;
-    const chatId = message.chat.id.toString();
-    const text = message.text || '';
-    const firstName = message.from.first_name;
-    const username = message.from.username;
+    if (update.message) {
+      const message = update.message;
+      const chatId = message.chat.id;
+      const text = message.text || '';
+      const userId = message.from.id;
+      const firstName = message.from.first_name;
+      const username = message.from.username;
 
-    // Handle commands
-    if (text.startsWith('/')) {
-      await handleCommand(text, chatId, firstName, username);
+      // Handle commands
+      if (text.startsWith('/')) {
+        await handleCommand(text, chatId, userId, firstName, username);
+      }
     }
 
     return NextResponse.json({ ok: true });
-  } catch (error: any) {
-    console.error('Telegram webhook error:', error);
+  } catch (error) {
+    console.error('Error processing webhook:', error);
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -56,346 +59,184 @@ export async function POST(request: NextRequest) {
 
 async function handleCommand(
   command: string,
-  chatId: string,
+  chatId: number,
+  userId: number,
   firstName: string,
   username?: string
 ) {
   const cmd = command.split(' ')[0].toLowerCase();
 
-  switch (cmd) {
-    case '/start':
-      await telegramClient.sendWelcomeMessage(chatId, firstName);
-      // Create or update user telegram connection
-      await updateTelegramConnection(chatId, username, firstName);
-      // Send mini app launch button
-      await sendMiniAppButton(chatId);
-      break;
-
-    case '/app':
-    case '/miniapp':
-      await sendMiniAppButton(chatId);
-      break;
-
-    case '/help':
-      await telegramClient.sendHelpMessage(chatId);
-      break;
-
-    case '/settings':
-      await sendSettingsMessage(chatId);
-      break;
-
-    case '/connect':
-      await sendConnectInstructions(chatId);
-      break;
-
-    case '/whale':
-      await sendLatestWhaleTransactions(chatId);
-      break;
-
-    case '/alpha':
-      await sendLatestAlphaFeeds(chatId);
-      break;
-
-    case '/market':
-      await sendMarketOverview(chatId);
-      break;
-
-    case '/blockwars':
-      await sendBlockWarsStats(chatId, username);
-      break;
-
-    default:
-      await telegramClient.sendMessage({
-        chat_id: chatId,
-        text: `Unknown command. Use /help to see available commands.`,
-      });
-  }
-}
-
-async function sendMiniAppButton(chatId: string) {
-  const miniAppUrl = 'https://defidashtracker.com/telegram-mini';
-  
-  await telegramClient.sendMessage({
-    chat_id: chatId,
-    text: `📱 *Launch DeFiDash Mini App*\n\nAccess real-time crypto data, whale tracking, and trending tokens directly in Telegram!`,
-    parse_mode: 'Markdown',
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: '🚀 Open Mini App',
-            web_app: { url: miniAppUrl },
-          },
-        ],
-        [
-          {
-            text: '🌐 Full Website',
-            url: 'https://defidashtracker.com',
-          },
-        ],
-      ],
-    },
-  });
-}
-
-async function updateTelegramConnection(
-  chatId: string,
-  username?: string,
-  firstName?: string
-) {
   try {
-    // Check if user exists with this telegram chat ID
-    let user = await prisma.user.findFirst({
-      where: { telegramChatId: chatId },
-    });
+    // Update or create user with Telegram info
+    await updateUserTelegramInfo(userId, chatId, username);
 
-    if (!user && username) {
-      // Try to find user by username
-      user = await prisma.user.findFirst({
-        where: { username: username },
-      });
+    switch (cmd) {
+      case '/start':
+        await telegramClient.sendWelcomeMessage(String(chatId), firstName);
+        break;
 
-      if (user) {
-        // Link telegram to existing user
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            telegramChatId: chatId,
-            telegramUsername: username,
+      case '/help':
+        await telegramClient.sendHelpMessage(String(chatId));
+        break;
+
+      case '/app':
+      case '/miniapp':
+        await telegramClient.sendMessage({
+          chat_id: chatId,
+          text: '📱 *Launch DeFiDash Mini App*\n\nClick the button below to open our mobile-optimized app!',
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '🚀 Open Mini App',
+                  web_app: { url: 'https://defidashtracker.com/telegram-mini' },
+                },
+              ],
+            ],
           },
         });
-      }
-    }
+        break;
 
-    if (!user) {
-      // Create new user for this telegram account
-      user = await prisma.user.create({
-        data: {
-          telegramChatId: chatId,
-          telegramUsername: username,
-          name: firstName || 'Telegram User',
-          username: username || `tg_${chatId}`,
-        },
-      });
-    }
+      case '/settings':
+        await telegramClient.sendMessage({
+          chat_id: chatId,
+          text: '⚙️ *Notification Settings*\n\nManage your notification preferences in the Mini App.',
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '⚙️ Open Settings',
+                  web_app: { url: 'https://defidashtracker.com/telegram-mini/notifications' },
+                },
+              ],
+            ],
+          },
+        });
+        break;
 
-    return user;
+      case '/whale':
+        const whaleRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://defidashtracker.com'}/api/telegram/whale-feed`);
+        if (whaleRes.ok) {
+          const whaleData = await whaleRes.json();
+          const transactions = whaleData.transactions || [];
+          
+          if (transactions.length > 0) {
+            const tx = transactions[0];
+            await telegramClient.sendWhaleAlert(String(chatId), {
+              blockchain: tx.blockchain,
+              value: tx.value,
+              valueUsd: tx.valueUsd,
+              fromAddress: tx.fromAddress || 'Unknown',
+              toAddress: tx.toAddress || 'Unknown',
+              txHash: tx.txHash || 'Unknown',
+            });
+          } else {
+            await telegramClient.sendMessage({
+              chat_id: chatId,
+              text: '🐋 No recent whale transactions found.',
+            });
+          }
+        }
+        break;
+
+      case '/alpha':
+        await telegramClient.sendMessage({
+          chat_id: chatId,
+          text: '💎 *Latest Alpha Feeds*\n\nView the latest token calls from top KOLs in the Mini App!',
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '🚀 View Alpha Feeds',
+                  web_app: { url: 'https://defidashtracker.com/shot-callers' },
+                },
+              ],
+            ],
+          },
+        });
+        break;
+
+      case '/market':
+        const marketRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://defidashtracker.com'}/api/telegram/market-feed`);
+        if (marketRes.ok) {
+          const marketData = await marketRes.json();
+          const cryptos = marketData.data || [];
+          
+          if (cryptos.length > 0) {
+            const topCryptos = cryptos.slice(0, 5);
+            let message = '📊 *Top Market Movers*\n\n';
+            
+            topCryptos.forEach((crypto: any, idx: number) => {
+              const emoji = crypto.priceChange24h >= 0 ? '📈' : '📉';
+              message += `${idx + 1}. *${crypto.symbol}*: $${crypto.price.toFixed(2)} (${emoji} ${crypto.priceChange24h >= 0 ? '+' : ''}${crypto.priceChange24h.toFixed(2)}%)\n`;
+            });
+            
+            await telegramClient.sendMessage({
+              chat_id: chatId,
+              text: message,
+              parse_mode: 'Markdown',
+            });
+          }
+        }
+        break;
+
+      default:
+        await telegramClient.sendMessage({
+          chat_id: chatId,
+          text: '❓ Unknown command. Use /help to see available commands.',
+        });
+        break;
+    }
   } catch (error) {
-    console.error('Error updating telegram connection:', error);
-  }
-}
-
-async function sendSettingsMessage(chatId: string) {
-  const user = await prisma.user.findFirst({
-    where: { telegramChatId: chatId },
-  });
-
-  if (!user) {
+    console.error('Error handling command:', error);
     await telegramClient.sendMessage({
       chat_id: chatId,
-      text: 'Please use /connect to link your account first.',
+      text: '⚠️ An error occurred. Please try again later.',
     });
-    return;
-  }
-
-  const settings = user.telegramNotificationSettings as any || {};
-  
-  const message = `
-⚙️ *Your Notification Settings*
-
-🐋 Whale Alerts: ${settings.whaleAlerts ? '✅ Enabled' : '❌ Disabled'}
-⚔️ Block Wars: ${settings.blockWars ? '✅ Enabled' : '❌ Disabled'}
-💎 Alpha Feeds: ${settings.alphaFeeds ? '✅ Enabled' : '❌ Disabled'}
-📊 Market Alerts: ${settings.marketAlerts ? '✅ Enabled' : '❌ Disabled'}
-📈 Daily Summary: ${settings.dailySummary ? '✅ Enabled' : '❌ Disabled'}
-
-To update settings, visit:
-https://defidashtracker.com/settings
-  `.trim();
-
-  await telegramClient.sendMessage({
-    chat_id: chatId,
-    text: message,
-    parse_mode: 'Markdown',
-  });
-}
-
-async function sendConnectInstructions(chatId: string) {
-  const message = `
-🔗 *Connect Your Account*
-
-To link your DeFiDash account with Telegram:
-
-1. Visit https://defidashtracker.com/settings
-2. Go to "Telegram Notifications" section
-3. Copy your Chat ID: \`${chatId}\`
-4. Paste it in the settings and save
-
-Once connected, you'll receive personalized notifications!
-  `.trim();
-
-  await telegramClient.sendMessage({
-    chat_id: chatId,
-    text: message,
-    parse_mode: 'Markdown',
-  });
-}
-
-async function sendLatestWhaleTransactions(chatId: string) {
-  try {
-    const transactions = await prisma.whaleTransaction.findMany({
-      take: 5,
-      orderBy: { timestamp: 'desc' },
-      include: { cryptocurrency: true },
-    });
-
-    if (transactions.length === 0) {
-      await telegramClient.sendMessage({
-        chat_id: chatId,
-        text: 'No whale transactions found recently.',
-      });
-      return;
-    }
-
-    let message = '🐋 *Latest Whale Transactions*\n\n';
-
-    for (const tx of transactions) {
-      message += `💰 ${tx.cryptocurrency.symbol}: $${tx.valueUsd.toLocaleString()}\n`;
-      message += `⛓️ ${tx.blockchain}\n`;
-      message += `🕐 ${new Date(tx.timestamp).toLocaleString()}\n\n`;
-    }
-
-    await telegramClient.sendMessage({
-      chat_id: chatId,
-      text: message,
-      parse_mode: 'Markdown',
-    });
-  } catch (error) {
-    console.error('Error fetching whale transactions:', error);
   }
 }
 
-async function sendLatestAlphaFeeds(chatId: string) {
+async function updateUserTelegramInfo(
+  userId: number,
+  chatId: number,
+  username?: string
+) {
   try {
-    const tokenCalls = await prisma.tokenCall.findMany({
-      take: 5,
-      orderBy: { calledAt: 'desc' },
-      include: {
-        kol: true,
-        tweet: true,
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        telegramChatId: String(chatId),
       },
     });
 
-    if (tokenCalls.length === 0) {
-      await telegramClient.sendMessage({
-        chat_id: chatId,
-        text: 'No alpha feeds found recently.',
+    if (existingUser) {
+      await prisma.user.update({
+        where: {
+          id: existingUser.id,
+        },
+        data: {
+          telegramUsername: username,
+        },
       });
-      return;
+    } else {
+      await prisma.user.create({
+        data: {
+          telegramChatId: String(chatId),
+          telegramUsername: username,
+          telegramNotificationSettings: {
+            whaleAlerts: true,
+            shotCallersAlerts: true,
+            blockWarsAlerts: true,
+            marketAlerts: false,
+            dailySummary: true,
+            selectedShotCallers: [],
+          },
+        },
+      });
     }
-
-    let message = '💎 *Latest Alpha Feeds*\n\n';
-
-    for (const call of tokenCalls) {
-      const sentimentEmoji = call.sentiment === 'bullish' ? '🚀' : 
-                             call.sentiment === 'bearish' ? '📉' : '➡️';
-      
-      message += `${sentimentEmoji} *${call.tokenSymbol}* by @${call.kol.username}\n`;
-      message += `📊 ${call.sentiment.toUpperCase()}\n`;
-      message += `🕐 ${new Date(call.calledAt).toLocaleString()}\n\n`;
-    }
-
-    await telegramClient.sendMessage({
-      chat_id: chatId,
-      text: message,
-      parse_mode: 'Markdown',
-    });
   } catch (error) {
-    console.error('Error fetching alpha feeds:', error);
+    console.error('Error updating user Telegram info:', error);
   }
-}
-
-async function sendMarketOverview(chatId: string) {
-  try {
-    const cryptos = await prisma.cryptocurrency.findMany({
-      take: 10,
-      orderBy: { rank: 'asc' },
-    });
-
-    if (cryptos.length === 0) {
-      await telegramClient.sendMessage({
-        chat_id: chatId,
-        text: 'Market data not available.',
-      });
-      return;
-    }
-
-    let message = '📊 *Market Overview*\n\n';
-
-    for (const crypto of cryptos) {
-      const change = crypto.priceChange24h || 0;
-      const emoji = change > 0 ? '📈' : change < 0 ? '📉' : '➡️';
-      
-      message += `${emoji} *${crypto.symbol}*: $${crypto.price?.toLocaleString() || 'N/A'}\n`;
-      message += `   ${change > 0 ? '+' : ''}${change.toFixed(2)}%\n\n`;
-    }
-
-    await telegramClient.sendMessage({
-      chat_id: chatId,
-      text: message,
-      parse_mode: 'Markdown',
-    });
-  } catch (error) {
-    console.error('Error fetching market data:', error);
-  }
-}
-
-async function sendBlockWarsStats(chatId: string, username?: string) {
-  try {
-    if (!username) {
-      await telegramClient.sendMessage({
-        chat_id: chatId,
-        text: 'Please connect your account to view Block Wars stats.',
-      });
-      return;
-    }
-
-    const user = await prisma.user.findFirst({
-      where: { username: username },
-    });
-
-    if (!user) {
-      await telegramClient.sendMessage({
-        chat_id: chatId,
-        text: 'User not found. Please connect your account.',
-      });
-      return;
-    }
-
-    const message = `
-⚔️ *Your Block Wars Stats*
-
-👤 *Player:* ${user.name || username}
-⭐ *Level:* ${user.gameLevel}
-✨ *Experience:* ${user.gameExp}
-💰 *Money:* ${user.gameMoney.toLocaleString()}
-
-Keep playing to level up! 🚀
-    `.trim();
-
-    await telegramClient.sendMessage({
-      chat_id: chatId,
-      text: message,
-      parse_mode: 'Markdown',
-    });
-  } catch (error) {
-    console.error('Error fetching Block Wars stats:', error);
-  }
-}
-
-export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    status: 'Telegram webhook is active',
-    timestamp: new Date().toISOString(),
-  });
 }
