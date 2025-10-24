@@ -10,6 +10,7 @@ import { Toaster as HotToaster } from 'react-hot-toast'
 import { EnhancedDefidashAgent } from '@/components/chat/enhanced-defidash-agent'
 import { AdsBanner } from '@/components/ui/ads-banner'
 import { RollingBanner } from '@/components/ui/rolling-banner'
+import { LivePriceTicker } from '@/components/mobile/LivePriceTicker'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { WalletProvider } from '@/contexts/WalletContext'
 import { Web3Provider } from '@/lib/web3-provider'
@@ -62,6 +63,9 @@ export default function RootLayout({
             
             {/* Rolling Banner - Market Data */}
             <RollingBanner />
+            
+            {/* Live Price Ticker - Real-time crypto prices */}
+            <LivePriceTicker />
             
             {/* Main Layout - Sidebar + Content */}
             <div className="flex-1 flex lg:flex-row">
