@@ -18,6 +18,8 @@ import DetailedAlphaCard from '@/components/shot-callers/DetailedAlphaCard';
 import DetailedAlertCard from '@/components/shot-callers/DetailedAlertCard';
 import DetailedAnalysisCard from '@/components/shot-callers/DetailedAnalysisCard';
 import DetailedBullishCard from '@/components/shot-callers/DetailedBullishCard';
+import DetailedBearishCard from '@/components/shot-callers/DetailedBearishCard';
+import UnifiedTweetCard from '@/components/shot-callers/UnifiedTweetCard';
 import { useWeb3 } from '@/lib/web3-provider';
 
 // Top Crypto KOLs data
@@ -544,172 +546,109 @@ export default function ShotCallersPage() {
 
               <TabsContent value="all" className="mt-4">
                 <ScrollArea className="h-[calc(100vh-400px)]">
-                  <div className="space-y-4">
-                    {filteredTweets.map((tweet) => (
-                      <Card key={tweet.id} className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all">
-                        <CardContent className="p-4">
-                          {/* Tweet Header */}
-                          <div className="flex items-start gap-3 mb-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={tweet.avatar} alt={tweet.author} />
-                              <AvatarFallback>{tweet.author[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-white">{tweet.author}</span>
-                                <span className="text-xs text-gray-400">@{tweet.username}</span>
-                                <span className="text-xs text-gray-500">• {tweet.timestamp}</span>
-                              </div>
-                              <Badge className={`text-xs ${getCategoryColor(tweet.category)}`}>
-                                {tweet.category}
-                              </Badge>
-                            </div>
-                          </div>
-
-                          {/* Tweet Content */}
-                          <p className="text-sm text-gray-300 mb-3 whitespace-pre-wrap">{tweet.content}</p>
-
-                          {/* Coin Tags */}
-                          {tweet.coins.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {tweet.coins.map((coin) => (
-                                <Badge key={coin} variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/30">
-                                  ${coin}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Tweet Actions */}
-                          <div className="flex items-center gap-6 text-gray-400">
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="h-4 w-4 text-pink-500" />
-                              <span className="text-xs">{tweet.likes.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Repeat2 className="h-4 w-4 text-green-500" />
-                              <span className="text-xs">{tweet.retweets.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <MessageCircle className="h-4 w-4 text-blue-500" />
-                              <span className="text-xs">{tweet.replies}</span>
-                            </div>
-                            <a 
-                              href={`https://x.com/${tweet.username}/status/${tweet.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="text-xs">View on X</span>
-                            </a>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  {filteredTweets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <MessageCircle className="h-12 w-12 text-gray-600 mb-3" />
+                      <h3 className="text-lg font-semibold text-gray-400 mb-2">No tweets found</h3>
+                      <p className="text-sm text-gray-500">Check back soon for fresh alpha from top Shot Callers</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredTweets.map((tweet) => (
+                        <UnifiedTweetCard key={tweet.id} tweet={tweet} />
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </TabsContent>
 
               <TabsContent value="bullish" className="mt-4">
                 <ScrollArea className="h-[calc(100vh-400px)]">
-                  <div className="space-y-4">
-                    {filteredTweets.map((tweet) => (
-                      <DetailedBullishCard key={tweet.id} tweet={tweet} />
-                    ))}
-                  </div>
+                  {filteredTweets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <TrendingUp className="h-12 w-12 text-gray-600 mb-3" />
+                      <h3 className="text-lg font-semibold text-gray-400 mb-2">No bullish signals</h3>
+                      <p className="text-sm text-gray-500">Waiting for bullish alpha from Shot Callers</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredTweets.map((tweet) => (
+                        <DetailedBullishCard key={tweet.id} tweet={tweet} />
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </TabsContent>
 
               <TabsContent value="alpha" className="mt-4">
                 <ScrollArea className="h-[calc(100vh-400px)]">
-                  <div className="space-y-4">
-                    {filteredTweets.map((tweet) => (
-                      <DetailedAlphaCard key={tweet.id} tweet={tweet} />
-                    ))}
-                  </div>
+                  {filteredTweets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <Target className="h-12 w-12 text-gray-600 mb-3" />
+                      <h3 className="text-lg font-semibold text-gray-400 mb-2">No alpha signals</h3>
+                      <p className="text-sm text-gray-500">Stay tuned for exclusive alpha opportunities</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredTweets.map((tweet) => (
+                        <DetailedAlphaCard key={tweet.id} tweet={tweet} />
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </TabsContent>
 
               <TabsContent value="alert" className="mt-4">
                 <ScrollArea className="h-[calc(100vh-400px)]">
-                  <div className="space-y-4">
-                    {filteredTweets.map((tweet) => (
-                      <DetailedAlertCard key={tweet.id} tweet={tweet} />
-                    ))}
-                  </div>
+                  {filteredTweets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <Activity className="h-12 w-12 text-gray-600 mb-3" />
+                      <h3 className="text-lg font-semibold text-gray-400 mb-2">No active alerts</h3>
+                      <p className="text-sm text-gray-500">All quiet on the crypto front</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredTweets.map((tweet) => (
+                        <DetailedAlertCard key={tweet.id} tweet={tweet} />
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </TabsContent>
 
               <TabsContent value="analysis" className="mt-4">
                 <ScrollArea className="h-[calc(100vh-400px)]">
-                  <div className="space-y-4">
-                    {filteredTweets.map((tweet) => (
-                      <DetailedAnalysisCard key={tweet.id} tweet={tweet} />
-                    ))}
-                  </div>
+                  {filteredTweets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <Activity className="h-12 w-12 text-gray-600 mb-3" />
+                      <h3 className="text-lg font-semibold text-gray-400 mb-2">No analysis available</h3>
+                      <p className="text-sm text-gray-500">Waiting for technical analysis from experts</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredTweets.map((tweet) => (
+                        <DetailedAnalysisCard key={tweet.id} tweet={tweet} />
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </TabsContent>
 
               <TabsContent value="bearish" className="mt-4">
                 <ScrollArea className="h-[calc(100vh-400px)]">
-                  <div className="space-y-4">
-                    {filteredTweets.map((tweet) => (
-                      <Card key={tweet.id} className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3 mb-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={tweet.avatar} alt={tweet.author} />
-                              <AvatarFallback>{tweet.author[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-white">{tweet.author}</span>
-                                <span className="text-xs text-gray-400">@{tweet.username}</span>
-                                <span className="text-xs text-gray-500">• {tweet.timestamp}</span>
-                              </div>
-                              <Badge className={`text-xs ${getCategoryColor(tweet.category)}`}>
-                                {tweet.category}
-                              </Badge>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-300 mb-3 whitespace-pre-wrap">{tweet.content}</p>
-                          {tweet.coins.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {tweet.coins.map((coin) => (
-                                <Badge key={coin} variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/30">
-                                  ${coin}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-6 text-gray-400">
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="h-4 w-4 text-pink-500" />
-                              <span className="text-xs">{tweet.likes.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Repeat2 className="h-4 w-4 text-green-500" />
-                              <span className="text-xs">{tweet.retweets.toLocaleString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <MessageCircle className="h-4 w-4 text-blue-500" />
-                              <span className="text-xs">{tweet.replies}</span>
-                            </div>
-                            <a 
-                              href={`https://x.com/${tweet.username}/status/${tweet.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-auto flex items-center gap-1.5 hover:text-purple-500 transition-colors"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="text-xs">View on X</span>
-                            </a>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  {filteredTweets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <TrendingUp className="h-12 w-12 text-gray-600 mb-3" />
+                      <h3 className="text-lg font-semibold text-gray-400 mb-2">No bearish signals</h3>
+                      <p className="text-sm text-gray-500">All systems are go! 🚀</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredTweets.map((tweet) => (
+                        <DetailedBearishCard key={tweet.id} tweet={tweet} />
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </TabsContent>
             </Tabs>
