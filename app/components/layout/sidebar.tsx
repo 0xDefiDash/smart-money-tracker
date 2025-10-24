@@ -18,7 +18,8 @@ import {
   Radio,
   Video,
   Globe,
-  Shield
+  Shield,
+  Settings
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -81,6 +82,11 @@ const sidebarItems = [
     title: 'CA Detector',
     href: '/ca-detector',
     icon: Shield,
+  },
+  {
+    title: 'Settings',
+    href: '/settings',
+    icon: Settings,
   },
 ]
 

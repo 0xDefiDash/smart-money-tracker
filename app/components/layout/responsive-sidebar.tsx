@@ -20,7 +20,8 @@ import {
   Radio,
   Video,
   Globe,
-  Shield
+  Shield,
+  Settings
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 
@@ -84,6 +85,11 @@ const sidebarItems = [
     title: 'CA Detector',
     href: '/ca-detector',
     icon: Shield,
+  },
+  {
+    title: 'Settings',
+    href: '/settings',
+    icon: Settings,
   },
 ]
 

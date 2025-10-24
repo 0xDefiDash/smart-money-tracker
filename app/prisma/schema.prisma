@@ -10,19 +10,22 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String?   @unique
-  name         String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  gameExp      Int       @default(0)
-  gameLevel    Int       @default(1)
-  isAdmin      Boolean   @default(false)
-  password     String?
-  profileImage String?
-  username     String?   @unique
-  gameMoney    Int       @default(0)
-  xHandle      String?
+  id                              String    @id @default(cuid())
+  email                           String?   @unique
+  name                            String?
+  createdAt                       DateTime  @default(now())
+  updatedAt                       DateTime  @updatedAt
+  gameExp                         Int       @default(0)
+  gameLevel                       Int       @default(1)
+  isAdmin                         Boolean   @default(false)
+  password                        String?
+  profileImage                    String?
+  username                        String?   @unique
+  gameMoney                       Int       @default(0)
+  xHandle                         String?
+  telegramChatId                  String?   @unique
+  telegramUsername                String?
+  telegramNotificationSettings    Json?
   accounts     Account[]
   sessions     Session[]
 
