@@ -345,7 +345,7 @@ export default function ShotCallersPage() {
               <p className="text-gray-400 text-xs sm:text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs whitespace-nowrap">
                 <Activity className="h-2 w-2 mr-1 animate-pulse" />
-                Tracking 7 KOLs
+                Tracking 9 KOLs
               </Badge>
             </div>
           </div>

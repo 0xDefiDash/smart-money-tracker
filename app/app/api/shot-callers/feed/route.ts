@@ -7,6 +7,10 @@ import { prisma } from '@/lib/db';
 const TRACKED_ACCOUNTS = [
   'JamesWynnReal',
   '100xDarren',
+  'CryptoExpert101',
+  'Bullrun_Gravano',
+  'CryptoWendyO',
+  'poe_real69',
   'elonmusk',
   'cz_binance',
   'four_meme_'
@@ -223,6 +227,9 @@ function getDefaultAvatar(username: string): string {
     'JamesWynnReal': '/Uploads/James wynn.jpg',
     '100xDarren': '/Uploads/100xdarren.jpg',
     'BullRunGravano': '/Uploads/bullrun Gravano.jpg',
+    'Bullrun_Gravano': '/Uploads/bullrun Gravano.jpg',
+    'CryptoWendyO': '/Uploads/wendy.jpg',
+    'poe_real69': '/public/images/poe-real69.jpg',
     'elonmusk': '/Uploads/Trump.jpg',
     'cz_binance': '/Uploads/QngrqCSC_400x400.jpg',
     'four_meme_': '/Uploads/UPaVddbm_400x400.jpg',
