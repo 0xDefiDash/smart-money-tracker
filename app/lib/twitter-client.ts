@@ -50,10 +50,11 @@ interface TwitterApiResponse {
 
 class TwitterClient {
   private baseUrl = 'https://api.twitter.com/2';
+  private bearerToken: string | null = null;
+  private tokenExpiry: number = 0;
   
   private generateBearerToken(): string {
     // For OAuth 1.0a (App-only auth), we need to get a bearer token
-    // This is a simplified version - in production, you'd handle this more robustly
     const credentials = Buffer.from(
       `${encodeURIComponent(TWITTER_API_KEY)}:${encodeURIComponent(TWITTER_API_SECRET)}`
     ).toString('base64');
@@ -62,7 +63,16 @@ class TwitterClient {
   }
 
   private async getBearerToken(): Promise<string> {
+    // Return cached token if still valid
+    if (this.bearerToken && Date.now() < this.tokenExpiry) {
+      return this.bearerToken;
+    }
+
     try {
+      if (!TWITTER_API_KEY || !TWITTER_API_SECRET) {
+        throw new Error('Twitter API credentials not configured');
+      }
+
       const response = await fetch('https://api.twitter.com/oauth2/token', {
         method: 'POST',
         headers: {
@@ -73,13 +83,18 @@ class TwitterClient {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to get bearer token: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('Twitter API auth error:', response.status, errorText);
+        throw new Error(`Failed to get bearer token: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      return data.access_token;
-    } catch (error) {
-      console.error('Error getting bearer token:', error);
+      this.bearerToken = data.access_token;
+      // Tokens typically last 2 hours, cache for 1.5 hours to be safe
+      this.tokenExpiry = Date.now() + (90 * 60 * 1000);
+      return this.bearerToken || '';
+    } catch (error: any) {
+      console.error('Error getting bearer token:', error.message);
       throw error;
     }
   }
