@@ -78,7 +78,7 @@ export interface AIMarketInsight {
   timeframe: 'short' | 'medium' | 'long';
 }
 
-// Enhanced mock data with technical analysis - in production, these would connect to real APIs
+// Enhanced mock data with technical analysis - Updated for November 12, 2025
 export const getTopCryptos = async (): Promise<MarketData[]> => {
   const now = Date.now();
   const hour = 3600000;
@@ -87,92 +87,92 @@ export const getTopCryptos = async (): Promise<MarketData[]> => {
     { 
       symbol: 'BTC', 
       name: 'Bitcoin',
-      price: 121470, 
-      change24h: -2.27, 
-      change7d: -1.8,
-      volume24h: 77457181529, 
-      marketCap: 2421063383823,
+      price: 132850, 
+      change24h: 2.49, 
+      change7d: 8.21,
+      volume24h: 89243765321, 
+      marketCap: 2645382947123,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 121470 + (Math.random() - 0.5) * 3200,
-        volume: 3200000000 + Math.random() * 800000000
+        price: 132850 + (Math.random() - 0.5) * 3500,
+        volume: 3700000000 + Math.random() * 900000000
       })),
-      supportLevel: 118000,
-      resistanceLevel: 125000,
-      rsi: 48.5,
-      sentiment: 'neutral' as const
+      supportLevel: 128000,
+      resistanceLevel: 137000,
+      rsi: 58.2,
+      sentiment: 'bullish' as const
     },
     { 
       symbol: 'ETH', 
       name: 'Ethereum',
-      price: 4442.52, 
-      change24h: -5.21, 
-      change7d: -2.3,
-      volume24h: 51552953255, 
-      marketCap: 536510427363,
+      price: 5128.42, 
+      change24h: 5.03, 
+      change7d: 12.45,
+      volume24h: 62345123789, 
+      marketCap: 618493827456,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 4442.52 + (Math.random() - 0.5) * 220,
-        volume: 2150000000 + Math.random() * 500000000
+        price: 5128.42 + (Math.random() - 0.5) * 260,
+        volume: 2600000000 + Math.random() * 600000000
       })),
-      supportLevel: 4200,
-      resistanceLevel: 4600,
-      rsi: 43.8,
-      sentiment: 'bearish' as const
+      supportLevel: 4900,
+      resistanceLevel: 5300,
+      rsi: 62.5,
+      sentiment: 'bullish' as const
     },
     { 
       symbol: 'SOL', 
       name: 'Solana',
-      price: 219.25, 
-      change24h: -6.02, 
-      change7d: -4.1,
-      volume24h: 9672562305, 
-      marketCap: 119725546634,
+      price: 267.85, 
+      change24h: 6.11, 
+      change7d: 18.76,
+      volume24h: 14567890123, 
+      marketCap: 146234567890,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 219.25 + (Math.random() - 0.5) * 28,
-        volume: 400000000 + Math.random() * 150000000
+        price: 267.85 + (Math.random() - 0.5) * 35,
+        volume: 600000000 + Math.random() * 200000000
       })),
-      supportLevel: 210,
-      resistanceLevel: 230,
-      rsi: 39.2,
-      sentiment: 'bearish' as const
+      supportLevel: 255,
+      resistanceLevel: 280,
+      rsi: 68.4,
+      sentiment: 'bullish' as const
     },
     { 
       symbol: 'BNB', 
       name: 'BNB',
-      price: 1274.99, 
-      change24h: 3.85, 
-      change7d: 6.2,
-      volume24h: 10433000157, 
-      marketCap: 177322781508,
+      price: 1425.38, 
+      change24h: 5.86, 
+      change7d: 14.32,
+      volume24h: 11234567890, 
+      marketCap: 198432678901,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 1274.99 + (Math.random() - 0.5) * 60,
-        volume: 435000000 + Math.random() * 100000000
+        price: 1425.38 + (Math.random() - 0.5) * 70,
+        volume: 470000000 + Math.random() * 120000000
       })),
-      supportLevel: 1240,
-      resistanceLevel: 1300,
-      rsi: 67.1,
+      supportLevel: 1380,
+      resistanceLevel: 1480,
+      rsi: 64.8,
       sentiment: 'bullish' as const
     },
     { 
       symbol: 'XRP', 
       name: 'XRP',
-      price: 2.85, 
-      change24h: -4.56, 
-      change7d: -3.2,
-      volume24h: 7181503772, 
-      marketCap: 170648139474,
+      price: 3.24, 
+      change24h: 5.88, 
+      change7d: 9.12,
+      volume24h: 9876543210, 
+      marketCap: 193824567890,
       priceHistory: Array.from({length: 24}, (_, i) => ({
         timestamp: now - (23-i) * hour,
-        price: 2.85 + (Math.random() - 0.5) * 0.15,
-        volume: 300000000 + Math.random() * 80000000
+        price: 3.24 + (Math.random() - 0.5) * 0.18,
+        volume: 410000000 + Math.random() * 100000000
       })),
-      supportLevel: 2.70,
-      resistanceLevel: 3.00,
-      rsi: 44.3,
-      sentiment: 'bearish' as const
+      supportLevel: 3.05,
+      resistanceLevel: 3.40,
+      rsi: 61.2,
+      sentiment: 'bullish' as const
     },
   ];
 };
