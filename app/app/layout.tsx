@@ -1,6 +1,5 @@
 
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { ResponsiveSidebar } from '@/components/layout/responsive-sidebar'
 import { MobileHeader } from '@/components/layout/mobile-header'
@@ -15,8 +14,6 @@ import { AuthProvider } from '@/components/auth/auth-provider'
 import { WalletProvider } from '@/contexts/WalletContext'
 import { Web3Provider } from '@/lib/web3-provider'
 
-const inter = Inter({ subsets: ['latin'] })
-
 export const metadata: Metadata = {
   title: 'Smart Money Tracker',
   description: 'Track cryptocurrency whale transactions and institutional flows in real-time',
@@ -29,8 +26,8 @@ export const viewport: Viewport = {
   userScalable: true,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#0a0a0a' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' }
+    { media: '(prefers-color-scheme: light)', color: '#000000' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' }
   ]
 }
 
@@ -44,7 +41,7 @@ export default function RootLayout({
       <head>
         {/* Removed legacy Loomlay scripts as we now use the new AI-powered chat widget */}
       </head>
-      <body className={inter.className}>
+      <body className="font-mono scanlines">
         <AuthProvider>
           <WalletProvider>
             <Web3Provider>

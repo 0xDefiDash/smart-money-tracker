@@ -105,20 +105,20 @@ export function ResponsiveSidebar() {
   }, [])
 
   return (
-    <div className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-card lg:border-r lg:border-border">
-      <div className="p-6">
+    <div className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-black lg:border-r-2 lg:border-white">
+      <div className="p-6 border-b-2 border-white">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <Activity className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-black border-2 border-terminal-green flex items-center justify-center">
+            <Activity className="w-4 h-4 text-terminal-green" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-foreground">Defidash</h1>
-            <p className="text-xs text-muted-foreground">Smart Money Tracker</p>
+            <h1 className="text-sm font-bold text-terminal-green uppercase tracking-wider">Defidash</h1>
+            <p className="text-xs text-white">Smart Money Tracker</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 px-4 pb-4">
+      <nav className="flex-1 px-4 pb-4 pt-4">
         <ul className="space-y-1">
           {sidebarItems.map((item) => {
             const Icon = item.icon
@@ -129,17 +129,17 @@ export function ResponsiveSidebar() {
                 <Link
                   href={item.href}
                   className={cn(
-                    'flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group',
+                    'flex items-center space-x-3 px-3 py-2.5 transition-all duration-200 group border-2',
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      ? 'bg-terminal-green text-black border-terminal-green'
+                      : 'text-white border-transparent hover:text-terminal-green hover:border-terminal-green'
                   )}
                 >
                   <Icon className={cn(
                     'w-4 h-4 transition-colors',
-                    isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
+                    isActive ? 'text-black' : 'text-white group-hover:text-terminal-green'
                   )} />
-                  <span className="font-medium text-sm">{item.title}</span>
+                  <span className="font-medium text-sm uppercase tracking-wider">{item.title}</span>
                 </Link>
               </li>
             )
@@ -147,19 +147,19 @@ export function ResponsiveSidebar() {
         </ul>
       </nav>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 border-t-2 border-white">
         {/* Wallet Connection */}
         <div className="flex justify-center">
           <WalletButton />
         </div>
         
-        <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 rounded-lg p-3">
+        <div className="bg-black border-2 border-terminal-green p-3">
           <div className="flex items-center space-x-2 mb-2">
-            <Zap className="w-4 h-4 text-blue-500" />
-            <span className="text-xs font-medium text-foreground">Real-time Updates</span>
+            <Zap className="w-4 h-4 text-terminal-green" />
+            <span className="text-xs font-medium text-terminal-green uppercase tracking-wider">Real-time Updates</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Monitoring {whaleCount} whale addresses
+          <p className="text-xs text-white">
+            &gt; Monitoring {whaleCount} whale addresses
           </p>
         </div>
       </div>

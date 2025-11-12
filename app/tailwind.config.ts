@@ -9,6 +9,18 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        mono: [
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'Liberation Mono',
+          'Courier New',
+          'monospace',
+        ],
+      },
       screens: {
         'xs': '375px',
         '3xl': '1600px',
@@ -17,10 +29,7 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'tech-gradient': 'linear-gradient(135deg, hsl(var(--dark-bg)) 0%, hsl(var(--dark-bg-secondary)) 25%, hsl(var(--dark-bg-tertiary)) 50%, hsl(var(--dark-bg-secondary)) 75%, hsl(var(--dark-bg)) 100%)',
-        'neon-gradient': 'linear-gradient(135deg, hsl(var(--neon-green)) 0%, hsl(var(--neon-blue)) 100%)',
-        'neon-gradient-vertical': 'linear-gradient(to bottom, hsl(var(--neon-green)) 0%, hsl(var(--neon-blue)) 100%)',
-        'dark-gradient': 'linear-gradient(135deg, hsl(var(--dark-bg)) 0%, hsl(var(--dark-bg-tertiary)) 100%)',
+        'terminal-gradient': 'linear-gradient(180deg, #000000 0%, #0a0a0a 100%)',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -68,16 +77,12 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        'neon': {
-          green: 'hsl(var(--neon-green))',
-          'green-bright': 'hsl(var(--neon-green-bright))',
-          blue: 'hsl(var(--neon-blue))',
-          'blue-bright': 'hsl(var(--neon-blue-bright))',
-        },
-        'dark-bg': {
-          DEFAULT: 'hsl(var(--dark-bg))',
-          secondary: 'hsl(var(--dark-bg-secondary))',
-          tertiary: 'hsl(var(--dark-bg-tertiary))',
+        'terminal': {
+          green: 'hsl(var(--terminal-green))',
+          'green-dim': 'hsl(var(--terminal-green-dim))',
+          white: 'hsl(var(--terminal-white))',
+          black: 'hsl(var(--terminal-black))',
+          gray: 'hsl(var(--terminal-gray))',
         },
       },
       keyframes: {

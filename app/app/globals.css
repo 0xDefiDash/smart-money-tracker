@@ -133,74 +133,73 @@
  
 @layer base {
   :root {
-    /* Light theme (fallback - most users will see dark theme) */
-    --background: 0 0% 5%;
-    --foreground: 210 40% 98%;
+    /* Terminal theme - Pure black and white with green accents */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
  
-    --popover: 0 0% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
  
-    --primary: 142 76% 36%;
+    --primary: 120 100% 50%;
     --primary-foreground: 0 0% 0%;
  
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
  
-    --muted: 0 0% 12%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
  
-    --accent: 0 0% 15%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 120 100% 50%;
+    --accent-foreground: 0 0% 0%;
  
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 0% 100%;
+    --destructive-foreground: 0 0% 0%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 142 76% 36%;
+    --border: 0 0% 100%;
+    --input: 0 0% 0%;
+    --ring: 120 100% 50%;
  
-    --radius: 0.5rem;
+    --radius: 0rem;
 
-    /* Tech theme colors */
-    --neon-green: 142 76% 36%;
-    --neon-green-bright: 142 76% 46%;
-    --neon-blue: 200 98% 39%;
-    --neon-purple: 271 91% 65%;
-    --dark-bg: 0 0% 5%;
-    --darker-bg: 0 0% 3%;
+    /* Terminal colors */
+    --terminal-green: 120 100% 50%;
+    --terminal-green-dim: 120 100% 35%;
+    --terminal-white: 0 0% 100%;
+    --terminal-black: 0 0% 0%;
+    --terminal-gray: 0 0% 60%;
   }
  
   .dark {
-    --background: 0 0% 5%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
  
-    --card: 0 0% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
  
-    --popover: 0 0% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
  
-    --primary: 142 76% 36%;
+    --primary: 120 100% 50%;
     --primary-foreground: 0 0% 0%;
  
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
  
-    --muted: 0 0% 12%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
  
-    --accent: 0 0% 15%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 120 100% 50%;
+    --accent-foreground: 0 0% 0%;
  
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 0% 100%;
+    --destructive-foreground: 0 0% 0%;
  
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 142 76% 36%;
+    --border: 0 0% 100%;
+    --input: 0 0% 0%;
+    --ring: 120 100% 50%;
   }
 }
  
@@ -231,52 +230,119 @@
   }
 }
 
-/* Custom tech/gaming gradient backgrounds */
-.bg-tech-gradient {
-  background: linear-gradient(135deg, 
-    hsl(var(--dark-bg)) 0%, 
-    hsl(0 0% 7%) 50%, 
-    hsl(var(--darker-bg)) 100%);
+/* Terminal theme backgrounds */
+.bg-terminal {
+  background: #000000;
+  border: 2px solid #00ff00;
 }
 
-.bg-game-gradient {
-  background: linear-gradient(135deg,
-    hsl(var(--dark-bg)) 0%,
-    hsl(271 91% 15%) 50%,
-    hsl(var(--dark-bg)) 100%);
+.bg-terminal-card {
+  background: #000000;
+  border: 1px solid #ffffff;
 }
 
-/* Glow effects for tech theme */
-.glow-green {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+/* Terminal glow effects */
+.glow-terminal {
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5),
+              inset 0 0 10px rgba(0, 255, 0, 0.1);
 }
 
-.glow-blue {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+.glow-terminal-white {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+              inset 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
-.glow-purple {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+/* Terminal text effects */
+.terminal-text {
+  color: #00ff00;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
 }
 
-.glow-red {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+.terminal-text-white {
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-.glow-hover:hover {
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
-  transition: box-shadow 0.3s ease;
+.terminal-text-dim {
+  color: #999999;
 }
 
-/* Animated gradient text */
-.gradient-text {
-  background: linear-gradient(90deg, 
-    hsl(var(--neon-green)) 0%,
-    hsl(var(--neon-blue)) 50%,
-    hsl(var(--neon-purple)) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* CRT scanline effect */
+.scanlines {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanlines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* CRT flicker effect */
+@keyframes flicker {
+  0% { opacity: 0.97; }
+  5% { opacity: 0.98; }
+  10% { opacity: 0.97; }
+  15% { opacity: 0.99; }
+  20% { opacity: 0.98; }
+  25% { opacity: 0.97; }
+  30% { opacity: 0.98; }
+  35% { opacity: 0.97; }
+  40% { opacity: 0.99; }
+  45% { opacity: 0.98; }
+  50% { opacity: 0.97; }
+  55% { opacity: 0.98; }
+  60% { opacity: 0.99; }
+  65% { opacity: 0.98; }
+  70% { opacity: 0.97; }
+  75% { opacity: 0.98; }
+  80% { opacity: 0.97; }
+  85% { opacity: 0.99; }
+  90% { opacity: 0.98; }
+  95% { opacity: 0.97; }
+  100% { opacity: 0.98; }
+}
+
+.crt-flicker {
+  animation: flicker 0.15s infinite;
+}
+
+/* Terminal cursor blink */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1em;
+  background: #00ff00;
+  animation: blink 1s step-end infinite;
+}
+
+/* Terminal border styles */
+.terminal-border {
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.terminal-border-green {
+  border: 2px solid #00ff00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
 }
 
 /* Animated background for cards */
