@@ -20,7 +20,8 @@ export default function DashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [pullDistance, setPullDistance] = useState(0)
   const [startY, setStartY] = useState(0)
-  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
 
   // Pull-to-refresh functionality
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -63,6 +64,12 @@ export default function DashboardPage() {
       setStartY(0)
     }
   }, [pullDistance])
+
+  // Initialize time only on client side to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+    setLastUpdate(new Date())
+  }, [])
 
   useEffect(() => {
     document.addEventListener('touchstart', handleTouchStart)
@@ -120,16 +127,18 @@ export default function DashboardPage() {
             </div>
           </div>
           
-          {/* Last update time */}
-          <div className="text-xs text-muted-foreground">
-            Updated {lastUpdate.toLocaleTimeString()}
-          </div>
+          {/* Last update time - Only shown after client-side hydration */}
+          {isMounted && lastUpdate && (
+            <div className="text-xs text-muted-foreground">
+              Updated {lastUpdate.toLocaleTimeString()}
+            </div>
+          )}
         </div>
 
         {/* Mobile Quick Stats - Shows first on mobile */}
         <div className="lg:hidden">
           <Suspense fallback={<LoadingCard />}>
-            <MobileQuickStats key={lastUpdate.getTime()} />
+            <MobileQuickStats key={lastUpdate?.getTime() || 0} />
           </Suspense>
         </div>
 
@@ -148,7 +157,7 @@ export default function DashboardPage() {
         {/* Trending Tokens - Mobile optimized */}
         <div className="lg:hidden">
           <Suspense fallback={<LoadingCard />}>
-            <MobileTrendingTokens key={lastUpdate.getTime()} />
+            <MobileTrendingTokens key={lastUpdate?.getTime() || 0} />
           </Suspense>
         </div>
 
