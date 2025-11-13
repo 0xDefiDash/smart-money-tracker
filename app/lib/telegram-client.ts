@@ -242,6 +242,60 @@ ${summary.topMovers.map(m => `• ${m.symbol}: ${m.change > 0 ? '+' : ''}${m.cha
     });
   }
 
+  async sendWalletTransactionAlert(chatId: string, transaction: {
+    walletAddress: string;
+    chain: string;
+    transactionHash: string;
+    type: 'sent' | 'received' | 'swap' | 'contract';
+    value?: string;
+    tokenSymbol?: string;
+    tokenAmount?: string;
+  }): Promise<void> {
+    const typeEmojis = {
+      sent: '📤',
+      received: '📥',
+      swap: '🔄',
+      contract: '📝'
+    };
+
+    const emoji = typeEmojis[transaction.type];
+    const chainDisplay = transaction.chain.toUpperCase();
+    const explorerUrl = this.getExplorerUrl(transaction.chain, transaction.transactionHash);
+
+    let message = `${emoji} *${transaction.type.toUpperCase()} Transaction*\n\n`;
+    message += `🔗 *Chain:* ${chainDisplay}\n`;
+    message += `💼 *Wallet:* \`${transaction.walletAddress.slice(0, 8)}...${transaction.walletAddress.slice(-6)}\`\n`;
+
+    if (transaction.tokenSymbol && transaction.tokenAmount) {
+      message += `💰 *Amount:* ${transaction.tokenAmount} ${transaction.tokenSymbol}\n`;
+    } else if (transaction.value) {
+      message += `💰 *Value:* ${transaction.value}\n`;
+    }
+
+    message += `\n🔍 [View on Explorer](${explorerUrl})`;
+
+    await this.sendMessage({
+      chat_id: chatId,
+      text: message,
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true,
+    });
+  }
+
+  private getExplorerUrl(chain: string, txHash: string): string {
+    const explorers: Record<string, string> = {
+      ethereum: 'https://etherscan.io',
+      bnb: 'https://bscscan.com',
+      polygon: 'https://polygonscan.com',
+      base: 'https://basescan.org',
+      optimism: 'https://optimistic.etherscan.io',
+      arbitrum: 'https://arbiscan.io',
+      solana: 'https://solscan.io'
+    };
+    const baseUrl = explorers[chain] || explorers.ethereum;
+    return `${baseUrl}/tx/${txHash}`;
+  }
+
   async sendWelcomeMessage(chatId: string, firstName: string): Promise<void> {
     const message = `
 👋 Welcome ${firstName}!
@@ -389,3 +443,49 @@ Let's track the smart money together! 🚀
 
 export const telegramClient = new TelegramClient();
 export default telegramClient;
+
+// Helper function to notify wallet transactions
+export async function notifyWalletTransaction(notification: {
+  username: string;
+  walletAddress: string;
+  chain: string;
+  transactionHash: string;
+  type: 'sent' | 'received' | 'swap' | 'contract';
+  value?: string;
+  tokenSymbol?: string;
+  tokenAmount?: string;
+}): Promise<boolean> {
+  try {
+    // Import prisma here to avoid circular dependencies
+    const { prisma } = await import('@/lib/db');
+    
+    // Get chat ID from database
+    const user = await prisma.user.findFirst({
+      where: { 
+        telegramUsername: notification.username 
+      },
+      select: { telegramChatId: true }
+    });
+
+    if (!user?.telegramChatId) {
+      console.log(`No chat ID found for ${notification.username}`);
+      return false;
+    }
+
+    // Send notification
+    await telegramClient.sendWalletTransactionAlert(user.telegramChatId, {
+      walletAddress: notification.walletAddress,
+      chain: notification.chain,
+      transactionHash: notification.transactionHash,
+      type: notification.type,
+      value: notification.value,
+      tokenSymbol: notification.tokenSymbol,
+      tokenAmount: notification.tokenAmount
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error sending wallet transaction notification:', error);
+    return false;
+  }
+}

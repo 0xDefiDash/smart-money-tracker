@@ -26,8 +26,18 @@ model User {
   telegramChatId                  String?   @unique
   telegramUsername                String?
   telegramNotificationSettings    Json?
-  accounts     Account[]
-  sessions     Session[]
+  
+  // Premium Subscription Fields
+  isPremium                       Boolean   @default(false)
+  trialEndsAt                     DateTime?
+  premiumExpiresAt                DateTime?
+  pendingPaymentHash              String?
+  paymentSubmittedAt              DateTime?
+  
+  accounts                Account[]
+  sessions                Session[]
+  watchlistItems          WatchlistItem[]
+  transactionAlerts       TransactionAlert[]
 
   @@map("users")
 }
@@ -623,4 +633,51 @@ model TweetTip {
   @@index([fromUserAddress])
   @@index([status])
   @@index([createdAt])
+}
+
+// ============ Wallet Tracker Models ============
+
+model WatchlistItem {
+  id                      String   @id @default(cuid())
+  userId                  String
+  address                 String
+  chain                   String
+  label                   String?
+  tokenAddress            String?
+  tokenSymbol             String?
+  lastChecked             DateTime @default(now())
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, address, chain, tokenAddress])
+  @@map("watchlist_items")
+  @@index([userId])
+  @@index([address, chain])
+}
+
+model TransactionAlert {
+  id                      String   @id @default(cuid())
+  userId                  String
+  walletAddress           String
+  chain                   String
+  transactionHash         String
+  fromAddress             String
+  toAddress               String
+  value                   String?
+  tokenAddress            String?
+  tokenSymbol             String?
+  tokenAmount             String?
+  type                    String
+  isRead                  Boolean  @default(false)
+  notifiedAt              DateTime @default(now())
+  createdAt               DateTime @default(now())
+  
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, transactionHash])
+  @@map("transaction_alerts")
+  @@index([userId, isRead])
+  @@index([walletAddress, chain])
 }

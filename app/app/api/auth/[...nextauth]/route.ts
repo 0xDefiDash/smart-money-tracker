@@ -5,7 +5,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
-const authOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   trustHost: true,
   providers: [

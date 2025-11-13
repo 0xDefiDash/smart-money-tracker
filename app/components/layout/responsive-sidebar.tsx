@@ -32,29 +32,9 @@ const sidebarItems = [
     icon: Home,
   },
   {
-    title: 'Dash Wars',
-    href: '/block-wars',
-    icon: Gamepad2,
-  },
-  {
-    title: 'Dash TV',
-    href: '/block-wars/live',
-    icon: Radio,
-  },
-  {
-    title: 'Go Live',
-    href: '/block-wars/go-live',
-    icon: Video,
-  },
-  {
-    title: 'Dash TV',
-    href: '/dash-tv',
-    icon: Video,
-  },
-  {
-    title: 'Dash Wars Players Guide',
-    href: '/block-wars-guide',
-    icon: Target,
+    title: 'Wallet Tracker',
+    href: '/wallet-tracker',
+    icon: Wallet,
   },
   {
     title: 'Shot Callers',
