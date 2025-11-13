@@ -34,7 +34,7 @@ export function LoginForm() {
       if (result?.error) {
         setError('Invalid username or password')
       } else {
-        router.push('/block-wars')
+        router.push('/')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')

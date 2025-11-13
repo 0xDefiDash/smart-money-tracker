@@ -181,8 +181,8 @@ export async function getWalletTransactions(
     // Combine and sort by timestamp
     const allTransfers = [...transfers.transfers, ...receivedTransfers.transfers]
       .sort((a, b) => {
-        const timeA = new Date(a.metadata.blockTimestamp).getTime();
-        const timeB = new Date(b.metadata.blockTimestamp).getTime();
+        const timeA = new Date((a as any).metadata?.blockTimestamp || 0).getTime();
+        const timeB = new Date((b as any).metadata?.blockTimestamp || 0).getTime();
         return timeB - timeA;
       })
       .slice(0, limit);
@@ -192,9 +192,9 @@ export async function getWalletTransactions(
       from: tx.from,
       to: tx.to,
       value: tx.value?.toString() || '0',
-      timestamp: tx.metadata.blockTimestamp,
+      timestamp: (tx as any).metadata?.blockTimestamp || new Date().toISOString(),
       blockNumber: tx.blockNum,
-      blockTimestamp: tx.metadata.blockTimestamp,
+      blockTimestamp: (tx as any).metadata?.blockTimestamp || new Date().toISOString(),
       tokenTransfers: tx.asset ? [{
         asset: tx.asset,
         value: tx.value,

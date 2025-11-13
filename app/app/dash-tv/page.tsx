@@ -143,7 +143,7 @@ export default function DashTVPage() {
               </div>
 
               <Button
-                onClick={() => router.push('/block-wars/go-live')}
+                onClick={() => router.push('/dash-tv')}
                 className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
               >
                 <Radio className="w-4 h-4 mr-2" />

@@ -190,7 +190,7 @@ export default function ProfileDemoPage() {
                 <p className="text-sm text-slate-400 mb-3">
                   Profile images in user boards and game interfaces
                 </p>
-                <Button size="sm" onClick={() => window.open('/block-wars', '_blank')}>
+                <Button size="sm" onClick={() => window.open('/wallet-tracker', '_blank')}>
                   View in Game
                 </Button>
               </div>

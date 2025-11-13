@@ -44,7 +44,7 @@ export default function AuthTestPage() {
         setError('Invalid username or password')
       } else if (result?.ok) {
         setError('')
-        router.push('/block-wars')
+        router.push('/')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
@@ -122,10 +122,10 @@ export default function AuthTestPage() {
 
               <div className="space-y-2">
                 <Button 
-                  onClick={() => router.push('/block-wars')}
+                  onClick={() => router.push('/')}
                   className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold py-2"
                 >
-                  Enter Dash Wars
+                  Go to Dashboard
                 </Button>
                 
                 <Button 

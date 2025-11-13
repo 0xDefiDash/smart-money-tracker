@@ -248,27 +248,6 @@ export default function NotificationsPage() {
 
             <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                  <Gamepad2 className="w-4 h-4 text-green-600" />
-                </div>
-                <div>
-                  <Label htmlFor="block-wars" className="text-xs font-semibold">
-                    Block Wars
-                  </Label>
-                  <p className="text-[10px] text-muted-foreground">
-                    Game updates
-                  </p>
-                </div>
-              </div>
-              <Switch
-                id="block-wars"
-                checked={settings.blockWarsAlerts}
-                onCheckedChange={() => handleToggleNotification('blockWarsAlerts')}
-              />
-            </div>
-
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-              <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0">
                   <TrendingUp className="w-4 h-4 text-orange-600" />
                 </div>

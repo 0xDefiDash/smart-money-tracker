@@ -32,10 +32,10 @@ const quickActions = [
     iconColor: 'text-purple-500'
   },
   {
-    id: 'block-wars',
-    label: 'Block Wars',
-    icon: Gamepad2,
-    href: '/block-wars',
+    id: 'wallet-tracker',
+    label: 'Wallet Tracker',
+    icon: Target,
+    href: '/wallet-tracker',
     gradient: 'from-orange-500/20 to-red-500/20',
     iconColor: 'text-orange-500'
   },

@@ -24,7 +24,7 @@ export async function getSolanaBalance(address: string) {
     let priceUSD = 0;
     try {
       const priceData = await getCryptoPrice('SOL');
-      priceUSD = typeof priceData === 'object' && priceData?.price ? priceData.price : 0;
+      priceUSD = typeof priceData === 'object' && priceData && 'price' in priceData ? (priceData as any).price : 0;
     } catch {
       priceUSD = 0;
     }
@@ -64,7 +64,7 @@ export async function getSolanaTokenBalances(address: string) {
       let priceUSD = 0;
       try {
         const priceData = await getCryptoPrice(info.tokenAmount.symbol || '');
-        priceUSD = typeof priceData === 'object' && priceData?.price ? priceData.price : 0;
+        priceUSD = typeof priceData === 'object' && priceData && 'price' in priceData ? (priceData as any).price : 0;
       } catch {
         priceUSD = 0;
       }
