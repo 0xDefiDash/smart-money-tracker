@@ -102,9 +102,30 @@ export class MoralisClient {
       '0x38': { name: 'BSC', symbol: 'BNB', explorer: 'https://bscscan.com' },
       '0x89': { name: 'Polygon', symbol: 'MATIC', explorer: 'https://polygonscan.com' },
       '0xa86a': { name: 'Avalanche', symbol: 'AVAX', explorer: 'https://snowtrace.io' },
-      '0xfa': { name: 'Fantom', symbol: 'FTM', explorer: 'https://ftmscan.com' }
+      '0xfa': { name: 'Fantom', symbol: 'FTM', explorer: 'https://ftmscan.com' },
+      '0x2105': { name: 'Base', symbol: 'ETH', explorer: 'https://basescan.org' }
     }
     return chains[chainId] || { name: 'Unknown', symbol: 'ETH', explorer: 'https://etherscan.io' }
+  }
+
+  // Helper to convert common chain names to chain IDs
+  public getChainId(chainName: string): string {
+    const chainMap: { [key: string]: string } = {
+      'ethereum': '0x1',
+      'eth': '0x1',
+      'bsc': '0x38',
+      'bnb': '0x38',
+      'binance': '0x38',
+      'polygon': '0x89',
+      'matic': '0x89',
+      'avalanche': '0xa86a',
+      'avax': '0xa86a',
+      'fantom': '0xfa',
+      'ftm': '0xfa',
+      'base': '0x2105',
+      'basechain': '0x2105'
+    }
+    return chainMap[chainName.toLowerCase()] || '0x1'
   }
 }
 
