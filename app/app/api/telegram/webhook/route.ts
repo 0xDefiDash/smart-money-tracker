@@ -116,6 +116,14 @@ async function handleCommand(
         });
         break;
 
+      case '/connect':
+        await telegramClient.sendMessage({
+          chat_id: chatId,
+          text: `🔗 *Connect Your Account*\n\n📋 Your Telegram Chat ID:\n\`${chatId}\`\n\n*How to connect:*\n1. Copy the Chat ID above\n2. Go to Settings on DeFiDash\n3. Navigate to Telegram Notifications\n4. Paste your Chat ID\n5. Click "Connect Telegram"\n\n✅ You'll start receiving alerts instantly!\n\n🌐 [Open DeFiDash Settings](https://defidashtracker.com/settings)`,
+          parse_mode: 'Markdown',
+        });
+        break;
+
       case '/whale':
         const whaleRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://defidashtracker.com'}/api/telegram/whale-feed`);
         if (whaleRes.ok) {

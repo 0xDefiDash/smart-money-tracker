@@ -160,7 +160,7 @@ export default function TelegramSettings() {
     toast.success('Copied to clipboard!');
   };
 
-  const botUsername = 'defidash_bot'; // Replace with your actual bot username
+  const botUsername = 'Tracker103_bot'; // Official DeFiDash Tracker Bot
 
   if (!session) {
     return (
