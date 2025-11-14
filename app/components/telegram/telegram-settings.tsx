@@ -17,6 +17,7 @@ import {
   Copy,
   ExternalLink,
   Loader2,
+  User,
 } from 'lucide-react';
 
 interface TelegramSettings {
@@ -30,9 +31,11 @@ interface TelegramSettings {
 export default function TelegramSettings() {
   const { data: session } = useSession() || {};
   const [username, setUsername] = useState('');
+  const [inputUsername, setInputUsername] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPendingConnection, setIsPendingConnection] = useState(false);
   const [settings, setSettings] = useState<TelegramSettings>({
     whaleAlerts: true,
     blockWars: true,
@@ -41,13 +44,8 @@ export default function TelegramSettings() {
     dailySummary: true,
   });
 
-  const [linkingCode, setLinkingCode] = useState('');
-  const [codeExpiry, setCodeExpiry] = useState<Date | null>(null);
-
   useEffect(() => {
-    if (session?.user) {
-      loadUserSettings();
-    }
+    loadUserSettings();
   }, [session]);
 
   const loadUserSettings = async () => {
@@ -60,6 +58,10 @@ export default function TelegramSettings() {
         if (data.username || data.chatId) {
           setUsername(data.username || '');
           setIsConnected(true);
+          setIsPendingConnection(false);
+        } else if (data.pendingUsername) {
+          setInputUsername(data.pendingUsername);
+          setIsPendingConnection(true);
         }
         if (data.settings) {
           setSettings(data.settings);
@@ -72,73 +74,47 @@ export default function TelegramSettings() {
     }
   };
 
-  const generateLinkingCode = async () => {
+  const handleSaveUsername = async () => {
+    if (!inputUsername.trim()) {
+      toast.error('Please enter your Telegram username');
+      return;
+    }
+
+    // Remove @ if user included it
+    const cleanUsername = inputUsername.replace('@', '').trim();
+
     try {
-      setIsLoading(true);
-      const response = await fetch('/api/telegram/link-account');
+      setIsSaving(true);
+      const response = await fetch('/api/telegram/save-username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: cleanUsername }),
+      });
+
       const data = await response.json();
 
       if (data.success) {
-        if (data.connected) {
-          // Already connected
-          setUsername(data.username || '');
-          setIsConnected(true);
-          toast.success('✅ Already connected!');
-          if (session?.user) {
-            await loadUserSettings();
-          }
-        } else {
-          // Got linking code
-          setLinkingCode(data.linkingCode);
-          setCodeExpiry(new Date(data.expiresAt));
-          // Store in localStorage for persistence
-          localStorage.setItem('telegram_linking_code', data.linkingCode);
-          localStorage.setItem('telegram_code_expiry', data.expiresAt);
-          toast.success('Linking code generated!');
-        }
+        setIsPendingConnection(true);
+        toast.success('Username saved! Now go to Telegram and send /connect');
       } else {
-        toast.error(data.error || 'Failed to generate linking code');
+        toast.error(data.error || 'Failed to save username');
       }
     } catch (error) {
-      console.error('Error generating linking code:', error);
-      toast.error('Error generating linking code');
+      toast.error('Error saving username');
+      console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
   const handleRefresh = async () => {
-    if (session?.user) {
-      await loadUserSettings();
-    }
+    await loadUserSettings();
     if (isConnected) {
       toast.success('✅ Connection verified!');
     } else {
-      toast.info('Not connected yet. Please follow the steps above.');
+      toast.info('Not connected yet. Please send /connect to the bot.');
     }
   };
-
-  // Auto-generate linking code when component loads (even without session)
-  useEffect(() => {
-    if (!isConnected) {
-      // Check localStorage first
-      const storedCode = localStorage.getItem('telegram_linking_code');
-      const storedExpiry = localStorage.getItem('telegram_code_expiry');
-      
-      if (storedCode && storedExpiry) {
-        const expiryDate = new Date(storedExpiry);
-        if (expiryDate > new Date()) {
-          // Code is still valid
-          setLinkingCode(storedCode);
-          setCodeExpiry(expiryDate);
-          return;
-        }
-      }
-      
-      // Generate new code
-      generateLinkingCode();
-    }
-  }, [isConnected]);
 
   const handleSaveSettings = async () => {
     try {
@@ -203,17 +179,6 @@ export default function TelegramSettings() {
 
   const botUsername = 'Tracker103_bot'; // Official DeFiDash Tracker Bot
 
-  if (!session) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Telegram Notifications</CardTitle>
-          <CardDescription>Please sign in to connect Telegram</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <Card>
@@ -232,16 +197,20 @@ export default function TelegramSettings() {
             <div className="flex items-center gap-3">
               {isConnected ? (
                 <CheckCircle2 className="w-5 h-5 text-green-500" />
+              ) : isPendingConnection ? (
+                <Loader2 className="w-5 h-5 text-yellow-500 animate-spin" />
               ) : (
                 <AlertCircle className="w-5 h-5 text-yellow-500" />
               )}
               <div>
                 <p className="font-medium">
-                  {isConnected ? 'Connected' : 'Not Connected'}
+                  {isConnected ? 'Connected' : isPendingConnection ? 'Pending Connection' : 'Not Connected'}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {isConnected
                     ? 'Receiving notifications on Telegram'
+                    : isPendingConnection
+                    ? 'Waiting for you to send /connect on Telegram'
                     : 'Connect your Telegram to receive notifications'}
                 </p>
               </div>
@@ -251,87 +220,101 @@ export default function TelegramSettings() {
                 Active
               </Badge>
             )}
+            {isPendingConnection && (
+              <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500">
+                Pending
+              </Badge>
+            )}
           </div>
 
-          {/* Setup Instructions */}
-          {!isConnected && (
+          {/* Setup Instructions - Not Connected */}
+          {!isConnected && !isPendingConnection && (
             <div className="space-y-4">
-              {/* Linking Code Display */}
-              {linkingCode && (
-                <div className="p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-lg border-2 border-primary/20">
-                  <div className="text-center space-y-3">
-                    <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
-                      <span>Your Linking Code</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <code className="text-4xl font-mono font-bold tracking-widest bg-background px-6 py-3 rounded-lg border-2 border-primary/30 select-all">
-                        {linkingCode}
-                      </code>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-12 w-12"
-                        onClick={() => {
-                          copyToClipboard(linkingCode);
-                          toast.success('Code copied!');
-                        }}
-                      >
-                        <Copy className="w-5 h-5" />
-                      </Button>
-                    </div>
-                    {codeExpiry && (
-                      <p className="text-xs text-muted-foreground">
-                        Expires in {Math.ceil((codeExpiry.getTime() - Date.now()) / 60000)} minutes
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Instructions */}
               <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
                 <h3 className="font-semibold text-sm flex items-center gap-2">
-                  <Send className="w-4 h-4" />
-                  Connect in 2 Easy Steps:
+                  <User className="w-4 h-4" />
+                  Connect in 2 Simple Steps:
                 </h3>
-                <ol className="space-y-3 text-sm">
-                  <li className="flex gap-3">
+                
+                <div className="space-y-4">
+                  <div className="flex gap-3">
                     <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">
                       1
                     </span>
-                    <span>
-                      Open our bot:{' '}
-                      <Button
-                        variant="link"
-                        className="h-auto p-0 text-primary font-semibold inline-flex items-center gap-1"
-                        onClick={() => window.open(`https://t.me/${botUsername}`, '_blank')}
-                      >
-                        @{botUsername}
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor="telegram-username">Enter your Telegram username</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+                          <Input
+                            id="telegram-username"
+                            placeholder="your_username"
+                            value={inputUsername}
+                            onChange={(e) => setInputUsername(e.target.value)}
+                            className="pl-7"
+                          />
+                        </div>
+                        <Button
+                          onClick={handleSaveUsername}
+                          disabled={isSaving || !inputUsername.trim()}
+                        >
+                          {isSaving ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            'Save'
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Enter your Telegram username (without @)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Setup Instructions - Pending Connection */}
+          {!isConnected && isPendingConnection && (
+            <div className="space-y-4">
+              <div className="space-y-4 p-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-lg border-2 border-primary/20">
+                <div className="text-center space-y-3">
+                  <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span>Username Saved: @{inputUsername}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 text-sm">
+                  <div className="flex gap-3">
                     <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">
                       2
                     </span>
-                    <div className="flex-1">
-                      <div className="space-y-1">
-                        <p>Send this command to the bot:</p>
-                        <code className="block bg-black text-green-400 px-3 py-2 rounded font-mono text-sm select-all">
-                          /link {linkingCode || 'YOUR_CODE'}
-                        </code>
-                      </div>
+                    <div className="flex-1 space-y-2">
+                      <p>Open our bot and send <code className="bg-black text-green-400 px-2 py-1 rounded">/connect</code></p>
+                      <Button
+                        variant="default"
+                        className="w-full"
+                        onClick={() => window.open(`https://t.me/${botUsername}`, '_blank')}
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        Open @{botUsername}
+                        <ExternalLink className="w-4 h-4 ml-2" />
+                      </Button>
                     </div>
-                  </li>
-                </ol>
+                  </div>
+                </div>
                 
                 <div className="pt-3 border-t space-y-2">
                   <Button
                     onClick={handleRefresh}
                     disabled={isLoading}
                     className="w-full"
-                    variant="default"
+                    variant="outline"
                   >
                     {isLoading ? (
                       <>
@@ -345,20 +328,12 @@ export default function TelegramSettings() {
                       </>
                     )}
                   </Button>
-                  <Button
-                    onClick={generateLinkingCode}
-                    disabled={isLoading}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    Generate New Code
-                  </Button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Username Display */}
+          {/* Username Display - Connected */}
           {isConnected && (
             <div className="space-y-2">
               <Label>Connected Telegram Account</Label>

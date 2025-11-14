@@ -118,43 +118,51 @@ async function handleCommand(
 
       case '/connect':
       case '/link':
-        // Check if a code was provided (e.g., "/link ABC123")
-        const parts = command.split(' ');
-        const linkCode = parts.length > 1 ? parts[1].trim().toUpperCase() : null;
-
-        if (linkCode) {
-          // Try to link with the code
-          const linkRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://defidashtracker.com'}/api/telegram/link-account`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              code: linkCode,
-              chatId,
-              username,
-            }),
-          });
-
-          const linkData = await linkRes.json();
-
-          if (linkData.success) {
-            await telegramClient.sendMessage({
-              chat_id: chatId,
-              text: `✅ *Account Linked Successfully!*\n\n👤 Username: ${username ? `@${username}` : 'Connected'}\n\n🔔 You're all set! You'll now receive:\n• 🐋 Whale transaction alerts\n• 💎 Shot caller notifications\n• ⚔️ Block Wars updates\n• 📊 Market insights\n\nUse /settings to customize your notifications.`,
-              parse_mode: 'Markdown',
-            });
-          } else {
-            await telegramClient.sendMessage({
-              chat_id: chatId,
-              text: `❌ *Link Failed*\n\n${linkData.error || 'Invalid or expired code'}\n\n*How to get your code:*\n1. Go to [DeFiDash Settings](https://defidashtracker.com/settings)\n2. Navigate to Telegram Notifications\n3. Copy your 6-digit linking code\n4. Send: \`/link YOUR_CODE\``,
-              parse_mode: 'Markdown',
-            });
-          }
-        } else {
-          // No code provided, show instructions
-          const usernameDisplay = username ? `@${username}` : 'your Telegram';
+        // Try to match username with a pending account
+        if (!username) {
           await telegramClient.sendMessage({
             chat_id: chatId,
-            text: `🔗 *Link Your Account*\n\n👤 Your Telegram: ${usernameDisplay}\n\n*How to connect:*\n1. Go to [DeFiDash Settings](https://defidashtracker.com/settings)\n2. Sign in to your account\n3. Go to Telegram Notifications\n4. Copy your 6-digit linking code\n5. Send it here: \`/link YOUR_CODE\`\n\n*Example:* \`/link ABC123\`\n\n✅ Your account will be linked instantly!`,
+            text: `❌ *No Username Found*\n\nYou need to set a Telegram username first.\n\n*How to set a username:*\n1. Open Telegram Settings\n2. Tap on your profile\n3. Tap "Username"\n4. Create a username\n5. Come back and send /connect again`,
+            parse_mode: 'Markdown',
+          });
+          break;
+        }
+
+        // Find user with this pending username
+        const pendingUser = await prisma.user.findFirst({
+          where: {
+            telegramUsername: username.toLowerCase(),
+            telegramChatId: null, // Not yet connected
+          },
+        });
+
+        if (pendingUser) {
+          // Link the account
+          await prisma.user.update({
+            where: { id: pendingUser.id },
+            data: {
+              telegramChatId: String(chatId),
+              telegramNotificationSettings: {
+                whaleAlerts: true,
+                shotCallersAlerts: true,
+                blockWarsAlerts: true,
+                marketAlerts: false,
+                dailySummary: true,
+                selectedShotCallers: [],
+              },
+            },
+          });
+
+          await telegramClient.sendMessage({
+            chat_id: chatId,
+            text: `✅ *Account Connected Successfully!*\n\n👤 Username: @${username}\n\n🎉 Welcome to DeFiDash Tracker!\n\n🔔 You'll now receive:\n• 🐋 Whale transaction alerts\n• 💎 Shot caller notifications\n• ⚔️ Block Wars updates\n• 📊 Market insights\n• 📈 Daily market summaries\n\nUse /settings to customize your notifications.\nUse /help to see all commands.`,
+            parse_mode: 'Markdown',
+          });
+        } else {
+          // No pending username found
+          await telegramClient.sendMessage({
+            chat_id: chatId,
+            text: `🔗 *Connect Your Account*\n\n👤 Your Telegram: @${username}\n\n*To connect:*\n1. Go to [DeFiDash Settings](https://defidashtracker.com/settings)\n2. Enter your Telegram username: \`${username}\`\n3. Click "Save"\n4. Come back here and send /connect again\n\n✅ Simple as that!`,
             parse_mode: 'Markdown',
           });
         }

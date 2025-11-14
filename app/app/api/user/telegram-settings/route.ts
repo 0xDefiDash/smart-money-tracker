@@ -32,10 +32,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Check if user has pending connection (username but no chat ID)
+    const hasPendingConnection = user.telegramUsername && !user.telegramChatId;
+
     return NextResponse.json({
       success: true,
       chatId: user.telegramChatId,
       username: user.telegramUsername,
+      pendingUsername: hasPendingConnection ? user.telegramUsername : null,
       settings: user.telegramNotificationSettings || {
         whaleAlerts: true,
         blockWars: true,
