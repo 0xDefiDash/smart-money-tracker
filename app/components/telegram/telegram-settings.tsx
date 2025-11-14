@@ -41,6 +41,9 @@ export default function TelegramSettings() {
     dailySummary: true,
   });
 
+  const [linkingCode, setLinkingCode] = useState('');
+  const [codeExpiry, setCodeExpiry] = useState<Date | null>(null);
+
   useEffect(() => {
     if (session?.user) {
       loadUserSettings();
@@ -69,9 +72,6 @@ export default function TelegramSettings() {
     }
   };
 
-  const [linkingCode, setLinkingCode] = useState('');
-  const [codeExpiry, setCodeExpiry] = useState<Date | null>(null);
-
   const generateLinkingCode = async () => {
     try {
       setIsLoading(true);
@@ -84,11 +84,16 @@ export default function TelegramSettings() {
           setUsername(data.username || '');
           setIsConnected(true);
           toast.success('✅ Already connected!');
-          await loadUserSettings();
+          if (session?.user) {
+            await loadUserSettings();
+          }
         } else {
           // Got linking code
           setLinkingCode(data.linkingCode);
           setCodeExpiry(new Date(data.expiresAt));
+          // Store in localStorage for persistence
+          localStorage.setItem('telegram_linking_code', data.linkingCode);
+          localStorage.setItem('telegram_code_expiry', data.expiresAt);
           toast.success('Linking code generated!');
         }
       } else {
@@ -103,7 +108,9 @@ export default function TelegramSettings() {
   };
 
   const handleRefresh = async () => {
-    await loadUserSettings();
+    if (session?.user) {
+      await loadUserSettings();
+    }
     if (isConnected) {
       toast.success('✅ Connection verified!');
     } else {
@@ -111,12 +118,27 @@ export default function TelegramSettings() {
     }
   };
 
+  // Auto-generate linking code when component loads (even without session)
   useEffect(() => {
-    if (!isConnected && session?.user) {
-      // Auto-generate linking code when component loads
+    if (!isConnected) {
+      // Check localStorage first
+      const storedCode = localStorage.getItem('telegram_linking_code');
+      const storedExpiry = localStorage.getItem('telegram_code_expiry');
+      
+      if (storedCode && storedExpiry) {
+        const expiryDate = new Date(storedExpiry);
+        if (expiryDate > new Date()) {
+          // Code is still valid
+          setLinkingCode(storedCode);
+          setCodeExpiry(expiryDate);
+          return;
+        }
+      }
+      
+      // Generate new code
       generateLinkingCode();
     }
-  }, [session, isConnected]);
+  }, [isConnected]);
 
   const handleSaveSettings = async () => {
     try {
