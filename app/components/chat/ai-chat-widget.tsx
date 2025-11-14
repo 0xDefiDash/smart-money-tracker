@@ -7,9 +7,10 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, X, Send, Bot, User, Sparkles, Zap } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Sparkles, Zap, Volume2, VolumeX, Play, Pause, Square } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -24,8 +25,19 @@ export function AIChatWidget() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  
+  // Text-to-Speech state
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentSpeakingId, setCurrentSpeakingId] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -34,6 +46,156 @@ export function AIChatWidget() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  // Initialize Speech Synthesis
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      synthRef.current = window.speechSynthesis;
+      
+      // Load available voices
+      const loadVoices = () => {
+        const voices = synthRef.current?.getVoices() || [];
+        setAvailableVoices(voices);
+        
+        // Try to find a good default voice (English, female, or neural)
+        const preferredVoice = voices.findIndex(voice => 
+          voice.lang.startsWith('en') && 
+          (voice.name.includes('Female') || voice.name.includes('Samantha') || voice.name.includes('Google'))
+        );
+        
+        if (preferredVoice !== -1) {
+          setSelectedVoiceIndex(preferredVoice);
+        } else {
+          // Fallback to first English voice
+          const englishVoice = voices.findIndex(voice => voice.lang.startsWith('en'));
+          if (englishVoice !== -1) {
+            setSelectedVoiceIndex(englishVoice);
+          }
+        }
+      };
+
+      loadVoices();
+      
+      // Some browsers need this event
+      if (synthRef.current) {
+        synthRef.current.onvoiceschanged = loadVoices;
+      }
+
+      return () => {
+        if (synthRef.current) {
+          synthRef.current.cancel();
+        }
+      };
+    }
+  }, []);
+
+  // Clean up speech when component unmounts or chat closes
+  useEffect(() => {
+    if (!isOpen && synthRef.current) {
+      synthRef.current.cancel();
+      setIsSpeaking(false);
+      setCurrentSpeakingId(null);
+      setIsPaused(false);
+    }
+  }, [isOpen]);
+
+  // Text-to-Speech function
+  const speak = (text: string, messageId: string) => {
+    if (!synthRef.current || !availableVoices.length) {
+      toast.error('Text-to-speech is not available in your browser');
+      return;
+    }
+
+    // Stop any current speech
+    synthRef.current.cancel();
+
+    // Clean the text for speech (remove emojis and markdown)
+    const cleanText = text
+      .replace(/[*_~`#]/g, '') // Remove markdown
+      .replace(/[\u{1F300}-\u{1F9FF}]/gu, '') // Remove emojis
+      .replace(/\n+/g, '. ') // Replace newlines with periods
+      .trim();
+
+    if (!cleanText) {
+      toast.error('No text to speak');
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    currentUtteranceRef.current = utterance;
+
+    // Set voice
+    if (availableVoices[selectedVoiceIndex]) {
+      utterance.voice = availableVoices[selectedVoiceIndex];
+    }
+
+    // Configure speech parameters for natural sound
+    utterance.rate = 1.0; // Normal speed
+    utterance.pitch = 1.0; // Normal pitch
+    utterance.volume = 1.0; // Full volume
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      setCurrentSpeakingId(messageId);
+      setIsPaused(false);
+    };
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setCurrentSpeakingId(null);
+      setIsPaused(false);
+      currentUtteranceRef.current = null;
+    };
+
+    utterance.onerror = (event) => {
+      console.error('Speech synthesis error:', event);
+      setIsSpeaking(false);
+      setCurrentSpeakingId(null);
+      setIsPaused(false);
+      currentUtteranceRef.current = null;
+      
+      if (event.error !== 'canceled') {
+        toast.error('Voice playback failed');
+      }
+    };
+
+    synthRef.current.speak(utterance);
+  };
+
+  const pauseSpeech = () => {
+    if (synthRef.current && isSpeaking) {
+      synthRef.current.pause();
+      setIsPaused(true);
+    }
+  };
+
+  const resumeSpeech = () => {
+    if (synthRef.current && isPaused) {
+      synthRef.current.resume();
+      setIsPaused(false);
+    }
+  };
+
+  const stopSpeech = () => {
+    if (synthRef.current) {
+      synthRef.current.cancel();
+      setIsSpeaking(false);
+      setCurrentSpeakingId(null);
+      setIsPaused(false);
+      currentUtteranceRef.current = null;
+    }
+  };
+
+  const toggleVoice = () => {
+    const newState = !voiceEnabled;
+    setVoiceEnabled(newState);
+    
+    if (!newState) {
+      stopSpeech();
+    }
+    
+    toast.success(newState ? '🔊 Voice responses enabled' : '🔇 Voice responses disabled');
+  };
 
   useEffect(() => {
     // Add welcome message when chat opens for the first time
@@ -52,6 +214,8 @@ I'm here to make crypto easy and fun! Here's what I can help you with:
 • 📈 **DeFi Opportunities** - Best yields & protocols
 • 🎮 **Block Wars Guide** - Game strategies & tips
 • 🗺️ **Platform Help** - Navigate DeFiDash like a pro
+
+🔊 **NEW! Voice Responses** - I can now speak my responses! Click the speaker icon in the header to enable voice mode.
 
 💬 **Just ask me anything!** I speak human, not crypto jargon. Whether you're new or a pro, I'm here to help! 
 
@@ -163,6 +327,13 @@ Ready to dive in? 🚀`,
       // Ensure we have some response content
       if (assistantContent.trim() === '' && assistantMessage) {
         throw new Error('No content received from AI');
+      }
+
+      // Auto-play voice if enabled
+      if (voiceEnabled && assistantMessage && assistantContent.trim()) {
+        setTimeout(() => {
+          speak(assistantContent, assistantMessage!.id);
+        }, 500); // Small delay to ensure message is rendered
       }
 
     } catch (error: any) {
@@ -347,14 +518,36 @@ Ready to dive in? 🚀`,
                       </div>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsOpen(false)}
-                    className="rounded-full h-9 w-9 p-0 hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {/* Voice Toggle Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleVoice}
+                      className={`rounded-full h-9 w-9 p-0 transition-colors ${
+                        voiceEnabled 
+                          ? 'bg-green-500/20 hover:bg-green-500/30 text-green-500' 
+                          : 'hover:bg-muted/50 text-muted-foreground'
+                      }`}
+                      title={voiceEnabled ? 'Disable voice responses' : 'Enable voice responses'}
+                    >
+                      {voiceEnabled ? (
+                        <Volume2 className="w-5 h-5" />
+                      ) : (
+                        <VolumeX className="w-5 h-5" />
+                      )}
+                    </Button>
+                    
+                    {/* Close Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsOpen(false)}
+                      className="rounded-full h-9 w-9 p-0 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -390,6 +583,64 @@ Ready to dive in? 🚀`,
                           <div className="whitespace-pre-wrap text-sm leading-relaxed">
                             {message.content}
                           </div>
+                          
+                          {/* Voice Controls for Assistant Messages */}
+                          {message.role === 'assistant' && voiceEnabled && (
+                            <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50">
+                              {currentSpeakingId === message.id ? (
+                                <>
+                                  {isPaused ? (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={resumeSpeech}
+                                      className="h-7 px-2 text-xs hover:bg-green-500/10 hover:text-green-500"
+                                    >
+                                      <Play className="w-3 h-3 mr-1" />
+                                      Resume
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={pauseSpeech}
+                                      className="h-7 px-2 text-xs hover:bg-yellow-500/10 hover:text-yellow-500"
+                                    >
+                                      <Pause className="w-3 h-3 mr-1" />
+                                      Pause
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={stopSpeech}
+                                    className="h-7 px-2 text-xs hover:bg-red-500/10 hover:text-red-500"
+                                  >
+                                    <Square className="w-3 h-3 mr-1" />
+                                    Stop
+                                  </Button>
+                                  <Badge className="ml-2 bg-green-500/20 text-green-500 border-green-500/30 text-xs px-2 py-0">
+                                    <motion.div
+                                      animate={{ scale: [1, 1.2, 1] }}
+                                      transition={{ duration: 1, repeat: Infinity }}
+                                      className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"
+                                    />
+                                    Speaking...
+                                  </Badge>
+                                </>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => speak(message.content, message.id)}
+                                  className="h-7 px-2 text-xs hover:bg-blue-500/10 hover:text-blue-500"
+                                >
+                                  <Play className="w-3 h-3 mr-1" />
+                                  Play Voice
+                                </Button>
+                              )}
+                            </div>
+                          )}
                         </div>
                         {message.role === 'user' && (
                           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
@@ -547,7 +798,7 @@ Ready to dive in? 🚀`,
                   </motion.div>
                 </div>
                 <div className="flex items-center justify-between mt-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs px-2 py-0.5">
                       <div className="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse"></div>
                       AI Active
@@ -555,6 +806,17 @@ Ready to dive in? 🚀`,
                     <Badge variant="secondary" className="text-xs px-2 py-0.5">
                       ⚡ Real-time
                     </Badge>
+                    {voiceEnabled && (
+                      <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 text-xs px-2 py-0.5">
+                        <Volume2 className="w-3 h-3 mr-1" />
+                        Voice ON
+                      </Badge>
+                    )}
+                    {isSpeaking && (
+                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs px-2 py-0.5 animate-pulse">
+                        🎤 Speaking
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     <kbd className="px-1.5 py-0.5 text-xs rounded bg-muted border">Enter</kbd> to send
