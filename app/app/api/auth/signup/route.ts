@@ -15,6 +15,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Require email
+    if (!email || !email.includes('@')) {
+      return NextResponse.json(
+        { error: 'Valid email address is required' },
+        { status: 400 }
+      )
+    }
+
     // Check if username already exists (only check if username is not null)
     const existingUser = await prisma.user.findFirst({
       where: { 
@@ -32,23 +40,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Also check if email exists and has a username (to prevent duplicate accounts)
-    if (email) {
-      const existingEmailUser = await prisma.user.findFirst({
-        where: { 
-          email: email,
-          username: {
-            not: null
-          }
+    // Check if email exists and has a username (to prevent duplicate accounts)
+    const existingEmailUser = await prisma.user.findFirst({
+      where: { 
+        email: email,
+        username: {
+          not: null
         }
-      })
-
-      if (existingEmailUser) {
-        return NextResponse.json(
-          { error: 'Email already registered with an account' },
-          { status: 400 }
-        )
       }
+    })
+
+    if (existingEmailUser) {
+      return NextResponse.json(
+        { error: 'Email already registered with an account' },
+        { status: 400 }
+      )
     }
 
     // Hash password
@@ -59,7 +65,7 @@ export async function POST(request: NextRequest) {
       data: {
         username: username,
         password: hashedPassword,
-        email: email || null,
+        email: email,
         name: name || username,
         gameMoney: 1000,
         gameLevel: 1,

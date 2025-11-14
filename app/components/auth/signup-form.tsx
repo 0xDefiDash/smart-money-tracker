@@ -37,6 +37,13 @@ export function SignupForm() {
     setError('')
     setSuccess('')
 
+    // Validate email
+    if (!formData.email || !formData.email.includes('@')) {
+      setError('Valid email address is required')
+      setIsLoading(false)
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setIsLoading(false)
@@ -90,9 +97,9 @@ export function SignupForm() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            Join Dash Wars
+            Join Smart Money Tracker
           </CardTitle>
-          <p className="text-slate-400 text-sm">Create your account and start collecting blocks</p>
+          <p className="text-slate-400 text-sm">Create your account to access all features</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,6 +114,23 @@ export function SignupForm() {
                 <AlertDescription className="text-green-400">{success}</AlertDescription>
               </Alert>
             )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-slate-300">Email *</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your@email.com"
+                  className="pl-10 bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-purple-500"
+                  required
+                />
+              </div>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="username" className="text-slate-300">Username *</Label>
@@ -136,22 +160,6 @@ export function SignupForm() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Your display name (optional)"
-                  className="pl-10 bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-purple-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="your@email.com (optional)"
                   className="pl-10 bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-purple-500"
                 />
               </div>
