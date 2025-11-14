@@ -302,16 +302,23 @@ ${summary.topMovers.map(m => `• ${m.symbol}: ${m.change > 0 ? '+' : ''}${m.cha
 
 I'm the DeFiDash Tracker Bot 🤖
 
-🚀 *NEW: Telegram Mini App Available!*
-Launch our mobile-optimized app directly in Telegram for instant access to:
+🚀 *Quick Start:*
+1. Get your linking code at [defidashtracker.com/settings](https://defidashtracker.com/settings)
+2. Send: \`/link YOUR_CODE\` to connect your account
+3. Start receiving personalized alerts!
+
+📱 *Telegram Mini App*
+Launch our mobile-optimized app with /app for instant access to:
 📊 Live Market Data
 🐋 Whale Activity Tracking  
 🔥 Trending Tokens
 ⚔️ Block Wars Game
 
-Use /app to launch the Mini App
-Use /help to see all available commands
-Use /settings to customize your notifications
+*Useful Commands:*
+/link - Connect your account
+/app - Launch Mini App
+/help - See all commands
+/settings - Customize notifications
 
 Let's track the smart money together! 🚀
     `.trim();
@@ -335,7 +342,7 @@ Let's track the smart money together! 🚀
 /start - Start the bot and get welcome message
 /help - Show this help message
 /settings - View and update notification preferences
-/connect - Link your Telegram to DeFiDash account
+/link YOUR_CODE - Link your Telegram to DeFiDash account
 
 📊 *Market Data*
 /whale - Get latest whale transactions
@@ -350,7 +357,7 @@ Let's track the smart money together! 🚀
 • Market Alerts - Significant price movements
 • Daily Summary - End-of-day market report
 
-💡 *Pro Tip:* Use the Mini App (/app) for the best mobile experience!
+💡 *Pro Tip:* Use /link to connect your account and receive personalized alerts!
 
 🌐 Visit https://defidashtracker.com for full experience!
     `.trim();

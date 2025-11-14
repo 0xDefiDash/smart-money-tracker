@@ -29,7 +29,7 @@ interface TelegramSettings {
 
 export default function TelegramSettings() {
   const { data: session } = useSession() || {};
-  const [chatId, setChatId] = useState('');
+  const [username, setUsername] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,8 +54,8 @@ export default function TelegramSettings() {
       const data = await response.json();
 
       if (data.success) {
-        if (data.chatId) {
-          setChatId(data.chatId);
+        if (data.username || data.chatId) {
+          setUsername(data.username || '');
           setIsConnected(true);
         }
         if (data.settings) {
@@ -69,35 +69,54 @@ export default function TelegramSettings() {
     }
   };
 
-  const handleConnect = async () => {
-    if (!chatId.trim()) {
-      toast.error('Please enter your Telegram Chat ID');
-      return;
-    }
+  const [linkingCode, setLinkingCode] = useState('');
+  const [codeExpiry, setCodeExpiry] = useState<Date | null>(null);
 
+  const generateLinkingCode = async () => {
     try {
-      setIsSaving(true);
-      const response = await fetch('/api/user/telegram-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId: chatId.trim() }),
-      });
-
+      setIsLoading(true);
+      const response = await fetch('/api/telegram/link-account');
       const data = await response.json();
 
       if (data.success) {
-        setIsConnected(true);
-        toast.success('Telegram connected successfully!');
+        if (data.connected) {
+          // Already connected
+          setUsername(data.username || '');
+          setIsConnected(true);
+          toast.success('✅ Already connected!');
+          await loadUserSettings();
+        } else {
+          // Got linking code
+          setLinkingCode(data.linkingCode);
+          setCodeExpiry(new Date(data.expiresAt));
+          toast.success('Linking code generated!');
+        }
       } else {
-        toast.error(data.error || 'Failed to connect Telegram');
+        toast.error(data.error || 'Failed to generate linking code');
       }
     } catch (error) {
-      toast.error('Error connecting Telegram');
-      console.error(error);
+      console.error('Error generating linking code:', error);
+      toast.error('Error generating linking code');
     } finally {
-      setIsSaving(false);
+      setIsLoading(false);
     }
   };
+
+  const handleRefresh = async () => {
+    await loadUserSettings();
+    if (isConnected) {
+      toast.success('✅ Connection verified!');
+    } else {
+      toast.info('Not connected yet. Please follow the steps above.');
+    }
+  };
+
+  useEffect(() => {
+    if (!isConnected && session?.user) {
+      // Auto-generate linking code when component loads
+      generateLinkingCode();
+    }
+  }, [session, isConnected]);
 
   const handleSaveSettings = async () => {
     try {
@@ -214,77 +233,133 @@ export default function TelegramSettings() {
 
           {/* Setup Instructions */}
           {!isConnected && (
-            <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-              <h3 className="font-semibold text-sm">How to Connect:</h3>
-              <ol className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="font-bold">1.</span>
-                  <span>
-                    Open Telegram and search for{' '}
-                    <Button
-                      variant="link"
-                      className="h-auto p-0 text-primary"
-                      onClick={() => window.open(`https://t.me/${botUsername}`, '_blank')}
-                    >
-                      @{botUsername}
-                      <ExternalLink className="w-3 h-3 ml-1" />
-                    </Button>
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold">2.</span>
-                  <span>Send /start to the bot</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold">3.</span>
-                  <span>Send /connect to get your Chat ID</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold">4.</span>
-                  <span>Copy and paste your Chat ID below</span>
-                </li>
-              </ol>
+            <div className="space-y-4">
+              {/* Linking Code Display */}
+              {linkingCode && (
+                <div className="p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-lg border-2 border-primary/20">
+                  <div className="text-center space-y-3">
+                    <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
+                      <span>Your Linking Code</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <code className="text-4xl font-mono font-bold tracking-widest bg-background px-6 py-3 rounded-lg border-2 border-primary/30 select-all">
+                        {linkingCode}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-12 w-12"
+                        onClick={() => {
+                          copyToClipboard(linkingCode);
+                          toast.success('Code copied!');
+                        }}
+                      >
+                        <Copy className="w-5 h-5" />
+                      </Button>
+                    </div>
+                    {codeExpiry && (
+                      <p className="text-xs text-muted-foreground">
+                        Expires in {Math.ceil((codeExpiry.getTime() - Date.now()) / 60000)} minutes
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Instructions */}
+              <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                <h3 className="font-semibold text-sm flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  Connect in 2 Easy Steps:
+                </h3>
+                <ol className="space-y-3 text-sm">
+                  <li className="flex gap-3">
+                    <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                      1
+                    </span>
+                    <span>
+                      Open our bot:{' '}
+                      <Button
+                        variant="link"
+                        className="h-auto p-0 text-primary font-semibold inline-flex items-center gap-1"
+                        onClick={() => window.open(`https://t.me/${botUsername}`, '_blank')}
+                      >
+                        @{botUsername}
+                        <ExternalLink className="w-3 h-3" />
+                      </Button>
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                      2
+                    </span>
+                    <div className="flex-1">
+                      <div className="space-y-1">
+                        <p>Send this command to the bot:</p>
+                        <code className="block bg-black text-green-400 px-3 py-2 rounded font-mono text-sm select-all">
+                          /link {linkingCode || 'YOUR_CODE'}
+                        </code>
+                      </div>
+                    </div>
+                  </li>
+                </ol>
+                
+                <div className="pt-3 border-t space-y-2">
+                  <Button
+                    onClick={handleRefresh}
+                    disabled={isLoading}
+                    className="w-full"
+                    variant="default"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Checking...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Check Connection Status
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={generateLinkingCode}
+                    disabled={isLoading}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    Generate New Code
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Chat ID Input */}
-          <div className="space-y-2">
-            <Label htmlFor="chatId">Telegram Chat ID</Label>
-            <div className="flex gap-2">
-              <Input
-                id="chatId"
-                value={chatId}
-                onChange={(e) => setChatId(e.target.value)}
-                placeholder="Enter your Telegram Chat ID"
-                disabled={isConnected}
-              />
-              {isConnected && (
+          {/* Username Display */}
+          {isConnected && (
+            <div className="space-y-2">
+              <Label>Connected Telegram Account</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={username ? `@${username}` : 'Connected'}
+                  disabled
+                  className="font-mono"
+                />
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => copyToClipboard(chatId)}
+                  onClick={() => username && copyToClipboard(`@${username}`)}
+                  disabled={!username}
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
-              )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Your account is connected and receiving notifications
+              </p>
             </div>
-            {!isConnected && (
-              <Button
-                onClick={handleConnect}
-                disabled={isSaving || !chatId.trim()}
-                className="w-full"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  'Connect Telegram'
-                )}
-              </Button>
-            )}
-          </div>
+          )}
 
           {/* Notification Settings */}
           {isConnected && (

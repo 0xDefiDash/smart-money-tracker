@@ -26,6 +26,8 @@ model User {
   telegramChatId                  String?   @unique
   telegramUsername                String?
   telegramNotificationSettings    Json?
+  telegramLinkingCode             String?
+  telegramLinkingCodeExpiry       DateTime?
   
   // Premium Subscription Fields
   isPremium                       Boolean   @default(false)
