@@ -1,9 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import telegramClient from '@/lib/telegram-client';
-
-const prisma = new PrismaClient();
 
 interface TelegramMessage {
   message_id: number;
@@ -29,9 +27,13 @@ interface TelegramUpdate {
   message?: TelegramMessage;
 }
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const update: TelegramUpdate = await request.json();
+    console.log('📨 Received Telegram update:', JSON.stringify(update, null, 2));
 
     if (update.message) {
       const message = update.message;
@@ -133,6 +135,12 @@ async function handleCommand(
           where: {
             telegramUsername: username.toLowerCase(),
             telegramChatId: null, // Not yet connected
+          },
+          select: {
+            id: true,
+            email: true,
+            telegramUsername: true,
+            telegramChatId: true,
           },
         });
 
@@ -260,6 +268,11 @@ async function updateUserTelegramInfo(
     const existingUser = await prisma.user.findFirst({
       where: {
         telegramChatId: String(chatId),
+      },
+      select: {
+        id: true,
+        telegramUsername: true,
+        telegramChatId: true,
       },
     });
 
