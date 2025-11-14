@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/table';
 import { Loader2, Lock, Check, Bell, ExternalLink, Search, Wallet } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { TokenGate } from '@/components/wallet/TokenGate';
 
 interface WalletBalance {
   address: string;
@@ -224,24 +225,29 @@ export default function WalletTrackerPage() {
   // }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6">
-      {/* Trial Banner */}
-      {isTrialActive && (
-        <Alert className="bg-terminal-green/10 border-terminal-green">
-          <AlertDescription className="text-terminal-green flex items-center justify-between">
-            <span>Free trial active: {trialMinutesLeft} minutes remaining</span>
-            <Button size="sm" onClick={() => router.push('/premium')} variant="outline" className="border-terminal-green text-terminal-green">
-              Subscribe Now
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
+    <TokenGate
+      requiredTokens={3000}
+      contractAddress="0xd6df108d516a5dc83f39020a349085c79d4edf0d"
+      chainId="8453"
+    >
+      <div className="container mx-auto p-4 md:p-6 space-y-6">
+        {/* Trial Banner */}
+        {isTrialActive && (
+          <Alert className="bg-terminal-green/10 border-terminal-green">
+            <AlertDescription className="text-terminal-green flex items-center justify-between">
+              <span>Free trial active: {trialMinutesLeft} minutes remaining</span>
+              <Button size="sm" onClick={() => router.push('/premium')} variant="outline" className="border-terminal-green text-terminal-green">
+                Subscribe Now
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
-      {/* Page Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Wallet className="h-8 w-8 text-terminal-green" />
-        <h1 className="text-3xl font-bold text-terminal-green uppercase tracking-wider">Wallet Tracker</h1>
-      </div>
+        {/* Page Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <Wallet className="h-8 w-8 text-terminal-green" />
+          <h1 className="text-3xl font-bold text-terminal-green uppercase tracking-wider">Wallet Tracker</h1>
+        </div>
 
       {/* Search Interface */}
       <Card className="p-6 bg-black border-terminal-green">
@@ -431,6 +437,7 @@ export default function WalletTrackerPage() {
           </div>
         </Card>
       )}
-    </div>
+      </div>
+    </TokenGate>
   );
 }
