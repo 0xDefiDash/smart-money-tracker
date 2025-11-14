@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Bell, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,16 +27,22 @@ interface TransactionAlert {
 }
 
 export function TransactionAlerts() {
+  const { data: session, status } = useSession() || {};
   const [alerts, setAlerts] = useState<TransactionAlert[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAlerts();
-    // Poll for new alerts every 30 seconds
-    const interval = setInterval(fetchAlerts, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    // Only fetch alerts if user is authenticated
+    if (status === 'authenticated') {
+      fetchAlerts();
+      // Poll for new alerts every 30 seconds
+      const interval = setInterval(fetchAlerts, 30000);
+      return () => clearInterval(interval);
+    } else {
+      setLoading(false);
+    }
+  }, [status]);
 
   const fetchAlerts = async () => {
     try {
@@ -44,9 +51,15 @@ export function TransactionAlerts() {
         const data = await res.json();
         setAlerts(data.alerts || []);
         setUnreadCount(data.unreadCount || 0);
+      } else if (res.status === 401) {
+        // User is not authenticated, silently ignore
+        setAlerts([]);
+        setUnreadCount(0);
       }
     } catch (error) {
-      console.error('Failed to fetch alerts:', error);
+      // Silently ignore errors for unauthenticated users
+      setAlerts([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
@@ -87,6 +100,11 @@ export function TransactionAlerts() {
     const baseUrl = explorers[chain] || explorers.ethereum;
     return `${baseUrl}/tx/${txHash}`;
   };
+
+  // Don't render anything if user is not authenticated
+  if (status !== 'authenticated') {
+    return null;
+  }
 
   return (
     <DropdownMenu>

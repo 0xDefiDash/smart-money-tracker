@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Menu, Activity } from 'lucide-react'
 import { MobileSidebar } from './mobile-sidebar'
 import { WalletButton } from '@/components/wallet/WalletButton'
+import { TransactionAlerts } from '@/components/wallet-tracker/transaction-alerts'
 
 export function MobileHeader() {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,6 +25,11 @@ export function MobileHeader() {
       </div>
 
       <div className="flex items-center space-x-2">
+        {/* Transaction Alerts - Watchlist notifications */}
+        <div className="scale-90 sm:scale-100">
+          <TransactionAlerts />
+        </div>
+        
         {/* Wallet Button for Mobile - show on all mobile sizes */}
         <div className="scale-90 sm:scale-100">
           <WalletButton />

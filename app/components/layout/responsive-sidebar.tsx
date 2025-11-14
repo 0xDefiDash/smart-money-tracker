@@ -24,6 +24,7 @@ import {
   Settings
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
+import { TransactionAlerts } from '@/components/wallet-tracker/transaction-alerts'
 
 const sidebarItems = [
   {
@@ -128,8 +129,9 @@ export function ResponsiveSidebar() {
       </nav>
 
       <div className="p-4 space-y-4 border-t-2 border-white">
-        {/* Wallet Connection */}
-        <div className="flex justify-center">
+        {/* Wallet Connection & Alerts */}
+        <div className="flex items-center justify-center gap-2">
+          <TransactionAlerts />
           <WalletButton />
         </div>
         
