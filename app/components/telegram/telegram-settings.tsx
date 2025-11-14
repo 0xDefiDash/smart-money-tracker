@@ -344,9 +344,19 @@ export default function TelegramSettings() {
                     <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
                   
-                  <p className="text-xs text-center text-muted-foreground">
-                    Click the button above to open Telegram. The connection will happen automatically!
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-xs text-center text-muted-foreground">
+                      Click the button above to open Telegram. The connection will happen automatically!
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 border-t border-muted"></div>
+                      <span className="text-xs text-muted-foreground">OR</span>
+                      <div className="flex-1 border-t border-muted"></div>
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground">
+                      Open Telegram and send the 6-digit code directly to <span className="font-mono text-primary">@Tracker103_bot</span>
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="pt-3 border-t space-y-2">
