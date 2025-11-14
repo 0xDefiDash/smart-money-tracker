@@ -2,9 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { usePremium } from '@/hooks/use-premium';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,9 +57,7 @@ interface Transaction {
 }
 
 export default function WalletTrackerPage() {
-  const { data: session } = useSession() || {};
   const router = useRouter();
-  const { hasPremiumAccess, isTrialActive, trialMinutesLeft, loading: premiumLoading } = usePremium();
 
   const [address, setAddress] = useState('');
   const [chain, setChain] = useState('ethereum');
@@ -71,29 +67,32 @@ export default function WalletTrackerPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [watchlist, setWatchlist] = useState<any[]>([]);
 
-  // Redirect if not authenticated
+  // Fetch watchlist on mount (stored in local storage)
   useEffect(() => {
-    if (!session) {
-      router.push('/auth/signin');
-    }
-  }, [session, router]);
-
-  // Fetch watchlist on mount
-  useEffect(() => {
-    if (hasPremiumAccess) {
-      fetchWatchlist();
-    }
-  }, [hasPremiumAccess]);
+    fetchWatchlist();
+  }, []);
 
   const fetchWatchlist = async () => {
     try {
+      // Try to fetch from API first (if authenticated)
       const res = await fetch('/api/watchlist');
       if (res.ok) {
         const data = await res.json();
         setWatchlist(data.watchlist || []);
+      } else {
+        // Fallback to local storage if not authenticated
+        const stored = localStorage.getItem('watchlist');
+        if (stored) {
+          setWatchlist(JSON.parse(stored));
+        }
       }
     } catch (error) {
       console.error('Failed to fetch watchlist:', error);
+      // Fallback to local storage
+      const stored = localStorage.getItem('watchlist');
+      if (stored) {
+        setWatchlist(JSON.parse(stored));
+      }
     }
   };
 
@@ -144,6 +143,7 @@ export default function WalletTrackerPage() {
     if (!walletData) return;
 
     try {
+      // Try API first (if authenticated)
       const res = await fetch('/api/watchlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,27 +158,57 @@ export default function WalletTrackerPage() {
         toast.success('Added to watchlist!');
         fetchWatchlist();
       } else {
-        const error = await res.json();
-        toast.error(error.error || 'Failed to add to watchlist');
+        // Fallback to local storage
+        const newItem = {
+          id: Date.now().toString(),
+          address: walletData.address,
+          chain: walletData.chain,
+          label: `${chain.toUpperCase()} Wallet`,
+          createdAt: new Date().toISOString()
+        };
+        const updatedWatchlist = [...watchlist, newItem];
+        localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+        setWatchlist(updatedWatchlist);
+        toast.success('Added to local watchlist!');
       }
     } catch (error) {
       console.error('Add to watchlist error:', error);
-      toast.error('Failed to add to watchlist');
+      // Fallback to local storage
+      const newItem = {
+        id: Date.now().toString(),
+        address: walletData.address,
+        chain: walletData.chain,
+        label: `${chain.toUpperCase()} Wallet`,
+        createdAt: new Date().toISOString()
+      };
+      const updatedWatchlist = [...watchlist, newItem];
+      localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+      setWatchlist(updatedWatchlist);
+      toast.success('Added to local watchlist!');
     }
   };
 
   const handleRemoveFromWatchlist = async (id: string) => {
     try {
+      // Try API first (if authenticated)
       const res = await fetch(`/api/watchlist?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success('Removed from watchlist');
         fetchWatchlist();
       } else {
-        toast.error('Failed to remove from watchlist');
+        // Fallback to local storage
+        const updatedWatchlist = watchlist.filter(item => item.id !== id);
+        localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+        setWatchlist(updatedWatchlist);
+        toast.success('Removed from local watchlist');
       }
     } catch (error) {
       console.error('Remove from watchlist error:', error);
-      toast.error('Failed to remove from watchlist');
+      // Fallback to local storage
+      const updatedWatchlist = watchlist.filter(item => item.id !== id);
+      localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+      setWatchlist(updatedWatchlist);
+      toast.success('Removed from local watchlist');
     }
   };
 
@@ -196,34 +226,6 @@ export default function WalletTrackerPage() {
     return `${baseUrl}/address/${address}`;
   };
 
-  // Show loading state while checking premium
-  if (premiumLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-terminal-green" />
-      </div>
-    );
-  }
-
-  // Show premium prompt if no access (for now, we'll allow free access)
-  // if (!hasPremiumAccess) {
-  //   return (
-  //     <div className="container mx-auto p-6">
-  //       <Card className="max-w-md mx-auto text-center p-8 bg-black border-terminal-green">
-  //         <Lock className="h-16 w-16 mx-auto mb-4 text-terminal-green" />
-  //         <h2 className="text-2xl font-bold mb-2 text-terminal-green">Premium Feature</h2>
-  //         <p className="text-terminal-gray mb-6">
-  //           Wallet Tracker requires a premium subscription
-  //         </p>
-  //         <Button onClick={() => router.push('/premium')} className="bg-terminal-green text-black hover:bg-terminal-green/80">
-  //           <Check className="mr-2 h-4 w-4" />
-  //           Subscribe Now
-  //         </Button>
-  //       </Card>
-  //     </div>
-  //   );
-  // }
-
   return (
     <TokenGate
       requiredTokens={3000}
@@ -231,18 +233,6 @@ export default function WalletTrackerPage() {
       chainId="8453"
     >
       <div className="container mx-auto p-4 md:p-6 space-y-6">
-        {/* Trial Banner */}
-        {isTrialActive && (
-          <Alert className="bg-terminal-green/10 border-terminal-green">
-            <AlertDescription className="text-terminal-green flex items-center justify-between">
-              <span>Free trial active: {trialMinutesLeft} minutes remaining</span>
-              <Button size="sm" onClick={() => router.push('/premium')} variant="outline" className="border-terminal-green text-terminal-green">
-                Subscribe Now
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
         {/* Page Header */}
         <div className="flex items-center gap-3 mb-6">
           <Wallet className="h-8 w-8 text-terminal-green" />

@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { useSession } from 'next-auth/react';
 import {
   Send,
   CheckCircle2,
@@ -36,7 +35,6 @@ interface LinkingCodeData {
 }
 
 export default function TelegramSettings() {
-  const { data: session } = useSession() || {};
   const [username, setUsername] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +52,7 @@ export default function TelegramSettings() {
 
   useEffect(() => {
     loadUserSettings();
-  }, [session]);
+  }, []);
 
   // Countdown timer for code expiry
   useEffect(() => {
@@ -177,7 +175,7 @@ export default function TelegramSettings() {
           data: {
             message: '🎉 Test notification from DeFiDash Tracker!\n\nYour Telegram notifications are working correctly.',
           },
-          userId: session?.user?.id,
+          username: username,
         }),
       });
 

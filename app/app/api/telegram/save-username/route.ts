@@ -28,12 +28,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If not logged in, store in session/cookie for later
+    // If not logged in, return success - username will be stored in local storage
     if (!session?.user?.email) {
-      // Store username temporarily (can be retrieved when they sign up/in)
       return NextResponse.json({
         success: true,
-        message: 'Username saved temporarily. Sign in to complete connection.',
+        message: 'Username saved! Go to Telegram and send /connect to @Tracker103_bot',
         pendingUsername: cleanUsername,
       });
     }

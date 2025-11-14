@@ -16,15 +16,7 @@ function generateCode(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
+    // No authentication required - generate code for anonymous users
     // Generate unique code (retry if duplicate)
     let code = generateCode();
     let attempts = 0;
@@ -56,19 +48,11 @@ export async function POST(request: NextRequest) {
     const expiry = new Date();
     expiry.setMinutes(expiry.getMinutes() + 5);
 
-    // Update user with linking code
-    await prisma.user.update({
-      where: { email: session.user.email },
-      data: {
-        telegramLinkingCode: code,
-        telegramLinkingCodeExpiry: expiry,
-      },
-    });
-
     // Generate deep link
     const botUsername = 'Tracker103_bot';
     const deepLink = `https://t.me/${botUsername}?start=${code}`;
 
+    // Return the code - it will be stored in local storage on the frontend
     return NextResponse.json({
       success: true,
       code,

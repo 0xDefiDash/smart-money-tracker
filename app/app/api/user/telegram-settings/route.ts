@@ -10,11 +10,21 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
+    // If not authenticated, return default settings
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        success: true,
+        chatId: null,
+        username: null,
+        pendingUsername: null,
+        settings: {
+          whaleAlerts: true,
+          blockWars: true,
+          alphaFeeds: true,
+          marketAlerts: false,
+          dailySummary: true,
+        },
+      });
     }
 
     const user = await prisma.user.findUnique({
@@ -61,16 +71,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
     const { chatId, settings } = body;
+
+    // If not authenticated, return success without saving to database
+    // Settings will be stored in local storage on the frontend
+    if (!session?.user?.email) {
+      return NextResponse.json({
+        success: true,
+        message: 'Settings saved locally',
+      });
+    }
 
     const updateData: any = {};
 

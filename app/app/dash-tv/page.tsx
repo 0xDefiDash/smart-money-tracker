@@ -2,7 +2,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,7 +26,6 @@ import { toast } from 'react-hot-toast'
 import Image from 'next/image'
 
 export default function DashTVPage() {
-  const { data: session, status } = useSession() || {}
   const router = useRouter()
   
   const [profile, setProfile] = useState<any>(null)
@@ -36,25 +34,9 @@ export default function DashTVPage() {
   const [activeTab, setActiveTab] = useState('browse')
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      loadProfile()
-      loadVideos()
-    }
-  }, [status])
-
-  const loadProfile = async () => {
-    try {
-      const response = await fetch(`/api/dash-tv/profile?userId=${(session as any)?.user?.id}`)
-      if (response.ok) {
-        const data = await response.json()
-        setProfile(data)
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+    loadVideos()
+    setLoading(false)
+  }, [])
 
   const loadVideos = async () => {
     try {
@@ -68,54 +50,12 @@ export default function DashTVPage() {
     }
   }
 
-  if (status === 'loading' || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-tech-gradient flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-muted-foreground">Loading Dash TV...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-tech-gradient flex items-center justify-center p-4">
-        <Card className="max-w-md bg-slate-900/80 border-slate-700/50">
-          <CardContent className="p-6 text-center space-y-4">
-            <Video className="w-12 h-12 text-blue-500 mx-auto" />
-            <h2 className="text-xl font-bold">Welcome to Dash TV</h2>
-            <p className="text-muted-foreground">
-              Please sign in to start broadcasting your crypto projects and engage with the community
-            </p>
-            <Button onClick={() => router.push('/auth/signin')} className="w-full">
-              Sign In
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // If no profile, show profile setup
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-tech-gradient p-4">
-        <div className="max-w-4xl mx-auto space-y-6 py-8">
-          <div className="text-center space-y-2 mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Welcome to Dash TV
-            </h1>
-            <p className="text-muted-foreground">
-              Create your broadcaster profile to start sharing your crypto projects with the world
-            </p>
-          </div>
-          
-          <ProfileSetup onProfileCreated={(newProfile) => {
-            setProfile(newProfile)
-            toast.success('Profile created! You can now start broadcasting.')
-          }} />
         </div>
       </div>
     )
