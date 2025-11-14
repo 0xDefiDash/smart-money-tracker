@@ -2,67 +2,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import prisma from '@/lib/db';
+import { prisma } from '@/lib/db';
 
-// Generate a random 6-character alphanumeric code
+export const dynamic = 'force-dynamic';
+
+// Generate a random 6-digit code
 function generateCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluding similar looking characters
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // No authentication required - generate code for anonymous users
-    // Generate unique code (retry if duplicate)
-    let code = generateCode();
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    while (attempts < maxAttempts) {
-      const existing = await prisma.user.findFirst({
-        where: {
-          telegramLinkingCode: code,
-          telegramLinkingCodeExpiry: {
-            gte: new Date(), // Only check non-expired codes
-          },
-        },
-      });
-
-      if (!existing) break;
-      code = generateCode();
-      attempts++;
-    }
-
-    if (attempts >= maxAttempts) {
-      return NextResponse.json(
-        { error: 'Failed to generate unique code. Please try again.' },
-        { status: 500 }
-      );
-    }
-
-    // Set expiry to 5 minutes from now
-    const expiry = new Date();
-    expiry.setMinutes(expiry.getMinutes() + 5);
-
-    // Generate deep link
+    const session = await getServerSession(authOptions);
+    
+    // Generate code regardless of authentication
+    // This allows users to generate a link before logging in
+    const code = generateCode();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    
+    // Bot username
     const botUsername = 'Tracker103_bot';
+    
+    // Create deep link with code as start parameter
     const deepLink = `https://t.me/${botUsername}?start=${code}`;
-
-    // Return the code - it will be stored in local storage on the frontend
+    
+    // If user is logged in, store the code in database
+    if (session?.user?.email) {
+      try {
+        await prisma.user.update({
+          where: { email: session.user.email },
+          data: {
+            telegramLinkingCode: code,
+            telegramLinkingCodeExpiry: expiresAt,
+          },
+        });
+      } catch (dbError) {
+        console.error('Error storing code in database:', dbError);
+        // Continue anyway - code can still work via bot memory
+      }
+    }
+    
     return NextResponse.json({
       success: true,
       code,
       deepLink,
-      expiresAt: expiry.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+      botUsername,
     });
-  } catch (error) {
-    console.error('Error generating Telegram linking code:', error);
+  } catch (error: any) {
+    console.error('Error generating code:', error);
     return NextResponse.json(
-      { error: 'Failed to generate linking code' },
+      { success: false, error: error.message || 'Failed to generate code' },
       { status: 500 }
     );
   }
