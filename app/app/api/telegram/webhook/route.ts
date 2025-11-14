@@ -74,7 +74,64 @@ async function handleCommand(
 
     switch (cmd) {
       case '/start':
-        await telegramClient.sendWelcomeMessage(String(chatId), firstName);
+        // Check if there's a linking code parameter
+        const parts = command.split(' ');
+        if (parts.length > 1) {
+          const linkingCode = parts[1].toUpperCase();
+          
+          // Try to find user with this linking code
+          const user = await prisma.user.findFirst({
+            where: {
+              telegramLinkingCode: linkingCode,
+              telegramLinkingCodeExpiry: {
+                gte: new Date(), // Code must not be expired
+              },
+            },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              telegramChatId: true,
+            },
+          });
+
+          if (user) {
+            // Link the account
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                telegramChatId: String(chatId),
+                telegramUsername: username,
+                telegramLinkingCode: null, // Clear the code
+                telegramLinkingCodeExpiry: null,
+                telegramNotificationSettings: {
+                  whaleAlerts: true,
+                  blockWars: true,
+                  alphaFeeds: true,
+                  marketAlerts: false,
+                  dailySummary: true,
+                },
+              },
+            });
+
+            // Send success message
+            await telegramClient.sendMessage({
+              chat_id: chatId,
+              text: `✅ *Account Connected Successfully!*\n\n👤 Account: ${user.name || user.email || 'DeFiDash User'}\n${username ? `📱 Telegram: @${username}\n` : ''}\n🎉 Welcome to DeFiDash Tracker!\n\n🔔 You'll now receive:\n• 🐋 Wallet tracker alerts\n• 💎 Shot caller notifications\n• ⚔️ Block Wars updates\n• 📊 Market insights\n• 📈 Daily market summaries\n\nUse /settings to customize your notifications.\nUse /help to see all commands.`,
+              parse_mode: 'Markdown',
+            });
+          } else {
+            // Invalid or expired code
+            await telegramClient.sendMessage({
+              chat_id: chatId,
+              text: `❌ *Invalid or Expired Code*\n\nThe connection code \`${linkingCode}\` is either invalid or has expired.\n\n*To connect your account:*\n1. Go to [DeFiDash Settings](https://defidashtracker.com/settings)\n2. Click "Connect Telegram"\n3. Click the new link that appears\n\n⏰ Codes expire after 5 minutes for security.`,
+              parse_mode: 'Markdown',
+            });
+          }
+        } else {
+          // No linking code, send welcome message
+          await telegramClient.sendWelcomeMessage(String(chatId), firstName);
+        }
         break;
 
       case '/help':
