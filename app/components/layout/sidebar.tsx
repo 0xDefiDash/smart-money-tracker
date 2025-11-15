@@ -19,7 +19,8 @@ import {
   Video,
   Globe,
   Shield,
-  Settings
+  Settings,
+  Twitter
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -67,6 +68,11 @@ const sidebarItems = [
     title: 'Settings',
     href: '/settings',
     icon: Settings,
+  },
+  {
+    title: 'Social Media',
+    href: '/social-media',
+    icon: Twitter,
   },
 ]
 

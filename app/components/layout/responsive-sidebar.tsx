@@ -21,7 +21,8 @@ import {
   Video,
   Globe,
   Shield,
-  Settings
+  Settings,
+  Twitter
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 import { TransactionAlerts } from '@/components/wallet-tracker/transaction-alerts'
@@ -71,6 +72,11 @@ const sidebarItems = [
     title: 'Settings',
     href: '/settings',
     icon: Settings,
+  },
+  {
+    title: 'Social Media',
+    href: '/social-media',
+    icon: Twitter,
   },
 ]
 

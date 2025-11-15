@@ -1,7 +1,8 @@
 
-// Twitter API v2 Client
+// Twitter API v2 Client with OAuth 1.0a posting support
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 interface TwitterUser {
   id: string;
@@ -14,6 +15,14 @@ interface TwitterUser {
     tweet_count: number;
   };
   verified?: boolean;
+}
+
+interface TwitterCredentials {
+  apiKey: string;
+  apiKeySecret: string;
+  accessToken: string;
+  accessTokenSecret: string;
+  bearerToken: string;
 }
 
 interface Tweet {
@@ -49,41 +58,124 @@ interface TwitterApiResponse {
 class TwitterClient {
   private baseUrl = 'https://api.twitter.com/2';
   private accessToken: string | null = null;
+  private credentials: TwitterCredentials | null = null;
   private lastRequestTime: number = 0;
   private minRequestInterval: number = 1000; // Minimum 1 second between requests
   private rateLimitRemaining: number = 180;
   private rateLimitReset: number = 0;
   
-  private getAccessToken(): string {
-    // Return cached token if available
-    if (this.accessToken) {
-      return this.accessToken;
+  private getCredentials(): TwitterCredentials {
+    // Return cached credentials if available
+    if (this.credentials) {
+      return this.credentials;
     }
 
-    // Try to get OAuth token from auth secrets file
+    // Try to get OAuth credentials from auth secrets file
     try {
       const authSecretsPath = '/home/ubuntu/.config/abacusai_auth_secrets.json';
       if (fs.existsSync(authSecretsPath)) {
         const authSecrets = JSON.parse(fs.readFileSync(authSecretsPath, 'utf-8'));
-        const token = authSecrets.twitter?.secrets?.access_token?.value;
-        if (token && typeof token === 'string') {
-          this.accessToken = token;
-          console.log('✅ Twitter OAuth token loaded successfully');
-          return token;
+        
+        // Try "x (twitter)" first, then fallback to "twitter"
+        const twitterData = authSecrets['x (twitter)'] || authSecrets.twitter;
+        
+        if (twitterData?.secrets) {
+          const secrets = twitterData.secrets;
+          this.credentials = {
+            apiKey: secrets.api_key?.value || '',
+            apiKeySecret: secrets.api_key_secret?.value || '',
+            accessToken: secrets.access_token?.value || '',
+            accessTokenSecret: secrets.access_token_secret?.value || '',
+            bearerToken: secrets.bearer_token?.value || ''
+          };
+          console.log('✅ Twitter OAuth credentials loaded successfully');
+          return this.credentials;
         }
       }
     } catch (error) {
-      console.error('Error reading OAuth token:', error);
+      console.error('Error reading OAuth credentials:', error);
     }
 
-    // Fallback to environment variable if available
-    const envToken = process.env.TWITTER_ACCESS_TOKEN;
-    if (envToken) {
-      this.accessToken = envToken;
-      return envToken;
-    }
+    throw new Error('Twitter OAuth credentials not configured. Please authenticate with Twitter.');
+  }
+  
+  private getAccessToken(): string {
+    const creds = this.getCredentials();
+    return creds.bearerToken;
+  }
 
-    throw new Error('Twitter OAuth access token not configured. Please authenticate with Twitter.');
+  // OAuth 1.0a signature generation for posting tweets
+  private generateOAuthSignature(
+    method: string,
+    url: string,
+    params: Record<string, string>
+  ): string {
+    const creds = this.getCredentials();
+    
+    // Sort parameters
+    const sortedParams = Object.keys(params)
+      .sort()
+      .map(key => `${this.percentEncode(key)}=${this.percentEncode(params[key])}`)
+      .join('&');
+
+    // Create signature base string
+    const signatureBaseString = [
+      method.toUpperCase(),
+      this.percentEncode(url),
+      this.percentEncode(sortedParams)
+    ].join('&');
+
+    // Create signing key
+    const signingKey = `${this.percentEncode(creds.apiKeySecret)}&${this.percentEncode(creds.accessTokenSecret)}`;
+
+    // Generate signature
+    const signature = crypto
+      .createHmac('sha1', signingKey)
+      .update(signatureBaseString)
+      .digest('base64');
+
+    return signature;
+  }
+
+  private percentEncode(str: string): string {
+    return encodeURIComponent(str)
+      .replace(/!/g, '%21')
+      .replace(/'/g, '%27')
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29')
+      .replace(/\*/g, '%2A');
+  }
+
+  private generateOAuthHeader(
+    method: string,
+    url: string,
+    additionalParams: Record<string, string> = {}
+  ): string {
+    const creds = this.getCredentials();
+    
+    const oauthParams: Record<string, string> = {
+      oauth_consumer_key: creds.apiKey,
+      oauth_token: creds.accessToken,
+      oauth_signature_method: 'HMAC-SHA1',
+      oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+      oauth_nonce: crypto.randomBytes(32).toString('base64').replace(/\W/g, ''),
+      oauth_version: '1.0'
+    };
+
+    // Combine OAuth params with additional params for signature
+    const allParams = { ...oauthParams, ...additionalParams };
+
+    // Generate signature
+    const signature = this.generateOAuthSignature(method, url, allParams);
+    oauthParams.oauth_signature = signature;
+
+    // Build OAuth header
+    const authHeader = 'OAuth ' + Object.keys(oauthParams)
+      .sort()
+      .map(key => `${this.percentEncode(key)}="${this.percentEncode(oauthParams[key])}"`)
+      .join(', ');
+
+    return authHeader;
   }
 
   private async rateLimitDelay(): Promise<void> {
@@ -438,6 +530,184 @@ class TwitterClient {
     }
 
     return { alertType, urgency, actionable };
+  }
+
+  // Post a tweet using OAuth 1.0a
+  async postTweet(text: string): Promise<{ success: boolean; tweetId?: string; error?: string }> {
+    try {
+      await this.rateLimitDelay();
+
+      const url = `${this.baseUrl}/tweets`;
+      const authHeader = this.generateOAuthHeader('POST', url);
+
+      console.log(`🐦 Posting tweet: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ Failed to post tweet:`, response.status, errorText);
+        return { success: false, error: `HTTP ${response.status}: ${errorText}` };
+      }
+
+      const data = await response.json();
+      console.log(`✅ Tweet posted successfully! ID: ${data.data?.id}`);
+      return { success: true, tweetId: data.data?.id };
+    } catch (error) {
+      console.error('❌ Error posting tweet:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  // Helper methods for creating different types of tweets
+
+  createWhaleAlertTweet(data: {
+    address: string;
+    amount: string;
+    token: string;
+    usdValue: string;
+    type: 'buy' | 'sell' | 'transfer';
+    chain: string;
+  }): string {
+    const emoji = data.type === 'buy' ? '🟢' : data.type === 'sell' ? '🔴' : '🔄';
+    const action = data.type === 'buy' ? 'bought' : data.type === 'sell' ? 'sold' : 'transferred';
+    
+    return `🐋 WHALE ALERT ${emoji}
+
+${data.amount} $${data.token} ${action}
+💰 Value: ${data.usdValue}
+⛓️ Chain: ${data.chain}
+📍 ${data.address.substring(0, 10)}...
+
+Track whale activity: https://defidashtracker.com/whale-tracker
+
+#Crypto #WhaleAlert #${data.token}`;
+  }
+
+  createMarketUpdateTweet(data: {
+    token: string;
+    price: string;
+    change24h: string;
+    sentiment: 'bullish' | 'bearish' | 'neutral';
+  }): string {
+    const emoji = data.sentiment === 'bullish' ? '🚀' : data.sentiment === 'bearish' ? '📉' : '➡️';
+    const changeEmoji = parseFloat(data.change24h) > 0 ? '📈' : '📉';
+    
+    return `${emoji} ${data.token} Market Update
+
+💵 Price: ${data.price}
+${changeEmoji} 24h: ${data.change24h}
+📊 Sentiment: ${data.sentiment.toUpperCase()}
+
+Get real-time market insights: https://defidashtracker.com
+
+#Crypto #${data.token} #MarketUpdate`;
+  }
+
+  createAlertTweet(data: {
+    title: string;
+    description: string;
+    urgency: 'high' | 'medium' | 'low';
+  }): string {
+    const emoji = data.urgency === 'high' ? '🚨' : data.urgency === 'medium' ? '⚠️' : 'ℹ️';
+    
+    return `${emoji} ${data.title}
+
+${data.description}
+
+Stay ahead with DeFiDash alerts: https://defidashtracker.com/alerts
+
+#DeFi #CryptoAlert #SmartMoney`;
+  }
+
+  createPlatformFeatureTweet(feature: string): string {
+    const features: Record<string, { emoji: string; description: string; hashtags: string[] }> = {
+      'whale-tracker': {
+        emoji: '🐋',
+        description: 'Track whale movements across multiple chains in real-time. Get instant alerts when smart money moves.',
+        hashtags: ['WhaleTracking', 'SmartMoney', 'Crypto']
+      },
+      'wallet-monitor': {
+        emoji: '👀',
+        description: 'Monitor any wallet address. Get notified of all transactions, token transfers, and balance changes.',
+        hashtags: ['WalletTracking', 'DeFi', 'Crypto']
+      },
+      'market-insights': {
+        emoji: '📊',
+        description: 'AI-powered market analysis with live price feeds, sentiment analysis, and trading signals.',
+        hashtags: ['CryptoTrading', 'MarketAnalysis', 'AI']
+      },
+      'telegram-alerts': {
+        emoji: '📱',
+        description: 'Get instant Telegram notifications for whale movements, price changes, and custom alerts.',
+        hashtags: ['TelegramBot', 'CryptoAlerts', 'DeFi']
+      }
+    };
+
+    const info = features[feature] || {
+      emoji: '✨',
+      description: 'Discover powerful tools for crypto tracking and analysis.',
+      hashtags: ['Crypto', 'DeFi', 'Trading']
+    };
+
+    return `${info.emoji} DeFiDash Feature
+
+${info.description}
+
+Try it now: https://defidashtracker.com
+
+${info.hashtags.map(tag => `#${tag}`).join(' ')}`;
+  }
+
+  createDailyReportTweet(data: {
+    date: string;
+    totalWhaleTransactions: number;
+    topMovers: Array<{ token: string; change: string }>;
+    marketSentiment: string;
+  }): string {
+    const topMoversText = data.topMovers
+      .slice(0, 3)
+      .map(m => `• $${m.token}: ${m.change}`)
+      .join('\n');
+
+    return `📊 Daily Crypto Report - ${data.date}
+
+🐋 Whale Transactions: ${data.totalWhaleTransactions}
+📈 Top Movers:
+${topMoversText}
+
+📌 Market Sentiment: ${data.marketSentiment}
+
+Full report: https://defidashtracker.com
+
+#Crypto #DailyReport #DeFi`;
+  }
+
+  createTrendingTokenTweet(data: {
+    token: string;
+    price: string;
+    change: string;
+    volume: string;
+    reason: string;
+  }): string {
+    return `🔥 TRENDING NOW: $${data.token}
+
+💵 Price: ${data.price}
+📈 Change: ${data.change}
+💰 Volume: ${data.volume}
+
+${data.reason}
+
+Track trending tokens: https://defidashtracker.com
+
+#Crypto #${data.token} #Trending`;
   }
 }
 
