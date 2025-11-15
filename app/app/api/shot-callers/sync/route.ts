@@ -199,183 +199,231 @@ async function updateKOLStats(kolId: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Starting sync for tracked KOLs...');
+    console.log('🔄 Starting sync for tracked KOLs...');
     
     const results = {
       success: true,
       processed: 0,
       tokenCallsCreated: 0,
       errors: [] as string[],
-      accounts: [] as any[]
+      accounts: [] as any[],
+      startTime: new Date().toISOString()
     };
 
-    for (const username of TRACKED_ACCOUNTS) {
-      try {
-        console.log(`Processing ${username}...`);
-        
-        // Ensure KOL profile exists
-        let kolProfile = await prisma.kOLProfile.findUnique({
-          where: { username }
-        });
+    // Process accounts in batches to avoid rate limits
+    const BATCH_SIZE = 3;
+    const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
 
-        // Fetch tweets from Twitter API
-        const response = await twitterClient.getUserTweets(username, 20);
-        
-        if (!response.data || response.data.length === 0) {
-          console.log(`No tweets found for ${username}`);
-          results.errors.push(`No tweets found for ${username}`);
-          continue;
-        }
-
-        const user = response.includes?.users?.[0];
-        
-        // Create or update KOL profile
-        if (!kolProfile && user) {
-          kolProfile = await prisma.kOLProfile.create({
-            data: {
-              username,
-              displayName: user.name,
-              twitterUserId: user.id,
-              profileImageUrl: user.profile_image_url,
-              followersCount: user.public_metrics?.followers_count || 0,
-              followingCount: user.public_metrics?.following_count || 0,
-              tweetCount: user.public_metrics?.tweet_count || 0,
-              isVerified: user.verified || false,
-              isTracked: true,
-              lastFetchedAt: new Date(),
-            }
+    for (let i = 0; i < TRACKED_ACCOUNTS.length; i += BATCH_SIZE) {
+      const batch = TRACKED_ACCOUNTS.slice(i, i + BATCH_SIZE);
+      
+      console.log(`📦 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(TRACKED_ACCOUNTS.length / BATCH_SIZE)}`);
+      
+      await Promise.all(batch.map(async (username) => {
+        try {
+          console.log(`👤 Processing ${username}...`);
+          
+          // Ensure KOL profile exists
+          let kolProfile = await prisma.kOLProfile.findUnique({
+            where: { username }
           });
-        } else if (kolProfile && user) {
-          await prisma.kOLProfile.update({
-            where: { id: kolProfile.id },
-            data: {
-              displayName: user.name,
-              profileImageUrl: user.profile_image_url,
-              followersCount: user.public_metrics?.followers_count || 0,
-              followingCount: user.public_metrics?.following_count || 0,
-              tweetCount: user.public_metrics?.tweet_count || 0,
-              isVerified: user.verified || false,
-              lastFetchedAt: new Date(),
-            }
-          });
-        }
 
-        if (!kolProfile) {
-          console.log(`Failed to create/find profile for ${username}`);
-          results.errors.push(`Failed to create/find profile for ${username}`);
-          continue;
-        }
-
-        let tweetsProcessed = 0;
-        let callsCreated = 0;
-
-        // Process each tweet
-        for (const tweet of response.data) {
+          // Fetch tweets from Twitter API with error handling
+          let response;
           try {
-            const category = twitterClient.categorizeTweet(tweet.text);
-            const coins = twitterClient.extractCoinsFromTweet(tweet.text);
-            const hashtags = tweet.entities?.hashtags?.map(h => h.tag) || [];
-            const mentions = tweet.entities?.mentions?.map(m => m.username) || [];
+            response = await twitterClient.getUserTweets(username, 20);
+          } catch (twitterError: any) {
+            console.error(`❌ Twitter API error for ${username}:`, twitterError.message);
+            
+            // Handle rate limit errors gracefully
+            if (twitterError.message?.includes('rate limit') || twitterError.message?.includes('429')) {
+              results.errors.push(`Rate limited for ${username} - will retry later`);
+              return;
+            }
+            
+            results.errors.push(`Twitter API error for ${username}: ${twitterError.message}`);
+            return;
+          }
+          
+          if (!response || !response.data || response.data.length === 0) {
+            console.log(`⚠️ No tweets found for ${username}`);
+            results.errors.push(`No tweets found for ${username}`);
+            return;
+          }
 
-            // Store tweet
-            const storedTweet = await prisma.kOLTweet.upsert({
-              where: { tweetId: tweet.id },
-              create: {
-                kolId: kolProfile.id,
-                tweetId: tweet.id,
-                content: tweet.text,
-                createdAt: new Date(tweet.created_at),
-                likeCount: tweet.public_metrics?.like_count || 0,
-                retweetCount: tweet.public_metrics?.retweet_count || 0,
-                replyCount: tweet.public_metrics?.reply_count || 0,
-                quoteCount: tweet.public_metrics?.quote_count || 0,
-                category,
-                coins,
-                hashtags,
-                mentions,
-                isAlert: category === 'alert',
-              },
-              update: {
-                likeCount: tweet.public_metrics?.like_count || 0,
-                retweetCount: tweet.public_metrics?.retweet_count || 0,
-                replyCount: tweet.public_metrics?.reply_count || 0,
-                quoteCount: tweet.public_metrics?.quote_count || 0,
+          const user = response.includes?.users?.[0];
+          
+          // Create or update KOL profile
+          if (!kolProfile && user) {
+            kolProfile = await prisma.kOLProfile.create({
+              data: {
+                username,
+                displayName: user.name,
+                twitterUserId: user.id,
+                profileImageUrl: user.profile_image_url,
+                followersCount: user.public_metrics?.followers_count || 0,
+                followingCount: user.public_metrics?.following_count || 0,
+                tweetCount: user.public_metrics?.tweet_count || 0,
+                isVerified: user.verified || false,
+                isTracked: true,
+                lastFetchedAt: new Date(),
               }
             });
-
-            tweetsProcessed++;
-
-            // Extract tokens and create token calls
-            const tokens = extractTokens(tweet.text);
-            
-            if (tokens.length > 0) {
-              const sentiment = analyzeSentiment(tweet.text);
-
-              for (const tokenSymbol of tokens) {
-                // Check if call already exists
-                const existingCall = await prisma.tokenCall.findUnique({
-                  where: {
-                    tweetId_tokenSymbol: {
-                      tweetId: tweet.id,
-                      tokenSymbol
-                    }
-                  }
-                });
-
-                if (existingCall) {
-                  console.log(`Token call already exists for ${tokenSymbol} in tweet ${tweet.id}`);
-                  continue;
-                }
-
-                // Get current price
-                const tokenData = await getTokenPrice(tokenSymbol);
-                
-                const tokenCall = await prisma.tokenCall.create({
-                  data: {
-                    kolId: kolProfile.id,
-                    tweetId: tweet.id,
-                    tokenSymbol,
-                    tokenName: tokenData?.name || tokenSymbol,
-                    callPrice: tokenData?.price,
-                    currentPrice: tokenData?.price,
-                    sentiment,
-                    calledAt: new Date(tweet.created_at),
-                  }
-                });
-
-                callsCreated++;
-                console.log(`Created token call for ${tokenSymbol} by ${username}`);
+            console.log(`✅ Created KOL profile for ${username}`);
+          } else if (kolProfile && user) {
+            await prisma.kOLProfile.update({
+              where: { id: kolProfile.id },
+              data: {
+                displayName: user.name,
+                profileImageUrl: user.profile_image_url,
+                followersCount: user.public_metrics?.followers_count || 0,
+                followingCount: user.public_metrics?.following_count || 0,
+                tweetCount: user.public_metrics?.tweet_count || 0,
+                isVerified: user.verified || false,
+                lastFetchedAt: new Date(),
               }
-            }
-          } catch (tweetError) {
-            console.error(`Error processing tweet ${tweet.id}:`, tweetError);
+            });
+            console.log(`✅ Updated KOL profile for ${username}`);
           }
+
+          if (!kolProfile) {
+            console.log(`❌ Failed to create/find profile for ${username}`);
+            results.errors.push(`Failed to create/find profile for ${username}`);
+            return;
+          }
+
+          let tweetsProcessed = 0;
+          let callsCreated = 0;
+
+          // Process each tweet
+          for (const tweet of response.data) {
+            try {
+              const category = twitterClient.categorizeTweet(tweet.text);
+              const coins = twitterClient.extractCoinsFromTweet(tweet.text);
+              const hashtags = tweet.entities?.hashtags?.map(h => h.tag) || [];
+              const mentions = tweet.entities?.mentions?.map(m => m.username) || [];
+
+              // Store tweet
+              await prisma.kOLTweet.upsert({
+                where: { tweetId: tweet.id },
+                create: {
+                  kolId: kolProfile.id,
+                  tweetId: tweet.id,
+                  content: tweet.text,
+                  createdAt: new Date(tweet.created_at),
+                  likeCount: tweet.public_metrics?.like_count || 0,
+                  retweetCount: tweet.public_metrics?.retweet_count || 0,
+                  replyCount: tweet.public_metrics?.reply_count || 0,
+                  quoteCount: tweet.public_metrics?.quote_count || 0,
+                  category,
+                  coins,
+                  hashtags,
+                  mentions,
+                  isAlert: category === 'alert',
+                },
+                update: {
+                  likeCount: tweet.public_metrics?.like_count || 0,
+                  retweetCount: tweet.public_metrics?.retweet_count || 0,
+                  replyCount: tweet.public_metrics?.reply_count || 0,
+                  quoteCount: tweet.public_metrics?.quote_count || 0,
+                }
+              });
+
+              tweetsProcessed++;
+
+              // Extract tokens and create token calls
+              const tokens = extractTokens(tweet.text);
+              
+              if (tokens.length > 0) {
+                const sentiment = analyzeSentiment(tweet.text);
+
+                for (const tokenSymbol of tokens) {
+                  // Check if call already exists
+                  const existingCall = await prisma.tokenCall.findUnique({
+                    where: {
+                      tweetId_tokenSymbol: {
+                        tweetId: tweet.id,
+                        tokenSymbol
+                      }
+                    }
+                  });
+
+                  if (existingCall) {
+                    continue;
+                  }
+
+                  // Get current price with error handling
+                  let tokenData = null;
+                  try {
+                    tokenData = await getTokenPrice(tokenSymbol);
+                  } catch (priceError) {
+                    console.log(`⚠️ Failed to get price for ${tokenSymbol}`);
+                  }
+                  
+                  await prisma.tokenCall.create({
+                    data: {
+                      kolId: kolProfile.id,
+                      tweetId: tweet.id,
+                      tokenSymbol,
+                      tokenName: tokenData?.name || tokenSymbol,
+                      callPrice: tokenData?.price,
+                      currentPrice: tokenData?.price,
+                      sentiment,
+                      calledAt: new Date(tweet.created_at),
+                    }
+                  });
+
+                  callsCreated++;
+                  console.log(`💰 Created token call for $${tokenSymbol} by ${username}`);
+                }
+              }
+            } catch (tweetError) {
+              console.error(`❌ Error processing tweet ${tweet.id}:`, tweetError);
+            }
+          }
+
+          // Update KOL stats
+          await updateKOLStats(kolProfile.id);
+
+          results.accounts.push({
+            username,
+            tweetsProcessed,
+            callsCreated
+          });
+
+          results.processed += tweetsProcessed;
+          results.tokenCallsCreated += callsCreated;
+
+          console.log(`✅ ${username}: ${tweetsProcessed} tweets, ${callsCreated} calls`);
+
+        } catch (accountError: any) {
+          console.error(`❌ Error processing ${username}:`, accountError);
+          results.errors.push(`Error processing ${username}: ${accountError.message}`);
         }
+      }));
 
-        // Update KOL stats
-        await updateKOLStats(kolProfile.id);
-
-        results.accounts.push({
-          username,
-          tweetsProcessed,
-          callsCreated
-        });
-
-        results.processed += tweetsProcessed;
-        results.tokenCallsCreated += callsCreated;
-
-      } catch (accountError: any) {
-        console.error(`Error processing ${username}:`, accountError);
-        results.errors.push(`Error processing ${username}: ${accountError.message}`);
+      // Delay between batches to avoid rate limits
+      if (i + BATCH_SIZE < TRACKED_ACCOUNTS.length) {
+        console.log(`⏳ Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }
 
-    console.log('Sync completed:', results);
+    console.log('✅ Sync completed:', {
+      processed: results.processed,
+      callsCreated: results.tokenCallsCreated,
+      accounts: results.accounts.length,
+      errors: results.errors.length
+    });
 
-    return NextResponse.json(results);
+    return NextResponse.json({
+      ...results,
+      endTime: new Date().toISOString(),
+      message: `Successfully synced ${results.processed} tweets from ${results.accounts.length} accounts`
+    });
 
   } catch (error: any) {
-    console.error('Error syncing token calls:', error);
+    console.error('❌ Error syncing token calls:', error);
     return NextResponse.json(
       { 
         success: false, 

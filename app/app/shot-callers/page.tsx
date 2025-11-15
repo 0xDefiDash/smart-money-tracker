@@ -738,41 +738,16 @@ export default function ShotCallersPage() {
       <div className="mt-4 sm:mt-6">
         <Card className="bg-slate-900/50 border-slate-800">
           <CardHeader className="pb-3">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
-                <span className="truncate">Token Calls Tracker</span>
-              </CardTitle>
-              <Button
-                onClick={async () => {
-                  toast.loading('Syncing token calls from Twitter...', { id: 'sync' });
-                  try {
-                    const response = await fetch('/api/shot-callers/sync', {
-                      method: 'POST'
-                    });
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                      toast.success(
-                        `Synced ${data.processed} tweets and created ${data.tokenCallsCreated} token calls`,
-                        { id: 'sync' }
-                      );
-                      // Refresh the token calls section
-                      window.location.reload();
-                    } else {
-                      toast.error('Failed to sync token calls', { id: 'sync' });
-                    }
-                  } catch (error) {
-                    toast.error('Error syncing token calls', { id: 'sync' });
-                  }
-                }}
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-xs w-full sm:w-auto"
-              >
-                <Database className="h-3 w-3 mr-1" />
-                Sync
-              </Button>
-            </div>
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+              <span className="truncate">Token Calls Tracker</span>
+              <Badge variant="outline" className="ml-2 text-xs border-green-500/50 text-green-400">
+                Live
+              </Badge>
+            </CardTitle>
+            <p className="text-xs text-gray-400 mt-1">
+              Real-time token calls from top crypto influencers with performance tracking
+            </p>
           </CardHeader>
           <CardContent className="px-3 sm:px-6">
             <TokenCallsSection />

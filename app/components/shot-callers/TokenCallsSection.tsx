@@ -66,11 +66,14 @@ export default function TokenCallsSection() {
   const [tokenCalls, setTokenCalls] = useState<TokenCall[]>([]);
   const [kolStats, setKolStats] = useState<KOLStat[]>([]);
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
   const [filter, setFilter] = useState<'all' | 'bullish' | 'bearish' | 'neutral'>('all');
+  const [autoSync, setAutoSync] = useState(true);
 
-  const fetchTokenCalls = async () => {
-    setLoading(true);
+  const fetchTokenCalls = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const url = filter === 'all' 
         ? '/api/shot-callers/token-calls?limit=50'
@@ -82,24 +85,69 @@ export default function TokenCallsSection() {
         setTokenCalls(data.tokenCalls || []);
         setKolStats(data.kolStats || []);
         setLastUpdate(new Date());
-        toast.success('Token calls updated');
+        if (!silent) {
+          toast.success(`Loaded ${data.tokenCalls?.length || 0} token calls`);
+        }
       } else {
-        toast.error('Failed to fetch token calls');
+        if (!silent) toast.error('Failed to fetch token calls');
       }
     } catch (error) {
       console.error('Error fetching token calls:', error);
-      toast.error('Error loading token calls');
+      if (!silent) toast.error('Error loading token calls');
     } finally {
       setLoading(false);
     }
   };
 
+  const syncFromTwitter = async () => {
+    setSyncing(true);
+    try {
+      toast.loading('Syncing token calls from X API...', { id: 'sync-token-calls' });
+      
+      const response = await fetch('/api/shot-callers/sync', {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setLastSync(new Date());
+        
+        toast.success(
+          `✅ Synced ${data.processed || 0} tweets, created ${data.tokenCallsCreated || 0} token calls`,
+          { id: 'sync-token-calls' }
+        );
+        
+        // Refresh token calls after sync
+        await fetchTokenCalls(true);
+      } else {
+        const error = await response.json();
+        toast.error(`Sync failed: ${error.message || 'Unknown error'}`, { id: 'sync-token-calls' });
+      }
+    } catch (error) {
+      console.error('Error syncing token calls:', error);
+      toast.error('Error syncing from X API', { id: 'sync-token-calls' });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   useEffect(() => {
     fetchTokenCalls();
-    // Auto-refresh every 5 minutes
-    const interval = setInterval(fetchTokenCalls, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [filter]);
+    
+    // Auto-refresh token calls every 3 minutes
+    const fetchInterval = setInterval(() => fetchTokenCalls(true), 3 * 60 * 1000);
+    
+    // Auto-sync from Twitter every 10 minutes (if enabled)
+    const syncInterval = autoSync ? setInterval(() => {
+      console.log('🔄 Auto-syncing token calls from X API...');
+      syncFromTwitter();
+    }, 10 * 60 * 1000) : null;
+    
+    return () => {
+      clearInterval(fetchInterval);
+      if (syncInterval) clearInterval(syncInterval);
+    };
+  }, [filter, autoSync]);
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
@@ -147,6 +195,48 @@ export default function TokenCallsSection() {
 
   return (
     <div className="space-y-4">
+      {/* Sync Status Bar */}
+      <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${syncing ? 'bg-yellow-500 animate-pulse' : autoSync ? 'bg-green-500' : 'bg-gray-500'}`} />
+            <span className="text-gray-400">
+              {syncing ? 'Syncing...' : autoSync ? 'Auto-sync ON' : 'Auto-sync OFF'}
+            </span>
+          </div>
+          {lastSync && (
+            <span className="text-gray-500">
+              • Last sync: {lastSync.toLocaleTimeString()}
+            </span>
+          )}
+          {lastUpdate && (
+            <span className="text-gray-500">
+              • Updated: {lastUpdate.toLocaleTimeString()}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setAutoSync(!autoSync)}
+            className="text-xs h-7 px-2"
+          >
+            {autoSync ? 'Disable' : 'Enable'} Auto-sync
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => syncFromTwitter()}
+            disabled={syncing}
+            className="text-xs h-7 px-2 bg-purple-600 hover:bg-purple-700"
+          >
+            <RefreshCw className={`h-3 w-3 mr-1 ${syncing ? 'animate-spin' : ''}`} />
+            Sync Now
+          </Button>
+        </div>
+      </div>
+
       {/* Compact KOL Stats */}
       {kolStats.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
