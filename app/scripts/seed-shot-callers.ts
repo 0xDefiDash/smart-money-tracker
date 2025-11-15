@@ -10,7 +10,7 @@ const seedTweets = [
     displayName: '100x Darren',
     tweets: [
       {
-        content: '🔥 ALPHA THREAD: Found a hidden gem before Binance listing. Project has:\n\n✅ Audited smart contracts\n✅ 100M+ TVL\n✅ Major VC backing (a16z, Paradigm)\n✅ Working product with 50K+ users\n\nCA: 0x... (1/5) #CryptoAlpha #100x',
+        content: '🔥 ALPHA THREAD: Found a hidden gem before Binance listing. $ETH based project has:\n\n✅ Audited smart contracts\n✅ 100M+ TVL\n✅ Major VC backing (a16z, Paradigm)\n✅ Working product with 50K+ users\n\n$BTC correlation breaking to upside! #CryptoAlpha #100x',
         category: 'alpha',
         coins: ['ETH', 'BTC'],
         likes: 3400,
@@ -18,7 +18,7 @@ const seedTweets = [
         replies: 340
       },
       {
-        content: 'Early intel: New L2 solution launching next week. Team from Ethereum Foundation. Backed by Vitalik personally. This is the next Arbitrum/Optimism play. Whitelist still open. #Alpha #Layer2',
+        content: 'Early intel: New L2 solution launching next week. Team from Ethereum Foundation. Backed by Vitalik personally. This is the next $ARB/$OP play. $ETH scaling solved! Whitelist still open. #Alpha #Layer2',
         category: 'alpha',
         coins: ['ETH', 'ARB'],
         likes: 2800,
@@ -40,7 +40,7 @@ const seedTweets = [
         replies: 445
       },
       {
-        content: 'Insider info: Major GameFi project dropping tomorrow. Backed by Animoca Brands and Immutable. Play-to-earn mechanics like Axie but 10x better. Get ready for the mint 🎮💰',
+        content: 'Insider info: Major GameFi project dropping tomorrow. Backed by Animoca Brands and $IMX. Play-to-earn mechanics like $AXS but 10x better. Get ready for the mint 🎮💰',
         category: 'alpha',
         coins: ['IMX', 'AXS'],
         likes: 4100,
@@ -55,7 +55,7 @@ const seedTweets = [
     displayName: 'James Wynn',
     tweets: [
       {
-        content: '🚨 CRITICAL ALERT: Major exchange listing announcement in 2 hours for a TOP 50 coin. Volume spiking 300% already. Smart money is positioning NOW. This is not a drill. #CryptoAlert',
+        content: '🚨 CRITICAL ALERT: Major exchange listing announcement in 2 hours for a TOP 50 coin. Volume spiking 300% already. Smart money positioning $BTC and $ETH NOW. This is not a drill. #CryptoAlert',
         category: 'alert',
         coins: ['BTC', 'ETH'],
         likes: 6700,
@@ -63,7 +63,7 @@ const seedTweets = [
         replies: 890
       },
       {
-        content: '⚠️ URGENT: Whale alert! 500M USDT just moved from cold storage to Binance. Historic data shows this precedes major price action. Be ready for volatility in next 24h. #WhaleAlert #Trading',
+        content: '⚠️ URGENT: Whale alert! 500M $USDT just moved from cold storage to Binance. Historic data shows this precedes major $BTC price action. Be ready for volatility in next 24h. #WhaleAlert #Trading',
         category: 'alert',
         coins: ['USDT', 'BTC'],
         likes: 4200,
@@ -71,7 +71,7 @@ const seedTweets = [
         replies: 456
       },
       {
-        content: '🔴 BREAKING: SEC announces clarity on crypto regulations TODAY. This could be the catalyst we\'ve been waiting for. Standby for official announcement at 2PM EST. Markets will react fast. #CryptoNews',
+        content: '🔴 BREAKING: SEC announces clarity on crypto regulations TODAY. This could be the catalyst we\'ve been waiting for. $BTC $ETH $SOL will react. Standby for official announcement at 2PM EST. Markets will move fast. #CryptoNews',
         category: 'alert',
         coins: ['BTC', 'ETH', 'SOL'],
         likes: 8900,
@@ -85,7 +85,7 @@ const seedTweets = [
     displayName: 'Elon Musk',
     tweets: [
       {
-        content: '🚨 Major announcement coming. Time to pay attention. 👀',
+        content: '🚨 Major announcement coming. $DOGE and $BTC holders pay attention. 👀',
         category: 'alert',
         coins: ['DOGE', 'BTC'],
         likes: 125000,
@@ -189,7 +189,7 @@ const seedTweets = [
     displayName: 'CZ Binance',
     tweets: [
       {
-        content: 'Building. Shipping. Growing. The future of finance is being built right now. Super bullish on crypto innovation. 🚀 #BUIDL',
+        content: 'Building. Shipping. Growing. The future of finance is being built right now. Super bullish on $BTC and $BNB innovation. 🚀 #BUIDL',
         category: 'bullish',
         coins: ['BTC', 'BNB'],
         likes: 89000,
@@ -276,8 +276,10 @@ async function main() {
     // Create tweets for this KOL
     for (let i = 0; i < kolData.tweets.length; i++) {
       const tweetData = kolData.tweets[i];
+      // Set tweets to November 15, 2025 with varying hours
+      const baseDate = new Date('2025-11-15T12:00:00Z');
       const hoursAgo = i * 2 + Math.floor(Math.random() * 3);
-      const createdAt = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
+      const createdAt = new Date(baseDate.getTime() - hoursAgo * 60 * 60 * 1000);
 
       // Generate metadata based on category
       const metadata = generateMetadata(tweetData.content, tweetData.category);
@@ -306,10 +308,187 @@ async function main() {
     }
   }
 
+  // Create token calls from tweets
+  console.log('\n' + '='.repeat(50));
+  console.log('Creating token calls from tweets...');
+  
+  const allTweets = await prisma.kOLTweet.findMany({
+    include: {
+      kol: true
+    }
+  });
+
+  let tokenCallsCreated = 0;
+  
+  // Define token call data with Nov 15, 2025 prices
+  const tokenPrices: Record<string, { price: number; name: string }> = {
+    'BTC': { price: 91250, name: 'Bitcoin' },
+    'ETH': { price: 3125, name: 'Ethereum' },
+    'SOL': { price: 238, name: 'Solana' },
+    'BNB': { price: 625, name: 'BNB' },
+    'XRP': { price: 1.15, name: 'XRP' },
+    'ADA': { price: 0.98, name: 'Cardano' },
+    'DOGE': { price: 0.38, name: 'Dogecoin' },
+    'AVAX': { price: 42.50, name: 'Avalanche' },
+    'DOT': { price: 7.80, name: 'Polkadot' },
+    'MATIC': { price: 0.92, name: 'Polygon' },
+    'LINK': { price: 14.20, name: 'Chainlink' },
+    'UNI': { price: 8.45, name: 'Uniswap' },
+    'ATOM': { price: 9.60, name: 'Cosmos' },
+    'LTC': { price: 88, name: 'Litecoin' },
+    'BCH': { price: 485, name: 'Bitcoin Cash' },
+    'ALGO': { price: 0.34, name: 'Algorand' },
+    'VET': { price: 0.045, name: 'VeChain' },
+    'ICP': { price: 12.80, name: 'Internet Computer' },
+    'FIL': { price: 5.60, name: 'Filecoin' },
+    'AAVE': { price: 178, name: 'Aave' },
+    'SAND': { price: 0.52, name: 'The Sandbox' },
+    'MANA': { price: 0.68, name: 'Decentraland' },
+    'AXS': { price: 8.20, name: 'Axie Infinity' },
+    'GALA': { price: 0.042, name: 'Gala' },
+    'APE': { price: 1.45, name: 'ApeCoin' },
+    'SHIB': { price: 0.000024, name: 'Shiba Inu' },
+    'PEPE': { price: 0.0000082, name: 'Pepe' },
+    'PRIME': { price: 12.50, name: 'Echelon Prime' },
+    'DESO': { price: 18.40, name: 'DeSo' },
+    'METIS': { price: 52.30, name: 'Metis' },
+    'RADIX': { price: 0.085, name: 'Radix' },
+    'NOIA': { price: 0.28, name: 'Syntropy' },
+    'IMX': { price: 1.82, name: 'Immutable X' },
+    'ARB': { price: 0.85, name: 'Arbitrum' },
+    'USDT': { price: 1.00, name: 'Tether' }
+  };
+
+  for (const tweet of allTweets) {
+    // Extract token symbols from tweet content
+    const tokenPattern = /\$([A-Z]{2,10})/g;
+    const matches = tweet.content.match(tokenPattern);
+    
+    if (!matches) continue;
+    
+    const tokens = [...new Set(matches.map(token => token.replace('$', '')))];
+    
+    // Determine sentiment
+    const content = tweet.content.toLowerCase();
+    let sentiment = 'neutral';
+    const bullishWords = ['bullish', 'moon', 'buy', 'long', 'pump', 'breakout', 'gem', 'accumulate', 'up', 'rocket'];
+    const bearishWords = ['bearish', 'dump', 'sell', 'short', 'crash', 'down', 'exit', 'warning'];
+    
+    const bullishCount = bullishWords.filter(word => content.includes(word)).length;
+    const bearishCount = bearishWords.filter(word => content.includes(word)).length;
+    
+    if (bullishCount > bearishCount) sentiment = 'bullish';
+    else if (bearishCount > bullishCount) sentiment = 'bearish';
+    
+    // Create token calls
+    for (const tokenSymbol of tokens) {
+      const tokenInfo = tokenPrices[tokenSymbol];
+      if (!tokenInfo) continue;
+      
+      try {
+        // Check if token call already exists
+        const existing = await prisma.tokenCall.findUnique({
+          where: {
+            tweetId_tokenSymbol: {
+              tweetId: tweet.tweetId,
+              tokenSymbol
+            }
+          }
+        });
+        
+        if (existing) continue;
+        
+        // Create simulated price movement
+        const callPrice = tokenInfo.price * (0.92 + Math.random() * 0.08); // Entry price slightly below current
+        const currentPrice = tokenInfo.price * (0.95 + Math.random() * 0.15); // Current price with some variance
+        const priceChange = ((currentPrice - callPrice) / callPrice) * 100;
+        const roi = priceChange;
+        const isWin = roi > 0;
+        
+        await prisma.tokenCall.create({
+          data: {
+            kolId: tweet.kolId,
+            tweetId: tweet.tweetId,
+            tokenSymbol,
+            tokenName: tokenInfo.name,
+            callPrice,
+            currentPrice,
+            priceChange,
+            roi,
+            isWin,
+            sentiment,
+            calledAt: tweet.createdAt,
+            lastCheckedAt: new Date('2025-11-15T18:00:00Z')
+          }
+        });
+        
+        tokenCallsCreated++;
+      } catch (error) {
+        console.error(`Failed to create token call for ${tokenSymbol}:`, error);
+      }
+    }
+  }
+
+  // Update KOL stats
+  console.log('\nUpdating KOL statistics...');
+  const allKOLs = await prisma.kOLProfile.findMany();
+  
+  for (const kol of allKOLs) {
+    const calls = await prisma.tokenCall.findMany({
+      where: { kolId: kol.id }
+    });
+
+    if (calls.length === 0) continue;
+
+    const totalCalls = calls.length;
+    const successfulCalls = calls.filter(c => c.isWin === true).length;
+    const failedCalls = calls.filter(c => c.isWin === false).length;
+    const pendingCalls = calls.filter(c => c.isWin === null).length;
+    
+    const completedCalls = successfulCalls + failedCalls;
+    const winRate = completedCalls > 0 ? (successfulCalls / completedCalls) * 100 : 0;
+    
+    const roiValues = calls.filter(c => c.roi !== null).map(c => c.roi!);
+    const averageROI = roiValues.length > 0 
+      ? roiValues.reduce((a, b) => a + b, 0) / roiValues.length 
+      : 0;
+    
+    const bestCall = roiValues.length > 0 ? Math.max(...roiValues) : undefined;
+    const worstCall = roiValues.length > 0 ? Math.min(...roiValues) : undefined;
+
+    await prisma.kOLStats.upsert({
+      where: { kolId: kol.id },
+      create: {
+        kolId: kol.id,
+        totalCalls,
+        successfulCalls,
+        failedCalls,
+        pendingCalls,
+        winRate: isNaN(winRate) ? 0 : winRate,
+        averageROI: isNaN(averageROI) ? 0 : averageROI,
+        bestCall,
+        worstCall,
+        lastUpdated: new Date('2025-11-15T18:00:00Z')
+      },
+      update: {
+        totalCalls,
+        successfulCalls,
+        failedCalls,
+        pendingCalls,
+        winRate: isNaN(winRate) ? 0 : winRate,
+        averageROI: isNaN(averageROI) ? 0 : averageROI,
+        bestCall,
+        worstCall,
+        lastUpdated: new Date('2025-11-15T18:00:00Z')
+      }
+    });
+  }
+
   console.log('\n' + '='.repeat(50));
   console.log('✅ Seed completed successfully!');
   console.log(`📊 Created ${totalKOLs} KOL profiles`);
   console.log(`📝 Created ${totalTweets} tweets`);
+  console.log(`🎯 Created ${tokenCallsCreated} token calls`);
   console.log('='.repeat(50) + '\n');
 }
 
