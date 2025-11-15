@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, User, Lock, Gamepad2 } from 'lucide-react'
+import { Loader2, User, Lock } from 'lucide-react'
 import Link from 'next/link'
 
 export function LoginForm() {
@@ -34,7 +34,8 @@ export function LoginForm() {
       if (result?.error) {
         setError('Invalid username or password')
       } else {
-        router.push('/')
+        // Use replace to avoid navigation issues
+        router.replace('/')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
@@ -49,13 +50,13 @@ export function LoginForm() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="p-3 rounded-full bg-purple-600/20 border border-purple-500/30">
-              <Gamepad2 className="h-8 w-8 text-purple-400" />
+              <User className="h-8 w-8 text-purple-400" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            Dash Wars Login
+            Login
           </CardTitle>
-          <p className="text-slate-400 text-sm">Enter the arena and claim your blocks</p>
+          <p className="text-slate-400 text-sm">Sign in to access your account</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -103,7 +104,7 @@ export function LoginForm() {
               disabled={isLoading}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enter the Arena
+              Sign In
             </Button>
           </form>
 
