@@ -3,17 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { twitterClient } from '@/lib/twitter-client';
 import { prisma } from '@/lib/db';
 
-// List of tracked KOL accounts (use real, valid Twitter usernames)
+// Tracking our own DeFiDash Agent account for real posts
 const TRACKED_ACCOUNTS = [
-  'JamesWynnReal',
-  '100xDarren',
-  'CryptoExpert101',
-  'Bullrun_Gravano',
-  'CryptoWendyO',
-  'poe_real69',
-  'elonmusk',
-  'cz_binance',
-  'four_meme_'
+  'Defidash_Agent'
 ];
 
 export async function GET(request: NextRequest) {
@@ -329,18 +321,10 @@ export async function GET(request: NextRequest) {
 
 function getDefaultAvatar(username: string): string {
   const avatarMap: Record<string, string> = {
-    'CryptoExpert101': '/Uploads/cryptoExpert101.jpg',
-    'JamesWynnReal': '/Uploads/James wynn.jpg',
-    '100xDarren': '/Uploads/100xdarren.jpg',
-    'BullRunGravano': '/Uploads/bullrun Gravano.jpg',
-    'Bullrun_Gravano': '/Uploads/bullrun Gravano.jpg',
-    'CryptoWendyO': '/Uploads/wendy.jpg',
-    'poe_real69': '/public/images/poe-real69.jpg',
-    'elonmusk': '/Uploads/Trump.jpg',
-    'cz_binance': '/Uploads/QngrqCSC_400x400.jpg',
-    'four_meme_': '/Uploads/UPaVddbm_400x400.jpg',
+    'Defidash_Agent': '/images/defidash-agent-avatar.jpg',
+    'defidash_agent': '/images/defidash-agent-avatar.jpg',
   };
-  return avatarMap[username] || '/Uploads/cryptoExpert101.jpg';
+  return avatarMap[username] || '/images/defidash-agent-avatar.jpg';
 }
 
 function formatTimestamp(isoString: string): string {

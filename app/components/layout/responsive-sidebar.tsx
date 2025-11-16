@@ -39,7 +39,7 @@ const sidebarItems = [
     icon: Wallet,
   },
   {
-    title: 'Shot Callers',
+    title: 'DeFiDash Feed',
     href: '/shot-callers',
     icon: Target,
   },

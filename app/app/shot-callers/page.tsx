@@ -22,232 +22,29 @@ import DetailedBearishCard from '@/components/shot-callers/DetailedBearishCard';
 import UnifiedTweetCard from '@/components/shot-callers/UnifiedTweetCard';
 import { useWeb3 } from '@/lib/web3-provider';
 
-// Top Crypto KOLs data
-const topKOLs = [
-  {
-    id: '1',
-    username: 'elonmusk',
-    displayName: 'Elon Musk',
-    avatar: '/Uploads/Trump.jpg',
-    followers: '170M',
-    category: 'Influencer',
-    influence: 100,
-    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @elonmusk',
-    isTracked: true
-  },
-  {
-    id: '2',
-    username: '100xDarren',
-    displayName: '100x Darren',
-    avatar: '/Uploads/100xdarren.jpg',
-    followers: '500K',
-    category: 'Trader',
-    influence: 98,
-    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @100xDarren',
-    isTracked: true
-  },
-  {
-    id: '3',
-    username: 'cz_binance',
-    displayName: 'CZ Binance',
-    avatar: '/Uploads/QngrqCSC_400x400.jpg',
-    followers: '10M',
-    category: 'Influencer',
-    influence: 99,
-    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @cz_binance',
-    isTracked: true
-  },
-  {
-    id: '4',
-    username: 'four_meme_',
-    displayName: 'Four',
-    avatar: '/Uploads/UPaVddbm_400x400.jpg',
-    followers: '350K',
-    category: 'Meme Expert',
-    influence: 94,
-    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @four_meme_',
-    isTracked: true
-  },
-  {
-    id: '5',
-    username: 'BullRunGravano',
-    displayName: 'Bull Run Gravano',
-    avatar: '/Uploads/bullrun Gravano.jpg',
-    followers: '300K',
-    category: 'Analyst',
-    influence: 95,
-    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @BullRunGravano',
-    isTracked: true
-  },
-  {
-    id: '6',
-    username: 'JamesWynnReal',
-    displayName: 'James Wynn',
-    avatar: '/Uploads/James wynn.jpg',
-    followers: '250K',
-    category: 'Trader',
-    influence: 92,
-    recentAlpha: '🔴 LIVE TRACKED: Real-time alpha from @JamesWynnReal',
-    isTracked: true
-  },
-  {
-    id: '7',
-    username: 'CryptoExpert101',
-    displayName: 'Crypto Expert',
-    avatar: '/Uploads/cryptoExpert101.jpg',
-    followers: '400K',
-    category: 'Educator',
-    influence: 90,
-    recentAlpha: '🔴 LIVE TRACKED: Real-time tweets from @CryptoExpert101',
-    isTracked: true
-  },
-  {
-    id: '8',
-    username: '0xPoet',
-    displayName: '0xPoet',
-    avatar: '/Uploads/oxpoet.jpg',
-    followers: '180K',
-    category: 'Developer',
-    influence: 88,
-    recentAlpha: 'New DeFi protocol launching - audited contracts'
-  },
-  {
-    id: '9',
-    username: '0xSweep',
-    displayName: '0xSweep',
-    avatar: '/Uploads/0xsweep.jpg',
-    followers: '220K',
-    category: 'Trader',
-    influence: 85,
-    recentAlpha: 'NFT floor sweep on blue chips incoming'
-  },
-  {
-    id: '10',
-    username: 'Wendyy',
-    displayName: 'Wendy O',
-    avatar: '/Uploads/wendy.jpg',
-    followers: '350K',
-    category: 'Influencer',
-    influence: 87,
-    recentAlpha: 'Market sentiment turning bullish - accumulation zone'
-  }
-];
+// DeFiDash Agent account info
+const defidashAgent = {
+  id: '1',
+  username: 'Defidash_Agent',
+  displayName: 'DeFiDash Agent',
+  avatar: '/images/defidash-agent-avatar.jpg',
+  followers: 'Growing',
+  category: 'DeFi Intelligence',
+  influence: 100,
+  recentAlpha: '🔴 LIVE: Real-time whale tracking, token calls & DeFi insights',
+  isTracked: true,
+  description: 'Your AI-powered DeFi intelligence hub tracking whale movements, market trends, and token opportunities in real-time.'
+};
 
-// Mock tweets data
-const mockTweets = [
-  {
-    id: '1',
-    author: '100x Darren',
-    username: '100xDarren',
-    avatar: '/Uploads/100xdarren.jpg',
-    content: '🚨 BREAKING: Just spotted massive whale accumulation on $SOL. 50M+ tokens moved from exchanges in the last 24h. This is what smart money does before major moves. 👀\n\n#Solana #Crypto #TradingAlpha',
-    timestamp: '2m ago',
-    likes: 2400,
-    retweets: 890,
-    replies: 156,
-    category: 'bullish',
-    coins: ['SOL']
-  },
-  {
-    id: '2',
-    author: 'Bull Run Gravano',
-    username: 'BullRunGravano',
-    avatar: '/Uploads/bullrun Gravano.jpg',
-    content: 'Alt season is here! My top 5 picks for 100x:\n\n1. $TOKEN1 - DeFi innovator\n2. $TOKEN2 - Gaming platform\n3. $TOKEN3 - Layer 2 solution\n4. $TOKEN4 - AI integration\n5. $TOKEN5 - Real world assets\n\nNFA, DYOR 🚀',
-    timestamp: '15m ago',
-    likes: 5600,
-    retweets: 1200,
-    replies: 340,
-    category: 'alpha',
-    coins: ['TOKEN1', 'TOKEN2', 'TOKEN3']
-  },
-  {
-    id: '3',
-    author: 'James Wynn',
-    username: 'JamesWynn',
-    avatar: '/Uploads/James wynn.jpg',
-    content: '⚠️ CRITICAL: Major exchange listing announcement in 2 hours. Get ready for volatility. Smart money is positioning now.\n\n#CryptoAlert #Trading',
-    timestamp: '30m ago',
-    likes: 3200,
-    retweets: 670,
-    replies: 89,
-    category: 'alert',
-    coins: []
-  },
-  {
-    id: '4',
-    author: 'Crypto Expert',
-    username: 'CryptoExpert101',
-    avatar: '/Uploads/cryptoExpert101.jpg',
-    content: '📊 Technical Analysis Update:\n\nBTC: Bullish pennant forming on 4H\nETH: Breaking resistance at $3.2K\nSOL: Consolidating before next leg up\n\nTarget: BTC $75K by month end\n\n#Bitcoin #Ethereum #TechnicalAnalysis',
-    timestamp: '1h ago',
-    likes: 4100,
-    retweets: 980,
-    replies: 234,
-    category: 'analysis',
-    coins: ['BTC', 'ETH', 'SOL']
-  },
-  {
-    id: '5',
-    author: '0xPoet',
-    username: '0xPoet',
-    avatar: '/Uploads/oxpoet.jpg',
-    content: '🔥 New DeFi protocol dropping tomorrow! Audited by top firms, innovative tokenomics, backed by major VCs. This could be the next 1000x gem.\n\nWhitelist spots still available. Link in bio 👇\n\n#DeFi #Crypto',
-    timestamp: '2h ago',
-    likes: 2800,
-    retweets: 1400,
-    replies: 567,
-    category: 'alpha',
-    coins: []
-  },
-  {
-    id: '6',
-    author: 'Wendy O',
-    username: 'Wendyy',
-    avatar: '/Uploads/wendy.jpg',
-    content: 'Market sentiment check:\n\n✅ Fear & Greed: 65 (Greed)\n✅ BTC dominance: Declining\n✅ Alt volume: Increasing\n✅ Whale activity: High\n\nThis is textbook alt season setup. Time to position! 📈\n\n#Crypto #AltSeason',
-    timestamp: '3h ago',
-    likes: 6700,
-    retweets: 1890,
-    replies: 445,
-    category: 'bullish',
-    coins: ['BTC']
-  },
-  {
-    id: '7',
-    author: '0xSweep',
-    username: '0xSweep',
-    avatar: '/Uploads/0xsweep.jpg',
-    content: 'Floor sweep complete! 🧹\n\nJust picked up 15 blue chip NFTs at 30% discount. Panic sellers are my favorite exit liquidity providers 😎\n\n#NFT #CryptoArt',
-    timestamp: '4h ago',
-    likes: 1900,
-    retweets: 450,
-    replies: 123,
-    category: 'alpha',
-    coins: []
-  },
-  {
-    id: '8',
-    author: 'Four',
-    username: 'four_meme_',
-    avatar: '/Uploads/UPaVddbm_400x400.jpg',
-    content: '📉 Red flags everywhere:\n\n⚠️ Volume declining\n⚠️ RSI extremely overbought\n⚠️ Whales moving to stables\n⚠️ Funding rates negative\n\nTaking profits and moving to sidelines. Risk management > FOMO\n\n#Trading #RiskManagement',
-    timestamp: '5h ago',
-    likes: 3400,
-    retweets: 890,
-    replies: 256,
-    category: 'bearish',
-    coins: ['BTC', 'ETH']
-  }
-];
+// No more mock data - all tweets are fetched live from X API
 
 export default function ShotCallersPage() {
   const router = useRouter();
   const { account, isConnected, connectWallet, disconnectWallet } = useWeb3();
   const [selectedKOL, setSelectedKOL] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
-  const [tweets, setTweets] = useState(mockTweets);
-  const [loading, setLoading] = useState(false);
+  const [tweets, setTweets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [kolWallets, setKolWallets] = useState<Record<string, any>>({});
   const [feedStatus, setFeedStatus] = useState<{
@@ -364,13 +161,13 @@ export default function ShotCallersPage() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text truncate">
-              Shot Callers
+              DeFiDash Feed
             </h1>
             <div className="flex items-center gap-2 flex-wrap mt-1">
-              <p className="text-gray-400 text-xs sm:text-sm md:text-base">Track Top Crypto KOLs for Real-Time Trading Alpha</p>
+              <p className="text-gray-400 text-xs sm:text-sm md:text-base">Real-Time Whale Tracking, Token Calls & DeFi Intelligence from @Defidash_Agent</p>
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs whitespace-nowrap">
                 <Activity className="h-2 w-2 mr-1 animate-pulse" />
-                Tracking 9 KOLs
+                Live Updates
               </Badge>
             </div>
           </div>
@@ -412,8 +209,8 @@ export default function ShotCallersPage() {
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 truncate">Active KOLs</p>
-                  <p className="text-xl sm:text-2xl font-bold text-purple-400">{topKOLs.length}</p>
+                  <p className="text-xs text-gray-400 truncate">Total Posts</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-400">{tweets.length}</p>
                 </div>
                 <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 flex-shrink-0 ml-2" />
               </div>
@@ -424,8 +221,8 @@ export default function ShotCallersPage() {
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 truncate">Alpha Signals</p>
-                  <p className="text-xl sm:text-2xl font-bold text-pink-400">24</p>
+                  <p className="text-xs text-gray-400 truncate">Token Calls</p>
+                  <p className="text-xl sm:text-2xl font-bold text-pink-400">{tweets.filter(t => t.coins?.length > 0).length}</p>
                 </div>
                 <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-pink-500 flex-shrink-0 ml-2" />
               </div>
@@ -436,8 +233,8 @@ export default function ShotCallersPage() {
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 truncate">Total Reach</p>
-                  <p className="text-xl sm:text-2xl font-bold text-blue-400">172M</p>
+                  <p className="text-xs text-gray-400 truncate">Whale Alerts</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-400">{tweets.filter(t => t.category === 'alert').length}</p>
                 </div>
                 <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0 ml-2" />
               </div>
@@ -448,8 +245,8 @@ export default function ShotCallersPage() {
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 truncate">Hot Takes</p>
-                  <p className="text-xl sm:text-2xl font-bold text-orange-400">156</p>
+                  <p className="text-xs text-gray-400 truncate">Analysis</p>
+                  <p className="text-xl sm:text-2xl font-bold text-orange-400">{tweets.filter(t => t.category === 'analysis').length}</p>
                 </div>
                 <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 flex-shrink-0 ml-2" />
               </div>
@@ -460,82 +257,104 @@ export default function ShotCallersPage() {
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* KOLs List */}
+        {/* DeFiDash Agent Profile */}
         <Card className="lg:col-span-1 bg-slate-900/50 border-slate-800">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Target className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
-              Top Shot Callers
+              Live Intelligence Feed
             </CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-6">
-            <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[calc(100vh-300px)]">
-              <div className="space-y-3">
-                {topKOLs.map((kol) => (
-                  <Card
-                    key={kol.id}
-                    className={`cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
-                      selectedKOL === kol.id
-                        ? 'bg-purple-500/20 border-purple-500'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-purple-500/50'
-                    } ${(kol as any).isTracked ? 'ring-1 ring-green-500/30' : ''}`}
-                    onClick={() => {
-                      if ((kol as any).isTracked) {
-                        router.push(`/shot-callers/${kol.username}`);
-                      } else {
-                        setSelectedKOL(kol.id);
-                      }
-                    }}
-                  >
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <Avatar className={`h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 border-2 ${(kol as any).isTracked ? 'border-green-500 ring-2 ring-green-500/30' : 'border-purple-500/50'}`}>
-                          <AvatarImage src={kol.avatar} alt={kol.displayName} />
-                          <AvatarFallback>{kol.displayName[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className="font-bold text-white text-sm sm:text-base truncate">{kol.displayName}</h3>
-                            <div className={`flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-2 ${getInfluenceColor(kol.influence)}`}>
-                              <Zap className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                              <span className="text-xs font-bold">{kol.influence}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 mb-1.5 sm:mb-2 flex-wrap">
-                            <a 
-                              href={`https://x.com/${kol.username}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-xs text-blue-400 hover:text-blue-300 hover:underline truncate"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              @{kol.username}
-                            </a>
-                            {(kol as any).isTracked && (
-                              <Badge className="text-[10px] sm:text-xs bg-green-500/20 text-green-400 border-green-500/30 whitespace-nowrap">
-                                <Activity className="h-2 w-2 mr-0.5 sm:mr-1 animate-pulse" />
-                                <span className="hidden xs:inline">LIVE • Click</span>
-                                <span className="xs:hidden">LIVE</span>
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 flex-wrap">
-                            <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
-                              {kol.category}
-                            </Badge>
-                            <div className="flex items-center gap-1 text-xs text-gray-400">
-                              <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                              <span className="text-[10px] sm:text-xs">{kol.followers}</span>
-                            </div>
-                          </div>
-                          <p className="text-[10px] sm:text-xs text-gray-300 line-clamp-2">{kol.recentAlpha}</p>
-                        </div>
+            <Card className="bg-gradient-to-br from-purple-500/20 to-blue-500/10 border-purple-500 ring-2 ring-purple-500/30">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                  <Avatar className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 border-2 border-purple-500 ring-2 ring-purple-500/50">
+                    <AvatarImage src={defidashAgent.avatar} alt={defidashAgent.displayName} />
+                    <AvatarFallback className="bg-purple-600 text-white text-xl">DA</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold text-white text-lg sm:text-xl">{defidashAgent.displayName}</h3>
+                      <div className="flex items-center gap-1 text-purple-400">
+                        <Zap className="h-4 w-4" />
+                        <span className="text-sm font-bold">{defidashAgent.influence}</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
+                    </div>
+                    <a 
+                      href={`https://x.com/${defidashAgent.username}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-400 hover:text-blue-300 hover:underline inline-flex items-center gap-1 mb-3"
+                    >
+                      @{defidashAgent.username}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 mb-3">
+                      <Activity className="h-3 w-3 mr-1 animate-pulse" />
+                      LIVE NOW
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 mb-4">
+                  <Badge variant="outline" className="text-xs px-2 py-1">
+                    {defidashAgent.category}
+                  </Badge>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    {defidashAgent.description}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 p-3 bg-black/30 rounded-lg border border-purple-500/20">
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Posts Today</p>
+                    <p className="text-lg font-bold text-purple-400">{tweets.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Token Calls</p>
+                    <p className="text-lg font-bold text-pink-400">{tweets.filter(t => t.coins?.length > 0).length}</p>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  onClick={() => window.open(`https://x.com/${defidashAgent.username}`, '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Follow on X
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Feed Status */}
+            {feedStatus && (
+              <Card className="mt-4 bg-slate-800/50 border-slate-700">
+                <CardContent className="p-3">
+                  <h4 className="text-xs font-semibold text-gray-300 mb-2">Feed Status</h4>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Source:</span>
+                      <span className={feedStatus.fromCache ? 'text-yellow-400' : 'text-green-400'}>
+                        {feedStatus.fromCache ? '📦 Cached' : '🔴 Live X API'}
+                      </span>
+                    </div>
+                    {!feedStatus.fromCache && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">API Status:</span>
+                        <span className="text-green-400">✓ Connected</span>
+                      </div>
+                    )}
+                    {lastUpdate && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Last Update:</span>
+                        <span className="text-gray-300">{lastUpdate.toLocaleTimeString()}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </CardContent>
         </Card>
 
