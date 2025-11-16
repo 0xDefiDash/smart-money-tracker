@@ -33,16 +33,16 @@ export function LoginForm() {
       })
 
       if (result?.error) {
+        console.error('Login error:', result.error)
         setError('Invalid username or password')
         setIsLoading(false)
       } else if (result?.ok) {
-        // Small delay to ensure session is properly set before redirect
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Force a hard navigation to ensure session is loaded
-        window.location.href = '/'
+        // Use router.push instead of window.location for better Next.js integration
+        router.push('/')
+        router.refresh()
       }
     } catch (error) {
+      console.error('Login exception:', error)
       setError('An error occurred. Please try again.')
       setIsLoading(false)
     }
