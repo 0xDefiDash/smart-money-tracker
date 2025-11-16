@@ -35,8 +35,8 @@ const sidebarItems = [
     icon: Wallet,
   },
   {
-    title: 'DeFiDash Feed',
-    href: '/shot-callers',
+    title: 'KOL Tracker',
+    href: '/kol-tracker',
     icon: Target,
   },
   {

@@ -41,8 +41,8 @@ const sidebarItems = [
     icon: Target,
   },
   {
-    title: 'Shot Callers',
-    href: '/shot-callers',
+    title: 'KOL Tracker',
+    href: '/kol-tracker',
     icon: Target,
   },
   {

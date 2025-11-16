@@ -3,9 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { twitterClient } from '@/lib/twitter-client';
 import { prisma } from '@/lib/db';
 
-// Tracking our own DeFiDash Agent account for real posts
+// Tracking prominent crypto KOLs for real-time intelligence
 const TRACKED_ACCOUNTS = [
-  'Defidash_Agent'
+  'Defidash_Agent',    // Our AI DeFi agent
+  'aixbt_agent',       // AI crypto analyst
+  'RealDonaldTrump',   // Political influence on crypto  
+  'cryptowendyo',      // Crypto Wendy O
+  'CryptoExpert101',   // Crypto expert & analyst
+  'pepecoineth',       // Pepe community leader
+  '0xsweep',           // NFT & DeFi influencer
+  'poe_real69',        // Crypto trader
+  '100xdarren',        // Alt coin specialist
+  '1crypticpoet',      // Crypto poet & analyst
+  'bullrun_gravano',   // Bull market caller
+  'JessePollak',       // Base ecosystem lead
+  'jameswynn'          // Crypto & tech influencer
 ];
 
 export async function GET(request: NextRequest) {
