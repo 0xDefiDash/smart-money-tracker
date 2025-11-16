@@ -37,9 +37,9 @@ export function LoginForm() {
         setError('Invalid username or password')
         setIsLoading(false)
       } else if (result?.ok) {
-        // Use router.push instead of window.location for better Next.js integration
-        router.push('/')
-        router.refresh()
+        // Simple navigation without refresh to prevent server errors
+        // Next.js will automatically revalidate the session
+        window.location.href = '/'
       }
     } catch (error) {
       console.error('Login exception:', error)

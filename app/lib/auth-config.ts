@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: false, // Disable debug to prevent verbose logging
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -15,38 +15,47 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) {
-          return null
-        }
-
-        const user = await prisma.user.findFirst({
-          where: {
-            username: credentials.username,
-            password: { not: null }
+        try {
+          if (!credentials?.username || !credentials?.password) {
+            console.error('[Auth] Missing credentials')
+            return null
           }
-        })
 
-        if (!user || !user.password || !user.username) {
+          const user = await prisma.user.findFirst({
+            where: {
+              username: credentials.username,
+              password: { not: null }
+            }
+          })
+
+          if (!user || !user.password || !user.username) {
+            console.error('[Auth] User not found or invalid data')
+            return null
+          }
+
+          // Compare hashed password
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password)
+          if (!isValidPassword) {
+            console.error('[Auth] Invalid password')
+            return null
+          }
+
+          console.log('[Auth] Login successful for user:', user.username)
+          return {
+            id: user.id,
+            username: user.username,
+            name: user.name || user.username,
+            email: user.email || '',
+            profileImage: user.profileImage || undefined,
+            xHandle: user.xHandle || undefined,
+            gameMoney: user.gameMoney || 0,
+            gameLevel: user.gameLevel || 1,
+            gameExp: user.gameExp || 0,
+            isAdmin: user.isAdmin || false
+          }
+        } catch (error) {
+          console.error('[Auth] Authorization error:', error)
           return null
-        }
-
-        // Compare hashed password
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password)
-        if (!isValidPassword) {
-          return null
-        }
-
-        return {
-          id: user.id,
-          username: user.username,
-          name: user.name || user.username,
-          email: user.email || '',
-          profileImage: user.profileImage || undefined,
-          xHandle: user.xHandle || undefined,
-          gameMoney: user.gameMoney,
-          gameLevel: user.gameLevel,
-          gameExp: user.gameExp,
-          isAdmin: user.isAdmin
         }
       }
     })
@@ -58,29 +67,39 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }: any) {
-      if (user) {
-        token.username = user.username
-        token.profileImage = user.profileImage
-        token.xHandle = user.xHandle
-        token.gameMoney = user.gameMoney
-        token.gameLevel = user.gameLevel
-        token.gameExp = user.gameExp
-        token.isAdmin = user.isAdmin
+      try {
+        if (user) {
+          token.username = user.username
+          token.profileImage = user.profileImage
+          token.xHandle = user.xHandle
+          token.gameMoney = user.gameMoney || 0
+          token.gameLevel = user.gameLevel || 1
+          token.gameExp = user.gameExp || 0
+          token.isAdmin = user.isAdmin || false
+        }
+        return token
+      } catch (error) {
+        console.error('[Auth] JWT callback error:', error)
+        return token
       }
-      return token
     },
     async session({ session, token }: any) {
-      if (token) {
-        session.user.id = token.sub
-        session.user.username = token.username as string
-        session.user.profileImage = token.profileImage as string
-        session.user.xHandle = token.xHandle as string
-        session.user.gameMoney = token.gameMoney as number
-        session.user.gameLevel = token.gameLevel as number
-        session.user.gameExp = token.gameExp as number
-        session.user.isAdmin = token.isAdmin as boolean
+      try {
+        if (token && session?.user) {
+          session.user.id = token.sub
+          session.user.username = token.username || ''
+          session.user.profileImage = token.profileImage || ''
+          session.user.xHandle = token.xHandle || ''
+          session.user.gameMoney = token.gameMoney || 0
+          session.user.gameLevel = token.gameLevel || 1
+          session.user.gameExp = token.gameExp || 0
+          session.user.isAdmin = token.isAdmin || false
+        }
+        return session
+      } catch (error) {
+        console.error('[Auth] Session callback error:', error)
+        return session
       }
-      return session
     }
   },
   pages: {
