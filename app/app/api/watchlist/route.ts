@@ -7,8 +7,9 @@ import { prisma } from '@/lib/db';
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   
+  // If no session, return empty watchlist (site is now public)
   if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ watchlist: [] });
   }
 
   try {
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ watchlist: [] });
     }
 
     const watchlist = await prisma.watchlistItem.findMany({
@@ -27,18 +28,19 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ watchlist });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch watchlist' },
-      { status: 500 }
-    );
+    return NextResponse.json({ watchlist: [] });
   }
 }
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   
+  // If no session, inform user that they need to sign in for this feature
   if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { error: 'Please sign in to add items to your watchlist' },
+      { status: 401 }
+    );
   }
 
   try {

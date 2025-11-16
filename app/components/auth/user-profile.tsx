@@ -27,7 +27,7 @@ interface UserProfile {
 }
 
 export function UserProfile() {
-  const { data: session } = useSession() || {}
+  const { data: session, status } = useSession() || {}
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
@@ -41,6 +41,29 @@ export function UserProfile() {
       fetchProfile()
     }
   }, [session?.user?.id])
+
+  // Show message if user is not logged in
+  if (status !== 'loading' && !session) {
+    return (
+      <Card className="w-full max-w-md mx-auto bg-slate-800/50 border-purple-500/20">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl font-bold text-white">User Profile</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center space-y-4">
+          <p className="text-slate-300">
+            Sign in to view and manage your profile
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/auth/signin'}
+            className="w-full bg-purple-600 hover:bg-purple-700"
+          >
+            <User className="mr-2 h-4 w-4" />
+            Sign In
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
   const fetchProfile = async () => {
     try {

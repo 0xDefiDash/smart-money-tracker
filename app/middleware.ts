@@ -1,33 +1,17 @@
+// Authentication middleware disabled - site is now publicly accessible
+// No login required to access any pages
 
-import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default withAuth(
-  function middleware(req) {
-    return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: '/auth/signin',
-    },
-  }
-)
+export function middleware(request: NextRequest) {
+  // Allow all requests through without authentication check
+  return NextResponse.next()
+}
 
-// Protect all routes except auth pages and API routes
+// Apply to all routes (but does nothing - just passes through)
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - auth (authentication pages)
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!api|auth|_next/static|_next/image|favicon.ico|images|videos|uploads|.*\\..*$).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
