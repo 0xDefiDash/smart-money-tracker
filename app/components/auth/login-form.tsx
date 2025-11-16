@@ -28,18 +28,22 @@ export function LoginForm() {
       const result = await signIn('credentials', {
         username,
         password,
-        redirect: false
+        redirect: false,
+        callbackUrl: '/'
       })
 
       if (result?.error) {
         setError('Invalid username or password')
-      } else {
-        // Use replace to avoid navigation issues
-        router.replace('/')
+        setIsLoading(false)
+      } else if (result?.ok) {
+        // Small delay to ensure session is properly set before redirect
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Force a hard navigation to ensure session is loaded
+        window.location.href = '/'
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
-    } finally {
       setIsLoading(false)
     }
   }
