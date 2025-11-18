@@ -54,7 +54,7 @@ async function nansenRequest<T>(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-KEY': NANSEN_API_KEY,
+        'apiKey': NANSEN_API_KEY,
       },
       body: JSON.stringify(body),
       signal: controller.signal,
@@ -120,7 +120,7 @@ export async function getSmartMoneyNetflows(
   timeframe: string = '24h',
   limit: number = 50
 ): Promise<SmartMoneyNetflow[]> {
-  const data = await nansenRequest<any>('/smart-money/netflows', {
+  const data = await nansenRequest<any>('/smart-money/netflow', {
     chain,
     timeframe,
     limit,
