@@ -20,7 +20,8 @@ import {
   Globe,
   Shield,
   Settings,
-  Twitter
+  Twitter,
+  Waves
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -48,6 +49,11 @@ const sidebarItems = [
     title: 'Exchange Flows',
     href: '/exchange-flows',
     icon: Building2,
+  },
+  {
+    title: 'Flow Intelligence',
+    href: '/flow-intelligence',
+    icon: Waves,
   },
   {
     title: 'Wallet Analytics',

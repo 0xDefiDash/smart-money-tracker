@@ -22,7 +22,8 @@ import {
   Globe,
   Shield,
   Settings,
-  Twitter
+  Twitter,
+  Waves
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 import { TransactionAlerts } from '@/components/wallet-tracker/transaction-alerts'
@@ -52,6 +53,11 @@ const sidebarItems = [
     title: 'Exchange Flows',
     href: '/exchange-flows',
     icon: Building2,
+  },
+  {
+    title: 'Flow Intelligence',
+    href: '/flow-intelligence',
+    icon: Waves,
   },
   {
     title: 'Wallet Analytics',
