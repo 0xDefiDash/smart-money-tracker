@@ -11,8 +11,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Fetch enhanced real-time market context with timeout and error handling
+    // Fetch enhanced real-time market context AND Nansen intelligence with timeout and error handling
     let marketContext = '';
+    let nansenContext = '';
+    
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout for enhanced data
@@ -75,6 +77,71 @@ ${marketData.aiInsights?.map((insight: any) =>
 
 **Last Updated**: ${new Date().toLocaleTimeString()} | Market Status: ${marketData.marketSentiment?.altcoinSeason ? '🚀 ALTCOIN SEASON' : '🔶 BTC DOMINANCE'}`;
       }
+      
+      // Fetch Nansen Smart Money intelligence
+      try {
+        const nansenController = new AbortController();
+        const nansenTimeout = setTimeout(() => nansenController.abort(), 5000);
+        
+        const [smartMoneyResponse, whaleResponse] = await Promise.allSettled([
+          fetch(`${request.nextUrl.origin}/api/nansen/smart-money?chain=ethereum&type=all&limit=10`, {
+            signal: nansenController.signal
+          }),
+          fetch(`${request.nextUrl.origin}/api/nansen/whale-activity?chain=ethereum&timeframe=24h&limit=10`, {
+            signal: nansenController.signal
+          })
+        ]);
+        
+        clearTimeout(nansenTimeout);
+        
+        if (smartMoneyResponse.status === 'fulfilled' && smartMoneyResponse.value.ok) {
+          const smartMoneyData = await smartMoneyResponse.value.json();
+          
+          nansenContext = `
+
+## 🧠 NANSEN SMART MONEY INTELLIGENCE (Institutional-Grade):
+
+### 💎 **Smart Money Netflows** (Top 5,000 Performing Wallets):
+${smartMoneyData.data?.netflows?.slice(0, 8).map((flow: any) => 
+  `- **${flow.tokenSymbol || flow.tokenName}**: ${flow.netflow >= 0 ? '📈 BUY' : '📉 SELL'} Signal
+    • Net Flow: ${flow.netflow >= 0 ? '+' : ''}$${(flow.netflow / 1000000).toFixed(2)}M | Smart Money Count: ${flow.smartMoneyCount || 'N/A'}
+    • Inflow: $${(flow.inflow / 1000000).toFixed(2)}M | Outflow: $${(flow.outflow / 1000000).toFixed(2)}M`
+).join('\n') || 'Loading Smart Money data...'}
+
+### 🏆 **Smart Money Holdings** (Current Top Positions):
+${smartMoneyData.data?.holdings?.slice(0, 6).map((holding: any) => 
+  `- **${holding.tokenSymbol}**: $${(holding.totalHoldingsUsd / 1000000).toFixed(1)}M total holdings
+    • ${holding.smartMoneyCount} Smart Money wallets | Avg: $${(holding.avgHoldingPerWallet / 1000).toFixed(0)}K per wallet`
+).join('\n') || 'Loading holdings data...'}
+
+### ⚡ **Smart Money DEX Trades** (Last 24h):
+${smartMoneyData.data?.dexTrades?.slice(0, 5).map((trade: any) => 
+  `- **${trade.type}** ${trade.tokenSymbol} by ${trade.walletLabel || 'SM Wallet'}: $${(trade.amountUsd / 1000).toFixed(1)}K
+    • Price: $${trade.priceUsd?.toFixed(8) || 'N/A'} | DEX: ${trade.dex} | ${Math.floor((Date.now() - new Date(trade.timestamp).getTime()) / 60000)}m ago`
+).join('\n') || 'Loading trade data...'}`;
+        }
+        
+        if (whaleResponse.status === 'fulfilled' && whaleResponse.value.ok) {
+          const whaleData = await whaleResponse.value.json();
+          
+          nansenContext += `
+
+### 🐋 **Nansen Whale Activity & PnL Leaderboard**:
+${whaleData.data?.topPerformers?.slice(0, 6).map((performer: any) => 
+  `- **${performer.label || performer.address.slice(0, 8)}...**: $${(performer.totalPnl / 1000000).toFixed(2)}M Total PnL
+    • ROI: ${(performer.roi * 100).toFixed(1)}% | Win Rate: ${(performer.winRate * 100).toFixed(1)}% | Trades: ${performer.totalTrades || 'N/A'}`
+).join('\n') || 'Loading whale performance data...'}
+
+**Nansen Intelligence Source**: Top 5,000 wallets ranked by realized profit, win rate, and consistent performance across market cycles.
+`;
+        }
+      } catch (nansenError) {
+        console.error('Failed to fetch Nansen context:', nansenError);
+        nansenContext = `
+
+## 🧠 NANSEN INTELLIGENCE:
+*Nansen Smart Money data temporarily unavailable. Standard market data is still available above.*`;
+      }
     } catch (error) {
       console.error('Failed to fetch enhanced market context:', error);
       // Fallback to basic market context
@@ -105,35 +172,42 @@ ${basicData.cryptos?.map((crypto: any) =>
     }
 
     // Build context-aware system prompt
-    const systemPrompt = `You are DefiDash Agent, the world's most advanced cryptocurrency and DeFi market expert AI assistant. You help users navigate the Smart Money Tracker platform and provide expert crypto market analysis with real-time blockchain data.
+    const systemPrompt = `You are DefiDash Agent, the world's most advanced cryptocurrency and DeFi market expert AI assistant powered by NANSEN INSTITUTIONAL-GRADE BLOCKCHAIN INTELLIGENCE. You help users navigate the Smart Money Tracker platform and provide expert crypto market analysis with real-time blockchain data.
 
 ## 🚨 CRITICAL: YOU HAVE LIVE DATA ACCESS RIGHT NOW!
 ${marketContext}
+${nansenContext}
 
-**IMPORTANT**: The data above is LIVE and REAL-TIME from our APIs. When users ask about current prices, market conditions, or crypto data:
+**IMPORTANT**: The data above is LIVE and REAL-TIME from our APIs including Nansen's institutional-grade intelligence. When users ask about current prices, market conditions, smart money movements, or crypto data:
 1. ✅ YOU HAVE ACCESS - Use the live data provided above
-2. ✅ Reference specific prices, volumes, and metrics from the data
-3. ✅ Say "According to current data..." or "Right now, BTC is trading at..."
+2. ✅ Reference specific prices, volumes, Smart Money netflows, and whale metrics from the data
+3. ✅ Say "According to current Nansen data..." or "Smart Money wallets are currently buying..."
 4. ❌ NEVER say "I don't have access to live data" - YOU DO!
-5. ❌ NEVER say "I can't check current prices" - THE PRICES ARE IN YOUR CONTEXT!
+5. ❌ NEVER say "I can't check current prices or Smart Money activity" - THE DATA IS IN YOUR CONTEXT!
+6. ✅ Highlight Smart Money signals and whale activity when relevant to user questions
 
 ## 🔥 YOUR CORE CAPABILITIES:
 
 ### 📊 Real-Time Data Integration (ACTIVE NOW):
+- **✅ NANSEN API**: Institutional-grade Smart Money tracking (top 5,000 performing wallets), whale activity, token flow intelligence, PnL leaderboards, and wallet profiling (DATA PROVIDED ABOVE)
 - **✅ LIVE Price Feeds**: Real-time cryptocurrency prices via CoinGecko, CoinCap, and Binance APIs (DATA PROVIDED ABOVE)
 - **✅ Moralis SDK**: Live wallet balances, token holdings, and transaction history across Ethereum, Base, BNB Chain, Polygon, Arbitrum, and Optimism
 - **✅ Multi-Chain Support**: Track wallets on Ethereum, Base, BNB, Polygon, Arbitrum, Optimism, and Solana
 - **✅ On-Chain Analytics**: Monitor gas prices, network activity, DEX volumes, and bridge flows
-- **✅ Whale Activity Tracking**: Large wallet movements tracked in real-time
+- **✅ Smart Money Intelligence**: Track what top-performing wallets are buying, selling, and holding in real-time
+- **✅ Whale Activity Tracking**: Large wallet movements and PnL performance tracked via Nansen
 
 ### 💡 Your Expertise:
+- **Nansen Smart Money Analysis**: Interpret netflows, holdings, and DEX trades from top 5,000 performing wallets
+- **Institutional-Grade Signals**: Identify buy/sell signals based on Smart Money activity
+- **Whale Profiling**: Deep analysis of whale wallets including PnL, win rates, and trading patterns
+- **Token Flow Intelligence**: Track Smart Money, exchange, whale, and fresh wallet flows
 - Real-time cryptocurrency market analysis and technical indicators
 - DeFi protocols, yield farming, liquidity mining, and staking opportunities
-- Whale wallet tracking and on-chain behavior analysis
 - Multi-chain wallet monitoring (EVM + Solana)
 - NFT markets and meme token trends (Pump.fun, Zora, Bonk.fun)
 - Technical analysis (RSI, support/resistance levels, volume analysis)
-- Risk assessment and portfolio optimization strategies
+- Risk assessment and portfolio optimization strategies leveraging Smart Money insights
 - Smart contract interactions and blockchain technology
 - Market sentiment analysis and Fear & Greed Index
 
