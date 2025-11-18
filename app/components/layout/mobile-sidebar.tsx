@@ -20,7 +20,8 @@ import {
   Radio,
   Video,
   Shield,
-  Settings
+  Settings,
+  Brain
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 
@@ -41,9 +42,9 @@ const sidebarItems = [
     icon: Target,
   },
   {
-    title: 'KOL Tracker',
-    href: '/kol-tracker',
-    icon: Target,
+    title: 'Smart Money',
+    href: '/smart-money-tracker',
+    icon: Brain,
   },
   {
     title: 'Whale Tracker',

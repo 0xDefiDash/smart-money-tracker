@@ -21,7 +21,8 @@ import {
   Shield,
   Settings,
   Twitter,
-  Waves
+  Waves,
+  Brain
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -36,9 +37,9 @@ const sidebarItems = [
     icon: Wallet,
   },
   {
-    title: 'KOL Tracker',
-    href: '/kol-tracker',
-    icon: Target,
+    title: 'Smart Money',
+    href: '/smart-money-tracker',
+    icon: Brain,
   },
   {
     title: 'Whale Tracker',

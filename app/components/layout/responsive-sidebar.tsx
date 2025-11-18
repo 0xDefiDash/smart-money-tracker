@@ -23,7 +23,8 @@ import {
   Shield,
   Settings,
   Twitter,
-  Waves
+  Waves,
+  Brain
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 import { TransactionAlerts } from '@/components/wallet-tracker/transaction-alerts'
@@ -40,9 +41,9 @@ const sidebarItems = [
     icon: Wallet,
   },
   {
-    title: 'KOL Tracker',
-    href: '/kol-tracker',
-    icon: Target,
+    title: 'Smart Money',
+    href: '/smart-money-tracker',
+    icon: Brain,
   },
   {
     title: 'Whale Tracker',
