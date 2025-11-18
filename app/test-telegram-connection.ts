@@ -65,7 +65,7 @@ async function testTelegramConnection() {
 
     if (users.length > 0) {
       console.log(`✅ Found ${users.length} user(s):`);
-      users.forEach(user => {
+      users.forEach((user: any) => {
         console.log('  -', {
           email: user.email || 'No email',
           telegramUsername: user.telegramUsername,
@@ -91,7 +91,7 @@ async function testTelegramConnection() {
       });
       
       if (allTelegramUsers.length > 0) {
-        allTelegramUsers.forEach(user => {
+        allTelegramUsers.forEach((user: any) => {
           console.log('  -', {
             email: user.email || 'No email',
             telegramUsername: user.telegramUsername,

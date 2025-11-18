@@ -532,6 +532,134 @@ export async function getRelatedWallets(
   return data.data || [];
 }
 
+export interface HistoricalBalance {
+  timestamp: string;
+  tokenAddress: string;
+  tokenSymbol: string;
+  tokenName: string;
+  balance: number;
+  balanceUsd: number;
+  priceUsd: number;
+}
+
+/**
+ * Get historical balances of a wallet
+ */
+export async function getHistoricalBalances(
+  address: string,
+  chain: string = 'ethereum',
+  startDate?: string,
+  endDate?: string
+): Promise<HistoricalBalance[]> {
+  const data = await nansenRequest<any>('/profiler/address/historical-balances', {
+    address,
+    chain,
+    startDate,
+    endDate,
+  });
+
+  return data.data || [];
+}
+
+export interface TokenPnL {
+  tokenAddress: string;
+  tokenSymbol: string;
+  tokenName: string;
+  realizedPnl: number;
+  unrealizedPnl: number;
+  totalPnl: number;
+  roi: number;
+  avgBuyPrice: number;
+  avgSellPrice: number;
+  totalBought: number;
+  totalSold: number;
+  buyCount: number;
+  sellCount: number;
+  currentHolding: number;
+  investedAmount: number;
+  returnAmount: number;
+}
+
+/**
+ * Get detailed PnL for a specific token held by the wallet
+ */
+export async function getWalletTokenPnL(
+  address: string,
+  tokenAddress: string,
+  chain: string = 'ethereum',
+  startDate?: string,
+  endDate?: string
+): Promise<TokenPnL> {
+  const data = await nansenRequest<any>('/profiler/address/pnl', {
+    address,
+    tokenAddress,
+    chain,
+    startDate,
+    endDate,
+  });
+
+  return data.data;
+}
+
+export interface Counterparty {
+  address: string;
+  label?: string;
+  entityName?: string;
+  transactionCount: number;
+  totalValueSent: number;
+  totalValueReceived: number;
+  netFlow: number;
+  firstInteraction: string;
+  lastInteraction: string;
+  category?: 'exchange' | 'smart_money' | 'whale' | 'defi' | 'nft' | 'other';
+}
+
+/**
+ * Get top counterparties (addresses this wallet interacts with most)
+ */
+export async function getWalletCounterparties(
+  address: string,
+  chain: string = 'ethereum',
+  limit: number = 50
+): Promise<Counterparty[]> {
+  const data = await nansenRequest<any>('/profiler/address/counterparties', {
+    address,
+    chain,
+    limit,
+  });
+
+  return data.data || [];
+}
+
+export interface WalletActivity {
+  address: string;
+  chain: string;
+  firstSeen: string;
+  lastSeen: string;
+  totalTransactions: number;
+  totalValueTransacted: number;
+  uniqueTokensTraded: number;
+  uniqueCounterparties: number;
+  dexTradeCount: number;
+  nftTradeCount: number;
+  defiInteractionCount: number;
+}
+
+/**
+ * Get overall wallet activity statistics
+ */
+export async function getWalletActivity(
+  address: string,
+  chain: string = 'ethereum'
+): Promise<WalletActivity> {
+  const data = await nansenRequest<any>('/profiler/address/activity', {
+    address,
+    chain,
+  });
+
+  return data.data;
+}
+
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
@@ -609,6 +737,10 @@ export default {
   getWalletPnLSummary,
   getWalletLabels,
   getRelatedWallets,
+  getHistoricalBalances,
+  getWalletTokenPnL,
+  getWalletCounterparties,
+  getWalletActivity,
   
   // Utilities
   formatChainName,

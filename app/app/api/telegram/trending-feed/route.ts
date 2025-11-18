@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const tokens = cryptos.map((crypto, idx) => ({
+    const tokens = cryptos.map((crypto: any, idx: any) => ({
       symbol: crypto.symbol,
       name: crypto.name,
       priceChange: crypto.priceChange24h || 0,

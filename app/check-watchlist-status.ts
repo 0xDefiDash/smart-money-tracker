@@ -15,7 +15,7 @@ async function checkWatchlist() {
   
   console.log('Total watchlist items:', items.length);
   console.log('\nWatchlist items:');
-  items.forEach((item, i) => {
+  items.forEach((item: any, i: any) => {
     console.log(`\n${i+1}. Address: ${item.address}`);
     console.log(`   Chain: ${item.chain}`);
     console.log(`   User: ${item.user.email}`);
@@ -32,7 +32,7 @@ async function checkWatchlist() {
   console.log(`\n\nTotal alerts in database: ${alerts.length}`);
   if (alerts.length > 0) {
     console.log('Recent alerts:');
-    alerts.forEach((alert, i) => {
+    alerts.forEach((alert: any, i: any) => {
       console.log(`\n${i+1}. ${alert.type} - ${alert.walletAddress}`);
       console.log(`   Chain: ${alert.chain}`);
       console.log(`   Hash: ${alert.transactionHash}`);

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const kols = kolProfiles.map(kol => ({
+    const kols = kolProfiles.map((kol: any) => ({
       id: kol.id,
       username: kol.username,
       displayName: kol.displayName,

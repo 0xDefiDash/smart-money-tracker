@@ -98,15 +98,15 @@ export async function GET(
 
     // Calculate stats
     const totalTweets = kolProfile.tweets.length;
-    const totalLikes = kolProfile.tweets.reduce((sum, t) => sum + t.likeCount, 0);
-    const totalRetweets = kolProfile.tweets.reduce((sum, t) => sum + t.retweetCount, 0);
-    const totalReplies = kolProfile.tweets.reduce((sum, t) => sum + t.replyCount, 0);
+    const totalLikes = kolProfile.tweets.reduce((sum: any, t: any) => sum + t.likeCount, 0);
+    const totalRetweets = kolProfile.tweets.reduce((sum: any, t: any) => sum + t.retweetCount, 0);
+    const totalReplies = kolProfile.tweets.reduce((sum: any, t: any) => sum + t.replyCount, 0);
     const totalEngagement = totalLikes + totalRetweets + totalReplies;
 
     // Top coins
     const coinCounts = new Map<string, number>();
-    kolProfile.tweets.forEach(tweet => {
-      tweet.coins.forEach(coin => {
+    kolProfile.tweets.forEach((tweet: any) => {
+      tweet.coins.forEach((coin: any) => {
         coinCounts.set(coin, (coinCounts.get(coin) || 0) + 1);
       });
     });
@@ -117,7 +117,7 @@ export async function GET(
 
     // Category distribution
     const categoryCounts = new Map<string, number>();
-    kolProfile.tweets.forEach(tweet => {
+    kolProfile.tweets.forEach((tweet: any) => {
       const cat = tweet.category || 'general';
       categoryCounts.set(cat, (categoryCounts.get(cat) || 0) + 1);
     });
@@ -126,7 +126,7 @@ export async function GET(
       .sort((a, b) => b.count - a.count);
 
     // Format tweets
-    const formattedTweets = kolProfile.tweets.map(tweet => ({
+    const formattedTweets = kolProfile.tweets.map((tweet: any) => ({
       id: tweet.tweetId,
       content: tweet.content,
       timestamp: formatTimestamp(tweet.createdAt.toISOString()),

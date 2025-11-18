@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const formattedData = cryptos.map((crypto) => ({
+    const formattedData = cryptos.map((crypto: any) => ({
       symbol: crypto.symbol,
       name: crypto.name,
       price: crypto.price || 0,

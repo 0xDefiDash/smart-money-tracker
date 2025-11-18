@@ -308,7 +308,7 @@ function generateAIInsights(topCryptos: any[], trendingTokens: any[]): any[] {
   }
   
   // Insight 3: Volatility warning
-  const highVolatility = topCryptos.filter(c => Math.abs(c.change24h) > 8);
+  const highVolatility = topCryptos.filter((c: any) => Math.abs(c.change24h) > 8);
   if (highVolatility.length > 3) {
     insights.push({
       type: 'risk',

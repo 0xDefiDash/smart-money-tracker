@@ -60,14 +60,14 @@ async function generateDailyReport(date: Date) {
 
     // Calculate metrics
     const totalWhaleTransactions = whaleTransactions.length
-    const totalWhaleVolumeUsd = whaleTransactions.reduce((sum: number, tx) => sum + tx.valueUsd, 0)
-    const largestTransaction = whaleTransactions.reduce((max, tx) => 
+    const totalWhaleVolumeUsd = whaleTransactions.reduce((sum: number, tx: any) => sum + tx.valueUsd, 0)
+    const largestTransaction = whaleTransactions.reduce((max: any, tx: any) => 
       tx.valueUsd > (max?.valueUsd || 0) ? tx : max, 
       null as typeof whaleTransactions[0] | null
     )
 
     // Get top crypto by volume
-    const cryptoVolumes = whaleTransactions.reduce((acc: Record<string, number>, tx) => {
+    const cryptoVolumes = whaleTransactions.reduce((acc: Record<string, number>, tx: any) => {
       const symbol = tx.cryptocurrency.symbol
       acc[symbol] = (acc[symbol] || 0) + tx.valueUsd
       return acc
@@ -86,20 +86,20 @@ async function generateDailyReport(date: Date) {
       }
     })
 
-    const exchangeInflows = exchangeFlows.filter(f => f.flowType === 'inflow')
-    const exchangeOutflows = exchangeFlows.filter(f => f.flowType === 'outflow')
+    const exchangeInflows = exchangeFlows.filter((f: any) => f.flowType === 'inflow')
+    const exchangeOutflows = exchangeFlows.filter((f: any) => f.flowType === 'outflow')
 
     const topExchangeInflow = exchangeInflows
-      .reduce((max, flow) => flow.amountUsd > (max?.amountUsd || 0) ? flow : max, 
+      .reduce((max: any, flow: any) => flow.amountUsd > (max?.amountUsd || 0) ? flow : max, 
         null as typeof exchangeInflows[0] | null)?.exchangeName || null
 
     const topExchangeOutflow = exchangeOutflows
-      .reduce((max, flow) => flow.amountUsd > (max?.amountUsd || 0) ? flow : max,
+      .reduce((max: any, flow: any) => flow.amountUsd > (max?.amountUsd || 0) ? flow : max,
         null as typeof exchangeOutflows[0] | null)?.exchangeName || null
 
     // Determine market sentiment (simplified)
     let marketSentiment: 'bullish' | 'bearish' | 'neutral' = 'neutral'
-    if (totalWhaleVolumeUsd > 5000000000 && whaleTransactions.filter((tx) => tx.isAlert).length > 10) {
+    if (totalWhaleVolumeUsd > 5000000000 && whaleTransactions.filter((tx: any) => tx.isAlert).length > 10) {
       marketSentiment = 'bullish'
     } else if (totalWhaleVolumeUsd < 1000000000) {
       marketSentiment = 'bearish'
@@ -121,17 +121,17 @@ async function generateDailyReport(date: Date) {
             totalTransactions: totalWhaleTransactions,
             totalVolume: totalWhaleVolumeUsd,
             averageTransactionSize: totalWhaleTransactions > 0 ? totalWhaleVolumeUsd / totalWhaleTransactions : 0,
-            alertCount: whaleTransactions.filter((tx) => tx.isAlert).length
+            alertCount: whaleTransactions.filter((tx: any) => tx.isAlert).length
           },
           topCryptos: Object.entries(cryptoVolumes)
             .sort(([,a], [,b]) => (b as number) - (a as number))
             .slice(0, 5)
             .map(([symbol, volume]) => ({ symbol, volume })),
           exchangeActivity: {
-            totalInflow: exchangeInflows.reduce((sum: number, f) => sum + f.amountUsd, 0),
-            totalOutflow: exchangeOutflows.reduce((sum: number, f) => sum + f.amountUsd, 0),
-            netFlow: exchangeInflows.reduce((sum: number, f) => sum + f.amountUsd, 0) - 
-                     exchangeOutflows.reduce((sum: number, f) => sum + f.amountUsd, 0)
+            totalInflow: exchangeInflows.reduce((sum: number, f: any) => sum + f.amountUsd, 0),
+            totalOutflow: exchangeOutflows.reduce((sum: number, f: any) => sum + f.amountUsd, 0),
+            netFlow: exchangeInflows.reduce((sum: number, f: any) => sum + f.amountUsd, 0) - 
+                     exchangeOutflows.reduce((sum: number, f: any) => sum + f.amountUsd, 0)
           }
         }
       }

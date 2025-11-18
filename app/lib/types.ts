@@ -63,8 +63,8 @@ export interface PrismaUserData {
   emailVerified?: Date | null
   image?: string | null
   password?: string | null
-  preferences?: Prisma.JsonValue | null
-  watchlist?: Prisma.JsonValue | null
+  preferences?: any | null
+  watchlist?: any | null
   alertsEnabled?: boolean
   createdAt: Date
   updatedAt: Date

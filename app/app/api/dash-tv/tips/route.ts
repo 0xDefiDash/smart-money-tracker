@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     // Calculate stats
     const stats = {
       totalTips: tips.length,
-      totalAmount: tips.reduce((sum, tip) => sum + tip.amountUsd, 0),
+      totalAmount: tips.reduce((sum: any, tip: any) => sum + tip.amountUsd, 0),
       topTipper: null
     }
 

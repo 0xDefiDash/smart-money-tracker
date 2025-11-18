@@ -366,7 +366,7 @@ async function main() {
     
     if (!matches) continue;
     
-    const tokens = [...new Set(matches.map(token => token.replace('$', '')))];
+    const tokens = [...new Set(matches.map((token: any) => token.replace('$', '')))];
     
     // Determine sentiment
     const content = tweet.content.toLowerCase();
@@ -381,7 +381,7 @@ async function main() {
     else if (bearishCount > bullishCount) sentiment = 'bearish';
     
     // Create token calls
-    for (const tokenSymbol of tokens) {
+    for (const tokenSymbol of tokens as string[]) {
       const tokenInfo = tokenPrices[tokenSymbol];
       if (!tokenInfo) continue;
       
@@ -441,16 +441,16 @@ async function main() {
     if (calls.length === 0) continue;
 
     const totalCalls = calls.length;
-    const successfulCalls = calls.filter(c => c.isWin === true).length;
-    const failedCalls = calls.filter(c => c.isWin === false).length;
-    const pendingCalls = calls.filter(c => c.isWin === null).length;
+    const successfulCalls = calls.filter((c: any) => c.isWin === true).length;
+    const failedCalls = calls.filter((c: any) => c.isWin === false).length;
+    const pendingCalls = calls.filter((c: any) => c.isWin === null).length;
     
     const completedCalls = successfulCalls + failedCalls;
     const winRate = completedCalls > 0 ? (successfulCalls / completedCalls) * 100 : 0;
     
-    const roiValues = calls.filter(c => c.roi !== null).map(c => c.roi!);
+    const roiValues = calls.filter((c: any) => c.roi !== null).map((c: any) => c.roi!);
     const averageROI = roiValues.length > 0 
-      ? roiValues.reduce((a, b) => a + b, 0) / roiValues.length 
+      ? roiValues.reduce((a: any, b: any) => a + b, 0) / roiValues.length 
       : 0;
     
     const bestCall = roiValues.length > 0 ? Math.max(...roiValues) : undefined;

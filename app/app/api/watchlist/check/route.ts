@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     if (expiredUsers.length > 0) {
       const deleted = await prisma.watchlistItem.deleteMany({
         where: {
-          userId: { in: expiredUsers.map(u => u.id) }
+          userId: { in: expiredUsers.map((u: any) => u.id) }
         }
       });
       console.log(`Cleaned up ${deleted.count} watchlist items from ${expiredUsers.length} expired users`);

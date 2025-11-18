@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const formattedTransactions = transactions.map((tx) => ({
+    const formattedTransactions = transactions.map((tx: any) => ({
       id: tx.id,
       blockchain: tx.blockchain,
       value: tx.value,

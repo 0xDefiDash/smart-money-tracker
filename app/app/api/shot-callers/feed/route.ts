@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
           });
 
           const cachedKolProfile = kolProfile; // Store reference for closure
-          cachedTweets.forEach(tweet => {
+          cachedTweets.forEach((tweet: any) => {
             allTweets.push({
               id: tweet.tweetId,
               author: cachedKolProfile.displayName,
@@ -237,7 +237,7 @@ export async function GET(request: NextRequest) {
 
       console.log(`📊 Loaded ${dbTweets.length} tweets from database`);
 
-      allTweets.push(...dbTweets.map(tweet => ({
+      allTweets.push(...dbTweets.map((tweet: any) => ({
         id: tweet.tweetId,
         author: tweet.kol.displayName,
         username: tweet.kol.username,
@@ -294,7 +294,7 @@ export async function GET(request: NextRequest) {
       });
 
       return NextResponse.json({
-        tweets: dbTweets.map(tweet => ({
+        tweets: dbTweets.map((tweet: any) => ({
           id: tweet.tweetId,
           author: tweet.kol.displayName,
           username: tweet.kol.username,
