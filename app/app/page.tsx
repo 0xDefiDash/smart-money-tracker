@@ -3,6 +3,7 @@
 import { Suspense, useState, useCallback, useEffect } from 'react'
 import { MarketOverview } from '@/components/dashboard/market-overview'
 import { WhaleActivity } from '@/components/dashboard/whale-activity'
+import { SmartMoneyInsights } from '@/components/dashboard/smart-money-insights'
 import { ExchangeFlows } from '@/components/dashboard/exchange-flows'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
 import { MarketStats } from '@/components/dashboard/market-stats'
@@ -184,6 +185,11 @@ export default function DashboardPage() {
         {/* DeFi Overview Section */}
         <Suspense fallback={<LoadingCard />}>
           <DeFiOverview />
+        </Suspense>
+
+        {/* Smart Money Insights - Nansen Integration */}
+        <Suspense fallback={<LoadingCard />}>
+          <SmartMoneyInsights />
         </Suspense>
 
         {/* Bottom Section */}

@@ -3,11 +3,24 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, ExternalLink, ArrowRightIcon, RefreshCw } from 'lucide-react'
+import { Activity, ExternalLink, ArrowRightIcon, RefreshCw, Sparkles } from 'lucide-react'
 import { formatCurrency, truncateAddress, getTimeAgo } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
-// Enhanced whale transaction data for September 20, 2025
+interface SmartMoneyTrade {
+  timestamp: string
+  walletAddress: string
+  walletLabel?: string
+  tokenAddress: string
+  tokenSymbol: string
+  type: 'BUY' | 'SELL'
+  amountUsd: number
+  amount: number
+  priceUsd: number
+  dex: string
+  txHash: string
+}
+
 const getCurrentTimestamp = () => new Date().getTime();
 
 const generateWhaleTransactions = () => {
@@ -135,44 +148,82 @@ const generateWhaleTransactions = () => {
 };
 
 export function WhaleActivity() {
-  const [whaleTransactions, setWhaleTransactions] = useState(generateWhaleTransactions());
+  const [smartMoneyTrades, setSmartMoneyTrades] = useState<SmartMoneyTrade[]>([]);
+  const [fallbackTransactions, setFallbackTransactions] = useState(generateWhaleTransactions());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [useNansenData, setUseNansenData] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Set initial lastUpdate on client
     setLastUpdate(new Date());
+    fetchSmartMoneyTrades();
     
-    // Update transactions every 2 minutes to simulate real-time data
+    // Update data every 2 minutes
     const interval = setInterval(() => {
-      setWhaleTransactions(generateWhaleTransactions());
-      setLastUpdate(new Date());
+      fetchSmartMoneyTrades();
     }, 120000);
 
     return () => clearInterval(interval);
   }, []);
 
+  const fetchSmartMoneyTrades = async () => {
+    try {
+      const response = await fetch('/api/nansen/smart-money?action=dex-trades&chain=ethereum&timeframe=1h&limit=6');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch Smart Money trades');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && result.data && result.data.length > 0) {
+        setSmartMoneyTrades(result.data);
+        setUseNansenData(true);
+        setError(null);
+        setLastUpdate(new Date());
+      } else {
+        // Use fallback data
+        setUseNansenData(false);
+        setFallbackTransactions(generateWhaleTransactions());
+      }
+    } catch (err: any) {
+      console.error('[Whale Activity] Error:', err);
+      setError(err.message);
+      setUseNansenData(false);
+      setFallbackTransactions(generateWhaleTransactions());
+      setLastUpdate(new Date());
+    }
+  };
+
   const refreshData = async () => {
     setIsRefreshing(true);
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setWhaleTransactions(generateWhaleTransactions());
-    setLastUpdate(new Date());
+    await fetchSmartMoneyTrades();
     setIsRefreshing(false);
   };
 
-  const alertCount = whaleTransactions.filter(tx => tx.isAlert).length;
+  const whaleTransactions = useNansenData ? [] : fallbackTransactions;
+  const alertCount = useNansenData 
+    ? smartMoneyTrades.filter(t => t.type === 'BUY' && t.amountUsd > 100000).length
+    : whaleTransactions.filter(tx => tx.isAlert).length;
 
   return (
     <Card className="bg-gradient-to-br from-background to-muted/10">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <CardTitle className="text-lg font-semibold flex items-center space-x-2">
           <Activity className="w-5 h-5 text-primary" />
-          <span>Whale Activity</span>
+          <span>{useNansenData ? 'Smart Money Trades' : 'Whale Activity'}</span>
+          {useNansenData && (
+            <Badge variant="outline" className="border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs ml-2">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Nansen
+            </Badge>
+          )}
         </CardTitle>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
-            {alertCount} Active Alerts
+            {alertCount} Active {useNansenData ? 'Buys' : 'Alerts'}
           </Badge>
           <button
             onClick={refreshData}
@@ -186,7 +237,78 @@ export function WhaleActivity() {
       
       <CardContent>
         <div className="space-y-4">
-          {whaleTransactions.map((tx, index) => (
+          {useNansenData ? (
+            // Render Nansen Smart Money Trades
+            smartMoneyTrades.map((trade, index) => (
+              <div 
+                key={trade.txHash}
+                className={`p-4 rounded-lg border transition-all hover:shadow-md ${
+                  trade.type === 'BUY' && trade.amountUsd > 100000
+                    ? 'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/20' 
+                    : trade.type === 'SELL' && trade.amountUsd > 100000
+                    ? 'border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-900/20'
+                    : 'border-border bg-muted/20'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      variant={trade.type === 'BUY' ? 'default' : 'destructive'} 
+                      className={`text-xs ${trade.type === 'BUY' ? 'bg-green-500' : 'bg-red-500'}`}
+                    >
+                      {trade.type}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {trade.tokenSymbol}
+                    </Badge>
+                    {trade.walletLabel && (
+                      <Badge variant="outline" className="text-xs border-purple-500 text-purple-600">
+                        {trade.walletLabel}
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {trade.dex}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {getTimeAgo(new Date(trade.timestamp))}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <span className="text-muted-foreground">
+                      {truncateAddress(trade.walletAddress)}
+                    </span>
+                    <ArrowRightIcon className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      {truncateAddress(trade.tokenAddress)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-foreground">
+                      {formatCurrency(trade.amountUsd)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {trade.amount.toLocaleString()} {trade.tokenSymbol}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <button className="flex items-center space-x-1 text-xs text-primary hover:text-primary/80 transition-colors">
+                    <ExternalLink className="w-3 h-3" />
+                    <span>View Transaction</span>
+                  </button>
+                  <div className="text-xs text-muted-foreground">
+                    Price: {formatCurrency(trade.priceUsd)}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            // Render fallback whale transactions
+            whaleTransactions.map((tx, index) => (
             <div 
               key={tx.id}
               className={`p-4 rounded-lg border transition-all hover:shadow-md ${
@@ -247,7 +369,8 @@ export function WhaleActivity() {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
         
         <div className="mt-4 pt-4 border-t border-border">
