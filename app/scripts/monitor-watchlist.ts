@@ -7,7 +7,7 @@
  */
 
 async function monitorWatchlist() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://defidashtracker.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   
   console.log(`[${new Date().toISOString()}] Starting watchlist monitoring...`);
   
