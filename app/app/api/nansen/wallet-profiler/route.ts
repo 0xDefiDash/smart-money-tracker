@@ -6,6 +6,9 @@ import {
   getRelatedWallets,
   getWalletCounterparties,
   getWalletActivity,
+  getWalletPerpPositions,
+  getWalletBalance,
+  getWalletTransactions,
   formatChainName,
 } from '@/lib/nansen-client';
 
@@ -85,6 +88,40 @@ export async function GET(request: NextRequest) {
           .catch(error => {
             console.error('Activity error:', error.message);
             return { activity: null, activityError: error.message };
+          })
+      );
+    }
+
+    if (section === 'all' || section === 'perp-positions') {
+      promises.push(
+        getWalletPerpPositions(address, formattedChain)
+          .then(data => ({ perpPositions: data }))
+          .catch(error => {
+            console.error('Perp Positions error:', error.message);
+            return { perpPositions: null, perpPositionsError: error.message };
+          })
+      );
+    }
+
+    if (section === 'all' || section === 'balance') {
+      promises.push(
+        getWalletBalance(address, formattedChain)
+          .then(data => ({ balance: data }))
+          .catch(error => {
+            console.error('Balance error:', error.message);
+            return { balance: null, balanceError: error.message };
+          })
+      );
+    }
+
+    if (section === 'all' || section === 'transactions') {
+      const limit = parseInt(searchParams.get('limit') || '50');
+      promises.push(
+        getWalletTransactions(address, formattedChain, limit)
+          .then(data => ({ transactions: data }))
+          .catch(error => {
+            console.error('Transactions error:', error.message);
+            return { transactions: [], transactionsError: error.message };
           })
       );
     }

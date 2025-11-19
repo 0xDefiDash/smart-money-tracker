@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   getSmartMoneyNetflows,
   getSmartMoneyHoldings,
+  getSmartMoneyHistoricalHoldings,
   getSmartMoneyDexTrades,
   formatChainName,
 } from '@/lib/nansen-client';
@@ -30,13 +31,33 @@ export async function GET(request: NextRequest) {
         data = await getSmartMoneyHoldings(formattedChain, limit);
         break;
 
+      case 'historical-holdings': {
+        const tokenAddress = searchParams.get('tokenAddress');
+        if (!tokenAddress) {
+          return NextResponse.json(
+            { success: false, error: 'tokenAddress parameter required for historical-holdings' },
+            { status: 400 }
+          );
+        }
+        const startDate = searchParams.get('startDate') || undefined;
+        const endDate = searchParams.get('endDate') || undefined;
+        data = await getSmartMoneyHistoricalHoldings(
+          tokenAddress,
+          formattedChain,
+          startDate,
+          endDate,
+          limit
+        );
+        break;
+      }
+
       case 'dex-trades':
         data = await getSmartMoneyDexTrades(formattedChain, timeframe, limit);
         break;
 
       default:
         return NextResponse.json(
-          { success: false, error: 'Invalid action. Use: netflows, holdings, or dex-trades' },
+          { success: false, error: 'Invalid action. Use: netflows, holdings, historical-holdings, or dex-trades' },
           { status: 400 }
         );
     }

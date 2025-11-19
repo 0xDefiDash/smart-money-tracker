@@ -121,7 +121,7 @@ export async function getSmartMoneyNetflows(
   limit: number = 50
 ): Promise<SmartMoneyNetflow[]> {
   const data = await nansenRequest<any>('/smart-money/netflow', {
-    chain,
+    chains: [chain],  // Nansen API expects an array of chains
     timeframe,
     limit,
   });
@@ -148,7 +148,7 @@ export async function getSmartMoneyHoldings(
   limit: number = 50
 ): Promise<SmartMoneyHolding[]> {
   const data = await nansenRequest<any>('/smart-money/holdings', {
-    chain,
+    chains: [chain],  // Nansen API expects an array of chains
     limit,
   });
 
@@ -178,8 +178,55 @@ export async function getSmartMoneyDexTrades(
   limit: number = 100
 ): Promise<SmartMoneyDexTrade[]> {
   const data = await nansenRequest<any>('/smart-money/dex-trades', {
-    chain,
+    chains: [chain],  // Nansen API expects an array of chains
     timeframe,
+    limit,
+  });
+
+  return data.data || [];
+}
+
+// ============================================================================
+// SMART MONEY - HISTORICAL HOLDINGS
+// ============================================================================
+
+export interface SmartMoneyHistoricalHolding {
+  tokenAddress: string;
+  tokenSymbol: string;
+  tokenName: string;
+  chain: string;
+  timestamp: string;
+  date: string;
+  totalHolders: number;
+  totalValue: string;
+  totalValueUSD: number;
+  averageHolding: string;
+  medianHolding: string;
+  changePercent24h?: number;
+  topHolders: {
+    walletAddress: string;
+    walletLabel?: string;
+    balance: string;
+    valueUSD: number;
+    percentage: number;
+  }[];
+}
+
+/**
+ * Get Smart Money historical holdings - track how Smart Money positions changed over time
+ */
+export async function getSmartMoneyHistoricalHoldings(
+  tokenAddress: string,
+  chain: string = 'ethereum',
+  startDate?: string,
+  endDate?: string,
+  limit: number = 100
+): Promise<SmartMoneyHistoricalHolding[]> {
+  const data = await nansenRequest<any>('/smart-money/historical-holdings', {
+    tokenAddress,
+    chains: [chain],  // Nansen API expects an array of chains
+    startDate,
+    endDate,
     limit,
   });
 
@@ -661,6 +708,65 @@ export async function getWalletActivity(
 }
 
 // ============================================================================
+// PROFILER - PERPETUAL POSITIONS
+// ============================================================================
+
+export interface PerpetualPosition {
+  protocol: string;
+  protocolName: string;
+  chain: string;
+  tokenAddress: string;
+  tokenSymbol: string;
+  positionType: 'LONG' | 'SHORT';
+  size: number;
+  sizeUSD: number;
+  entryPrice: number;
+  currentPrice: number;
+  leverage: number;
+  liquidationPrice?: number;
+  unrealizedPnL: number;
+  unrealizedPnLPercent: number;
+  collateral: number;
+  collateralUSD: number;
+  collateralToken: string;
+  openedAt: string;
+  lastUpdated: string;
+}
+
+export interface WalletPerpPositions {
+  address: string;
+  chain: string;
+  positions: PerpetualPosition[];
+  totalPositionValueUSD: number;
+  totalUnrealizedPnL: number;
+  totalUnrealizedPnLPercent: number;
+  protocols: string[];
+}
+
+/**
+ * Get wallet's perpetual trading positions across DeFi protocols
+ */
+export async function getWalletPerpPositions(
+  address: string,
+  chain: string = 'ethereum'
+): Promise<WalletPerpPositions> {
+  const data = await nansenRequest<any>('/profiler/address/perp-positions', {
+    address,
+    chain,
+  });
+
+  return data.data || {
+    address,
+    chain,
+    positions: [],
+    totalPositionValueUSD: 0,
+    totalUnrealizedPnL: 0,
+    totalUnrealizedPnLPercent: 0,
+    protocols: [],
+  };
+}
+
+// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
@@ -721,6 +827,7 @@ export default {
   // Smart Money
   getSmartMoneyNetflows,
   getSmartMoneyHoldings,
+  getSmartMoneyHistoricalHoldings,
   getSmartMoneyDexTrades,
   
   // Token God Mode
@@ -741,6 +848,7 @@ export default {
   getWalletTokenPnL,
   getWalletCounterparties,
   getWalletActivity,
+  getWalletPerpPositions,
   
   // Utilities
   formatChainName,
