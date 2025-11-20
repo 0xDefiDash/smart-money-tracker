@@ -149,7 +149,7 @@ export default function SmartMoneyTrackerPage() {
     fetchLiveData();
   }, [chain, timeframe]);
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 15 seconds
   useEffect(() => {
     if (autoRefreshRef.current) {
       clearInterval(autoRefreshRef.current);
@@ -157,7 +157,7 @@ export default function SmartMoneyTrackerPage() {
 
     autoRefreshRef.current = setInterval(() => {
       fetchLiveData(true);
-    }, 30000); // 30 seconds
+    }, 15000); // 15 seconds for real-time streaming
 
     return () => {
       if (autoRefreshRef.current) {
@@ -272,7 +272,7 @@ export default function SmartMoneyTrackerPage() {
             {lastUpdate && (
               <div className="flex items-center justify-center mt-3 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3 mr-1.5" />
-                Last updated: {lastUpdate.toLocaleTimeString()} • Auto-refresh: 30s
+                Last updated: {lastUpdate.toLocaleTimeString()} • Auto-refresh: 15s
               </div>
             )}
           </CardContent>

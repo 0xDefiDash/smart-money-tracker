@@ -8,6 +8,8 @@ import { ExchangeFlows } from '@/components/dashboard/exchange-flows'
 import { RecentAlerts } from '@/components/dashboard/recent-alerts'
 import { MarketStats } from '@/components/dashboard/market-stats'
 import { DeFiOverview } from '@/components/dashboard/defi-overview'
+import { LivePriceFeed } from '@/components/dashboard/live-price-feed'
+import { NansenLiveFeed } from '@/components/dashboard/nansen-live-feed'
 import { LoadingCard } from '@/components/ui/loading-card'
 import { LivePriceTicker } from '@/components/mobile/LivePriceTicker'
 import { MobileQuickStats } from '@/components/mobile/MobileQuickStats'
@@ -191,6 +193,19 @@ export default function DashboardPage() {
         <Suspense fallback={<LoadingCard />}>
           <SmartMoneyInsights />
         </Suspense>
+
+        {/* Real-Time Data Feeds */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+          {/* Live Price Feed */}
+          <Suspense fallback={<LoadingCard />}>
+            <LivePriceFeed />
+          </Suspense>
+
+          {/* Nansen Live Feed */}
+          <Suspense fallback={<LoadingCard />}>
+            <NansenLiveFeed />
+          </Suspense>
+        </div>
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">

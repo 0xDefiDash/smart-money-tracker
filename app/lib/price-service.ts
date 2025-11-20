@@ -34,7 +34,7 @@ let priceCache: {
   source: ''
 };
 
-const CACHE_DURATION = 60000; // 60 seconds cache
+const CACHE_DURATION = 15000; // 15 seconds cache for real-time feeds
 
 /**
  * Fetch prices from CoinCap API (Free, no API key required)
