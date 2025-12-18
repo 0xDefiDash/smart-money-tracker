@@ -22,7 +22,8 @@ import {
   Settings,
   Twitter,
   Waves,
-  Brain
+  Brain,
+  Sparkles
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -30,6 +31,11 @@ const sidebarItems = [
     title: 'Dashboard',
     href: '/',
     icon: Home,
+  },
+  {
+    title: 'Dash Agentic',
+    href: '/dash-agentic',
+    icon: Sparkles,
   },
   {
     title: 'Wallet Tracker',

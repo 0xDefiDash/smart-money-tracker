@@ -48,7 +48,7 @@ var priceCache = {
     timestamp: 0,
     source: ''
 };
-var CACHE_DURATION = 60000; // 60 seconds cache
+var CACHE_DURATION = 15000; // 15 seconds cache for real-time feeds
 /**
  * Fetch prices from CoinCap API (Free, no API key required)
  */

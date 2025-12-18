@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -58,14 +35,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.notifyWalletTransaction = exports.telegramClient = void 0;
 // Telegram Bot API Client
-var fs_1 = __importDefault(require("fs"));
-var path_1 = __importDefault(require("path"));
+var fs_1 = require("fs");
+var path_1 = require("path");
 var TelegramClient = /** @class */ (function () {
     function TelegramClient() {
         this.botToken = this.getBotToken();
@@ -298,7 +272,7 @@ var TelegramClient = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        message = "\n\uD83D\uDC4B Welcome ".concat(firstName, "!\n\nI'm the DeFiDash Tracker Bot \uD83E\uDD16\n\n\uD83D\uDE80 *NEW: Telegram Mini App Available!*\nLaunch our mobile-optimized app directly in Telegram for instant access to:\n\uD83D\uDCCA Live Market Data\n\uD83D\uDC0B Whale Activity Tracking  \n\uD83D\uDD25 Trending Tokens\n\u2694\uFE0F Block Wars Game\n\nUse /app to launch the Mini App\nUse /help to see all available commands\nUse /settings to customize your notifications\n\nLet's track the smart money together! \uD83D\uDE80\n    ").trim();
+                        message = "\n\uD83D\uDC4B Welcome ".concat(firstName, "!\n\nI'm the DeFiDash Tracker Bot \uD83E\uDD16\n\n\uD83D\uDE80 *Quick Start:*\n1. Get your linking code at [defidashtracker.com/settings](https://defidashtracker.com/settings)\n2. Send: `/link YOUR_CODE` to connect your account\n3. Start receiving personalized alerts!\n\n\uD83D\uDCF1 *Telegram Mini App*\nLaunch our mobile-optimized app with /app for instant access to:\n\uD83D\uDCCA Live Market Data\n\uD83D\uDC0B Whale Activity Tracking  \n\uD83D\uDD25 Trending Tokens\n\u2694\uFE0F Block Wars Game\n\n*Useful Commands:*\n/link - Connect your account\n/app - Launch Mini App\n/help - See all commands\n/settings - Customize notifications\n\nLet's track the smart money together! \uD83D\uDE80\n    ").trim();
                         return [4 /*yield*/, this.sendMessage({
                                 chat_id: chatId,
                                 text: message,
@@ -317,7 +291,7 @@ var TelegramClient = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        message = "\n\u2139\uFE0F *DeFiDash Bot Commands*\n\n\uD83D\uDCF1 *Mini App*\n/app - Launch the Telegram Mini App\n/miniapp - Same as /app\n\n\uD83D\uDCCB *Quick Commands*\n/start - Start the bot and get welcome message\n/help - Show this help message\n/settings - View and update notification preferences\n/connect - Link your Telegram to DeFiDash account\n\n\uD83D\uDCCA *Market Data*\n/whale - Get latest whale transactions\n/alpha - Get latest alpha feeds from KOLs\n/market - Get current market overview\n/blockwars - Get your Block Wars stats\n\n\uD83D\uDD14 *Notification Types*\n\u2022 Whale Alerts - Large crypto transfers\n\u2022 Block Wars - Game updates and achievements  \n\u2022 Alpha Feeds - Token calls from KOLs\n\u2022 Market Alerts - Significant price movements\n\u2022 Daily Summary - End-of-day market report\n\n\uD83D\uDCA1 *Pro Tip:* Use the Mini App (/app) for the best mobile experience!\n\n\uD83C\uDF10 Visit https://defidashtracker.com for full experience!\n    ".trim();
+                        message = "\n\u2139\uFE0F *DeFiDash Bot Commands*\n\n\uD83D\uDCF1 *Mini App*\n/app - Launch the Telegram Mini App\n/miniapp - Same as /app\n\n\uD83D\uDCCB *Quick Commands*\n/start - Start the bot and get welcome message\n/help - Show this help message\n/settings - View and update notification preferences\n/link YOUR_CODE - Link your Telegram to DeFiDash account\n\n\uD83D\uDCCA *Market Data*\n/whale - Get latest whale transactions\n/alpha - Get latest alpha feeds from KOLs\n/market - Get current market overview\n/blockwars - Get your Block Wars stats\n\n\uD83D\uDD14 *Notification Types*\n\u2022 Whale Alerts - Large crypto transfers\n\u2022 Block Wars - Game updates and achievements  \n\u2022 Alpha Feeds - Token calls from KOLs\n\u2022 Market Alerts - Significant price movements\n\u2022 Daily Summary - End-of-day market report\n\n\uD83D\uDCA1 *Pro Tip:* Use /link to connect your account and receive personalized alerts!\n\n\uD83C\uDF10 Visit https://defidashtracker.com for full experience!\n    ".trim();
                         return [4 /*yield*/, this.sendMessage({
                                 chat_id: chatId,
                                 text: message,
@@ -461,7 +435,7 @@ function notifyWalletTransaction(notification) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 4, , 5]);
-                    return [4 /*yield*/, Promise.resolve().then(function () { return __importStar(require('@/lib/db')); })];
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('@/lib/db'); })];
                 case 1:
                     prisma = (_a.sent()).prisma;
                     return [4 /*yield*/, prisma.user.findFirst({

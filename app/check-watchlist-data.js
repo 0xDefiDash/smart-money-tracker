@@ -36,75 +36,47 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
 var client_1 = require("@prisma/client");
-function checkData() {
+var prisma = new client_1.PrismaClient();
+function checkWatchlist() {
     return __awaiter(this, void 0, void 0, function () {
-        var prisma, watchlistCount, alertsCount, watchlists, alerts, error_1;
+        var watchlistItems, alerts;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    prisma = new client_1.PrismaClient();
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 8, 9, 11]);
-                    return [4 /*yield*/, prisma.watchlistItem.count()];
-                case 2:
-                    watchlistCount = _a.sent();
-                    return [4 /*yield*/, prisma.transactionAlert.count()];
-                case 3:
-                    alertsCount = _a.sent();
-                    console.log('Database Status:');
-                    console.log('- Watchlist items:', watchlistCount);
-                    console.log('- Transaction alerts:', alertsCount);
-                    if (!(watchlistCount > 0)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, prisma.watchlistItem.findMany({
-                            take: 5,
-                            select: {
-                                id: true,
-                                address: true,
-                                chain: true,
-                                lastChecked: true,
+                case 0: return [4 /*yield*/, prisma.watchlistItem.findMany({
+                        include: {
+                            user: {
+                                select: { email: true }
                             }
-                        })];
-                case 4:
-                    watchlists = _a.sent();
-                    console.log('\nRecent watchlist items:');
-                    watchlists.forEach(function (w) {
-                        console.log("  - ".concat(w.address, " (").concat(w.chain, ") - Last checked: ").concat(w.lastChecked));
+                        }
+                    })];
+                case 1:
+                    watchlistItems = _a.sent();
+                    console.log('Total Watchlist Items:', watchlistItems.length);
+                    console.log('\nWatchlist Details:');
+                    watchlistItems.forEach(function (item, idx) {
+                        console.log("\n".concat(idx + 1, ". Wallet: ").concat(item.address));
+                        console.log("   Chain: ".concat(item.chain));
+                        console.log("   User: ".concat(item.user.email));
+                        console.log("   Label: ".concat(item.label || 'None'));
+                        console.log("   Token: ".concat(item.tokenSymbol || 'All tokens'));
+                        console.log("   Last Checked: ".concat(item.lastChecked.toISOString()));
                     });
-                    _a.label = 5;
-                case 5:
-                    if (!(alertsCount > 0)) return [3 /*break*/, 7];
                     return [4 /*yield*/, prisma.transactionAlert.findMany({
                             take: 5,
-                            orderBy: { createdAt: 'desc' },
-                            select: {
-                                id: true,
-                                chain: true,
-                                walletAddress: true,
-                                transactionHash: true,
-                                createdAt: true,
-                            }
+                            orderBy: { createdAt: 'desc' }
                         })];
-                case 6:
+                case 2:
                     alerts = _a.sent();
-                    console.log('\nRecent alerts:');
-                    alerts.forEach(function (a) {
-                        console.log("  - [".concat(a.chain, "] ").concat(a.walletAddress, " - TX: ").concat(a.transactionHash.substring(0, 10), "..."));
-                    });
-                    _a.label = 7;
-                case 7: return [3 /*break*/, 11];
-                case 8:
-                    error_1 = _a.sent();
-                    console.error('Error:', error_1.message);
-                    return [3 /*break*/, 11];
-                case 9: return [4 /*yield*/, prisma.$disconnect()];
-                case 10:
+                    console.log('\n\nRecent Transaction Alerts:', alerts.length);
+                    return [4 /*yield*/, prisma.$disconnect()];
+                case 3:
                     _a.sent();
-                    return [7 /*endfinally*/];
-                case 11: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
 }
-checkData();
+checkWatchlist();
