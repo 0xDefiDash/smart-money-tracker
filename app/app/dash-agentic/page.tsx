@@ -16,7 +16,10 @@ import {
   Sparkles, 
   Activity,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle,
+  Zap,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import type { TradingSession, CEODecision, MarketData } from '@/lib/ai-agents/agent-types';
@@ -206,6 +209,52 @@ export default function DashAgenticPage() {
             </Badge>
           )}
         </div>
+
+        {/* Live Trading Status Banner */}
+        <Card className="border-2 border-yellow-500/50 bg-yellow-500/5 p-4 mb-4">
+          <div className="flex items-start gap-4">
+            <div className="flex items-center gap-2">
+              <Zap className="h-6 w-6 text-yellow-500 animate-pulse" />
+              <div className="flex items-center gap-2">
+                <Badge className="bg-terminal-green/20 text-terminal-green border-terminal-green">
+                  LIVE
+                </Badge>
+                <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500">
+                  API CONNECTED
+                </Badge>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-terminal-green font-bold text-lg mb-1">
+                🚀 Real Trading Integration Active
+              </h3>
+              <p className="text-terminal-gray text-sm mb-3">
+                Your AI Agentic system is connected to <strong className="text-terminal-green">AsterDex perpetuals exchange</strong> with live API credentials. 
+                The system can execute real trades with actual funds.
+              </p>
+              <div className="flex items-start gap-2 bg-black/50 border border-yellow-500/30 rounded p-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-yellow-500 text-sm font-bold mb-1">
+                    ⚠️ Account Funding Required
+                  </p>
+                  <p className="text-terminal-gray text-sm">
+                    Your AsterDex account currently has <strong className="text-yellow-500">$0 balance</strong>. 
+                    You must deposit funds before the AI agents can execute live trades. 
+                    Visit <a 
+                      href="https://asterdex.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-terminal-green hover:underline inline-flex items-center gap-1"
+                    >
+                      AsterDex <ExternalLink className="h-3 w-3" />
+                    </a> to fund your account.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         {session && (
           <Card className="border-2 border-terminal-green/30 bg-black/95 p-4">
