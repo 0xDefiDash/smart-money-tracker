@@ -53,20 +53,14 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-black/50 border border-terminal-green/30 rounded-lg p-4">
-          <div className="text-terminal-gray text-xs uppercase mb-2">Total Portfolio</div>
-          <div className="text-terminal-green text-2xl font-mono font-bold">
-            ${totalCapital.toFixed(0)}
-          </div>
-        </div>
-        <div className="bg-black/50 border border-terminal-green/30 rounded-lg p-4">
-          <div className="text-terminal-gray text-xs uppercase mb-2">Capital Used</div>
-          <div className="text-terminal-green text-2xl font-mono font-bold">
-            {utilizationPercent.toFixed(1)}%
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="bg-black/50 border border-yellow-500/30 rounded-lg p-4">
+          <div className="text-terminal-gray text-xs uppercase mb-2">Account Status</div>
+          <div className="text-yellow-500 text-lg font-mono font-bold">
+            NOT FUNDED
           </div>
           <div className="text-terminal-gray text-xs mt-1">
-            ${usedCapital.toFixed(0)} / ${totalCapital.toFixed(0)}
+            Fund your AsterDex account to activate trading
           </div>
         </div>
         <div className="bg-black/50 border border-terminal-green/30 rounded-lg p-4">
