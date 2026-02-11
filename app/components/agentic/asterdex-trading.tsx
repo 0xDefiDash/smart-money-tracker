@@ -3,13 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   TrendingUp,
   TrendingDown,
@@ -20,12 +16,9 @@ import {
   Loader2,
   RefreshCw,
   AlertTriangle,
-  CheckCircle2,
-  XCircle,
   BarChart3,
   Wallet,
   Clock,
-  Zap,
   Target,
   Shield
 } from 'lucide-react';
@@ -70,15 +63,6 @@ interface TradeHistory {
   realizedPnl: number;
 }
 
-interface OrderForm {
-  symbol: string;
-  side: 'BUY' | 'SELL';
-  type: 'MARKET' | 'LIMIT';
-  quantity: string;
-  price: string;
-  leverage: string;
-}
-
 const TRADING_PAIRS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT'];
 
 export function AsterDexTrading() {
@@ -89,15 +73,6 @@ export function AsterDexTrading() {
   const [tickers, setTickers] = useState<Ticker[]>([]);
   const [tradeHistory, setTradeHistory] = useState<TradeHistory[]>([]);
   const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT');
-  const [orderForm, setOrderForm] = useState<OrderForm>({
-    symbol: 'BTCUSDT',
-    side: 'BUY',
-    type: 'MARKET',
-    quantity: '',
-    price: '',
-    leverage: '10'
-  });
-  const [orderStatus, setOrderStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchAccountData = useCallback(async () => {
@@ -153,46 +128,6 @@ export function AsterDexTrading() {
     return () => clearInterval(interval);
   }, [refreshAll]);
 
-  const handlePlaceOrder = async () => {
-    if (!orderForm.quantity || parseFloat(orderForm.quantity) <= 0) {
-      setOrderStatus({ type: 'error', message: 'Please enter a valid quantity' });
-      return;
-    }
-
-    if (orderForm.type === 'LIMIT' && (!orderForm.price || parseFloat(orderForm.price) <= 0)) {
-      setOrderStatus({ type: 'error', message: 'Please enter a valid price for limit order' });
-      return;
-    }
-
-    setIsSubmitting(true);
-    setOrderStatus(null);
-
-    try {
-      const response = await fetch('/api/asterdex/trade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'placeOrder',
-          ...orderForm
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setOrderStatus({ type: 'success', message: `Order placed: ${data.result.orderId}` });
-        setOrderForm(prev => ({ ...prev, quantity: '', price: '' }));
-        await fetchAccountData();
-      } else {
-        setOrderStatus({ type: 'error', message: data.error || 'Order failed' });
-      }
-    } catch (error) {
-      setOrderStatus({ type: 'error', message: 'Failed to place order' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleClosePosition = async (symbol: string) => {
     setIsSubmitting(true);
     try {
@@ -204,13 +139,10 @@ export function AsterDexTrading() {
 
       const data = await response.json();
       if (data.success) {
-        setOrderStatus({ type: 'success', message: `Position closed for ${symbol}` });
         await fetchAccountData();
-      } else {
-        setOrderStatus({ type: 'error', message: data.error });
       }
     } catch (error) {
-      setOrderStatus({ type: 'error', message: 'Failed to close position' });
+      console.error('Failed to close position:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -306,10 +238,7 @@ export function AsterDexTrading() {
                 {tickers.map(ticker => (
                   <button
                     key={ticker.symbol}
-                    onClick={() => {
-                      setSelectedSymbol(ticker.symbol);
-                      setOrderForm(prev => ({ ...prev, symbol: ticker.symbol }));
-                    }}
+                    onClick={() => setSelectedSymbol(ticker.symbol)}
                     className={`w-full p-2 rounded border transition-all text-left ${
                       selectedSymbol === ticker.symbol
                         ? 'border-terminal-green bg-terminal-green/10'
@@ -335,141 +264,6 @@ export function AsterDexTrading() {
                 ))}
               </div>
             </ScrollArea>
-          </CardContent>
-        </Card>
-
-        {/* Order Form */}
-        <Card className="bg-black/50 border-terminal-green/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-terminal-green font-mono text-sm flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              Place Order - {selectedSymbol}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {/* Side Selection */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant={orderForm.side === 'BUY' ? 'default' : 'outline'}
-                onClick={() => setOrderForm(prev => ({ ...prev, side: 'BUY' }))}
-                className={orderForm.side === 'BUY' 
-                  ? 'bg-green-500 hover:bg-green-600 text-white' 
-                  : 'border-green-500/50 text-green-400 hover:bg-green-500/10'
-                }
-              >
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Long
-              </Button>
-              <Button
-                variant={orderForm.side === 'SELL' ? 'default' : 'outline'}
-                onClick={() => setOrderForm(prev => ({ ...prev, side: 'SELL' }))}
-                className={orderForm.side === 'SELL'
-                  ? 'bg-red-500 hover:bg-red-600 text-white'
-                  : 'border-red-500/50 text-red-400 hover:bg-red-500/10'
-                }
-              >
-                <TrendingDown className="w-4 h-4 mr-2" />
-                Short
-              </Button>
-            </div>
-
-            {/* Order Type */}
-            <div className="space-y-1">
-              <Label className="text-terminal-green/60 font-mono text-xs">Order Type</Label>
-              <Select
-                value={orderForm.type}
-                onValueChange={(v) => setOrderForm(prev => ({ ...prev, type: v as 'MARKET' | 'LIMIT' }))}
-              >
-                <SelectTrigger className="bg-black/50 border-terminal-green/30 text-terminal-green font-mono">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MARKET">Market</SelectItem>
-                  <SelectItem value="LIMIT">Limit</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Price (for Limit orders) */}
-            {orderForm.type === 'LIMIT' && (
-              <div className="space-y-1">
-                <Label className="text-terminal-green/60 font-mono text-xs">Price (USDT)</Label>
-                <Input
-                  type="number"
-                  value={orderForm.price}
-                  onChange={(e) => setOrderForm(prev => ({ ...prev, price: e.target.value }))}
-                  placeholder={currentTicker ? formatPrice(currentTicker.lastPrice) : '0'}
-                  className="bg-black/50 border-terminal-green/30 text-terminal-green font-mono"
-                />
-              </div>
-            )}
-
-            {/* Quantity */}
-            <div className="space-y-1">
-              <Label className="text-terminal-green/60 font-mono text-xs">Quantity</Label>
-              <Input
-                type="number"
-                value={orderForm.quantity}
-                onChange={(e) => setOrderForm(prev => ({ ...prev, quantity: e.target.value }))}
-                placeholder="0.001"
-                className="bg-black/50 border-terminal-green/30 text-terminal-green font-mono"
-              />
-            </div>
-
-            {/* Leverage */}
-            <div className="space-y-1">
-              <Label className="text-terminal-green/60 font-mono text-xs">Leverage</Label>
-              <Select
-                value={orderForm.leverage}
-                onValueChange={(v) => setOrderForm(prev => ({ ...prev, leverage: v }))}
-              >
-                <SelectTrigger className="bg-black/50 border-terminal-green/30 text-terminal-green font-mono">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 5, 10, 20, 25, 50, 75, 100, 125].map(lev => (
-                    <SelectItem key={lev} value={lev.toString()}>{lev}x</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Order Preview */}
-            {orderForm.quantity && currentTicker && (
-              <div className="p-2 rounded bg-terminal-green/5 border border-terminal-green/20">
-                <p className="text-xs text-terminal-green/60 font-mono">Order Value</p>
-                <p className="font-mono text-terminal-green">
-                  ~${formatPrice(parseFloat(orderForm.quantity || '0') * currentTicker.lastPrice)}
-                </p>
-              </div>
-            )}
-
-            {/* Status Message */}
-            {orderStatus && (
-              <Alert className={orderStatus.type === 'success' ? 'border-green-500/50 bg-green-500/10' : 'border-red-500/50 bg-red-500/10'}>
-                {orderStatus.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
-                <AlertDescription className={`font-mono text-xs ${orderStatus.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                  {orderStatus.message}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Submit Button */}
-            <Button
-              onClick={handlePlaceOrder}
-              disabled={isSubmitting || !orderForm.quantity}
-              className={`w-full font-mono font-bold ${
-                orderForm.side === 'BUY'
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-              }`}
-            >
-              {isSubmitting ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-              ) : (
-                <>{orderForm.side === 'BUY' ? 'Long' : 'Short'} {selectedSymbol}</>
-              )}
-            </Button>
           </CardContent>
         </Card>
 
