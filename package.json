@@ -1,0 +1,21 @@
+{
+  "name": "smart_money_tracker",
+  "version": "1.0.0",
+  "main": "direct-monitor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "^7.2.0",
+    "pg": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

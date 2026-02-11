@@ -38,6 +38,11 @@ const sidebarItems = [
     icon: Sparkles,
   },
   {
+    title: 'Agentic Trading',
+    href: '/agentic-trading',
+    icon: Zap,
+  },
+  {
     title: 'Wallet Tracker',
     href: '/wallet-tracker',
     icon: Wallet,

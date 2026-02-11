@@ -1,61 +1,33 @@
 const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 async function checkWatchlist() {
-  const prisma = new PrismaClient();
-  
   try {
-    // Get all watchlist items
-    const watchlistItems = await prisma.watchlistItem.findMany({
+    const items = await prisma.watchlistItem.findMany({
       include: {
         user: {
           select: {
             email: true,
-            telegramChatId: true
+            telegramUsername: true
           }
         }
       }
     });
     
-    console.log('\n=== WATCHLIST ITEMS ===');
-    console.log(`Total items: ${watchlistItems.length}\n`);
-    
-    watchlistItems.forEach((item, index) => {
-      console.log(`${index + 1}. Wallet: ${item.walletAddress}`);
-      console.log(`   Chain: ${item.chain}`);
-      console.log(`   Token: ${item.tokenAddress || 'All tokens'}`);
-      console.log(`   Active: ${item.isActive}`);
+    console.log(`\nFound ${items.length} watchlist items:\n`);
+    items.forEach((item, i) => {
+      console.log(`${i + 1}. ${item.address} (${item.chain})`);
+      console.log(`   User: ${item.user.email || 'N/A'}`);
+      console.log(`   Telegram: ${item.user.telegramUsername || 'Not linked'}`);
       console.log(`   Last Checked: ${item.lastChecked}`);
-      console.log(`   User Email: ${item.user?.email || 'N/A'}`);
-      console.log(`   Telegram: ${item.user?.telegramChatId ? 'Connected' : 'Not connected'}`);
+      console.log(`   Token: ${item.tokenAddress || 'All tokens'}`);
       console.log('');
     });
     
-    // Get all transaction alerts
-    const alerts = await prisma.transactionAlert.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: 10
-    });
-    
-    console.log('\n=== RECENT TRANSACTION ALERTS ===');
-    console.log(`Total alerts: ${alerts.length}\n`);
-    
-    alerts.forEach((alert, index) => {
-      console.log(`${index + 1}. ${alert.type} - ${alert.tokenSymbol || 'Unknown'}`);
-      console.log(`   Amount: ${alert.amount}`);
-      console.log(`   Value: $${alert.valueUsd}`);
-      console.log(`   Wallet: ${alert.walletAddress}`);
-      console.log(`   Chain: ${alert.chain}`);
-      console.log(`   Read: ${alert.isRead}`);
-      console.log(`   Created: ${alert.createdAt}`);
-      console.log('');
-    });
-    
-  } catch (error) {
-    console.error('Error:', error);
-  } finally {
     await prisma.$disconnect();
+  } catch (error) {
+    console.error('Error:', error.message);
+    process.exit(1);
   }
 }
 

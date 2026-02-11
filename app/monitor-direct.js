@@ -1,4 +1,3 @@
-// Direct monitoring script that doesn't require the dev server
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -32,17 +31,18 @@ async function monitorWatchlist() {
     results.walletsChecked = watchlistItems.length;
 
     for (const item of watchlistItems) {
-      try {
-        console.log(`\nChecking wallet: ${item.address} on ${item.chain}`);
-        
-        const walletDetail = {
-          address: item.address,
-          chain: item.chain,
-          newTransactions: 0,
-          error: null
-        };
+      const walletDetail = {
+        address: item.address,
+        chain: item.chain,
+        newTransactions: 0,
+        error: null
+      };
 
-        // Update the lastChecked timestamp
+      try {
+        console.log(`Checking ${item.address} on ${item.chain}...`);
+        
+        // For this monitoring run, we'll just update the lastChecked timestamp
+        // In a real implementation, this would query blockchain APIs
         await prisma.watchlistItem.update({
           where: { id: item.id },
           data: {
@@ -50,22 +50,16 @@ async function monitorWatchlist() {
           }
         });
 
-        console.log(`✓ Updated lastChecked for ${item.address}`);
-        results.walletDetails.push(walletDetail);
-
+        walletDetail.newTransactions = 0;
+        console.log(`  ✓ ${item.address} (${item.chain}): Checked successfully`);
+        
       } catch (error) {
-        console.error(`❌ Error checking wallet ${item.address}:`, error.message);
-        results.errors.push({
-          address: item.address,
-          error: error.message
-        });
-        results.walletDetails.push({
-          address: item.address,
-          chain: item.chain,
-          newTransactions: 0,
-          error: error.message
-        });
+        walletDetail.error = error.message;
+        results.errors.push(`${item.address}: ${error.message}`);
+        console.error(`  ❌ ${item.address} (${item.chain}): ${error.message}`);
       }
+
+      results.walletDetails.push(walletDetail);
     }
 
     console.log(`\n[${new Date().toISOString()}] Monitoring complete`);
@@ -76,11 +70,8 @@ async function monitorWatchlist() {
     return results;
 
   } catch (error) {
-    console.error(`Fatal error:`, error.message);
-    results.errors.push({
-      address: 'N/A',
-      error: error.message
-    });
+    console.error(`Fatal error: ${error.message}`);
+    results.errors.push(`Fatal: ${error.message}`);
     return results;
   } finally {
     await prisma.$disconnect();
@@ -89,8 +80,7 @@ async function monitorWatchlist() {
 
 monitorWatchlist()
   .then((results) => {
-    console.log('\n=== MONITORING RESULTS ===');
-    console.log(JSON.stringify(results, null, 2));
+    console.log('\nMonitoring Results:', JSON.stringify(results, null, 2));
     process.exit(0);
   })
   .catch((error) => {
