@@ -56,21 +56,7 @@ const sidebarItems = [
     href: '/exchange-flows',
     icon: Building2,
   },
-  {
-    title: 'Wallet Analytics',
-    href: '/wallet',
-    icon: Wallet,
-  },
-  {
-    title: 'Wallet Dashboard',
-    href: '/wallet-dashboard',
-    icon: Activity,
-  },
-  {
-    title: 'CA Detector',
-    href: '/ca-detector',
-    icon: Shield,
-  },
+
   {
     title: 'Settings',
     href: '/settings',
