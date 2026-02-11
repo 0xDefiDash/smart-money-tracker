@@ -1,12 +1,11 @@
 /**
  * Multi-LLM Quick Analysis System
- * Integrates OpenAI, Gemini, NVIDIA, and Grok for comprehensive trading analysis
- * Uses real-time price data from multiple sources
+ * Integrates OpenAI, Gemini, NVIDIA for accurate trading analysis
+ * Uses REAL-TIME verified data only - no hallucinations
  */
 
 import { coinglassClient } from '@/lib/coinglass-client';
 import * as fs from 'fs';
-import * as path from 'path';
 
 interface QuickAnalysisResult {
   success: boolean;
@@ -28,7 +27,6 @@ interface QuickAnalysisResult {
     btcChange24h: number;
     ethPrice: number;
     ethChange24h: number;
-    marketSentiment?: any;
     source: string;
   };
   llmUsed: string;
@@ -44,10 +42,30 @@ interface LLMConfig {
   priority: number;
 }
 
+interface MarketData {
+  btcPrice: number;
+  btcChange24h: number;
+  ethPrice: number;
+  ethChange24h: number;
+  btcHigh24h: number;
+  btcLow24h: number;
+  ethHigh24h: number;
+  ethLow24h: number;
+  source: string;
+}
+
+interface SentimentData {
+  longRate: number;
+  shortRate: number;
+  fundingRate: number;
+  openInterest?: number;
+  oiChange24h?: number;
+}
+
 class MultiLLMAnalyzer {
   private llmConfigs: LLMConfig[] = [];
-  private priceCache: { data: any; timestamp: number } | null = null;
-  private CACHE_DURATION = 30000; // 30 seconds
+  private priceCache: { data: MarketData; timestamp: number } | null = null;
+  private CACHE_DURATION = 15000; // 15 seconds for fresher data
 
   constructor() {
     this.initializeLLMs();
@@ -73,7 +91,7 @@ class MultiLLMAnalyzer {
       this.llmConfigs.push({
         name: 'OpenAI GPT-4o',
         baseUrl: 'https://api.openai.com/v1',
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         apiKey: openaiKey,
         priority: 1
       });
@@ -104,7 +122,7 @@ class MultiLLMAnalyzer {
     }
 
     // Grok/XAI
-    const grokKey = this.getSecretValue('grok', 'api_key') || this.getSecretValue('xai', 'api_key');
+    const grokKey = this.getSecretValue('grok', 'api_key');
     if (grokKey) {
       this.llmConfigs.push({
         name: 'Grok',
@@ -121,117 +139,109 @@ class MultiLLMAnalyzer {
       this.llmConfigs.push({
         name: 'Abacus RouteLLM',
         baseUrl: 'https://routellm.abacus.ai/v1',
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         apiKey: abacusKey,
         priority: 5
       });
     }
 
-    // Sort by priority
     this.llmConfigs.sort((a, b) => a.priority - b.priority);
-    console.log(`[MultiLLM] Initialized ${this.llmConfigs.length} LLM providers: ${this.llmConfigs.map(c => c.name).join(', ')}`);
+    console.log(`[MultiLLM] Initialized ${this.llmConfigs.length} providers: ${this.llmConfigs.map(c => c.name).join(', ')}`);
   }
 
   /**
-   * Fetch REAL-TIME prices from multiple sources
+   * Fetch VERIFIED real-time prices from Binance
    */
-  private async getRealTimePrices(): Promise<{
-    btcPrice: number;
-    btcChange24h: number;
-    ethPrice: number;
-    ethChange24h: number;
-    source: string;
-  }> {
-    // Check cache first
+  private async getRealTimePrices(): Promise<MarketData> {
     if (this.priceCache && Date.now() - this.priceCache.timestamp < this.CACHE_DURATION) {
       return this.priceCache.data;
     }
 
-    const sources = [
-      { name: 'Binance', fn: () => this.fetchBinancePrices() },
-      { name: 'CoinGecko', fn: () => this.fetchCoinGeckoPrices() },
-      { name: 'CoinCap', fn: () => this.fetchCoinCapPrices() }
-    ];
-
-    for (const source of sources) {
-      try {
-        const data = await source.fn();
-        if (data && data.btcPrice > 0) {
-          const result = { ...data, source: source.name };
-          this.priceCache = { data: result, timestamp: Date.now() };
-          console.log(`[Prices] Got real-time data from ${source.name}: BTC=$${data.btcPrice.toLocaleString()}`);
-          return result;
-        }
-      } catch (e) {
-        console.error(`[Prices] ${source.name} failed:`, e);
+    // Try Binance first - most reliable
+    try {
+      const response = await fetch(
+        'https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT"]',
+        { signal: AbortSignal.timeout(5000) }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const btc = data.find((t: any) => t.symbol === 'BTCUSDT');
+        const eth = data.find((t: any) => t.symbol === 'ETHUSDT');
+        
+        const result: MarketData = {
+          btcPrice: parseFloat(btc?.lastPrice || '0'),
+          btcChange24h: parseFloat(btc?.priceChangePercent || '0'),
+          btcHigh24h: parseFloat(btc?.highPrice || '0'),
+          btcLow24h: parseFloat(btc?.lowPrice || '0'),
+          ethPrice: parseFloat(eth?.lastPrice || '0'),
+          ethChange24h: parseFloat(eth?.priceChangePercent || '0'),
+          ethHigh24h: parseFloat(eth?.highPrice || '0'),
+          ethLow24h: parseFloat(eth?.lowPrice || '0'),
+          source: 'Binance'
+        };
+        
+        this.priceCache = { data: result, timestamp: Date.now() };
+        console.log(`[Prices] Binance: BTC=$${result.btcPrice.toLocaleString()}, ETH=$${result.ethPrice.toLocaleString()}`);
+        return result;
       }
+    } catch (e) {
+      console.error('[Prices] Binance failed:', e);
     }
 
-    // Ultimate fallback - should never reach here
-    console.warn('[Prices] All sources failed, using last known prices');
-    return {
-      btcPrice: 97000,
-      btcChange24h: 0,
-      ethPrice: 3600,
-      ethChange24h: 0,
-      source: 'fallback'
-    };
-  }
+    // Fallback to CoinGecko
+    try {
+      const response = await fetch(
+        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum&sparkline=false',
+        { signal: AbortSignal.timeout(5000) }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const btc = data.find((c: any) => c.id === 'bitcoin');
+        const eth = data.find((c: any) => c.id === 'ethereum');
+        
+        const result: MarketData = {
+          btcPrice: btc?.current_price || 0,
+          btcChange24h: btc?.price_change_percentage_24h || 0,
+          btcHigh24h: btc?.high_24h || 0,
+          btcLow24h: btc?.low_24h || 0,
+          ethPrice: eth?.current_price || 0,
+          ethChange24h: eth?.price_change_percentage_24h || 0,
+          ethHigh24h: eth?.high_24h || 0,
+          ethLow24h: eth?.low_24h || 0,
+          source: 'CoinGecko'
+        };
+        
+        this.priceCache = { data: result, timestamp: Date.now() };
+        return result;
+      }
+    } catch (e) {
+      console.error('[Prices] CoinGecko failed:', e);
+    }
 
-  private async fetchBinancePrices(): Promise<{ btcPrice: number; btcChange24h: number; ethPrice: number; ethChange24h: number }> {
-    const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT"]', {
-      signal: AbortSignal.timeout(5000)
-    });
-    if (!response.ok) throw new Error('Binance API error');
-    const data = await response.json();
-    
-    const btc = data.find((t: any) => t.symbol === 'BTCUSDT');
-    const eth = data.find((t: any) => t.symbol === 'ETHUSDT');
-    
-    return {
-      btcPrice: parseFloat(btc?.lastPrice || '0'),
-      btcChange24h: parseFloat(btc?.priceChangePercent || '0'),
-      ethPrice: parseFloat(eth?.lastPrice || '0'),
-      ethChange24h: parseFloat(eth?.priceChangePercent || '0')
-    };
-  }
-
-  private async fetchCoinGeckoPrices(): Promise<{ btcPrice: number; btcChange24h: number; ethPrice: number; ethChange24h: number }> {
-    const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true',
-      { signal: AbortSignal.timeout(5000) }
-    );
-    if (!response.ok) throw new Error('CoinGecko API error');
-    const data = await response.json();
-    
-    return {
-      btcPrice: data.bitcoin?.usd || 0,
-      btcChange24h: data.bitcoin?.usd_24h_change || 0,
-      ethPrice: data.ethereum?.usd || 0,
-      ethChange24h: data.ethereum?.usd_24h_change || 0
-    };
-  }
-
-  private async fetchCoinCapPrices(): Promise<{ btcPrice: number; btcChange24h: number; ethPrice: number; ethChange24h: number }> {
-    const [btcRes, ethRes] = await Promise.all([
-      fetch('https://api.coincap.io/v2/assets/bitcoin', { signal: AbortSignal.timeout(5000) }),
-      fetch('https://api.coincap.io/v2/assets/ethereum', { signal: AbortSignal.timeout(5000) })
-    ]);
-    
-    const btcData = await btcRes.json();
-    const ethData = await ethRes.json();
-    
-    return {
-      btcPrice: parseFloat(btcData.data?.priceUsd || '0'),
-      btcChange24h: parseFloat(btcData.data?.changePercent24Hr || '0'),
-      ethPrice: parseFloat(ethData.data?.priceUsd || '0'),
-      ethChange24h: parseFloat(ethData.data?.changePercent24Hr || '0')
-    };
+    // Return cached or error
+    if (this.priceCache) return this.priceCache.data;
+    throw new Error('All price sources failed');
   }
 
   /**
-   * Call LLM with fallback to next provider on failure
+   * Get REAL sentiment data from Coinglass
    */
+  private async getSentimentData(): Promise<SentimentData | null> {
+    try {
+      const sentiment = await coinglassClient.getMarketSentiment('BTC');
+      return {
+        longRate: sentiment.longShortRatio.longRate,
+        shortRate: sentiment.longShortRatio.shortRate,
+        fundingRate: sentiment.fundingRate.rate,
+        openInterest: sentiment.openInterest?.openInterestUsd,
+        oiChange24h: sentiment.openInterest?.h24Change
+      };
+    } catch (e) {
+      console.error('[Sentiment] Coinglass failed:', e);
+      return null;
+    }
+  }
+
   private async callLLM(systemPrompt: string, userPrompt: string): Promise<{ content: string; llmUsed: string }> {
     for (const config of this.llmConfigs) {
       try {
@@ -244,14 +254,13 @@ class MultiLLMAnalyzer {
         }
         
         if (content) {
-          console.log(`[MultiLLM] Successfully used ${config.name}`);
+          console.log(`[MultiLLM] Success with ${config.name}`);
           return { content, llmUsed: config.name };
         }
       } catch (e) {
         console.error(`[MultiLLM] ${config.name} failed:`, e);
       }
     }
-    
     throw new Error('All LLM providers failed');
   }
 
@@ -268,17 +277,13 @@ class MultiLLMAnalyzer {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.3, // Lower temp for more factual responses
         max_tokens: 1000
       }),
-      signal: AbortSignal.timeout(20000)
+      signal: AbortSignal.timeout(25000)
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`${config.name} API error: ${error}`);
-    }
-
+    if (!response.ok) throw new Error(`${config.name} error: ${response.status}`);
     const result = await response.json();
     return result.choices?.[0]?.message?.content || '';
   }
@@ -290,98 +295,97 @@ class MultiLLMAnalyzer {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1000
-          }
+          contents: [{ parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 1000 }
         }),
-        signal: AbortSignal.timeout(20000)
+        signal: AbortSignal.timeout(25000)
       }
     );
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Gemini API error: ${error}`);
-    }
-
+    if (!response.ok) throw new Error(`Gemini error: ${response.status}`);
     const result = await response.json();
     return result.candidates?.[0]?.content?.parts?.[0]?.text || '';
   }
 
-  /**
-   * Fast market analysis using multiple LLMs
-   */
   async analyzeMarket(query: string): Promise<QuickAnalysisResult> {
     const startTime = Date.now();
 
-    // Get REAL-TIME price data
+    // Get REAL data
     const [priceData, sentimentData] = await Promise.all([
       this.getRealTimePrices(),
-      this.getSentimentContext()
+      this.getSentimentData()
     ]);
 
-    const systemPrompt = `You are an expert crypto trading analyst with access to REAL-TIME market data. Provide CONCISE, actionable analysis based on the ACTUAL current prices provided.
+    // Build prompt that ONLY allows using provided data
+    const systemPrompt = `You are a crypto market analyst. CRITICAL RULES:
+1. ONLY use the EXACT data provided below - DO NOT invent prices, levels, or statistics
+2. For support/resistance, use the 24h high/low from the data provided
+3. DO NOT mention any price levels that aren't in the provided data
+4. If data is missing, say "data not available" instead of making it up
+5. Base sentiment ONLY on the Long/Short ratio and funding rate provided
 
-Format your response as JSON with this exact structure:
+Respond in JSON format:
 {
-  "summary": "2-3 sentence market overview with specific price levels",
-  "sentiment": "BULLISH" or "BEARISH" or "NEUTRAL",
+  "summary": "2-3 sentences using ONLY the provided data",
+  "sentiment": "BULLISH" or "BEARISH" or "NEUTRAL" (based on L/S ratio and price change),
   "confidence": number 1-10,
-  "keyPoints": ["point 1 with specific data", "point 2", "point 3"],
-  "recommendation": "specific actionable advice with price targets",
+  "keyPoints": ["point using actual data", "point 2", "point 3"],
+  "recommendation": "advice based on actual data",
   "riskLevel": "LOW" or "MEDIUM" or "HIGH",
   "signals": {
-    "technical": "technical outlook based on price action",
-    "sentiment": "market sentiment from L/S ratios and funding",
-    "onchain": "on-chain data insight"
+    "technical": "based on 24h high/low and price change ONLY",
+    "sentiment": "based on L/S ratio and funding rate ONLY",
+    "onchain": "based on open interest if available, otherwise say data limited"
   }
 }`;
 
-    const userPrompt = `Analyze the following crypto trading query:
+    const userPrompt = `Query: "${query}"
 
-"${query}"
+=== VERIFIED REAL-TIME DATA (${new Date().toISOString()}) ===
+Source: ${priceData.source}
 
-=== REAL-TIME MARKET DATA (Source: ${priceData.source}) ===
-• BTC Price: $${priceData.btcPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-• BTC 24h Change: ${priceData.btcChange24h > 0 ? '+' : ''}${priceData.btcChange24h.toFixed(2)}%
-• ETH Price: $${priceData.ethPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-• ETH 24h Change: ${priceData.ethChange24h > 0 ? '+' : ''}${priceData.ethChange24h.toFixed(2)}%
-${sentimentData ? `
-=== DERIVATIVES DATA ===
-• BTC Long/Short Ratio: ${sentimentData.longRate?.toFixed(1)}% / ${sentimentData.shortRate?.toFixed(1)}%
-• Funding Rate: ${sentimentData.fundingRate?.toFixed(4)}%` : ''}
+BTC/USDT:
+- Current Price: $${priceData.btcPrice.toLocaleString(undefined, {minimumFractionDigits: 2})}
+- 24h Change: ${priceData.btcChange24h >= 0 ? '+' : ''}${priceData.btcChange24h.toFixed(2)}%
+- 24h High: $${priceData.btcHigh24h.toLocaleString(undefined, {minimumFractionDigits: 2})}
+- 24h Low: $${priceData.btcLow24h.toLocaleString(undefined, {minimumFractionDigits: 2})}
 
-Provide your analysis in the JSON format specified. Use the ACTUAL prices shown above.`;
+ETH/USDT:
+- Current Price: $${priceData.ethPrice.toLocaleString(undefined, {minimumFractionDigits: 2})}
+- 24h Change: ${priceData.ethChange24h >= 0 ? '+' : ''}${priceData.ethChange24h.toFixed(2)}%
+- 24h High: $${priceData.ethHigh24h.toLocaleString(undefined, {minimumFractionDigits: 2})}
+- 24h Low: $${priceData.ethLow24h.toLocaleString(undefined, {minimumFractionDigits: 2})}
+
+${sentimentData ? `=== DERIVATIVES DATA (Coinglass) ===
+- Long Positions: ${sentimentData.longRate.toFixed(1)}%
+- Short Positions: ${sentimentData.shortRate.toFixed(1)}%
+- Funding Rate: ${sentimentData.fundingRate >= 0 ? '+' : ''}${sentimentData.fundingRate.toFixed(4)}%
+${sentimentData.openInterest ? `- Open Interest: $${(sentimentData.openInterest / 1e9).toFixed(2)}B` : ''}
+${sentimentData.oiChange24h ? `- OI 24h Change: ${sentimentData.oiChange24h >= 0 ? '+' : ''}${sentimentData.oiChange24h.toFixed(2)}%` : ''}` : '=== DERIVATIVES DATA ===\nNot available'}
+
+Analyze using ONLY the data above. Do not invent any numbers or levels.`;
 
     try {
       const { content, llmUsed } = await this.callLLM(systemPrompt, userPrompt);
       
-      // Parse the JSON response
       let analysis;
       try {
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         analysis = JSON.parse(jsonMatch ? jsonMatch[0] : content);
       } catch (e) {
-        analysis = this.parseUnstructuredResponse(content);
+        analysis = this.createDataDrivenAnalysis(priceData, sentimentData);
       }
 
       return {
         success: true,
         analysis: {
-          summary: analysis.summary || 'Analysis completed',
-          sentiment: analysis.sentiment || 'NEUTRAL',
+          summary: analysis.summary || this.createSummary(priceData, sentimentData),
+          sentiment: analysis.sentiment || this.deriveSentiment(priceData, sentimentData),
           confidence: analysis.confidence || 7,
-          keyPoints: analysis.keyPoints || ['Market analysis completed'],
-          recommendation: analysis.recommendation || 'Monitor market conditions',
+          keyPoints: analysis.keyPoints || this.createKeyPoints(priceData, sentimentData),
+          recommendation: analysis.recommendation || 'Monitor key levels',
           riskLevel: analysis.riskLevel || 'MEDIUM',
-          signals: analysis.signals || {
-            technical: 'Mixed signals',
-            sentiment: 'Neutral',
-            onchain: 'Normal activity'
-          }
+          signals: analysis.signals || this.createSignals(priceData, sentimentData)
         },
         marketContext: priceData,
         llmUsed,
@@ -390,81 +394,111 @@ Provide your analysis in the JSON format specified. Use the ACTUAL prices shown 
       };
     } catch (error) {
       console.error('Analysis error:', error);
-      return this.getFallbackAnalysis(query, priceData, startTime);
+      return this.createFallbackAnalysis(priceData, sentimentData, startTime);
     }
   }
 
-  async analyzeToken(symbol: string): Promise<QuickAnalysisResult> {
-    return this.analyzeMarket(`Provide trading analysis for ${symbol}. Include entry points, risk levels, and short-term outlook based on current price action.`);
-  }
-
-  async assessRisk(position: string): Promise<QuickAnalysisResult> {
-    return this.analyzeMarket(`Assess the risk of: ${position}. Provide position sizing recommendations and stop-loss levels based on current market conditions.`);
-  }
-
-  async scanAlpha(): Promise<QuickAnalysisResult> {
-    return this.analyzeMarket('Identify the top 3 alpha opportunities in crypto right now. Focus on emerging narratives, momentum plays, and smart money movements.');
-  }
-
-  private async getSentimentContext() {
-    try {
-      const sentiment = await coinglassClient.getMarketSentiment('BTC');
-      return {
-        longRate: sentiment.longShortRatio.longRate,
-        shortRate: sentiment.longShortRatio.shortRate,
-        fundingRate: sentiment.fundingRate.rate
-      };
-    } catch (e) {
-      return null;
+  private deriveSentiment(priceData: MarketData, sentimentData: SentimentData | null): 'BULLISH' | 'BEARISH' | 'NEUTRAL' {
+    let score = 0;
+    
+    // Price momentum
+    if (priceData.btcChange24h > 3) score += 2;
+    else if (priceData.btcChange24h > 0) score += 1;
+    else if (priceData.btcChange24h < -3) score -= 2;
+    else if (priceData.btcChange24h < 0) score -= 1;
+    
+    // L/S ratio
+    if (sentimentData) {
+      if (sentimentData.longRate > 55) score += 1;
+      else if (sentimentData.shortRate > 55) score -= 1;
+      
+      // Funding
+      if (sentimentData.fundingRate > 0.01) score += 1;
+      else if (sentimentData.fundingRate < -0.01) score -= 1;
     }
+    
+    if (score >= 2) return 'BULLISH';
+    if (score <= -2) return 'BEARISH';
+    return 'NEUTRAL';
   }
 
-  private parseUnstructuredResponse(content: string) {
-    const isBullish = /bullish|long|buy|accumulate/i.test(content);
-    const isBearish = /bearish|short|sell|avoid/i.test(content);
+  private createSummary(priceData: MarketData, sentimentData: SentimentData | null): string {
+    const btcDir = priceData.btcChange24h >= 0 ? 'up' : 'down';
+    const sentiment = this.deriveSentiment(priceData, sentimentData);
+    return `BTC trading at $${priceData.btcPrice.toLocaleString()} (${btcDir} ${Math.abs(priceData.btcChange24h).toFixed(2)}% in 24h). ` +
+           `24h range: $${priceData.btcLow24h.toLocaleString()} - $${priceData.btcHigh24h.toLocaleString()}. ` +
+           `Market sentiment appears ${sentiment.toLowerCase()}.`;
+  }
+
+  private createKeyPoints(priceData: MarketData, sentimentData: SentimentData | null): string[] {
+    const points = [
+      `BTC: $${priceData.btcPrice.toLocaleString()} (${priceData.btcChange24h >= 0 ? '+' : ''}${priceData.btcChange24h.toFixed(2)}%)`,
+      `ETH: $${priceData.ethPrice.toLocaleString()} (${priceData.ethChange24h >= 0 ? '+' : ''}${priceData.ethChange24h.toFixed(2)}%)`,
+      `BTC 24h Range: $${priceData.btcLow24h.toLocaleString()} - $${priceData.btcHigh24h.toLocaleString()}`
+    ];
+    
+    if (sentimentData) {
+      points.push(`Long/Short Ratio: ${sentimentData.longRate.toFixed(1)}% / ${sentimentData.shortRate.toFixed(1)}%`);
+    }
+    
+    return points;
+  }
+
+  private createSignals(priceData: MarketData, sentimentData: SentimentData | null): { technical: string; sentiment: string; onchain: string } {
+    const pricePosition = ((priceData.btcPrice - priceData.btcLow24h) / (priceData.btcHigh24h - priceData.btcLow24h) * 100).toFixed(0);
     
     return {
-      summary: content.substring(0, 300) + (content.length > 300 ? '...' : ''),
-      sentiment: isBullish ? 'BULLISH' : isBearish ? 'BEARISH' : 'NEUTRAL',
-      confidence: 6,
-      keyPoints: ['See full analysis above'],
-      recommendation: 'Review detailed analysis',
-      riskLevel: 'MEDIUM',
-      signals: {
-        technical: 'Analysis provided',
-        sentiment: isBullish ? 'Positive' : isBearish ? 'Negative' : 'Neutral',
-        onchain: 'Data integrated'
-      }
+      technical: `BTC at ${pricePosition}% of 24h range. Support: $${priceData.btcLow24h.toLocaleString()}, Resistance: $${priceData.btcHigh24h.toLocaleString()}`,
+      sentiment: sentimentData 
+        ? `L/S: ${sentimentData.longRate.toFixed(1)}%/${sentimentData.shortRate.toFixed(1)}%, Funding: ${sentimentData.fundingRate >= 0 ? '+' : ''}${sentimentData.fundingRate.toFixed(4)}%`
+        : 'Derivatives data not available',
+      onchain: sentimentData?.openInterest 
+        ? `Open Interest: $${(sentimentData.openInterest / 1e9).toFixed(2)}B`
+        : 'On-chain data limited'
     };
   }
 
-  private getFallbackAnalysis(query: string, priceData: any, startTime: number): QuickAnalysisResult {
-    const btcTrend = priceData.btcChange24h > 2 ? 'BULLISH' : priceData.btcChange24h < -2 ? 'BEARISH' : 'NEUTRAL';
-    
+  private createDataDrivenAnalysis(priceData: MarketData, sentimentData: SentimentData | null): {
+    summary: string;
+    sentiment: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+    confidence: number;
+    keyPoints: string[];
+    recommendation: string;
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    signals: { technical: string; sentiment: string; onchain: string };
+  } {
+    return {
+      summary: this.createSummary(priceData, sentimentData),
+      sentiment: this.deriveSentiment(priceData, sentimentData),
+      confidence: 7,
+      keyPoints: this.createKeyPoints(priceData, sentimentData),
+      recommendation: priceData.btcChange24h > 0 ? 'Monitor for continuation' : 'Watch for reversal signals',
+      riskLevel: Math.abs(priceData.btcChange24h) > 5 ? 'HIGH' as const : 'MEDIUM' as const,
+      signals: this.createSignals(priceData, sentimentData)
+    };
+  }
+
+  private createFallbackAnalysis(priceData: MarketData, sentimentData: SentimentData | null, startTime: number): QuickAnalysisResult {
     return {
       success: true,
-      analysis: {
-        summary: `BTC trading at $${priceData.btcPrice.toLocaleString()} with ${priceData.btcChange24h > 0 ? '+' : ''}${priceData.btcChange24h.toFixed(2)}% in 24h. ETH at $${priceData.ethPrice.toLocaleString()}.`,
-        sentiment: btcTrend as 'BULLISH' | 'BEARISH' | 'NEUTRAL',
-        confidence: 5,
-        keyPoints: [
-          `BTC: $${priceData.btcPrice.toLocaleString()} (${priceData.btcChange24h > 0 ? '+' : ''}${priceData.btcChange24h.toFixed(2)}%)`,
-          `ETH: $${priceData.ethPrice.toLocaleString()} (${priceData.ethChange24h > 0 ? '+' : ''}${priceData.ethChange24h.toFixed(2)}%)`,
-          `Data source: ${priceData.source}`
-        ],
-        recommendation: btcTrend === 'BULLISH' ? 'Look for pullback entries' : btcTrend === 'BEARISH' ? 'Exercise caution' : 'Range-trade with tight stops',
-        riskLevel: 'MEDIUM',
-        signals: {
-          technical: 'Based on real-time price data',
-          sentiment: 'Market data integrated',
-          onchain: 'Monitoring whale activity'
-        }
-      },
+      analysis: this.createDataDrivenAnalysis(priceData, sentimentData),
       marketContext: priceData,
-      llmUsed: 'Fallback',
+      llmUsed: 'Data-Driven Fallback',
       executionTime: (Date.now() - startTime) / 1000,
       timestamp: new Date().toISOString()
     };
+  }
+
+  async analyzeToken(symbol: string): Promise<QuickAnalysisResult> {
+    return this.analyzeMarket(`Analyze ${symbol} trading opportunity based on current market data.`);
+  }
+
+  async assessRisk(position: string): Promise<QuickAnalysisResult> {
+    return this.analyzeMarket(`Assess risk for: ${position}`);
+  }
+
+  async scanAlpha(): Promise<QuickAnalysisResult> {
+    return this.analyzeMarket('What trading opportunities exist based on current BTC and ETH price action and derivatives data?');
   }
 }
 
