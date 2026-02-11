@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AsterDexTrading } from '@/components/agentic/asterdex-trading';
+import { CoinglassData } from '@/components/agentic/coinglass-data';
 import { 
   Brain, 
   Network, 
@@ -623,6 +624,24 @@ export default function AgenticTradingPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Coinglass Market Data Section */}
+        <div className="mt-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+              <BarChart3 className="w-8 h-8 text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-mono font-bold text-terminal-green">
+                Market Intelligence (Coinglass)
+              </h2>
+              <p className="text-terminal-green/60 font-mono text-sm">
+                Long/Short Ratios • Funding Rates • Open Interest • Liquidations
+              </p>
+            </div>
+          </div>
+          <CoinglassData />
         </div>
 
         {/* AsterDex Trading Section */}
