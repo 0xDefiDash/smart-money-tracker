@@ -24,7 +24,8 @@ import {
   Settings,
   Twitter,
   Waves,
-  Brain
+  Brain,
+  Sparkles
 } from 'lucide-react'
 import { WalletButton } from '@/components/wallet/WalletButton'
 import { TransactionAlerts } from '@/components/wallet-tracker/transaction-alerts'
@@ -34,6 +35,16 @@ const sidebarItems = [
     title: 'Dashboard',
     href: '/',
     icon: Home,
+  },
+  {
+    title: 'Dash Agentic',
+    href: '/dash-agentic',
+    icon: Sparkles,
+  },
+  {
+    title: 'Agentic Trading',
+    href: '/agentic-trading',
+    icon: Zap,
   },
   {
     title: 'Wallet Tracker',
