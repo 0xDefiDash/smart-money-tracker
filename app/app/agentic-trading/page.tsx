@@ -56,6 +56,15 @@ interface SwarmResult {
     token_usage: number;
   };
   agent_outputs?: AgentOutput[];
+  llmUsed?: string;
+  priceSource?: string;
+  marketContext?: {
+    btcPrice: number;
+    btcChange24h: number;
+    ethPrice: number;
+    ethChange24h: number;
+    source: string;
+  };
 }
 
 interface AnalysisHistory {
@@ -506,11 +515,19 @@ export default function AgenticTradingPage() {
                       <CheckCircle2 className="w-5 h-5 text-green-400" />
                       Analysis Complete
                     </CardTitle>
-                    <div className="flex items-center gap-4 text-xs font-mono text-terminal-green/60">
-                      <span className="flex items-center gap-1">
-                        <Bot className="w-3 h-3" />
-                        {result.number_of_agents} agents
-                      </span>
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-terminal-green/60">
+                      {result.llmUsed && (
+                        <span className="flex items-center gap-1 text-cyan-400">
+                          <Sparkles className="w-3 h-3" />
+                          {result.llmUsed}
+                        </span>
+                      )}
+                      {result.priceSource && (
+                        <span className="flex items-center gap-1 text-yellow-400">
+                          <Activity className="w-3 h-3" />
+                          {result.priceSource}
+                        </span>
+                      )}
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {result.execution_time?.toFixed(2) || '0.00'}s

@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
           number_of_agents: 1,
           execution_time: quickResult.executionTime,
           marketContext: quickResult.marketContext,
+          llmUsed: quickResult.llmUsed,
+          priceSource: quickResult.marketContext.source,
           mode: 'quick'
         },
         timestamp: quickResult.timestamp
