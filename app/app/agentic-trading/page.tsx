@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AsterDexTrading } from '@/components/agentic/asterdex-trading';
 import { 
   Brain, 
   Network, 
@@ -34,7 +35,8 @@ import {
   CheckCircle2,
   Sparkles,
   Send,
-  RotateCcw
+  RotateCcw,
+  LineChart
 } from 'lucide-react';
 
 interface AgentOutput {
@@ -621,6 +623,24 @@ export default function AgenticTradingPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* AsterDex Trading Section */}
+        <div className="mt-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 bg-cyan-500/10 rounded-lg border border-cyan-500/30">
+              <LineChart className="w-8 h-8 text-cyan-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-mono font-bold text-terminal-green">
+                AsterDex Perpetuals Trading
+              </h2>
+              <p className="text-terminal-green/60 font-mono text-sm">
+                Live Trading • Positions • Order Management
+              </p>
+            </div>
+          </div>
+          <AsterDexTrading />
         </div>
       </div>
     </div>

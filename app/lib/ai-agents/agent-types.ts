@@ -87,12 +87,15 @@ export interface TradingSession {
 export interface AsterDexOrder {
   symbol: string;
   side: 'BUY' | 'SELL';
-  type: 'MARKET' | 'LIMIT';
+  type: 'MARKET' | 'LIMIT' | 'STOP' | 'STOP_MARKET' | 'TAKE_PROFIT' | 'TAKE_PROFIT_MARKET';
   quantity: number;
   price?: number;
+  stopPrice?: number;
   stopLoss?: number;
   takeProfit?: number;
   leverage?: number;
+  reduceOnly?: boolean;
+  timeInForce?: 'GTC' | 'IOC' | 'FOK' | 'GTX';
 }
 
 export interface AsterDexPosition {
@@ -105,7 +108,8 @@ export interface AsterDexPosition {
   leverage: number;
   unrealizedPnl: number;
   realizedPnl: number;
-  marginType: 'ISOLATED' | 'CROSS';
+  marginType: 'isolated' | 'cross' | 'ISOLATED' | 'CROSS';
+  isolatedMargin?: number;
 }
 
 export interface AsterDexAccount {
