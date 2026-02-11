@@ -210,6 +210,37 @@ export default function AgenticTradingPage() {
 
   const formatOutput = (output: any): string => {
     if (typeof output === 'string') return output;
+    
+    // Handle quick analysis structured output
+    if (output.summary && output.sentiment) {
+      let formatted = '';
+      formatted += `📊 ANALYSIS SUMMARY\n${'─'.repeat(40)}\n`;
+      formatted += `${output.summary}\n\n`;
+      
+      formatted += `📈 SENTIMENT: ${output.sentiment}`;
+      if (output.confidence) formatted += ` (Confidence: ${output.confidence}/10)`;
+      formatted += `\n⚠️ RISK LEVEL: ${output.riskLevel || 'MEDIUM'}\n\n`;
+      
+      if (output.keyPoints && output.keyPoints.length > 0) {
+        formatted += `🔑 KEY POINTS\n`;
+        output.keyPoints.forEach((point: string, i: number) => {
+          formatted += `  ${i + 1}. ${point}\n`;
+        });
+        formatted += '\n';
+      }
+      
+      formatted += `💡 RECOMMENDATION\n${output.recommendation}\n\n`;
+      
+      if (output.signals) {
+        formatted += `📡 SIGNALS\n`;
+        formatted += `  • Technical: ${output.signals.technical}\n`;
+        formatted += `  • Sentiment: ${output.signals.sentiment}\n`;
+        formatted += `  • On-Chain: ${output.signals.onchain}\n`;
+      }
+      
+      return formatted;
+    }
+    
     return JSON.stringify(output, null, 2);
   };
 
