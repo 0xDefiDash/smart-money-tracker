@@ -22,15 +22,15 @@ interface WalletLabelsCardProps {
 export function WalletLabelsCard({ data, isLoading }: WalletLabelsCardProps) {
   if (isLoading) {
     return (
-      <Card className="border-2 border-terminal-green bg-black">
+      <Card className="border-2 border-primary bg-background">
         <CardHeader>
-          <CardTitle className="text-terminal-green uppercase tracking-wider">
+          <CardTitle className="text-primary uppercase tracking-wider">
             🏷️ Wallet Labels & Identity
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-terminal-green"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </CardContent>
       </Card>
@@ -39,9 +39,9 @@ export function WalletLabelsCard({ data, isLoading }: WalletLabelsCardProps) {
 
   if (!data || data.labels.length === 0) {
     return (
-      <Card className="border-2 border-terminal-green/30 bg-black">
+      <Card className="border-2 border-white/10 bg-background">
         <CardHeader>
-          <CardTitle className="text-terminal-green uppercase tracking-wider">
+          <CardTitle className="text-primary uppercase tracking-wider">
             🏷️ Wallet Labels & Identity
           </CardTitle>
           <CardDescription className="text-terminal-gray">
@@ -53,13 +53,13 @@ export function WalletLabelsCard({ data, isLoading }: WalletLabelsCardProps) {
   }
 
   return (
-    <Card className="border-2 border-terminal-green bg-black">
+    <Card className="border-2 border-primary bg-background">
       <CardHeader>
-        <CardTitle className="text-terminal-green uppercase tracking-wider">
+        <CardTitle className="text-primary uppercase tracking-wider">
           🏷️ Wallet Labels & Identity
         </CardTitle>
         {data.entityName && (
-          <CardDescription className="text-terminal-green text-lg font-bold">
+          <CardDescription className="text-primary text-lg font-bold">
             {data.entityName}
           </CardDescription>
         )}
@@ -98,7 +98,7 @@ export function WalletLabelsCard({ data, isLoading }: WalletLabelsCardProps) {
               <Badge
                 key={index}
                 variant="outline"
-                className="border-terminal-green text-terminal-green font-mono"
+                className="border-primary text-primary font-mono"
               >
                 {label}
               </Badge>
@@ -107,11 +107,11 @@ export function WalletLabelsCard({ data, isLoading }: WalletLabelsCardProps) {
         </div>
 
         {/* Info Box */}
-        <div className="p-4 border border-terminal-green/50 rounded bg-terminal-green/5">
+        <div className="p-4 border border-primary/30 rounded bg-primary/5">
           <div className="flex items-start gap-2">
-            <ShieldCheckIcon className="h-5 w-5 text-terminal-green mt-0.5" />
+            <ShieldCheckIcon className="h-5 w-5 text-primary mt-0.5" />
             <div className="text-sm text-terminal-gray">
-              <p className="font-semibold text-terminal-green mb-1">About Nansen Labels</p>
+              <p className="font-semibold text-primary mb-1">About Nansen Labels</p>
               <p>
                 Nansen labels identify wallet categories based on on-chain activity. Smart Money
                 labels indicate top-performing traders, Exchanges show CEX wallets, and Whales

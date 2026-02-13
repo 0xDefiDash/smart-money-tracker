@@ -174,22 +174,22 @@ export default function DashAgenticPage() {
 
   if (loading && !session) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Activity className="h-16 w-16 text-terminal-green mx-auto mb-4 animate-pulse" />
-          <p className="text-terminal-green text-xl font-mono">Initializing AI Agent System...</p>
+          <Activity className="h-16 w-16 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-primary text-xl font-mono">Initializing AI Agent System...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-terminal-green text-3xl font-bold uppercase tracking-wider flex items-center gap-3">
+            <h1 className="text-primary text-3xl font-bold uppercase tracking-wider flex items-center gap-3">
               <Sparkles className="h-8 w-8" />
               Dash Agentic
             </h1>
@@ -201,7 +201,7 @@ export default function DashAgenticPage() {
             <Badge 
               className={`text-lg px-4 py-2 ${
                 session.status === 'RUNNING' 
-                  ? 'bg-terminal-green/20 text-terminal-green border-terminal-green' 
+                  ? 'bg-primary/20 text-primary border-primary' 
                   : 'bg-gray-500/20 text-gray-400'
               }`}
             >
@@ -216,7 +216,7 @@ export default function DashAgenticPage() {
             <div className="flex items-center gap-2">
               <Zap className="h-6 w-6 text-yellow-500 animate-pulse" />
               <div className="flex items-center gap-2">
-                <Badge className="bg-terminal-green/20 text-terminal-green border-terminal-green">
+                <Badge className="bg-primary/20 text-primary border-primary">
                   LIVE
                 </Badge>
                 <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500">
@@ -225,14 +225,14 @@ export default function DashAgenticPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-terminal-green font-bold text-lg mb-1">
+              <h3 className="text-primary font-bold text-lg mb-1">
                 🚀 Real Trading Integration Active
               </h3>
               <p className="text-terminal-gray text-sm mb-3">
-                Your AI Agentic system is connected to <strong className="text-terminal-green">AsterDex perpetuals exchange</strong> with live API credentials. 
+                Your AI Agentic system is connected to <strong className="text-primary">AsterDex perpetuals exchange</strong> with live API credentials. 
                 The system can execute real trades with actual funds.
               </p>
-              <div className="flex items-start gap-2 bg-black/50 border border-yellow-500/30 rounded p-3">
+              <div className="flex items-start gap-2 bg-surface-300 border border-yellow-500/30 rounded p-3">
                 <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-yellow-500 text-sm font-bold mb-1">
@@ -245,7 +245,7 @@ export default function DashAgenticPage() {
                       href="https://asterdex.com" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-terminal-green hover:underline inline-flex items-center gap-1"
+                      className="text-primary hover:underline inline-flex items-center gap-1"
                     >
                       AsterDex <ExternalLink className="h-3 w-3" />
                     </a> to fund your account.
@@ -257,18 +257,18 @@ export default function DashAgenticPage() {
         </Card>
 
         {session && (
-          <Card className="border-2 border-terminal-green/30 bg-black/95 p-4">
+          <Card className="border-2 border-white/10 bg-background/95 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Activity className={`h-5 w-5 ${autoRefresh ? 'text-terminal-green animate-pulse' : 'text-gray-500'}`} />
+                  <Activity className={`h-5 w-5 ${autoRefresh ? 'text-primary animate-pulse' : 'text-gray-500'}`} />
                   <span className="text-terminal-gray text-sm">Auto-refresh: {autoRefresh ? 'ON' : 'OFF'}</span>
                 </div>
                 <div className="text-terminal-gray text-sm">
-                  Session: <span className="text-terminal-green font-mono">{session.id}</span>
+                  Session: <span className="text-primary font-mono">{session.id}</span>
                 </div>
                 <div className="text-terminal-gray text-sm">
-                  Started: <span className="text-terminal-green">{new Date(session.startTime).toLocaleString()}</span>
+                  Started: <span className="text-primary">{new Date(session.startTime).toLocaleString()}</span>
                 </div>
               </div>
 
@@ -276,7 +276,7 @@ export default function DashAgenticPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-terminal-green/30 text-terminal-green"
+                  className="border-white/10 text-primary"
                   onClick={() => setAutoRefresh(!autoRefresh)}
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -299,7 +299,7 @@ export default function DashAgenticPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-terminal-green/30 text-terminal-green"
+                    className="border-white/10 text-primary"
                     onClick={() => handleSessionAction('resume')}
                   >
                     <Play className="h-4 w-4 mr-2" />
@@ -319,7 +319,7 @@ export default function DashAgenticPage() {
 
                 <Button
                   size="sm"
-                  className="bg-terminal-green/20 text-terminal-green border-terminal-green"
+                  className="bg-primary/20 text-primary border-primary"
                   onClick={createNewSession}
                 >
                   <Play className="h-4 w-4 mr-2" />
@@ -332,13 +332,13 @@ export default function DashAgenticPage() {
       </div>
 
       {!session ? (
-        <Card className="border-2 border-terminal-green/30 bg-black/95 p-12 text-center">
-          <AlertCircle className="h-16 w-16 text-terminal-green mx-auto mb-4" />
-          <h2 className="text-terminal-green text-2xl font-bold mb-4">No Active Session</h2>
+        <Card className="border-2 border-white/10 bg-background/95 p-12 text-center">
+          <AlertCircle className="h-16 w-16 text-primary mx-auto mb-4" />
+          <h2 className="text-primary text-2xl font-bold mb-4">No Active Session</h2>
           <p className="text-terminal-gray mb-6">Start a new trading session to activate AI agents</p>
           <Button
             size="lg"
-            className="bg-terminal-green/20 text-terminal-green border-2 border-terminal-green"
+            className="bg-primary/20 text-primary border-2 border-primary"
             onClick={createNewSession}
           >
             <Play className="h-5 w-5 mr-2" />
@@ -347,16 +347,16 @@ export default function DashAgenticPage() {
         </Card>
       ) : (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-black/50 border-2 border-terminal-green/30">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-terminal-green/20 data-[state=active]:text-terminal-green">
+          <TabsList className="bg-surface-300 border-2 border-white/10">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
               <TrendingUp className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="agents" className="data-[state=active]:bg-terminal-green/20 data-[state=active]:text-terminal-green">
+            <TabsTrigger value="agents" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
               <Activity className="h-4 w-4 mr-2" />
               Agents ({session.agents.length})
             </TabsTrigger>
-            <TabsTrigger value="market" className="data-[state=active]:bg-terminal-green/20 data-[state=active]:text-terminal-green">
+            <TabsTrigger value="market" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
               <Sparkles className="h-4 w-4 mr-2" />
               Market
             </TabsTrigger>
@@ -371,7 +371,7 @@ export default function DashAgenticPage() {
             />
 
             <div>
-              <h2 className="text-terminal-green font-bold text-xl uppercase tracking-wider mb-4">
+              <h2 className="text-primary font-bold text-xl uppercase tracking-wider mb-4">
                 Active Agents
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

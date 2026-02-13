@@ -149,12 +149,12 @@ export default function SocialMediaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black p-4 md:p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="mb-2 text-3xl font-bold text-terminal-green">
+            <h1 className="mb-2 text-3xl font-bold text-primary">
               Social Media Manager
             </h1>
             <p className="text-terminal-gray">
@@ -172,16 +172,16 @@ export default function SocialMediaPage() {
         </div>
 
         {/* Account Info */}
-        <Card className="border-terminal-green/20 bg-black">
+        <Card className="border-primary/20 bg-background">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-terminal-green">
+            <CardTitle className="flex items-center gap-2 text-primary">
               <Twitter className="h-5 w-5" />
               Connected Account
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
-              <Badge variant="outline" className="border-terminal-green text-terminal-green">
+              <Badge variant="outline" className="border-primary text-primary">
                 @Defidash_Agent
               </Badge>
               <span className="text-terminal-gray">
@@ -194,9 +194,9 @@ export default function SocialMediaPage() {
         {/* Main Posting Interface */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Left Column - Compose */}
-          <Card className="border-terminal-green/20 bg-black">
+          <Card className="border-primary/20 bg-background">
             <CardHeader>
-              <CardTitle className="text-terminal-green">
+              <CardTitle className="text-primary">
                 Compose Tweet
               </CardTitle>
               <CardDescription>
@@ -206,7 +206,7 @@ export default function SocialMediaPage() {
             <CardContent className="space-y-4">
               {/* Tweet Type Selector */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-terminal-green">
+                <label className="text-sm font-medium text-primary">
                   Tweet Type
                 </label>
                 <Select
@@ -220,10 +220,10 @@ export default function SocialMediaPage() {
                     }
                   }}
                 >
-                  <SelectTrigger className="border-terminal-green/30 bg-black text-terminal-green">
+                  <SelectTrigger className="border-white/10 bg-background text-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="border-terminal-green/30 bg-black">
+                  <SelectContent className="border-white/10 bg-background">
                     <SelectItem value="custom">Custom Tweet</SelectItem>
                     <SelectItem value="whale-alert">🐋 Whale Alert</SelectItem>
                     <SelectItem value="market-update">📈 Market Update</SelectItem>
@@ -237,7 +237,7 @@ export default function SocialMediaPage() {
               {/* Tweet Text Area */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-terminal-green">
+                  <label className="text-sm font-medium text-primary">
                     Tweet Content
                   </label>
                   <span className={`text-sm ${tweetText.length > 280 ? 'text-red-500' : 'text-terminal-gray'}`}>
@@ -248,7 +248,7 @@ export default function SocialMediaPage() {
                   value={tweetText}
                   onChange={(e) => setTweetText(e.target.value)}
                   placeholder="What's happening in crypto?"
-                  className="min-h-[200px] border-terminal-green/30 bg-black font-mono text-terminal-green placeholder:text-terminal-gray/50"
+                  className="min-h-[200px] border-white/10 bg-background font-mono text-primary placeholder:text-terminal-gray/50"
                   maxLength={280}
                 />
               </div>
@@ -258,7 +258,7 @@ export default function SocialMediaPage() {
                 <Button
                   onClick={postTweet}
                   disabled={isPosting || !tweetText.trim() || tweetText.length > 280}
-                  className="flex-1 gap-2 bg-terminal-green text-black hover:bg-terminal-green/90"
+                  className="flex-1 gap-2 bg-primary text-black hover:bg-primary/90"
                 >
                   <Send className="h-4 w-4" />
                   {isPosting ? 'Posting...' : 'Post Tweet'}
@@ -267,7 +267,7 @@ export default function SocialMediaPage() {
                   <Button
                     onClick={generatePreview}
                     variant="outline"
-                    className="gap-2 border-terminal-green/30 text-terminal-green"
+                    className="gap-2 border-white/10 text-primary"
                   >
                     <Eye className="h-4 w-4" />
                     Preview
@@ -280,9 +280,9 @@ export default function SocialMediaPage() {
           {/* Right Column - Templates & Last Posted */}
           <div className="space-y-6">
             {/* Tweet Templates */}
-            <Card className="border-terminal-green/20 bg-black">
+            <Card className="border-primary/20 bg-background">
               <CardHeader>
-                <CardTitle className="text-terminal-green">
+                <CardTitle className="text-primary">
                   Quick Templates
                 </CardTitle>
                 <CardDescription>
@@ -301,7 +301,7 @@ export default function SocialMediaPage() {
                           generatePreview();
                         }}
                         variant="outline"
-                        className="justify-start gap-2 border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10"
+                        className="justify-start gap-2 border-white/10 text-primary hover:bg-primary/10"
                       >
                         <Icon className="h-4 w-4" />
                         {template.name}
@@ -314,26 +314,26 @@ export default function SocialMediaPage() {
 
             {/* Last Posted Tweet */}
             {lastPostedTweet && (
-              <Card className="border-terminal-green/20 bg-black">
+              <Card className="border-primary/20 bg-background">
                 <CardHeader>
-                  <CardTitle className="text-terminal-green">
+                  <CardTitle className="text-primary">
                     Last Posted
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <p className="whitespace-pre-wrap font-mono text-sm text-terminal-green">
+                    <p className="whitespace-pre-wrap font-mono text-sm text-primary">
                       {lastPostedTweet.text}
                     </p>
                     <div className="flex gap-2">
-                      <Badge variant="outline" className="border-terminal-green text-terminal-green">
+                      <Badge variant="outline" className="border-primary text-primary">
                         ID: {lastPostedTweet.tweetId}
                       </Badge>
                       <a
                         href={`https://twitter.com/Defidash_Agent/status/${lastPostedTweet.tweetId}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-terminal-green underline"
+                        className="text-sm text-primary underline"
                       >
                         View on X
                       </a>
@@ -346,9 +346,9 @@ export default function SocialMediaPage() {
         </div>
 
         {/* Usage Guide */}
-        <Card className="border-terminal-green/20 bg-black">
+        <Card className="border-primary/20 bg-background">
           <CardHeader>
-            <CardTitle className="text-terminal-green">
+            <CardTitle className="text-primary">
               Usage Guide
             </CardTitle>
           </CardHeader>

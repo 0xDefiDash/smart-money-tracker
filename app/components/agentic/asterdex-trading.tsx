@@ -166,21 +166,21 @@ export function AsterDexTrading() {
     <div className="space-y-4">
       {/* Header Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="bg-black/50 border-terminal-green/30">
+        <Card className="bg-surface-300 border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
-              <Wallet className="w-4 h-4 text-terminal-green" />
-              <span className="text-xs text-terminal-green/60 font-mono">Balance</span>
+              <Wallet className="w-4 h-4 text-primary" />
+              <span className="text-xs text-muted-foreground font-mono">Balance</span>
             </div>
             <p className="text-lg font-mono text-white">${formatPrice(totalBalance)}</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-black/50 border-terminal-green/30">
+        <Card className="bg-surface-300 border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
               <Activity className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs text-terminal-green/60 font-mono">Unrealized PnL</span>
+              <span className="text-xs text-muted-foreground font-mono">Unrealized PnL</span>
             </div>
             <p className={`text-lg font-mono ${totalUnrealizedPnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {totalUnrealizedPnl >= 0 ? '+' : ''}${formatPrice(totalUnrealizedPnl)}
@@ -188,21 +188,21 @@ export function AsterDexTrading() {
           </CardContent>
         </Card>
 
-        <Card className="bg-black/50 border-terminal-green/30">
+        <Card className="bg-surface-300 border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
               <Target className="w-4 h-4 text-purple-400" />
-              <span className="text-xs text-terminal-green/60 font-mono">Positions</span>
+              <span className="text-xs text-muted-foreground font-mono">Positions</span>
             </div>
             <p className="text-lg font-mono text-white">{positions.length}</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-black/50 border-terminal-green/30">
+        <Card className="bg-surface-300 border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-4 h-4 text-yellow-400" />
-              <span className="text-xs text-terminal-green/60 font-mono">Status</span>
+              <span className="text-xs text-muted-foreground font-mono">Status</span>
             </div>
             <Badge className={isConfigured ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}>
               {isConfigured ? 'Live' : 'Demo'}
@@ -214,10 +214,10 @@ export function AsterDexTrading() {
       {/* Main Trading Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Market Prices */}
-        <Card className="bg-black/50 border-terminal-green/30">
+        <Card className="bg-surface-300 border-white/10">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-terminal-green font-mono text-sm flex items-center gap-2">
+              <CardTitle className="text-primary font-mono text-sm flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
                 Markets
               </CardTitle>
@@ -226,7 +226,7 @@ export function AsterDexTrading() {
                 size="sm"
                 onClick={refreshAll}
                 disabled={isLoading}
-                className="h-6 text-terminal-green/60"
+                className="h-6 text-muted-foreground"
               >
                 <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
@@ -241,8 +241,8 @@ export function AsterDexTrading() {
                     onClick={() => setSelectedSymbol(ticker.symbol)}
                     className={`w-full p-2 rounded border transition-all text-left ${
                       selectedSymbol === ticker.symbol
-                        ? 'border-terminal-green bg-terminal-green/10'
-                        : 'border-terminal-green/20 hover:border-terminal-green/40'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-primary/20 hover:border-primary/40'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -250,7 +250,7 @@ export function AsterDexTrading() {
                       <span className="font-mono text-sm text-white">${formatPrice(ticker.lastPrice)}</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-terminal-green/50 font-mono">
+                      <span className="text-xs text-primary/50 font-mono">
                         Vol: {formatVolume(ticker.quoteVolume)}
                       </span>
                       <span className={`text-xs font-mono flex items-center gap-1 ${
@@ -268,14 +268,14 @@ export function AsterDexTrading() {
         </Card>
 
         {/* Positions & History */}
-        <Card className="bg-black/50 border-terminal-green/30">
+        <Card className="bg-surface-300 border-white/10">
           <CardHeader className="pb-0">
             <Tabs defaultValue="positions" className="w-full">
-              <TabsList className="bg-black/50 border border-terminal-green/30 w-full">
-                <TabsTrigger value="positions" className="flex-1 font-mono text-xs data-[state=active]:bg-terminal-green/20">
+              <TabsList className="bg-surface-300 border border-white/10 w-full">
+                <TabsTrigger value="positions" className="flex-1 font-mono text-xs data-[state=active]:bg-primary/20">
                   Positions ({positions.length})
                 </TabsTrigger>
-                <TabsTrigger value="history" className="flex-1 font-mono text-xs data-[state=active]:bg-terminal-green/20">
+                <TabsTrigger value="history" className="flex-1 font-mono text-xs data-[state=active]:bg-primary/20">
                   History
                 </TabsTrigger>
               </TabsList>
@@ -284,13 +284,13 @@ export function AsterDexTrading() {
                 <TabsContent value="positions" className="mt-0">
                   <ScrollArea className="h-[280px]">
                     {positions.length === 0 ? (
-                      <div className="text-center py-8 text-terminal-green/40 font-mono text-sm">
+                      <div className="text-center py-8 text-primary/40 font-mono text-sm">
                         No open positions
                       </div>
                     ) : (
                       <div className="space-y-2">
                         {positions.map((pos, i) => (
-                          <div key={i} className="p-3 rounded border border-terminal-green/20 bg-black/30">
+                          <div key={i} className="p-3 rounded border border-primary/20 bg-background/30">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-white">{pos.symbol.replace('USDT', '')}</span>
@@ -310,25 +310,25 @@ export function AsterDexTrading() {
                             </div>
                             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                               <div>
-                                <span className="text-terminal-green/50">Size: </span>
+                                <span className="text-primary/50">Size: </span>
                                 <span className="text-white">{pos.size}</span>
                               </div>
                               <div>
-                                <span className="text-terminal-green/50">Entry: </span>
+                                <span className="text-primary/50">Entry: </span>
                                 <span className="text-white">${formatPrice(pos.entryPrice)}</span>
                               </div>
                               <div>
-                                <span className="text-terminal-green/50">Mark: </span>
+                                <span className="text-primary/50">Mark: </span>
                                 <span className="text-white">${formatPrice(pos.markPrice)}</span>
                               </div>
                               <div>
-                                <span className="text-terminal-green/50">PnL: </span>
+                                <span className="text-primary/50">PnL: </span>
                                 <span className={pos.unrealizedPnl >= 0 ? 'text-green-400' : 'text-red-400'}>
                                   {pos.unrealizedPnl >= 0 ? '+' : ''}${formatPrice(pos.unrealizedPnl)}
                                 </span>
                               </div>
                             </div>
-                            <div className="mt-2 text-xs font-mono text-terminal-green/40">
+                            <div className="mt-2 text-xs font-mono text-primary/40">
                               Liq: ${formatPrice(pos.liquidationPrice)}
                             </div>
                           </div>
@@ -341,13 +341,13 @@ export function AsterDexTrading() {
                 <TabsContent value="history" className="mt-0">
                   <ScrollArea className="h-[280px]">
                     {tradeHistory.length === 0 ? (
-                      <div className="text-center py-8 text-terminal-green/40 font-mono text-sm">
+                      <div className="text-center py-8 text-primary/40 font-mono text-sm">
                         No trade history
                       </div>
                     ) : (
                       <div className="space-y-2">
                         {tradeHistory.map((trade) => (
-                          <div key={trade.id} className="p-2 rounded border border-terminal-green/10 bg-black/20">
+                          <div key={trade.id} className="p-2 rounded border border-primary/10 bg-background/20">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-xs text-white">{trade.symbol.replace('USDT', '')}</span>
@@ -359,7 +359,7 @@ export function AsterDexTrading() {
                                 {trade.realizedPnl !== 0 ? `${trade.realizedPnl >= 0 ? '+' : ''}$${formatPrice(trade.realizedPnl)}` : ''}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between mt-1 text-[10px] font-mono text-terminal-green/50">
+                            <div className="flex items-center justify-between mt-1 text-[10px] font-mono text-primary/50">
                               <span>{trade.qty} @ ${formatPrice(trade.price)}</span>
                               <span>{new Date(trade.time).toLocaleString()}</span>
                             </div>

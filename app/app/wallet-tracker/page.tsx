@@ -281,19 +281,19 @@ export default function WalletTrackerPage() {
       <div className="container mx-auto p-4 md:p-6 space-y-6">
         {/* Page Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Wallet className="h-8 w-8 text-terminal-green" />
-          <h1 className="text-3xl font-bold text-terminal-green uppercase tracking-wider">Wallet Tracker</h1>
+          <Wallet className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold text-primary uppercase tracking-wider">Wallet Tracker</h1>
         </div>
 
       {/* Search Interface */}
-      <Card className="p-6 bg-black border-terminal-green">
-        <h2 className="text-2xl font-bold mb-4 text-terminal-green uppercase tracking-wider">Track Wallet</h2>
+      <Card className="p-6 bg-background border-primary">
+        <h2 className="text-2xl font-bold mb-4 text-primary uppercase tracking-wider">Track Wallet</h2>
         <div className="flex flex-col md:flex-row gap-4">
           <Select value={chain} onValueChange={setChain}>
-            <SelectTrigger className="w-full md:w-[200px] border-terminal-green text-terminal-green">
+            <SelectTrigger className="w-full md:w-[200px] border-primary text-primary">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-black border-terminal-green">
+            <SelectContent className="bg-background border-primary">
               <SelectItem value="ethereum">Ethereum</SelectItem>
               <SelectItem value="bnb">BNB Chain</SelectItem>
               <SelectItem value="polygon">Polygon</SelectItem>
@@ -308,12 +308,12 @@ export default function WalletTrackerPage() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            className="flex-1 border-terminal-green text-terminal-green placeholder-terminal-gray"
+            className="flex-1 border-primary text-primary placeholder-terminal-gray"
           />
           <Button 
             onClick={handleSearch} 
             disabled={isLoading}
-            className="bg-terminal-green text-black hover:bg-terminal-green/80 uppercase tracking-wider"
+            className="bg-primary text-black hover:bg-primary/80 uppercase tracking-wider"
           >
             {isLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Search className="mr-2 h-4 w-4" />}
             {isLoading ? 'Searching...' : 'Search'}
@@ -324,29 +324,29 @@ export default function WalletTrackerPage() {
       {/* Results Display */}
       {walletData && (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-black border-2 border-terminal-green">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-background border-2 border-primary">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-terminal-green data-[state=active]:text-black text-terminal-green uppercase tracking-wider"
+              className="data-[state=active]:bg-primary data-[state=active]:text-black text-primary uppercase tracking-wider"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger 
               value="intelligence" 
-              className="data-[state=active]:bg-terminal-green data-[state=active]:text-black text-terminal-green uppercase tracking-wider"
+              className="data-[state=active]:bg-primary data-[state=active]:text-black text-primary uppercase tracking-wider"
             >
               <Sparkles className="h-4 w-4 mr-1" />
               Intelligence
             </TabsTrigger>
             <TabsTrigger 
               value="holdings" 
-              className="data-[state=active]:bg-terminal-green data-[state=active]:text-black text-terminal-green uppercase tracking-wider"
+              className="data-[state=active]:bg-primary data-[state=active]:text-black text-primary uppercase tracking-wider"
             >
               Holdings
             </TabsTrigger>
             <TabsTrigger 
               value="transactions" 
-              className="data-[state=active]:bg-terminal-green data-[state=active]:text-black text-terminal-green uppercase tracking-wider"
+              className="data-[state=active]:bg-primary data-[state=active]:text-black text-primary uppercase tracking-wider"
             >
               Transactions
             </TabsTrigger>
@@ -355,20 +355,20 @@ export default function WalletTrackerPage() {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Balance Card */}
-            <Card className="p-6 bg-black border-terminal-green">
+            <Card className="p-6 bg-background border-primary">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-terminal-green uppercase tracking-wider">Balance</h3>
+                <h3 className="text-lg font-semibold text-primary uppercase tracking-wider">Balance</h3>
                 <a
                   href={getExplorerUrl(walletData.chain, walletData.address)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-terminal-green hover:text-terminal-green/80 flex items-center gap-1"
+                  className="text-primary hover:text-primary/80 flex items-center gap-1"
                 >
                   <ExternalLink className="h-4 w-4" />
                   <span className="text-sm">View on Explorer</span>
                 </a>
               </div>
-              <p className="text-4xl font-bold text-terminal-green font-mono">
+              <p className="text-4xl font-bold text-primary font-mono">
                 {walletData.balance} {walletData.currency}
               </p>
               <p className="text-terminal-gray mt-2 font-mono">
@@ -376,7 +376,7 @@ export default function WalletTrackerPage() {
               </p>
               <Button 
                 onClick={handleAddToWatchlist} 
-                className="mt-4 bg-terminal-green text-black hover:bg-terminal-green/80 uppercase tracking-wider"
+                className="mt-4 bg-primary text-black hover:bg-primary/80 uppercase tracking-wider"
               >
                 <Bell className="mr-2 h-4 w-4" />
                 Add to Watchlist
@@ -385,17 +385,17 @@ export default function WalletTrackerPage() {
 
             {/* Quick Stats */}
             <div className="grid gap-4 md:grid-cols-3">
-              <Card className="p-4 bg-black border-terminal-green">
+              <Card className="p-4 bg-background border-primary">
                 <div className="text-sm text-terminal-gray uppercase tracking-wider mb-1">Chain</div>
-                <div className="text-2xl font-bold text-terminal-green uppercase">{chain}</div>
+                <div className="text-2xl font-bold text-primary uppercase">{chain}</div>
               </Card>
-              <Card className="p-4 bg-black border-terminal-green">
+              <Card className="p-4 bg-background border-primary">
                 <div className="text-sm text-terminal-gray uppercase tracking-wider mb-1">Token Count</div>
-                <div className="text-2xl font-bold text-terminal-green">{tokens.length}</div>
+                <div className="text-2xl font-bold text-primary">{tokens.length}</div>
               </Card>
-              <Card className="p-4 bg-black border-terminal-green">
+              <Card className="p-4 bg-background border-primary">
                 <div className="text-sm text-terminal-gray uppercase tracking-wider mb-1">Transactions</div>
-                <div className="text-2xl font-bold text-terminal-green">{transactions.length}+</div>
+                <div className="text-2xl font-bold text-primary">{transactions.length}+</div>
               </Card>
             </div>
           </TabsContent>
@@ -403,10 +403,10 @@ export default function WalletTrackerPage() {
           {/* Nansen Intelligence Tab */}
           <TabsContent value="intelligence" className="space-y-6">
             {isLoadingNansen && (
-              <Card className="p-8 bg-black border-terminal-green">
+              <Card className="p-8 bg-background border-primary">
                 <div className="flex flex-col items-center justify-center gap-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-terminal-green" />
-                  <p className="text-terminal-green text-lg">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                  <p className="text-primary text-lg">
                     Loading Nansen Intelligence...
                   </p>
                   <p className="text-terminal-gray text-sm">
@@ -456,10 +456,10 @@ export default function WalletTrackerPage() {
             )}
 
             {!nansenData && !isLoadingNansen && !nansenError && (
-              <Card className="p-8 bg-black border-terminal-green/50">
+              <Card className="p-8 bg-background border-primary/30">
                 <div className="text-center">
-                  <Sparkles className="h-12 w-12 text-terminal-green mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-terminal-green uppercase mb-2">
+                  <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-primary uppercase mb-2">
                     Nansen Intelligence
                   </h3>
                   <p className="text-terminal-gray">
@@ -474,30 +474,30 @@ export default function WalletTrackerPage() {
           {/* Holdings Tab */}
           <TabsContent value="holdings" className="space-y-6">
             {tokens.length > 0 ? (
-              <Card className="p-6 bg-black border-terminal-green">
-                <h3 className="text-lg font-semibold mb-4 text-terminal-green uppercase tracking-wider">
+              <Card className="p-6 bg-background border-primary">
+                <h3 className="text-lg font-semibold mb-4 text-primary uppercase tracking-wider">
                   Token Holdings ({tokens.length})
                 </h3>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-terminal-green">
-                        <TableHead className="text-terminal-green">Token</TableHead>
-                        <TableHead className="text-terminal-green">Balance</TableHead>
-                        <TableHead className="text-terminal-green">Value</TableHead>
+                      <TableRow className="border-primary">
+                        <TableHead className="text-primary">Token</TableHead>
+                        <TableHead className="text-primary">Balance</TableHead>
+                        <TableHead className="text-primary">Value</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {tokens.map((token) => (
-                        <TableRow key={token.address} className="border-terminal-green/30">
-                          <TableCell className="text-terminal-green font-mono">
+                        <TableRow key={token.address} className="border-white/10">
+                          <TableCell className="text-primary font-mono">
                             <div>
                               <div className="font-bold">{token.symbol}</div>
                               <div className="text-sm text-terminal-gray">{token.name}</div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-terminal-green font-mono">{token.balance}</TableCell>
-                          <TableCell className="text-terminal-green font-mono">${token.valueUSD}</TableCell>
+                          <TableCell className="text-primary font-mono">{token.balance}</TableCell>
+                          <TableCell className="text-primary font-mono">${token.valueUSD}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -505,7 +505,7 @@ export default function WalletTrackerPage() {
                 </div>
               </Card>
             ) : (
-              <Card className="p-8 bg-black border-terminal-green/50">
+              <Card className="p-8 bg-background border-primary/30">
                 <div className="text-center text-terminal-gray">
                   No token holdings found
                 </div>
@@ -516,42 +516,42 @@ export default function WalletTrackerPage() {
           {/* Transactions Tab */}
           <TabsContent value="transactions" className="space-y-6">
             {transactions.length > 0 ? (
-              <Card className="p-6 bg-black border-terminal-green">
-                <h3 className="text-lg font-semibold mb-4 text-terminal-green uppercase tracking-wider">
+              <Card className="p-6 bg-background border-primary">
+                <h3 className="text-lg font-semibold mb-4 text-primary uppercase tracking-wider">
                   Recent Transactions ({transactions.length})
                 </h3>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-terminal-green">
-                        <TableHead className="text-terminal-green">Tx Hash</TableHead>
-                        <TableHead className="text-terminal-green">From</TableHead>
-                        <TableHead className="text-terminal-green">To</TableHead>
-                        <TableHead className="text-terminal-green">Value</TableHead>
-                        <TableHead className="text-terminal-green">Time</TableHead>
+                      <TableRow className="border-primary">
+                        <TableHead className="text-primary">Tx Hash</TableHead>
+                        <TableHead className="text-primary">From</TableHead>
+                        <TableHead className="text-primary">To</TableHead>
+                        <TableHead className="text-primary">Value</TableHead>
+                        <TableHead className="text-primary">Time</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {transactions.map((tx) => (
-                        <TableRow key={tx.hash} className="border-terminal-green/30">
-                          <TableCell className="text-terminal-green font-mono">
+                        <TableRow key={tx.hash} className="border-white/10">
+                          <TableCell className="text-primary font-mono">
                             <a
                               href={`${getExplorerUrl(chain, '')}/../tx/${tx.hash}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="hover:text-terminal-green/80 flex items-center gap-1"
+                              className="hover:text-primary/80 flex items-center gap-1"
                             >
                               {tx.hash.slice(0, 8)}...{tx.hash.slice(-6)}
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           </TableCell>
-                          <TableCell className="text-terminal-green font-mono text-sm">
+                          <TableCell className="text-primary font-mono text-sm">
                             {tx.from.slice(0, 6)}...{tx.from.slice(-4)}
                           </TableCell>
-                          <TableCell className="text-terminal-green font-mono text-sm">
+                          <TableCell className="text-primary font-mono text-sm">
                             {tx.to.slice(0, 6)}...{tx.to.slice(-4)}
                           </TableCell>
-                          <TableCell className="text-terminal-green font-mono">
+                          <TableCell className="text-primary font-mono">
                             {tx.tokenTransfers && tx.tokenTransfers.length > 0 ? (
                               <span>{tx.tokenTransfers[0].value} {tx.tokenTransfers[0].asset || tx.tokenTransfers[0].tokenSymbol}</span>
                             ) : (
@@ -568,7 +568,7 @@ export default function WalletTrackerPage() {
                 </div>
               </Card>
             ) : (
-              <Card className="p-8 bg-black border-terminal-green/50">
+              <Card className="p-8 bg-background border-primary/30">
                 <div className="text-center text-terminal-gray">
                   No transactions found
                 </div>
@@ -580,20 +580,20 @@ export default function WalletTrackerPage() {
 
       {/* Watchlist */}
       {watchlist.length > 0 && (
-        <Card className="p-6 bg-black border-terminal-green">
-          <h3 className="text-lg font-semibold mb-4 text-terminal-green uppercase tracking-wider">My Watchlist</h3>
+        <Card className="p-6 bg-background border-primary">
+          <h3 className="text-lg font-semibold mb-4 text-primary uppercase tracking-wider">My Watchlist</h3>
           <div className="space-y-3">
             {watchlist.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 border border-terminal-green/30 rounded">
+              <div key={item.id} className="flex items-center justify-between p-3 border border-white/10 rounded">
                 <div className="flex-1">
-                  <div className="text-terminal-green font-mono font-bold">
+                  <div className="text-primary font-mono font-bold">
                     {item.label || 'Unlabeled Wallet'}
                   </div>
                   <div className="text-terminal-gray font-mono text-sm">
                     {item.address.slice(0, 12)}...{item.address.slice(-8)} on {item.chain.toUpperCase()}
                   </div>
                   {item.tokenSymbol && (
-                    <div className="text-terminal-green/80 text-sm">
+                    <div className="text-primary/80 text-sm">
                       Tracking: {item.tokenSymbol}
                     </div>
                   )}
@@ -602,7 +602,7 @@ export default function WalletTrackerPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleRemoveFromWatchlist(item.id)}
-                  className="border-terminal-green text-terminal-green hover:bg-terminal-green/10"
+                  className="border-primary text-primary hover:bg-primary/10"
                 >
                   Remove
                 </Button>

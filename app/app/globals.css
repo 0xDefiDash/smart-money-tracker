@@ -1,608 +1,371 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile optimization utilities */
+/* =====================================================
+   INSTITUTIONAL TECH THEME - Blue, Black, White
+   Modern Trading Platform Design
+   ===================================================== */
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 220 20% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 220 20% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 20% 14%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 217 20% 14%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 190 100% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 350 100% 62%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 20% 18%;
+    --input: 217 20% 14%;
+    --ring: 217 100% 50%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Suppress hydration warnings */
+  [data-hydration-error] {
+    display: none !important;
+  }
+}
+
+/* =====================================================
+   TYPOGRAPHY
+   ===================================================== */
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl lg:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl lg:text-2xl;
+  }
+}
+
+/* =====================================================
+   CUSTOM COMPONENTS
+   ===================================================== */
+
+@layer components {
+  /* Glass morphism card effect */
+  .glass-card {
+    @apply bg-surface-300/80 backdrop-blur-xl border border-white/5 rounded-xl;
+  }
+
+  /* Tech grid background */
+  .tech-grid {
+    background-image: 
+      linear-gradient(rgba(0, 102, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 102, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400 bg-clip-text text-transparent;
+  }
+
+  /* Glow effects */
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.2);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.2);
+  }
+
+  /* Status indicators */
+  .status-live {
+    @apply relative;
+  }
+
+  .status-live::before {
+    content: '';
+    @apply absolute -left-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-success animate-pulse;
+  }
+
+  /* Data cards */
+  .data-card {
+    @apply bg-surface-300 border border-white/5 rounded-xl p-6 transition-all duration-300;
+  }
+
+  .data-card:hover {
+    @apply border-primary/30 shadow-card-hover;
+  }
+
+  /* Stat display */
+  .stat-value {
+    @apply text-3xl font-bold text-white tracking-tight;
+  }
+
+  .stat-label {
+    @apply text-sm text-muted-foreground uppercase tracking-wider;
+  }
+
+  .stat-change-positive {
+    @apply text-success text-sm font-medium;
+  }
+
+  .stat-change-negative {
+    @apply text-destructive text-sm font-medium;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-600 text-white font-medium px-6 py-2.5 rounded-lg transition-all duration-200;
+    @apply shadow-glow hover:shadow-glow-lg;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-200 hover:bg-surface-300 text-white border border-white/10 font-medium px-6 py-2.5 rounded-lg transition-all duration-200;
+  }
+
+  .btn-outline {
+    @apply bg-transparent hover:bg-primary/10 text-primary border border-primary/50 hover:border-primary font-medium px-6 py-2.5 rounded-lg transition-all duration-200;
+  }
+
+  /* Tables */
+  .data-table {
+    @apply w-full;
+  }
+
+  .data-table th {
+    @apply text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3 px-4 bg-surface-300 border-b border-white/5;
+  }
+
+  .data-table td {
+    @apply py-4 px-4 border-b border-white/5 text-sm;
+  }
+
+  .data-table tr:hover td {
+    @apply bg-surface-200/50;
+  }
+
+  /* Charts area */
+  .chart-container {
+    @apply bg-surface-300 border border-white/5 rounded-xl p-4;
+  }
+
+  /* Navigation */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-white hover:bg-surface-200 rounded-lg transition-all duration-200;
+  }
+
+  .nav-item.active {
+    @apply text-white bg-primary/20 border-l-2 border-primary;
+  }
+
+  /* Badges */
+  .badge-success {
+    @apply bg-success/20 text-success px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-danger {
+    @apply bg-destructive/20 text-destructive px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-info {
+    @apply bg-primary/20 text-primary-300 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-warning {
+    @apply bg-warning/20 text-warning px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Input fields */
+  .input-field {
+    @apply bg-surface-300 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200;
+  }
+
+  /* Scrollbars */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-surface-400;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 rounded-full hover:bg-primary/50;
+  }
+
+  /* Shimmer loading effect */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+}
+
+/* =====================================================
+   UTILITY CLASSES
+   ===================================================== */
+
 @layer utilities {
-  /* Touch targets should be at least 44x44px for iOS and 48x48px for Android */
-  .touch-target {
-    min-width: 44px;
-    min-height: 44px;
-  }
-  
-  /* Improved touch manipulation */
-  .touch-manipulation {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  /* Prevent text selection on game elements */
-  .no-select {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-  
-  /* Better scroll behavior on mobile */
-  .smooth-scroll {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-  
-  /* Mobile-friendly hover states */
-  @media (hover: none) and (pointer: coarse) {
-    .hover\:scale-105:hover {
-      transform: none;
-    }
-    .group:hover .group-hover\:scale-110 {
-      transform: none;
-    }
-  }
-  
-  /* Active states for touch devices */
-  .touch-active:active {
-    transform: scale(0.95);
-    opacity: 0.8;
-    transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-  }
-  
-  /* Safe area utilities for mobile devices with notches */
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  .safe-left {
-    padding-left: env(safe-area-inset-left);
-  }
-  
-  .safe-right {
-    padding-right: env(safe-area-inset-right);
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
   }
 
-  /* Mobile-specific spacing */
-  .mobile-spacing {
-    @apply p-3 sm:p-4 md:p-6;
+  /* Price colors */
+  .price-up {
+    @apply text-success;
   }
 
-  /* Mobile-friendly card */
-  .mobile-card {
-    @apply rounded-lg sm:rounded-xl p-4 sm:p-6;
+  .price-down {
+    @apply text-destructive;
   }
 
-  /* Mobile-optimized text sizes */
-  .text-mobile-xs {
-    @apply text-xs sm:text-sm;
+  /* Truncate with ellipsis */
+  .truncate-address {
+    @apply truncate max-w-[120px];
   }
 
-  .text-mobile-sm {
-    @apply text-sm sm:text-base;
+  /* Mono numbers */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 
-  .text-mobile-base {
-    @apply text-base sm:text-lg;
-  }
-
-  .text-mobile-lg {
-    @apply text-lg sm:text-xl md:text-2xl;
-  }
-
-  .text-mobile-xl {
-    @apply text-xl sm:text-2xl md:text-3xl;
-  }
-
-  /* Mobile grid layouts */
-  .mobile-grid-2 {
-    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4;
-  }
-
-  .mobile-grid-3 {
-    @apply grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6;
-  }
-
-  /* Better button spacing for mobile */
-  .mobile-button {
-    @apply px-4 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-lg touch-manipulation;
-  }
-
-  /* Scroll snap for mobile carousels */
-  .snap-x-scroll {
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .snap-center {
-    scroll-snap-align: center;
-  }
-
-  /* Hide scrollbar but keep functionality */
-  .scrollbar-hide {
+  /* Hide scrollbar */
+  .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  .scrollbar-hide::-webkit-scrollbar {
+  .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-}
- 
-@layer base {
-  :root {
-    /* Terminal theme - Pure black and white with green accents */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
 
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
- 
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
- 
-    --primary: 120 100% 50%;
-    --primary-foreground: 0 0% 0%;
- 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 100%;
- 
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 60%;
- 
-    --accent: 120 100% 50%;
-    --accent-foreground: 0 0% 0%;
- 
-    --destructive: 0 0% 100%;
-    --destructive-foreground: 0 0% 0%;
-
-    --border: 0 0% 100%;
-    --input: 0 0% 0%;
-    --ring: 120 100% 50%;
- 
-    --radius: 0rem;
-
-    /* Terminal colors */
-    --terminal-green: 120 100% 50%;
-    --terminal-green-dim: 120 100% 35%;
-    --terminal-white: 0 0% 100%;
-    --terminal-black: 0 0% 0%;
-    --terminal-gray: 0 0% 60%;
-  }
- 
-  .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
- 
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
- 
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
- 
-    --primary: 120 100% 50%;
-    --primary-foreground: 0 0% 0%;
- 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 100%;
- 
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 60%;
- 
-    --accent: 120 100% 50%;
-    --accent-foreground: 0 0% 0%;
- 
-    --destructive: 0 0% 100%;
-    --destructive-foreground: 0 0% 0%;
- 
-    --border: 0 0% 100%;
-    --input: 0 0% 0%;
-    --ring: 120 100% 50%;
-  }
-}
- 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    /* Improved font rendering */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    /* Better touch scrolling on iOS */
-    -webkit-overflow-scrolling: touch;
+  /* Fade edges */
+  .fade-x {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   }
 
-  /* Optimize mobile input fields */
-  input,
-  textarea,
-  select {
-    @apply text-base; /* Prevents zoom on iOS */
-  }
-
-  /* Better tap highlight for mobile */
-  button,
-  a {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  .fade-y {
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
   }
 }
 
-/* Terminal theme backgrounds */
-.bg-terminal {
-  background: #000000;
-  border: 2px solid #00ff00;
+/* =====================================================
+   RECHARTS CUSTOMIZATION
+   ===================================================== */
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.05);
 }
 
-.bg-terminal-card {
-  background: #000000;
-  border: 1px solid #ffffff;
+.recharts-tooltip-wrapper {
+  outline: none !important;
 }
 
-/* Terminal glow effects */
-.glow-terminal {
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5),
-              inset 0 0 10px rgba(0, 255, 0, 0.1);
+.recharts-default-tooltip {
+  @apply !bg-surface-300 !border-white/10 !rounded-lg !shadow-lg;
 }
 
-.glow-terminal-white {
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
-              inset 0 0 10px rgba(255, 255, 255, 0.1);
+.recharts-tooltip-label {
+  @apply !text-white !font-medium;
 }
 
-/* Terminal text effects */
-.terminal-text {
-  color: #00ff00;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+.recharts-tooltip-item {
+  @apply !text-muted-foreground;
 }
 
-.terminal-text-white {
-  color: #ffffff;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
+/* =====================================================
+   ANIMATIONS
+   ===================================================== */
 
-.terminal-text-dim {
-  color: #999999;
-}
-
-/* CRT scanline effect */
-.scanlines {
-  position: relative;
-}
-
-.scanlines::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15),
-    rgba(0, 0, 0, 0.15) 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  pointer-events: none;
-  z-index: 1000;
-}
-
-/* CRT flicker effect */
-@keyframes flicker {
-  0% { opacity: 0.97; }
-  5% { opacity: 0.98; }
-  10% { opacity: 0.97; }
-  15% { opacity: 0.99; }
-  20% { opacity: 0.98; }
-  25% { opacity: 0.97; }
-  30% { opacity: 0.98; }
-  35% { opacity: 0.97; }
-  40% { opacity: 0.99; }
-  45% { opacity: 0.98; }
-  50% { opacity: 0.97; }
-  55% { opacity: 0.98; }
-  60% { opacity: 0.99; }
-  65% { opacity: 0.98; }
-  70% { opacity: 0.97; }
-  75% { opacity: 0.98; }
-  80% { opacity: 0.97; }
-  85% { opacity: 0.99; }
-  90% { opacity: 0.98; }
-  95% { opacity: 0.97; }
-  100% { opacity: 0.98; }
-}
-
-.crt-flicker {
-  animation: flicker 0.15s infinite;
-}
-
-/* Terminal cursor blink */
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-.terminal-cursor {
-  display: inline-block;
-  width: 10px;
-  height: 1em;
-  background: #00ff00;
-  animation: blink 1s step-end infinite;
-}
-
-/* Terminal border styles */
-.terminal-border {
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
-
-.terminal-border-green {
-  border: 2px solid #00ff00;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-}
-
-/* Animated background for cards */
 @keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-ring {
   0% {
-    background-position: -1000px 0;
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 102, 255, 0.7);
   }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-.shimmer {
-  animation: shimmer 3s infinite;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
-  background-size: 1000px 100%;
-}
-
-/* Mobile-optimized animations */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Mobile landscape optimizations */
-@media (max-height: 500px) and (orientation: landscape) {
-  .mobile-spacing {
-    @apply p-2;
-  }
-  
-  .mobile-card {
-    @apply p-3;
-  }
-}
-
-/* Improve contrast for accessibility */
-@media (prefers-contrast: high) {
-  :root {
-    --foreground: 0 0% 100%;
-    --background: 0 0% 0%;
-    --border: 0 0% 50%;
-  }
-}
-
-/* Dark mode text rendering fix */
-@supports (font-variation-settings: normal) {
-  body {
-    font-variation-settings: "wght" 400;
-  }
-}
-
-/* Enhanced mobile animations */
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
+  70% {
     transform: scale(1);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
-  }
-}
-
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
+    box-shadow: 0 0 0 10px rgba(0, 102, 255, 0);
   }
   100% {
-    background-position: 0% 50%;
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 102, 255, 0);
   }
 }
 
-/* Animated gradient background */
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-shift 8s ease infinite;
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
 
-/* Pulse glow effect */
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+/* =====================================================
+   LEGACY TERMINAL COMPATIBILITY
+   (Maps old classes to new theme)
+   ===================================================== */
+
+.text-terminal-green {
+  @apply text-primary;
 }
 
-/* Slide in animations */
-.slide-in-left {
-  animation: slideInFromLeft 0.5s ease-out;
+.border-terminal-green {
+  @apply border-primary;
 }
 
-.slide-in-right {
-  animation: slideInFromRight 0.5s ease-out;
+.bg-terminal-green {
+  @apply bg-primary;
 }
 
-.slide-in-bottom {
-  animation: slideInFromBottom 0.5s ease-out;
+.text-terminal-green\/60 {
+  @apply text-muted-foreground;
 }
 
-.fade-in-scale {
-  animation: fadeInScale 0.5s ease-out;
+.border-terminal-green\/30 {
+  @apply border-white/10;
 }
 
-/* Enhanced card hover effects for mobile */
-.mobile-card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.bg-terminal-green\/10 {
+  @apply bg-primary/10;
 }
 
-.mobile-card-hover:active {
-  transform: scale(0.98);
-}
-
-/* Glowing border animation */
-@keyframes glow-border {
-  0%, 100% {
-    border-color: rgba(16, 185, 129, 0.3);
-  }
-  50% {
-    border-color: rgba(16, 185, 129, 0.8);
-  }
-}
-
-.animate-glow-border {
-  animation: glow-border 2s ease-in-out infinite;
-}
-
-/* Floating animation for icons */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Ripple effect for touch */
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-.ripple-effect {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple-effect::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple 0.6s ease-out;
-}
-
-/* Enhanced gradient text */
-.gradient-text-animated {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--neon-green)),
-    hsl(var(--neon-blue)),
-    hsl(var(--neon-purple)),
-    hsl(var(--neon-green))
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 3s linear infinite;
-}
-
-/* Mobile-optimized glass effect */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Neon glow effect */
-.neon-glow-green {
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.8),
-               0 0 20px rgba(16, 185, 129, 0.6),
-               0 0 30px rgba(16, 185, 129, 0.4);
-}
-
-.neon-glow-blue {
-  text-shadow: 0 0 10px rgba(59, 130, 246, 0.8),
-               0 0 20px rgba(59, 130, 246, 0.6),
-               0 0 30px rgba(59, 130, 246, 0.4);
-}
-
-.neon-glow-purple {
-  text-shadow: 0 0 10px rgba(168, 85, 247, 0.8),
-               0 0 20px rgba(168, 85, 247, 0.6),
-               0 0 30px rgba(168, 85, 247, 0.4);
+.bg-terminal-green\/20 {
+  @apply bg-primary/20;
 }

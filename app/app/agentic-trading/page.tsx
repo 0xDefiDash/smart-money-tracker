@@ -256,33 +256,33 @@ export default function AgenticTradingPage() {
   const selectedWorkflowData = WORKFLOWS.find(w => w.id === selectedWorkflow);
 
   return (
-    <div className="min-h-screen bg-black text-terminal-green p-6">
+    <div className="min-h-screen bg-background text-primary p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-terminal-green/10 rounded-lg border border-terminal-green/30">
-              <Brain className="w-8 h-8 text-terminal-green" />
+            <div className="p-3 bg-primary/10 rounded-lg border border-white/10">
+              <Brain className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-mono font-bold text-terminal-green">
+              <h1 className="text-2xl font-mono font-bold text-primary">
                 Agentic Trading Intelligence
               </h1>
-              <p className="text-terminal-green/60 font-mono text-sm">
+              <p className="text-muted-foreground font-mono text-sm">
                 Swarms AI Hierarchical Framework • Multi-Agent Orchestration
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="border-terminal-green/50 text-terminal-green font-mono">
+          <Badge variant="outline" className="border-primary/30 text-primary font-mono">
             <Activity className="w-3 h-3 mr-1 animate-pulse" />
             LIVE
           </Badge>
         </div>
 
         {/* Quick Actions */}
-        <Card className="bg-black/50 border-terminal-green/30">
+        <Card className="bg-surface-300 border-white/10">
           <CardHeader className="pb-3">
-            <CardTitle className="text-terminal-green font-mono flex items-center gap-2">
+            <CardTitle className="text-primary font-mono flex items-center gap-2">
               <Zap className="w-5 h-5" />
               Quick Actions
             </CardTitle>
@@ -350,15 +350,15 @@ export default function AgenticTradingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Analysis Panel */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-black/50 border-terminal-green/30">
+            <Card className="bg-surface-300 border-white/10">
               <CardHeader>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="bg-black/50 border border-terminal-green/30">
-                    <TabsTrigger value="swarm" className="font-mono data-[state=active]:bg-terminal-green/20">
+                  <TabsList className="bg-surface-300 border border-white/10">
+                    <TabsTrigger value="swarm" className="font-mono data-[state=active]:bg-primary/20">
                       <Network className="w-4 h-4 mr-2" />
                       Swarm Analysis
                     </TabsTrigger>
-                    <TabsTrigger value="single" className="font-mono data-[state=active]:bg-terminal-green/20">
+                    <TabsTrigger value="single" className="font-mono data-[state=active]:bg-primary/20">
                       <Bot className="w-4 h-4 mr-2" />
                       Single Agent
                     </TabsTrigger>
@@ -371,7 +371,7 @@ export default function AgenticTradingPage() {
                   <>
                     {/* Workflow Selection */}
                     <div className="space-y-3">
-                      <Label className="text-terminal-green font-mono">Select Workflow</Label>
+                      <Label className="text-primary font-mono">Select Workflow</Label>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {WORKFLOWS.map((workflow) => (
                           <button
@@ -379,15 +379,15 @@ export default function AgenticTradingPage() {
                             onClick={() => setSelectedWorkflow(workflow.id)}
                             className={`p-3 rounded-lg border transition-all text-left ${
                               selectedWorkflow === workflow.id
-                                ? 'border-terminal-green bg-terminal-green/10'
-                                : 'border-terminal-green/30 hover:border-terminal-green/60'
+                                ? 'border-primary bg-primary/10'
+                                : 'border-white/10 hover:border-primary/60'
                             }`}
                           >
                             <div className="flex items-center gap-2 mb-1">
                               <workflow.icon className={`w-4 h-4 ${workflow.color}`} />
                               <span className="font-mono text-sm text-white">{workflow.name}</span>
                             </div>
-                            <p className="text-xs text-terminal-green/60 font-mono">
+                            <p className="text-xs text-muted-foreground font-mono">
                               {workflow.description}
                             </p>
                           </button>
@@ -397,15 +397,15 @@ export default function AgenticTradingPage() {
 
                     {/* Selected Workflow Details */}
                     {selectedWorkflowData && (
-                      <Alert className="bg-terminal-green/5 border-terminal-green/30">
+                      <Alert className="bg-primary/10 border-white/10">
                         <selectedWorkflowData.icon className={`w-4 h-4 ${selectedWorkflowData.color}`} />
-                        <AlertTitle className="text-terminal-green font-mono">
+                        <AlertTitle className="text-primary font-mono">
                           {selectedWorkflowData.name} Workflow
                         </AlertTitle>
-                        <AlertDescription className="text-terminal-green/70 font-mono text-xs mt-2">
+                        <AlertDescription className="text-muted-foreground font-mono text-xs mt-2">
                           <div className="flex flex-wrap gap-2">
                             {selectedWorkflowData.agents.map((agent, i) => (
-                              <Badge key={i} variant="outline" className="border-terminal-green/30 text-terminal-green/70">
+                              <Badge key={i} variant="outline" className="border-white/10 text-muted-foreground">
                                 {agent}
                               </Badge>
                             ))}
@@ -418,7 +418,7 @@ export default function AgenticTradingPage() {
 
                 {activeTab === 'single' && (
                   <div className="space-y-3">
-                    <Label className="text-terminal-green font-mono">Select Specialist Agent</Label>
+                    <Label className="text-primary font-mono">Select Specialist Agent</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                       {AGENT_TYPES.map((agent) => (
                         <button
@@ -426,8 +426,8 @@ export default function AgenticTradingPage() {
                           onClick={() => setSelectedAgentType(agent.id)}
                           className={`p-3 rounded-lg border transition-all text-center ${
                             selectedAgentType === agent.id
-                              ? 'border-terminal-green bg-terminal-green/10'
-                              : 'border-terminal-green/30 hover:border-terminal-green/60'
+                              ? 'border-primary bg-primary/10'
+                              : 'border-white/10 hover:border-primary/60'
                           }`}
                         >
                           <agent.icon className={`w-5 h-5 mx-auto mb-1 ${agent.color}`} />
@@ -444,40 +444,40 @@ export default function AgenticTradingPage() {
                     <Switch
                       checked={includeMarketData}
                       onCheckedChange={setIncludeMarketData}
-                      className="data-[state=checked]:bg-terminal-green"
+                      className="data-[state=checked]:bg-primary"
                     />
-                    <Label className="text-terminal-green/70 font-mono text-sm">Include Market Data</Label>
+                    <Label className="text-muted-foreground font-mono text-sm">Include Market Data</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Input
                       placeholder="Token (optional)"
                       value={tokenSymbol}
                       onChange={(e) => setTokenSymbol(e.target.value.toUpperCase())}
-                      className="w-32 bg-black/50 border-terminal-green/30 text-terminal-green font-mono text-sm"
+                      className="w-32 bg-surface-300 border-white/10 text-primary font-mono text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Task Input */}
                 <div className="space-y-2">
-                  <Label className="text-terminal-green font-mono">Analysis Task</Label>
+                  <Label className="text-primary font-mono">Analysis Task</Label>
                   <Textarea
                     placeholder="Enter your analysis request... e.g., 'Analyze the current market conditions for BTC and provide trading recommendations'"
                     value={task}
                     onChange={(e) => setTask(e.target.value)}
-                    className="min-h-[120px] bg-black/50 border-terminal-green/30 text-terminal-green font-mono placeholder:text-terminal-green/30"
+                    className="min-h-[120px] bg-surface-300 border-white/10 text-primary font-mono placeholder:text-muted-foreground/50"
                   />
                 </div>
 
                 {/* Quick Prompts */}
                 <div className="space-y-2">
-                  <Label className="text-terminal-green/70 font-mono text-xs">Quick Prompts</Label>
+                  <Label className="text-muted-foreground font-mono text-xs">Quick Prompts</Label>
                   <div className="flex flex-wrap gap-2">
                     {QUICK_PROMPTS.slice(0, 4).map((prompt, i) => (
                       <button
                         key={i}
                         onClick={() => setTask(prompt)}
-                        className="text-xs px-2 py-1 rounded border border-terminal-green/20 text-terminal-green/60 hover:border-terminal-green/50 hover:text-terminal-green font-mono transition-all"
+                        className="text-xs px-2 py-1 rounded border border-white/5 text-muted-foreground hover:border-primary/30 hover:text-primary font-mono transition-all"
                       >
                         {prompt.substring(0, 40)}...
                       </button>
@@ -489,7 +489,7 @@ export default function AgenticTradingPage() {
                 <Button
                   onClick={executeAnalysis}
                   disabled={isLoading || !task.trim()}
-                  className="w-full bg-terminal-green text-black hover:bg-terminal-green/80 font-mono font-bold"
+                  className="w-full bg-primary text-black hover:bg-primary/80 font-mono font-bold"
                 >
                   {isLoading ? (
                     <>
@@ -508,14 +508,14 @@ export default function AgenticTradingPage() {
 
             {/* Results */}
             {result && (
-              <Card ref={resultRef} className="bg-black/50 border-terminal-green/30">
+              <Card ref={resultRef} className="bg-surface-300 border-white/10">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-terminal-green font-mono flex items-center gap-2">
+                    <CardTitle className="text-primary font-mono flex items-center gap-2">
                       <CheckCircle2 className="w-5 h-5 text-green-400" />
                       Analysis Complete
                     </CardTitle>
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-terminal-green/60">
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground">
                       {result.llmUsed && (
                         <span className="flex items-center gap-1 text-cyan-400">
                           <Sparkles className="w-3 h-3" />
@@ -543,21 +543,21 @@ export default function AgenticTradingPage() {
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[400px]">
-                    <pre className="text-sm text-terminal-green/90 font-mono whitespace-pre-wrap">
+                    <pre className="text-sm text-primary/90 font-mono whitespace-pre-wrap">
                       {formatOutput(result.output)}
                     </pre>
                     
                     {/* Individual Agent Outputs */}
                     {result.agent_outputs && result.agent_outputs.length > 0 && (
-                      <div className="mt-6 pt-6 border-t border-terminal-green/20">
-                        <h4 className="text-terminal-green font-mono mb-4">Individual Agent Outputs</h4>
+                      <div className="mt-6 pt-6 border-t border-white/5">
+                        <h4 className="text-primary font-mono mb-4">Individual Agent Outputs</h4>
                         <div className="space-y-4">
                           {result.agent_outputs.map((agent, i) => (
-                            <div key={i} className="p-4 rounded-lg bg-terminal-green/5 border border-terminal-green/20">
-                              <Badge className="mb-2 bg-terminal-green/20 text-terminal-green">
+                            <div key={i} className="p-4 rounded-lg bg-primary/10 border border-white/5">
+                              <Badge className="mb-2 bg-primary/20 text-primary">
                                 {agent.agent_name}
                               </Badge>
-                              <pre className="text-xs text-terminal-green/70 font-mono whitespace-pre-wrap">
+                              <pre className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
                                 {agent.output}
                               </pre>
                             </div>
@@ -574,16 +574,16 @@ export default function AgenticTradingPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Agent Status */}
-            <Card className="bg-black/50 border-terminal-green/30">
+            <Card className="bg-surface-300 border-white/10">
               <CardHeader>
-                <CardTitle className="text-terminal-green font-mono text-sm flex items-center gap-2">
+                <CardTitle className="text-primary font-mono text-sm flex items-center gap-2">
                   <Bot className="w-4 h-4" />
                   Available Agents
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {AGENT_TYPES.map((agent) => (
-                  <div key={agent.id} className="flex items-center justify-between p-2 rounded bg-black/30 border border-terminal-green/10">
+                  <div key={agent.id} className="flex items-center justify-between p-2 rounded bg-background/30 border border-primary/10">
                     <div className="flex items-center gap-2">
                       <agent.icon className={`w-4 h-4 ${agent.color}`} />
                       <span className="font-mono text-xs text-white">{agent.name}</span>
@@ -595,10 +595,10 @@ export default function AgenticTradingPage() {
             </Card>
 
             {/* History */}
-            <Card className="bg-black/50 border-terminal-green/30">
+            <Card className="bg-surface-300 border-white/10">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-terminal-green font-mono text-sm flex items-center gap-2">
+                  <CardTitle className="text-primary font-mono text-sm flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     Recent Analyses
                   </CardTitle>
@@ -607,7 +607,7 @@ export default function AgenticTradingPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setHistory([])}
-                      className="h-6 text-terminal-green/50 hover:text-terminal-green font-mono text-xs"
+                      className="h-6 text-primary/50 hover:text-primary font-mono text-xs"
                     >
                       <RotateCcw className="w-3 h-3" />
                     </Button>
@@ -617,7 +617,7 @@ export default function AgenticTradingPage() {
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   {history.length === 0 ? (
-                    <p className="text-terminal-green/40 font-mono text-xs text-center py-4">
+                    <p className="text-primary/40 font-mono text-xs text-center py-4">
                       No analyses yet
                     </p>
                   ) : (
@@ -626,17 +626,17 @@ export default function AgenticTradingPage() {
                         <button
                           key={item.id}
                           onClick={() => setResult(item.result)}
-                          className="w-full p-3 rounded bg-black/30 border border-terminal-green/10 hover:border-terminal-green/30 text-left transition-all"
+                          className="w-full p-3 rounded bg-background/30 border border-primary/10 hover:border-white/10 text-left transition-all"
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <Badge variant="outline" className="text-xs border-terminal-green/30 text-terminal-green/70">
+                            <Badge variant="outline" className="text-xs border-white/10 text-muted-foreground">
                               {item.workflow}
                             </Badge>
-                            <span className="text-[10px] text-terminal-green/40 font-mono">
+                            <span className="text-[10px] text-primary/40 font-mono">
                               {new Date(item.timestamp).toLocaleTimeString()}
                             </span>
                           </div>
-                          <p className="text-xs text-terminal-green/60 font-mono truncate">
+                          <p className="text-xs text-muted-foreground font-mono truncate">
                             {item.task}
                           </p>
                         </button>
@@ -681,10 +681,10 @@ export default function AgenticTradingPage() {
               <BarChart3 className="w-8 h-8 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-mono font-bold text-terminal-green">
+              <h2 className="text-xl font-mono font-bold text-primary">
                 Market Intelligence (Coinglass)
               </h2>
-              <p className="text-terminal-green/60 font-mono text-sm">
+              <p className="text-muted-foreground font-mono text-sm">
                 Long/Short Ratios • Funding Rates • Open Interest • Liquidations
               </p>
             </div>
@@ -699,10 +699,10 @@ export default function AgenticTradingPage() {
               <LineChart className="w-8 h-8 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-xl font-mono font-bold text-terminal-green">
+              <h2 className="text-xl font-mono font-bold text-primary">
                 AsterDex Perpetuals Trading
               </h2>
-              <p className="text-terminal-green/60 font-mono text-sm">
+              <p className="text-muted-foreground font-mono text-sm">
                 Live Trading • Positions • Order Management
               </p>
             </div>

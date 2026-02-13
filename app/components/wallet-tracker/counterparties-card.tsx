@@ -26,15 +26,15 @@ interface CounterpartiesCardProps {
 export function CounterpartiesCard({ data, isLoading }: CounterpartiesCardProps) {
   if (isLoading) {
     return (
-      <Card className="border-2 border-terminal-green bg-black">
+      <Card className="border-2 border-primary bg-background">
         <CardHeader>
-          <CardTitle className="text-terminal-green uppercase tracking-wider">
+          <CardTitle className="text-primary uppercase tracking-wider">
             🤝 Top Counterparties
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-terminal-green"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </CardContent>
       </Card>
@@ -70,9 +70,9 @@ export function CounterpartiesCard({ data, isLoading }: CounterpartiesCardProps)
   };
 
   return (
-    <Card className="border-2 border-terminal-green bg-black">
+    <Card className="border-2 border-primary bg-background">
       <CardHeader>
-        <CardTitle className="text-terminal-green uppercase tracking-wider flex items-center gap-2">
+        <CardTitle className="text-primary uppercase tracking-wider flex items-center gap-2">
           <Building2 className="h-5 w-5" />
           Top Counterparties
         </CardTitle>
@@ -85,18 +85,18 @@ export function CounterpartiesCard({ data, isLoading }: CounterpartiesCardProps)
           {data.slice(0, 10).map((counterparty, index) => (
             <div
               key={counterparty.address}
-              className="p-4 border border-terminal-green/30 rounded"
+              className="p-4 border border-white/10 rounded"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-terminal-green font-mono text-sm">#{index + 1}</span>
+                    <span className="text-primary font-mono text-sm">#{index + 1}</span>
                     {counterparty.entityName ? (
-                      <span className="text-terminal-green font-bold">
+                      <span className="text-primary font-bold">
                         {counterparty.entityName}
                       </span>
                     ) : counterparty.label ? (
-                      <span className="text-terminal-green font-mono">
+                      <span className="text-primary font-mono">
                         {counterparty.label}
                       </span>
                     ) : (
@@ -135,7 +135,7 @@ export function CounterpartiesCard({ data, isLoading }: CounterpartiesCardProps)
                 </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-terminal-green/30">
+              <div className="mt-3 pt-3 border-t border-white/10">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-terminal-gray">
                     Net Flow:{' '}

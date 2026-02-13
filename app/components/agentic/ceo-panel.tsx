@@ -30,17 +30,17 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
 
   const getActionColor = (action: string) => {
     const colors: Record<string, string> = {
-      APPROVE: 'text-terminal-green',
+      APPROVE: 'text-primary',
       REJECT: 'text-red-500',
       MODIFY: 'text-yellow-500',
       PAUSE_AGENT: 'text-orange-500',
       REBALANCE: 'text-blue-500'
     };
-    return colors[action] || 'text-terminal-green';
+    return colors[action] || 'text-primary';
   };
 
   return (
-    <Card className="border-2 border-yellow-500/50 bg-black/95 p-6">
+    <Card className="border-2 border-yellow-500/50 bg-background/95 p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-3 bg-yellow-500/20 rounded-lg">
           <Crown className="h-6 w-6 text-yellow-500" />
@@ -54,7 +54,7 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-black/50 border border-yellow-500/30 rounded-lg p-4">
+        <div className="bg-surface-300 border border-yellow-500/30 rounded-lg p-4">
           <div className="text-terminal-gray text-xs uppercase mb-2">Account Status</div>
           <div className="text-yellow-500 text-lg font-mono font-bold">
             NOT FUNDED
@@ -63,12 +63,12 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
             Fund your AsterDex account to activate trading
           </div>
         </div>
-        <div className="bg-black/50 border border-terminal-green/30 rounded-lg p-4">
+        <div className="bg-surface-300 border border-white/10 rounded-lg p-4">
           <div className="text-terminal-gray text-xs uppercase mb-2">Total PnL</div>
-          <div className={`text-2xl font-mono font-bold ${totalPnL >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
+          <div className={`text-2xl font-mono font-bold ${totalPnL >= 0 ? 'text-primary' : 'text-red-500'}`}>
             {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}
           </div>
-          <div className={`text-xs mt-1 ${totalPnL >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
+          <div className={`text-xs mt-1 ${totalPnL >= 0 ? 'text-primary' : 'text-red-500'}`}>
             {pnlPercent >= 0 ? '+' : ''}{pnlPercent.toFixed(2)}%
           </div>
         </div>
@@ -91,7 +91,7 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
             decisions.map((decision, idx) => (
               <div
                 key={idx}
-                className="bg-black/50 border border-terminal-green/20 rounded-lg p-3 hover:border-terminal-green/40 transition-all"
+                className="bg-surface-300 border border-primary/20 rounded-lg p-3 hover:border-primary/40 transition-all"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
                   </span>
                 </div>
 
-                <p className="text-terminal-green text-sm mb-2">{decision.reasoning}</p>
+                <p className="text-primary text-sm mb-2">{decision.reasoning}</p>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
@@ -121,9 +121,9 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
                 </div>
 
                 {decision.modifications && (
-                  <div className="mt-2 pt-2 border-t border-terminal-green/20">
+                  <div className="mt-2 pt-2 border-t border-primary/20">
                     <div className="text-terminal-gray text-xs">Modifications Applied</div>
-                    <div className="text-terminal-green text-xs font-mono mt-1">
+                    <div className="text-primary text-xs font-mono mt-1">
                       {JSON.stringify(decision.modifications)}
                     </div>
                   </div>

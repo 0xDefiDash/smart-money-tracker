@@ -29,9 +29,9 @@ interface PnLSummaryCardProps {
 export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
   if (isLoading) {
     return (
-      <Card className="border-2 border-terminal-green bg-black">
+      <Card className="border-2 border-primary bg-background">
         <CardHeader>
-          <CardTitle className="text-terminal-green uppercase tracking-wider">
+          <CardTitle className="text-primary uppercase tracking-wider">
             💰 Profit & Loss Summary
           </CardTitle>
           <CardDescription className="text-terminal-gray">
@@ -40,7 +40,7 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terminal-green"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </CardContent>
       </Card>
@@ -65,11 +65,11 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
   const isProfitable = data.totalPnl > 0;
 
   return (
-    <Card className="border-2 border-terminal-green bg-black">
+    <Card className="border-2 border-primary bg-background">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-terminal-green uppercase tracking-wider flex items-center gap-2">
+            <CardTitle className="text-primary uppercase tracking-wider flex items-center gap-2">
               💰 Profit & Loss Summary
               {isProfitable ? (
                 <Badge variant="outline" className="border-green-500 text-green-500">
@@ -90,7 +90,7 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
       <CardContent className="space-y-6">
         {/* Main PnL Display */}
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="p-4 border-2 border-terminal-green/30 rounded-lg bg-black/50">
+          <div className="p-4 border-2 border-white/10 rounded-lg bg-surface-300">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUpIcon className="h-5 w-5 text-green-500" />
               <span className="text-sm text-terminal-gray uppercase">Realized PnL</span>
@@ -104,7 +104,7 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
             </p>
           </div>
 
-          <div className="p-4 border-2 border-terminal-green/30 rounded-lg bg-black/50">
+          <div className="p-4 border-2 border-white/10 rounded-lg bg-surface-300">
             <div className="flex items-center gap-2 mb-2">
               <TrendingDownIcon className="h-5 w-5 text-yellow-500" />
               <span className="text-sm text-terminal-gray uppercase">Unrealized PnL</span>
@@ -120,7 +120,7 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
         </div>
 
         {/* Total PnL */}
-        <div className="p-6 border-2 border-terminal-green rounded-lg bg-black/70">
+        <div className="p-6 border-2 border-primary rounded-lg bg-background/70">
           <div className="text-center">
             <span className="text-sm text-terminal-gray uppercase tracking-wider">Total P&L</span>
             <p
@@ -135,9 +135,9 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
 
         {/* Performance Metrics */}
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="p-4 border border-terminal-green/30 rounded">
+          <div className="p-4 border border-white/10 rounded">
             <div className="flex items-center gap-2 mb-1">
-              <TargetIcon className="h-4 w-4 text-terminal-green" />
+              <TargetIcon className="h-4 w-4 text-primary" />
               <span className="text-xs text-terminal-gray uppercase">ROI</span>
             </div>
             <p className={`text-2xl font-bold font-mono ${isProfitable ? 'text-green-500' : 'text-red-500'}`}>
@@ -145,22 +145,22 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
             </p>
           </div>
 
-          <div className="p-4 border border-terminal-green/30 rounded">
+          <div className="p-4 border border-white/10 rounded">
             <div className="flex items-center gap-2 mb-1">
-              <TrophyIcon className="h-4 w-4 text-terminal-green" />
+              <TrophyIcon className="h-4 w-4 text-primary" />
               <span className="text-xs text-terminal-gray uppercase">Win Rate</span>
             </div>
-            <p className="text-2xl font-bold font-mono text-terminal-green">
+            <p className="text-2xl font-bold font-mono text-primary">
               {data.winRate.toFixed(1)}%
             </p>
           </div>
 
-          <div className="p-4 border border-terminal-green/30 rounded">
+          <div className="p-4 border border-white/10 rounded">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-terminal-green">📊</span>
+              <span className="text-primary">📊</span>
               <span className="text-xs text-terminal-gray uppercase">Total Trades</span>
             </div>
-            <p className="text-2xl font-bold font-mono text-terminal-green">
+            <p className="text-2xl font-bold font-mono text-primary">
               {data.totalTrades.toLocaleString()}
             </p>
           </div>
@@ -169,20 +169,20 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
         {/* Top Trades */}
         {data.topTrades && data.topTrades.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-terminal-green uppercase tracking-wider mb-3">
+            <h4 className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
               🏆 Top 5 Profitable Tokens
             </h4>
             <div className="space-y-2">
               {data.topTrades.map((trade, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 border border-terminal-green/30 rounded"
+                  className="flex items-center justify-between p-3 border border-white/10 rounded"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-terminal-green font-mono font-bold">
+                    <span className="text-primary font-mono font-bold">
                       #{index + 1}
                     </span>
-                    <span className="text-terminal-green font-mono font-bold">
+                    <span className="text-primary font-mono font-bold">
                       {trade.tokenSymbol}
                     </span>
                   </div>

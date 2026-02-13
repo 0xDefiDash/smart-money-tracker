@@ -109,27 +109,27 @@ export function TransactionAlerts() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-terminal-green hover:bg-terminal-green/10">
+        <Button variant="ghost" size="icon" className="relative text-primary hover:bg-primary/10">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-terminal-green text-black"
+              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-black"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 bg-black border-terminal-green max-h-[500px] overflow-y-auto">
-        <div className="flex justify-between items-center p-2 border-b border-terminal-green">
-          <span className="font-semibold text-terminal-green uppercase tracking-wider">Transaction Alerts</span>
+      <DropdownMenuContent align="end" className="w-80 bg-background border-primary max-h-[500px] overflow-y-auto">
+        <div className="flex justify-between items-center p-2 border-b border-primary">
+          <span className="font-semibold text-primary uppercase tracking-wider">Transaction Alerts</span>
           {alerts.some(a => a.isRead) && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearReadAlerts}
-              className="text-terminal-green hover:bg-terminal-green/10 text-xs"
+              className="text-primary hover:bg-primary/10 text-xs"
             >
               Clear Read
             </Button>
@@ -144,20 +144,20 @@ export function TransactionAlerts() {
             alerts.map((alert) => (
               <DropdownMenuItem
                 key={alert.id}
-                className={`p-3 cursor-pointer border-b border-terminal-green/20 hover:bg-terminal-green/10 focus:bg-terminal-green/10 ${!alert.isRead ? 'bg-terminal-green/5' : ''}`}
+                className={`p-3 cursor-pointer border-b border-primary/20 hover:bg-primary/10 focus:bg-primary/10 ${!alert.isRead ? 'bg-primary/5' : ''}`}
                 onClick={() => !alert.isRead && markAsRead([alert.id])}
               >
                 <div className="flex flex-col gap-1 w-full">
                   <div className="flex justify-between items-start">
-                    <span className="font-medium capitalize text-terminal-green">
+                    <span className="font-medium capitalize text-primary">
                       {alert.type} Transaction
                     </span>
-                    <Badge variant="outline" className="text-xs border-terminal-green text-terminal-green">
+                    <Badge variant="outline" className="text-xs border-primary text-primary">
                       {alert.chain.toUpperCase()}
                     </Badge>
                   </div>
                   {alert.tokenSymbol && alert.tokenAmount && (
-                    <span className="text-sm text-terminal-green font-mono">
+                    <span className="text-sm text-primary font-mono">
                       {alert.tokenAmount} {alert.tokenSymbol}
                     </span>
                   )}
@@ -168,7 +168,7 @@ export function TransactionAlerts() {
                     href={getExplorerUrl(alert.chain, alert.transactionHash)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-terminal-green hover:text-terminal-green/80 flex items-center gap-1 font-mono"
+                    className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 font-mono"
                     onClick={(e) => e.stopPropagation()}
                   >
                     View on Explorer <ExternalLink className="h-3 w-3" />
