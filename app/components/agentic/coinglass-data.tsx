@@ -129,7 +129,7 @@ export function CoinglassData() {
   };
 
   return (
-    <Card className="bg-background/90 border-green-500/30">
+    <Card className="bg-black/90 border-green-500/30">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
@@ -180,7 +180,7 @@ export function CoinglassData() {
 
       <CardContent>
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full bg-surface-300 border border-green-500/20">
+          <TabsList className="w-full bg-[#0a0a0a] border border-green-500/20">
             <TabsTrigger value="overview" className="flex-1 data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">
               Overview
             </TabsTrigger>
@@ -210,7 +210,7 @@ export function CoinglassData() {
                     return (
                       <div
                         key={s.symbol}
-                        className={`p-3 rounded-lg border ${selectedSymbol === s.symbol ? 'border-green-500/50 bg-green-500/10' : 'border-gray-800 bg-surface-300'}`}
+                        className={`p-3 rounded-lg border ${selectedSymbol === s.symbol ? 'border-green-500/50 bg-green-500/10' : 'border-gray-800 bg-[#0a0a0a]'}`}
                         onClick={() => setSelectedSymbol(s.symbol)}
                         role="button"
                         tabIndex={0}
@@ -269,7 +269,7 @@ export function CoinglassData() {
                     </div>
 
                     {/* Funding Rate */}
-                    <div className="p-4 rounded-lg bg-surface-300 border border-gray-800">
+                    <div className="p-4 rounded-lg bg-[#0a0a0a] border border-gray-800">
                       <div className="flex items-center gap-2 mb-3">
                         <DollarSign className="w-4 h-4 text-yellow-400" />
                         <span className="text-sm text-gray-400">Funding Rate</span>
@@ -292,7 +292,7 @@ export function CoinglassData() {
                     </div>
 
                     {/* Open Interest */}
-                    <div className="p-4 rounded-lg bg-surface-300 border border-gray-800">
+                    <div className="p-4 rounded-lg bg-[#0a0a0a] border border-gray-800">
                       <div className="flex items-center gap-2 mb-3">
                         <Activity className="w-4 h-4 text-purple-400" />
                         <span className="text-sm text-gray-400">Open Interest</span>
@@ -313,7 +313,7 @@ export function CoinglassData() {
                     </div>
 
                     {/* Liquidations */}
-                    <div className="p-4 rounded-lg bg-surface-300 border border-gray-800">
+                    <div className="p-4 rounded-lg bg-[#0a0a0a] border border-gray-800">
                       <div className="flex items-center gap-2 mb-3">
                         <Flame className="w-4 h-4 text-orange-400" />
                         <span className="text-sm text-gray-400">24h Liquidations</span>
@@ -348,7 +348,7 @@ export function CoinglassData() {
               <div className="space-y-3">
                 <h4 className="text-sm text-gray-400 mb-3">Long/Short Ratio by Exchange - {selectedSymbol}</h4>
                 {longShortRatios.map((ratio, idx) => (
-                  <div key={idx} className="p-3 rounded-lg bg-surface-300 border border-gray-800">
+                  <div key={idx} className="p-3 rounded-lg bg-[#0a0a0a] border border-gray-800">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-mono text-white">{ratio.exchange || 'Exchange'}</span>
                       <Badge className={ratio.longRate > 50 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
@@ -391,7 +391,7 @@ export function CoinglassData() {
               <div className="space-y-3">
                 <h4 className="text-sm text-gray-400 mb-3">Funding Rates by Exchange - {selectedSymbol}</h4>
                 {fundingRates.map((fr, idx) => (
-                  <div key={idx} className="p-3 rounded-lg bg-surface-300 border border-gray-800 flex items-center justify-between">
+                  <div key={idx} className="p-3 rounded-lg bg-[#0a0a0a] border border-gray-800 flex items-center justify-between">
                     <span className="font-mono text-white">{fr.exchange}</span>
                     <div className="flex items-center gap-2">
                       {fr.rate >= 0 ? (
@@ -424,7 +424,7 @@ export function CoinglassData() {
               <div className="space-y-3">
                 <h4 className="text-sm text-gray-400 mb-3">Open Interest by Exchange - {selectedSymbol}</h4>
                 {openInterest.map((oi, idx) => (
-                  <div key={idx} className="p-3 rounded-lg bg-surface-300 border border-gray-800">
+                  <div key={idx} className="p-3 rounded-lg bg-[#0a0a0a] border border-gray-800">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-mono text-white">{oi.exchange || 'Exchange'}</span>
                       <div className="flex items-center gap-2">

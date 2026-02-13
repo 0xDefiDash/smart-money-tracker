@@ -166,7 +166,7 @@ export function AsterDexTrading() {
     <div className="space-y-4">
       {/* Header Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="bg-surface-300 border-white/10">
+        <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
               <Wallet className="w-4 h-4 text-primary" />
@@ -176,7 +176,7 @@ export function AsterDexTrading() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface-300 border-white/10">
+        <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
               <Activity className="w-4 h-4 text-cyan-400" />
@@ -188,7 +188,7 @@ export function AsterDexTrading() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface-300 border-white/10">
+        <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
               <Target className="w-4 h-4 text-purple-400" />
@@ -198,7 +198,7 @@ export function AsterDexTrading() {
           </CardContent>
         </Card>
 
-        <Card className="bg-surface-300 border-white/10">
+        <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-4 h-4 text-yellow-400" />
@@ -214,7 +214,7 @@ export function AsterDexTrading() {
       {/* Main Trading Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Market Prices */}
-        <Card className="bg-surface-300 border-white/10">
+        <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-primary font-mono text-sm flex items-center gap-2">
@@ -268,10 +268,10 @@ export function AsterDexTrading() {
         </Card>
 
         {/* Positions & History */}
-        <Card className="bg-surface-300 border-white/10">
+        <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
           <CardHeader className="pb-0">
             <Tabs defaultValue="positions" className="w-full">
-              <TabsList className="bg-surface-300 border border-white/10 w-full">
+              <TabsList className="bg-[#0a0a0a] border border-[#1a1a1a] w-full">
                 <TabsTrigger value="positions" className="flex-1 font-mono text-xs data-[state=active]:bg-primary/20">
                   Positions ({positions.length})
                 </TabsTrigger>
@@ -290,7 +290,7 @@ export function AsterDexTrading() {
                     ) : (
                       <div className="space-y-2">
                         {positions.map((pos, i) => (
-                          <div key={i} className="p-3 rounded border border-primary/20 bg-background/30">
+                          <div key={i} className="p-3 rounded border border-primary/20 bg-black/30">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-white">{pos.symbol.replace('USDT', '')}</span>
@@ -347,7 +347,7 @@ export function AsterDexTrading() {
                     ) : (
                       <div className="space-y-2">
                         {tradeHistory.map((trade) => (
-                          <div key={trade.id} className="p-2 rounded border border-primary/10 bg-background/20">
+                          <div key={trade.id} className="p-2 rounded border border-primary/10 bg-black/20">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-xs text-white">{trade.symbol.replace('USDT', '')}</span>

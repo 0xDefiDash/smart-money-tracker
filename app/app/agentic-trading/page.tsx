@@ -256,19 +256,19 @@ export default function AgenticTradingPage() {
   const selectedWorkflowData = WORKFLOWS.find(w => w.id === selectedWorkflow);
 
   return (
-    <div className="min-h-screen bg-background text-primary p-6">
+    <div className="min-h-screen bg-black text-primary p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-lg border border-white/10">
+            <div className="p-3 bg-primary/10 rounded-lg border border-[#1a1a1a]">
               <Brain className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-mono font-bold text-primary">
+              <h1 className="text-2xl font-bold text-primary">
                 Agentic Trading Intelligence
               </h1>
-              <p className="text-muted-foreground font-mono text-sm">
+              <p className="text-muted-foreground text-sm">
                 Swarms AI Hierarchical Framework • Multi-Agent Orchestration
               </p>
             </div>
@@ -280,9 +280,9 @@ export default function AgenticTradingPage() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="bg-surface-300 border-white/10">
+        <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-primary font-mono flex items-center gap-2">
+            <CardTitle className="text-primary flex items-center gap-2">
               <Zap className="w-5 h-5" />
               Quick Actions
             </CardTitle>
@@ -291,7 +291,7 @@ export default function AgenticTradingPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               <Button
                 variant="outline"
-                className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 font-mono text-xs h-auto py-3"
+                className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs h-auto py-3"
                 onClick={() => executeQuickAction('market_sentiment')}
                 disabled={isLoading}
               >
@@ -300,7 +300,7 @@ export default function AgenticTradingPage() {
               </Button>
               <Button
                 variant="outline"
-                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 font-mono text-xs h-auto py-3"
+                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 text-xs h-auto py-3"
                 onClick={() => executeQuickAction('find_alpha')}
                 disabled={isLoading}
               >
@@ -309,7 +309,7 @@ export default function AgenticTradingPage() {
               </Button>
               <Button
                 variant="outline"
-                className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 font-mono text-xs h-auto py-3"
+                className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 text-xs h-auto py-3"
                 onClick={() => executeQuickAction('whale_analysis', { chain: 'ethereum' })}
                 disabled={isLoading}
               >
@@ -318,7 +318,7 @@ export default function AgenticTradingPage() {
               </Button>
               <Button
                 variant="outline"
-                className="border-red-500/50 text-red-400 hover:bg-red-500/10 font-mono text-xs h-auto py-3"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 text-xs h-auto py-3"
                 onClick={() => executeQuickAction('assess_risk', { position: 'BTC Long', size: 10000, leverage: 3 })}
                 disabled={isLoading}
               >
@@ -327,7 +327,7 @@ export default function AgenticTradingPage() {
               </Button>
               <Button
                 variant="outline"
-                className="border-green-500/50 text-green-400 hover:bg-green-500/10 font-mono text-xs h-auto py-3"
+                className="border-green-500/50 text-green-400 hover:bg-green-500/10 text-xs h-auto py-3"
                 onClick={() => executeQuickAction('analyze_token', { symbol: 'ETH' })}
                 disabled={isLoading}
               >
@@ -336,7 +336,7 @@ export default function AgenticTradingPage() {
               </Button>
               <Button
                 variant="outline"
-                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 font-mono text-xs h-auto py-3"
+                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 text-xs h-auto py-3"
                 onClick={() => executeQuickAction('execution_plan', { action: 'buy', token: 'SOL', amount: 25000, urgency: 'medium' })}
                 disabled={isLoading}
               >
@@ -350,15 +350,15 @@ export default function AgenticTradingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Analysis Panel */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-surface-300 border-white/10">
+            <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
               <CardHeader>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="bg-surface-300 border border-white/10">
-                    <TabsTrigger value="swarm" className="font-mono data-[state=active]:bg-primary/20">
+                  <TabsList className="bg-[#0a0a0a] border border-[#1a1a1a]">
+                    <TabsTrigger value="swarm" className="data-[state=active]:bg-primary/20">
                       <Network className="w-4 h-4 mr-2" />
                       Swarm Analysis
                     </TabsTrigger>
-                    <TabsTrigger value="single" className="font-mono data-[state=active]:bg-primary/20">
+                    <TabsTrigger value="single" className="data-[state=active]:bg-primary/20">
                       <Bot className="w-4 h-4 mr-2" />
                       Single Agent
                     </TabsTrigger>
@@ -380,12 +380,12 @@ export default function AgenticTradingPage() {
                             className={`p-3 rounded-lg border transition-all text-left ${
                               selectedWorkflow === workflow.id
                                 ? 'border-primary bg-primary/10'
-                                : 'border-white/10 hover:border-primary/60'
+                                : 'border-[#1a1a1a] hover:border-primary/60'
                             }`}
                           >
                             <div className="flex items-center gap-2 mb-1">
                               <workflow.icon className={`w-4 h-4 ${workflow.color}`} />
-                              <span className="font-mono text-sm text-white">{workflow.name}</span>
+                              <span className="text-sm text-white">{workflow.name}</span>
                             </div>
                             <p className="text-xs text-muted-foreground font-mono">
                               {workflow.description}
@@ -397,15 +397,15 @@ export default function AgenticTradingPage() {
 
                     {/* Selected Workflow Details */}
                     {selectedWorkflowData && (
-                      <Alert className="bg-primary/10 border-white/10">
+                      <Alert className="bg-primary/10 border-[#1a1a1a]">
                         <selectedWorkflowData.icon className={`w-4 h-4 ${selectedWorkflowData.color}`} />
                         <AlertTitle className="text-primary font-mono">
                           {selectedWorkflowData.name} Workflow
                         </AlertTitle>
-                        <AlertDescription className="text-muted-foreground font-mono text-xs mt-2">
+                        <AlertDescription className="text-muted-foreground text-xs mt-2">
                           <div className="flex flex-wrap gap-2">
                             {selectedWorkflowData.agents.map((agent, i) => (
-                              <Badge key={i} variant="outline" className="border-white/10 text-muted-foreground">
+                              <Badge key={i} variant="outline" className="border-[#1a1a1a] text-muted-foreground">
                                 {agent}
                               </Badge>
                             ))}
@@ -427,11 +427,11 @@ export default function AgenticTradingPage() {
                           className={`p-3 rounded-lg border transition-all text-center ${
                             selectedAgentType === agent.id
                               ? 'border-primary bg-primary/10'
-                              : 'border-white/10 hover:border-primary/60'
+                              : 'border-[#1a1a1a] hover:border-primary/60'
                           }`}
                         >
                           <agent.icon className={`w-5 h-5 mx-auto mb-1 ${agent.color}`} />
-                          <span className="font-mono text-xs text-white block">{agent.name}</span>
+                          <span className="text-xs text-white block">{agent.name}</span>
                         </button>
                       ))}
                     </div>
@@ -446,14 +446,14 @@ export default function AgenticTradingPage() {
                       onCheckedChange={setIncludeMarketData}
                       className="data-[state=checked]:bg-primary"
                     />
-                    <Label className="text-muted-foreground font-mono text-sm">Include Market Data</Label>
+                    <Label className="text-muted-foreground text-sm">Include Market Data</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Input
                       placeholder="Token (optional)"
                       value={tokenSymbol}
                       onChange={(e) => setTokenSymbol(e.target.value.toUpperCase())}
-                      className="w-32 bg-surface-300 border-white/10 text-primary font-mono text-sm"
+                      className="w-32 bg-[#0a0a0a] border-[#1a1a1a] text-primary text-sm"
                     />
                   </div>
                 </div>
@@ -465,19 +465,19 @@ export default function AgenticTradingPage() {
                     placeholder="Enter your analysis request... e.g., 'Analyze the current market conditions for BTC and provide trading recommendations'"
                     value={task}
                     onChange={(e) => setTask(e.target.value)}
-                    className="min-h-[120px] bg-surface-300 border-white/10 text-primary font-mono placeholder:text-muted-foreground/50"
+                    className="min-h-[120px] bg-[#0a0a0a] border-[#1a1a1a] text-primary placeholder:text-muted-foreground/50"
                   />
                 </div>
 
                 {/* Quick Prompts */}
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground font-mono text-xs">Quick Prompts</Label>
+                  <Label className="text-muted-foreground text-xs">Quick Prompts</Label>
                   <div className="flex flex-wrap gap-2">
                     {QUICK_PROMPTS.slice(0, 4).map((prompt, i) => (
                       <button
                         key={i}
                         onClick={() => setTask(prompt)}
-                        className="text-xs px-2 py-1 rounded border border-white/5 text-muted-foreground hover:border-primary/30 hover:text-primary font-mono transition-all"
+                        className="text-xs px-2 py-1 rounded border border-[#1a1a1a] text-muted-foreground hover:border-primary/30 hover:text-primary transition-all"
                       >
                         {prompt.substring(0, 40)}...
                       </button>
@@ -489,7 +489,7 @@ export default function AgenticTradingPage() {
                 <Button
                   onClick={executeAnalysis}
                   disabled={isLoading || !task.trim()}
-                  className="w-full bg-primary text-black hover:bg-primary/80 font-mono font-bold"
+                  className="w-full bg-primary text-black hover:bg-primary/80 font-bold"
                 >
                   {isLoading ? (
                     <>
@@ -508,14 +508,14 @@ export default function AgenticTradingPage() {
 
             {/* Results */}
             {result && (
-              <Card ref={resultRef} className="bg-surface-300 border-white/10">
+              <Card ref={resultRef} className="bg-[#0a0a0a] border-[#1a1a1a]">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-primary font-mono flex items-center gap-2">
+                    <CardTitle className="text-primary flex items-center gap-2">
                       <CheckCircle2 className="w-5 h-5 text-green-400" />
                       Analysis Complete
                     </CardTitle>
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                       {result.llmUsed && (
                         <span className="flex items-center gap-1 text-cyan-400">
                           <Sparkles className="w-3 h-3" />
@@ -543,21 +543,21 @@ export default function AgenticTradingPage() {
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[400px]">
-                    <pre className="text-sm text-primary/90 font-mono whitespace-pre-wrap">
+                    <pre className="text-sm text-primary/90 whitespace-pre-wrap">
                       {formatOutput(result.output)}
                     </pre>
                     
                     {/* Individual Agent Outputs */}
                     {result.agent_outputs && result.agent_outputs.length > 0 && (
-                      <div className="mt-6 pt-6 border-t border-white/5">
-                        <h4 className="text-primary font-mono mb-4">Individual Agent Outputs</h4>
+                      <div className="mt-6 pt-6 border-t border-[#1a1a1a]">
+                        <h4 className="text-primary mb-4">Individual Agent Outputs</h4>
                         <div className="space-y-4">
                           {result.agent_outputs.map((agent, i) => (
-                            <div key={i} className="p-4 rounded-lg bg-primary/10 border border-white/5">
+                            <div key={i} className="p-4 rounded-lg bg-primary/10 border border-[#1a1a1a]">
                               <Badge className="mb-2 bg-primary/20 text-primary">
                                 {agent.agent_name}
                               </Badge>
-                              <pre className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
+                              <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
                                 {agent.output}
                               </pre>
                             </div>
@@ -574,19 +574,19 @@ export default function AgenticTradingPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Agent Status */}
-            <Card className="bg-surface-300 border-white/10">
+            <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
               <CardHeader>
-                <CardTitle className="text-primary font-mono text-sm flex items-center gap-2">
+                <CardTitle className="text-primary text-sm flex items-center gap-2">
                   <Bot className="w-4 h-4" />
                   Available Agents
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {AGENT_TYPES.map((agent) => (
-                  <div key={agent.id} className="flex items-center justify-between p-2 rounded bg-background/30 border border-primary/10">
+                  <div key={agent.id} className="flex items-center justify-between p-2 rounded bg-black/30 border border-primary/10">
                     <div className="flex items-center gap-2">
                       <agent.icon className={`w-4 h-4 ${agent.color}`} />
-                      <span className="font-mono text-xs text-white">{agent.name}</span>
+                      <span className="text-xs text-white">{agent.name}</span>
                     </div>
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                   </div>
@@ -595,10 +595,10 @@ export default function AgenticTradingPage() {
             </Card>
 
             {/* History */}
-            <Card className="bg-surface-300 border-white/10">
+            <Card className="bg-[#0a0a0a] border-[#1a1a1a]">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-primary font-mono text-sm flex items-center gap-2">
+                  <CardTitle className="text-primary text-sm flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     Recent Analyses
                   </CardTitle>
@@ -607,7 +607,7 @@ export default function AgenticTradingPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setHistory([])}
-                      className="h-6 text-primary/50 hover:text-primary font-mono text-xs"
+                      className="h-6 text-primary/50 hover:text-primary text-xs"
                     >
                       <RotateCcw className="w-3 h-3" />
                     </Button>
@@ -617,7 +617,7 @@ export default function AgenticTradingPage() {
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   {history.length === 0 ? (
-                    <p className="text-primary/40 font-mono text-xs text-center py-4">
+                    <p className="text-primary/40 text-xs text-center py-4">
                       No analyses yet
                     </p>
                   ) : (
@@ -626,17 +626,17 @@ export default function AgenticTradingPage() {
                         <button
                           key={item.id}
                           onClick={() => setResult(item.result)}
-                          className="w-full p-3 rounded bg-background/30 border border-primary/10 hover:border-white/10 text-left transition-all"
+                          className="w-full p-3 rounded bg-black/30 border border-primary/10 hover:border-[#1a1a1a] text-left transition-all"
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <Badge variant="outline" className="text-xs border-white/10 text-muted-foreground">
+                            <Badge variant="outline" className="text-xs border-[#1a1a1a] text-muted-foreground">
                               {item.workflow}
                             </Badge>
                             <span className="text-[10px] text-primary/40 font-mono">
                               {new Date(item.timestamp).toLocaleTimeString()}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground font-mono truncate">
+                          <p className="text-xs text-muted-foreground truncate">
                             {item.task}
                           </p>
                         </button>
@@ -652,9 +652,9 @@ export default function AgenticTradingPage() {
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-5 h-5 text-purple-400" />
-                  <span className="font-mono text-sm text-white">Powered by Swarms AI</span>
+                  <span className="text-sm text-white">Powered by Swarms AI</span>
                 </div>
-                <p className="text-xs text-purple-300/70 font-mono leading-relaxed">
+                <p className="text-xs text-purple-300/70 leading-relaxed">
                   Enterprise-grade multi-agent orchestration framework. 
                   Hierarchical swarms coordinate specialized agents for 
                   comprehensive trading intelligence.
@@ -681,10 +681,10 @@ export default function AgenticTradingPage() {
               <BarChart3 className="w-8 h-8 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-mono font-bold text-primary">
+              <h2 className="text-xl font-bold text-primary">
                 Market Intelligence (Coinglass)
               </h2>
-              <p className="text-muted-foreground font-mono text-sm">
+              <p className="text-muted-foreground text-sm">
                 Long/Short Ratios • Funding Rates • Open Interest • Liquidations
               </p>
             </div>
@@ -699,10 +699,10 @@ export default function AgenticTradingPage() {
               <LineChart className="w-8 h-8 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-xl font-mono font-bold text-primary">
+              <h2 className="text-xl font-bold text-primary">
                 AsterDex Perpetuals Trading
               </h2>
-              <p className="text-muted-foreground font-mono text-sm">
+              <p className="text-muted-foreground text-sm">
                 Live Trading • Positions • Order Management
               </p>
             </div>

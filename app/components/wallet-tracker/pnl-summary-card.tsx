@@ -90,7 +90,7 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
       <CardContent className="space-y-6">
         {/* Main PnL Display */}
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="p-4 border-2 border-white/10 rounded-lg bg-surface-300">
+          <div className="p-4 border-2 border-white/10 rounded-lg bg-[#0a0a0a]">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUpIcon className="h-5 w-5 text-green-500" />
               <span className="text-sm text-terminal-gray uppercase">Realized PnL</span>
@@ -104,7 +104,7 @@ export function PnLSummaryCard({ data, isLoading }: PnLSummaryCardProps) {
             </p>
           </div>
 
-          <div className="p-4 border-2 border-white/10 rounded-lg bg-surface-300">
+          <div className="p-4 border-2 border-white/10 rounded-lg bg-[#0a0a0a]">
             <div className="flex items-center gap-2 mb-2">
               <TrendingDownIcon className="h-5 w-5 text-yellow-500" />
               <span className="text-sm text-terminal-gray uppercase">Unrealized PnL</span>

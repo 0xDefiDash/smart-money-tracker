@@ -61,13 +61,13 @@ export function AgentCard({ agent, onStatusChange }: AgentCardProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-surface-300 border border-white/10 rounded p-2">
+        <div className="bg-[#0a0a0a] border border-white/10 rounded p-2">
           <div className="text-terminal-gray text-[10px] uppercase mb-1">Capital</div>
           <div className="text-primary font-mono text-sm">
             ${agent.currentCapital.toFixed(0)}
           </div>
         </div>
-        <div className="bg-surface-300 border border-white/10 rounded p-2">
+        <div className="bg-[#0a0a0a] border border-white/10 rounded p-2">
           <div className="text-terminal-gray text-[10px] uppercase mb-1">PnL</div>
           <div className={`${pnlColor} font-mono text-sm font-bold flex items-center gap-1`}>
             {agent.performance.totalPnL >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
@@ -95,7 +95,7 @@ export function AgentCard({ agent, onStatusChange }: AgentCardProps) {
         <div className="space-y-2 mb-3">
           <div className="text-terminal-gray text-xs uppercase">Open Positions</div>
           {agent.positions.map((pos, idx) => (
-            <div key={idx} className="bg-surface-300 border border-primary/20 rounded p-2">
+            <div key={idx} className="bg-[#0a0a0a] border border-primary/20 rounded p-2">
               <div className="flex justify-between items-start">
                 <div>
                   <div className="text-primary text-xs font-mono">{pos.symbol}</div>

@@ -54,7 +54,7 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-surface-300 border border-yellow-500/30 rounded-lg p-4">
+        <div className="bg-[#0a0a0a] border border-yellow-500/30 rounded-lg p-4">
           <div className="text-terminal-gray text-xs uppercase mb-2">Account Status</div>
           <div className="text-yellow-500 text-lg font-mono font-bold">
             NOT FUNDED
@@ -63,7 +63,7 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
             Fund your AsterDex account to activate trading
           </div>
         </div>
-        <div className="bg-surface-300 border border-white/10 rounded-lg p-4">
+        <div className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4">
           <div className="text-terminal-gray text-xs uppercase mb-2">Total PnL</div>
           <div className={`text-2xl font-mono font-bold ${totalPnL >= 0 ? 'text-primary' : 'text-red-500'}`}>
             {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}
@@ -91,7 +91,7 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
             decisions.map((decision, idx) => (
               <div
                 key={idx}
-                className="bg-surface-300 border border-primary/20 rounded-lg p-3 hover:border-primary/40 transition-all"
+                className="bg-[#0a0a0a] border border-primary/20 rounded-lg p-3 hover:border-primary/40 transition-all"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">

@@ -1,5 +1,3 @@
-
-
 'use client'
 
 import Link from 'next/link'
@@ -13,148 +11,150 @@ import {
   TrendingUp,
   Wallet,
   Zap,
-  LineChart,
-  Target,
-  Rocket,
-  Gamepad2,
-  Radio,
-  Video,
-  Globe,
-  Shield,
   Settings,
   Twitter,
   Waves,
   Brain,
-  Sparkles
+  Sparkles,
+  Menu,
+  X
 } from 'lucide-react'
-import { WalletButton } from '@/components/wallet/WalletButton'
-import { TransactionAlerts } from '@/components/wallet-tracker/transaction-alerts'
 
 const sidebarItems = [
-  {
-    title: 'Dashboard',
-    href: '/',
-    icon: Home,
-  },
-  {
-    title: 'Dash Agentic',
-    href: '/dash-agentic',
-    icon: Sparkles,
-  },
-  {
-    title: 'Agentic Trading',
-    href: '/agentic-trading',
-    icon: Zap,
-  },
-  {
-    title: 'Wallet Tracker',
-    href: '/wallet-tracker',
-    icon: Wallet,
-  },
-  {
-    title: 'Smart Money',
-    href: '/smart-money-tracker',
-    icon: Brain,
-  },
-  {
-    title: 'Whale Tracker',
-    href: '/whale-tracker',
-    icon: Activity,
-  },
-  {
-    title: 'Exchange Flows',
-    href: '/exchange-flows',
-    icon: Building2,
-  },
-  {
-    title: 'Flow Intelligence',
-    href: '/flow-intelligence',
-    icon: Waves,
-  },
-
-  {
-    title: 'Settings',
-    href: '/settings',
-    icon: Settings,
-  },
-  {
-    title: 'Social Media',
-    href: '/social-media',
-    icon: Twitter,
-  },
+  { title: 'Dashboard', href: '/', icon: Home },
+  { title: 'Dash Agentic', href: '/dash-agentic', icon: Sparkles },
+  { title: 'Agentic Trading', href: '/agentic-trading', icon: Zap },
+  { title: 'Wallet Tracker', href: '/wallet-tracker', icon: Wallet },
+  { title: 'Smart Money', href: '/smart-money-tracker', icon: Brain },
+  { title: 'Whale Tracker', href: '/whale-tracker', icon: Activity },
+  { title: 'Exchange Flows', href: '/exchange-flows', icon: Building2 },
+  { title: 'Flow Intelligence', href: '/flow-intelligence', icon: Waves },
+  { title: 'Settings', href: '/settings', icon: Settings },
+  { title: 'Social Media', href: '/social-media', icon: Twitter },
 ]
 
 export function ResponsiveSidebar() {
   const pathname = usePathname()
-  const [whaleCount, setWhaleCount] = useState(175) // Default deterministic value
+  const [isOpen, setIsOpen] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
-    // Set a deterministic count that doesn't change during the session
-    setWhaleCount(175)
   }, [])
 
   return (
-    <div className="hidden lg:flex lg:flex-col lg:w-64 lg:bg-background lg:border-r-2 lg:border-white">
-      <div className="p-6 border-b-2 border-white">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-background border-2 border-primary flex items-center justify-center">
-            <Activity className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-primary uppercase tracking-wider">Defidash</h1>
-            <p className="text-xs text-white">Smart Money Tracker</p>
-          </div>
-        </div>
-      </div>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-[#0a0a0a] border border-[#1a1a1a] text-white"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
 
-      <nav className="flex-1 px-4 pb-4 pt-4">
-        <ul className="space-y-1">
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/80 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      <div className={cn(
+        "lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-black border-r border-[#1a1a1a] transform transition-transform duration-300",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="flex items-center justify-between p-4 border-b border-[#1a1a1a]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-white font-semibold">DeFiDash</h1>
+              <p className="text-xs text-gray-500">Smart Money Tracker</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-2 rounded-lg hover:bg-white/5 text-gray-400"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <nav className="p-3 space-y-1">
           {sidebarItems.map((item) => {
-            const Icon = item.icon
             const isActive = pathname === item.href
-            
             return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center space-x-3 px-3 py-2.5 transition-all duration-200 group border-2',
-                    isActive
-                      ? 'bg-primary text-black border-primary'
-                      : 'text-white border-transparent hover:text-primary hover:border-primary'
-                  )}
-                >
-                  <Icon className={cn(
-                    'w-4 h-4 transition-colors',
-                    isActive ? 'text-black' : 'text-white group-hover:text-primary'
-                  )} />
-                  <span className="font-medium text-sm uppercase tracking-wider">{item.title}</span>
-                </Link>
-              </li>
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
+                  isActive
+                    ? "bg-white/10 text-white"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                )}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium">{item.title}</span>
+              </Link>
             )
           })}
-        </ul>
-      </nav>
+        </nav>
 
-      <div className="p-4 space-y-4 border-t-2 border-white">
-        {/* Wallet Connection & Alerts */}
-        <div className="flex items-center justify-center gap-2">
-          <TransactionAlerts />
-          <WalletButton />
-        </div>
-        
-        <div className="bg-background border-2 border-primary p-3">
-          <div className="flex items-center space-x-2 mb-2">
-            <Zap className="w-4 h-4 text-primary" />
-            <span className="text-xs font-medium text-primary uppercase tracking-wider">Real-time Updates</span>
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#1a1a1a]">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-xs text-gray-500">Live Data Connected</span>
           </div>
-          <p className="text-xs text-white">
-            &gt; Monitoring {whaleCount} whale addresses
-          </p>
         </div>
       </div>
-    </div>
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex h-screen w-64 bg-black border-r border-[#1a1a1a] flex-col">
+        <div className="p-4 border-b border-[#1a1a1a]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-white font-semibold">DeFiDash</h1>
+              <p className="text-xs text-gray-500">Smart Money Tracker</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
+          {sidebarItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                  isActive
+                    ? "bg-white/10 text-white"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                )}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="text-sm font-medium">{item.title}</span>
+              </Link>
+            )
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-[#1a1a1a]">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-xs text-gray-500">Live Data</span>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }

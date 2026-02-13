@@ -30,7 +30,7 @@ export function MarketOverview({ marketData }: MarketOverviewProps) {
         {marketData.map((market) => (
           <div
             key={market.symbol}
-            className="bg-surface-300 border border-white/10 rounded-lg p-4 hover:border-primary/60 transition-all"
+            className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4 hover:border-primary/60 transition-all"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="text-primary font-mono font-bold text-lg">

@@ -232,7 +232,7 @@ export default function DashAgenticPage() {
                 Your AI Agentic system is connected to <strong className="text-primary">AsterDex perpetuals exchange</strong> with live API credentials. 
                 The system can execute real trades with actual funds.
               </p>
-              <div className="flex items-start gap-2 bg-surface-300 border border-yellow-500/30 rounded p-3">
+              <div className="flex items-start gap-2 bg-[#0a0a0a] border border-yellow-500/30 rounded p-3">
                 <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-yellow-500 text-sm font-bold mb-1">
@@ -347,7 +347,7 @@ export default function DashAgenticPage() {
         </Card>
       ) : (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-surface-300 border-2 border-white/10">
+          <TabsList className="bg-[#0a0a0a] border-2 border-white/10">
             <TabsTrigger value="overview" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
               <TrendingUp className="h-4 w-4 mr-2" />
               Overview

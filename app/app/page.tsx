@@ -16,7 +16,7 @@ import { MobileQuickStats } from '@/components/mobile/MobileQuickStats'
 import { MobileTrendingTokens } from '@/components/mobile/MobileTrendingTokens'
 import { MobileQuickActions } from '@/components/mobile/MobileQuickActions'
 import { MobileWhaleAlerts } from '@/components/mobile/MobileWhaleAlerts'
-import { RefreshCw, Sparkles } from 'lucide-react'
+import { RefreshCw, Activity, TrendingUp } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 export default function DashboardPage() {
@@ -48,17 +48,16 @@ export default function DashboardPage() {
     if (pullDistance > 80) {
       setIsRefreshing(true)
       
-      // Trigger refresh
       setTimeout(() => {
         setIsRefreshing(false)
         setPullDistance(0)
         setStartY(0)
         setLastUpdate(new Date())
         toast.success('Data refreshed!', {
-          icon: '✨',
           style: {
-            background: '#10b981',
+            background: '#0a0a0a',
             color: '#fff',
+            border: '1px solid #1a1a1a',
           }
         })
       }, 1500)
@@ -68,7 +67,6 @@ export default function DashboardPage() {
     }
   }, [pullDistance])
 
-  // Initialize time only on client side to avoid hydration mismatch
   useEffect(() => {
     setIsMounted(true)
     setLastUpdate(new Date())
@@ -87,11 +85,11 @@ export default function DashboardPage() {
   }, [handleTouchStart, handleTouchMove, handleTouchEnd])
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-background via-background to-muted/5">
+    <div className="min-h-screen bg-black">
       {/* Pull-to-refresh indicator */}
       {pullDistance > 0 && (
         <div 
-          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center bg-gradient-to-b from-primary/20 to-transparent transition-all duration-200"
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center bg-primary/10 transition-all duration-200"
           style={{
             height: `${pullDistance}px`,
             opacity: pullDistance / 100
@@ -99,46 +97,56 @@ export default function DashboardPage() {
         >
           <div className="flex flex-col items-center space-y-2">
             <RefreshCw 
-              className={`w-8 h-8 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
+              className={`w-6 h-6 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
               style={{
                 transform: `rotate(${pullDistance * 2}deg)`
               }}
             />
-            <span className="text-sm font-medium text-primary">
+            <span className="text-sm text-white">
               {pullDistance > 80 ? 'Release to refresh' : 'Pull to refresh'}
             </span>
           </div>
         </div>
       )}
 
-      <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
-        {/* Enhanced Mobile Header */}
-        <div className="flex flex-col space-y-3">
+      <div className="p-4 lg:p-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary via-blue-500 to-purple-500 bg-clip-text text-transparent flex items-center space-x-2">
-                <span>DeFiDash</span>
-                <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+              <h1 className="text-3xl lg:text-4xl font-bold text-white flex items-center gap-3">
+                <span>Smart Money Tracker</span>
               </h1>
-              <p className="text-muted-foreground mt-1 text-sm lg:text-base">
-                Real-time crypto intelligence
+              <p className="text-gray-400 mt-2">
+                Discover and track smart money movements across chains
               </p>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-green-500">LIVE</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-green-400">LIVE</span>
+              </div>
             </div>
           </div>
           
-          {/* Last update time - Only shown after client-side hydration */}
+          {/* Last update time */}
           {isMounted && lastUpdate && (
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm text-gray-500">
               Updated {lastUpdate.toLocaleTimeString()}
             </div>
           )}
         </div>
 
-        {/* Mobile Quick Stats - Shows first on mobile */}
+        {/* Search Bar - Swarms Style */}
+        <div className="relative max-w-2xl">
+          <input
+            type="text"
+            placeholder="Search by wallet, token, or transaction..."
+            className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-primary transition-colors"
+          />
+        </div>
+
+        {/* Mobile Quick Stats */}
         <div className="lg:hidden">
           <Suspense fallback={<LoadingCard />}>
             <MobileQuickStats key={lastUpdate?.getTime() || 0} />
@@ -157,14 +165,14 @@ export default function DashboardPage() {
           </Suspense>
         </div>
 
-        {/* Trending Tokens - Mobile optimized */}
+        {/* Trending Tokens - Mobile */}
         <div className="lg:hidden">
           <Suspense fallback={<LoadingCard />}>
             <MobileTrendingTokens key={lastUpdate?.getTime() || 0} />
           </Suspense>
         </div>
 
-        {/* Whale Alerts - Mobile optimized */}
+        {/* Whale Alerts - Mobile */}
         <div className="lg:hidden">
           <Suspense fallback={<LoadingCard />}>
             <MobileWhaleAlerts />
@@ -172,49 +180,43 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          {/* Market Overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Suspense fallback={<LoadingCard />}>
             <MarketOverview />
           </Suspense>
 
-          {/* Whale Activity */}
           <Suspense fallback={<LoadingCard />}>
             <WhaleActivity />
           </Suspense>
         </div>
 
-        {/* DeFi Overview Section */}
+        {/* DeFi Overview */}
         <Suspense fallback={<LoadingCard />}>
           <DeFiOverview />
         </Suspense>
 
-        {/* Smart Money Insights - Nansen Integration */}
+        {/* Smart Money Insights */}
         <Suspense fallback={<LoadingCard />}>
           <SmartMoneyInsights />
         </Suspense>
 
         {/* Real-Time Data Feeds */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          {/* Live Price Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Suspense fallback={<LoadingCard />}>
             <LivePriceFeed />
           </Suspense>
 
-          {/* Nansen Live Feed */}
           <Suspense fallback={<LoadingCard />}>
             <NansenLiveFeed />
           </Suspense>
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          {/* Exchange Flows */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Suspense fallback={<LoadingCard />}>
             <ExchangeFlows />
           </Suspense>
 
-          {/* Recent Alerts */}
           <Suspense fallback={<LoadingCard />}>
             <RecentAlerts />
           </Suspense>
