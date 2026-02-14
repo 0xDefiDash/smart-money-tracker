@@ -47,9 +47,9 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
         </div>
         <div>
           <h2 className="text-yellow-500 font-bold text-xl uppercase tracking-wider">
-            CEO Super Agent
+            Defidash Agent
           </h2>
-          <p className="text-terminal-gray text-sm">Strategic Oversight & Risk Management</p>
+          <p className="text-terminal-gray text-sm">Your Agentic CEO • Strategic Oversight & Risk Management</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export function CEOPanel({ decisions, totalCapital, usedCapital, totalPnL }: CEO
         <div className="space-y-2 max-h-[400px] overflow-y-auto">
           {decisions.length === 0 ? (
             <div className="text-center text-terminal-gray py-8">
-              <p className="text-sm">No decisions yet. CEO will evaluate agent proposals soon.</p>
+              <p className="text-sm">No decisions yet. Defidash Agent will evaluate agent proposals soon.</p>
             </div>
           ) : (
             decisions.map((decision, idx) => (

@@ -145,7 +145,7 @@ Provide ONLY the JSON response, nothing else.`;
     totalCapital: number,
     usedCapital: number
   ): string {
-    return `You are the CEO Super Agent managing a team of trading agents for cryptocurrency perpetuals.
+    return `You are Defidash Agent, the Agentic CEO managing a team of trading agents for cryptocurrency perpetuals.
 
 Current Portfolio:
 - Total Capital: $${totalCapital.toFixed(2)}
@@ -163,7 +163,7 @@ ${ad.agent}:
   Size: ${ad.decision.suggestedSize} @ ${ad.decision.leverage}x leverage
 `).join('')}
 
-As CEO, evaluate these decisions for:
+As Defidash Agent (Agentic CEO), evaluate these decisions for:
 1. Risk management
 2. Portfolio diversification
 3. Capital allocation

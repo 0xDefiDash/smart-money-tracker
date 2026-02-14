@@ -44,11 +44,11 @@ export interface SwarmResult {
 
 // Predefined Trading Agents
 export const TRADING_AGENTS: Record<string, AgentConfig> = {
-  // Director Agent - Top of hierarchy
+  // Defidash Agent - Agentic CEO at the top of hierarchy
   TRADING_DIRECTOR: {
-    agent_name: 'Trading-Director',
-    description: 'Chief strategist that coordinates all trading analysis and makes final decisions',
-    system_prompt: `You are the Trading Director, the chief strategist overseeing a crypto trading operation.
+    agent_name: 'Defidash-Agent',
+    description: 'Defidash Agent - Your Agentic CEO that coordinates all trading analysis and makes final decisions',
+    system_prompt: `You are Defidash Agent, the Agentic CEO overseeing a crypto trading operation.
 Your role is to:
 1. Analyze incoming market data and intelligence from your team
 2. Synthesize findings from Market Analyst, Risk Manager, and Technical Analyst

@@ -80,8 +80,8 @@ const WORKFLOWS = [
     id: 'hierarchical',
     name: 'Hierarchical Swarm',
     icon: GitBranch,
-    description: 'Director-led comprehensive analysis with specialized agents',
-    agents: ['Trading-Director', 'Market-Analyst', 'Risk-Manager', 'Technical-Analyst', 'OnChain-Analyst'],
+    description: 'Defidash Agent-led comprehensive analysis with specialized agents',
+    agents: ['Defidash-Agent', 'Market-Analyst', 'Risk-Manager', 'Technical-Analyst', 'OnChain-Analyst'],
     color: 'text-purple-400'
   },
   {
@@ -119,7 +119,7 @@ const WORKFLOWS = [
 ];
 
 const AGENT_TYPES = [
-  { id: 'TRADING_DIRECTOR', name: 'Trading Director', icon: Brain, color: 'text-purple-400' },
+  { id: 'TRADING_DIRECTOR', name: 'Defidash Agent', icon: Brain, color: 'text-purple-400' },
   { id: 'MARKET_ANALYST', name: 'Market Analyst', icon: TrendingUp, color: 'text-green-400' },
   { id: 'RISK_MANAGER', name: 'Risk Manager', icon: Shield, color: 'text-red-400' },
   { id: 'TECHNICAL_ANALYST', name: 'Technical Analyst', icon: BarChart3, color: 'text-blue-400' },

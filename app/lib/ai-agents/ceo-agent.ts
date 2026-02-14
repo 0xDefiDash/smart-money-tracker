@@ -1,4 +1,4 @@
-// CEO Super Agent - Orchestrates all trading agents
+// Defidash Agent - Your Agentic CEO that orchestrates all trading agents
 
 import { TradingAgent, CEODecision, AgentDecision, TradingSession } from './agent-types';
 import { llmService } from './llm-service';
