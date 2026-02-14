@@ -420,6 +420,68 @@ class CoinglassClient {
       h24: baseLiq,
     };
   }
+
+  /**
+   * Get cryptocurrency prices from Coinglass Coins Markets endpoint
+   * Returns current prices, market caps, and 24h changes for futures coins
+   */
+  async getCoinPrices(): Promise<CoinPrice[]> {
+    try {
+      const data = await this.request<any[]>('/public/v2/indicator/coins_markets');
+
+      if (!data || !Array.isArray(data)) {
+        console.log('[Coinglass] No price data returned, using fallback');
+        return [];
+      }
+
+      return data.map((coin: any, index: number) => ({
+        symbol: coin.symbol || coin.coin || '',
+        name: coin.name || coin.symbol || '',
+        price: parseFloat(coin.price || coin.current_price || '0'),
+        priceChange24h: parseFloat(coin.priceChange24h || coin.price_change_24h || '0'),
+        priceChangePercent24h: parseFloat(coin.priceChangePercentage24h || coin.price_change_percentage_24h || '0'),
+        volume24h: parseFloat(coin.volume24h || coin.total_volume || '0'),
+        marketCap: parseFloat(coin.marketCap || coin.market_cap || '0'),
+        marketCapRank: coin.marketCapRank || coin.market_cap_rank || index + 1,
+        openInterest: parseFloat(coin.openInterest || '0'),
+        fundingRate: parseFloat(coin.fundingRate || coin.avgFundingRate || '0'),
+      }));
+    } catch (error) {
+      console.error('[Coinglass] Error fetching coin prices:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get price for a specific symbol
+   */
+  async getCoinPrice(symbol: string): Promise<CoinPrice | null> {
+    const prices = await this.getCoinPrices();
+    return prices.find(p => p.symbol.toUpperCase() === symbol.toUpperCase()) || null;
+  }
+
+  /**
+   * Get prices for multiple symbols with Coinglass futures data
+   */
+  async getMultiCoinPrices(symbols: string[] = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX', 'DOT', 'LINK']): Promise<CoinPrice[]> {
+    const allPrices = await this.getCoinPrices();
+    const upperSymbols = symbols.map(s => s.toUpperCase());
+    return allPrices.filter(p => upperSymbols.includes(p.symbol.toUpperCase()));
+  }
+}
+
+// Price data interface for Coinglass
+export interface CoinPrice {
+  symbol: string;
+  name: string;
+  price: number;
+  priceChange24h: number;
+  priceChangePercent24h: number;
+  volume24h: number;
+  marketCap: number;
+  marketCapRank: number;
+  openInterest?: number;
+  fundingRate?: number;
 }
 
 export const coinglassClient = new CoinglassClient();

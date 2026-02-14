@@ -1,9 +1,18 @@
 
 /**
- * Enhanced Price Service with Multiple API Sources
- * Provides reliable cryptocurrency price data with automatic fallbacks
- * Updated for November 12, 2025
+ * Enhanced Price Service with Coinglass + Nansen Priority
+ * Provides institutional-grade cryptocurrency price data with automatic fallbacks
+ * 
+ * Priority Order:
+ * 1. Coinglass (futures market data with prices, OI, funding)
+ * 2. Nansen (smart money token prices)
+ * 3. Binance (spot prices)
+ * 4. CoinCap (backup)
+ * 5. CoinGecko (rate-limited backup)
+ * 6. Fallback data
  */
+
+import { coinglassClient, CoinPrice } from './coinglass-client';
 
 export interface PriceData {
   id: string;
@@ -21,6 +30,10 @@ export interface PriceData {
   image?: string;
   ath?: number;
   atl?: number;
+  // Coinglass-specific data
+  openInterest?: number;
+  fundingRate?: number;
+  longShortRatio?: number;
 }
 
 // In-memory cache to reduce API calls
@@ -35,6 +48,93 @@ let priceCache: {
 };
 
 const CACHE_DURATION = 15000; // 15 seconds cache for real-time feeds
+const NANSEN_API_KEY = process.env.NANSEN_API_KEY;
+
+// Token symbol to ID mapping for API compatibility
+const SYMBOL_MAP: Record<string, string> = {
+  'BTC': 'bitcoin', 'ETH': 'ethereum', 'BNB': 'binancecoin', 'SOL': 'solana',
+  'XRP': 'ripple', 'DOGE': 'dogecoin', 'ADA': 'cardano', 'AVAX': 'avalanche-2',
+  'DOT': 'polkadot', 'LINK': 'chainlink', 'TRX': 'tron', 'TON': 'toncoin',
+  'SHIB': 'shiba-inu', 'MATIC': 'polygon', 'LTC': 'litecoin', 'UNI': 'uniswap',
+  'ATOM': 'cosmos', 'FIL': 'filecoin', 'ARB': 'arbitrum', 'OP': 'optimism',
+  'APT': 'aptos', 'SUI': 'sui', 'NEAR': 'near', 'INJ': 'injective-protocol',
+  'PEPE': 'pepe', 'WIF': 'dogwifcoin', 'BONK': 'bonk', 'FLOKI': 'floki'
+};
+
+/**
+ * Fetch prices from Coinglass API (PRIMARY - Institutional-grade futures data)
+ */
+async function fetchFromCoinglass(): Promise<PriceData[]> {
+  console.log('[PriceService] Fetching from Coinglass...');
+  
+  const coinPrices = await coinglassClient.getCoinPrices();
+  
+  if (!coinPrices || coinPrices.length === 0) {
+    throw new Error('No prices returned from Coinglass');
+  }
+
+  return coinPrices.map((coin: CoinPrice) => ({
+    id: SYMBOL_MAP[coin.symbol.toUpperCase()] || coin.symbol.toLowerCase(),
+    symbol: coin.symbol,
+    name: coin.name || coin.symbol,
+    current_price: coin.price,
+    price_change_24h: coin.priceChange24h,
+    price_change_percentage_24h: coin.priceChangePercent24h,
+    market_cap: coin.marketCap,
+    market_cap_rank: coin.marketCapRank,
+    total_volume: coin.volume24h,
+    openInterest: coin.openInterest,
+    fundingRate: coin.fundingRate,
+    image: ''
+  }));
+}
+
+/**
+ * Fetch prices from Nansen Token Screener API (Smart Money validated prices)
+ */
+async function fetchFromNansen(): Promise<PriceData[]> {
+  if (!NANSEN_API_KEY) {
+    throw new Error('NANSEN_API_KEY not configured');
+  }
+
+  console.log('[PriceService] Fetching from Nansen Token Screener...');
+  
+  const response = await fetch('https://api.nansen.ai/api/v1/token-screener', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apiKey': NANSEN_API_KEY,
+    },
+    body: JSON.stringify({
+      chains: ['ethereum'],
+      timeframe: '24h',
+      limit: 50,
+      sort_by: 'market_cap_usd',
+      sort_order: 'desc',
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Nansen API error: ${response.status}`);
+  }
+
+  const result = await response.json();
+  const tokens = result.data || [];
+
+  return tokens.map((token: any, index: number) => ({
+    id: token.token_address?.toLowerCase() || token.symbol?.toLowerCase() || `token-${index}`,
+    symbol: token.symbol || 'UNKNOWN',
+    name: token.name || token.symbol || 'Unknown Token',
+    current_price: parseFloat(token.price_usd || '0'),
+    price_change_24h: parseFloat(token.price_change || '0') * parseFloat(token.price_usd || '0') / 100,
+    price_change_percentage_24h: parseFloat(token.price_change || '0'),
+    market_cap: parseFloat(token.market_cap_usd || '0'),
+    market_cap_rank: index + 1,
+    total_volume: parseFloat(token.volume || '0'),
+    image: ''
+  }));
+}
 
 /**
  * Fetch prices from CoinCap API (Free, no API key required)
@@ -384,11 +484,13 @@ export async function fetchCryptoPrices(): Promise<{
     };
   }
 
-  // Try each API in order
+  // Try each API in order - Coinglass and Nansen as priority sources
   const apis = [
-    { name: 'CoinGecko', fetch: fetchFromCoinGecko },
-    { name: 'CoinCap', fetch: fetchFromCoinCap },
-    { name: 'Binance', fetch: fetchFromBinance }
+    { name: 'Coinglass', fetch: fetchFromCoinglass },      // PRIMARY: Institutional futures data
+    { name: 'Binance', fetch: fetchFromBinance },          // Fast spot prices
+    { name: 'CoinCap', fetch: fetchFromCoinCap },          // Good backup
+    { name: 'Nansen', fetch: fetchFromNansen },            // Smart money validated
+    { name: 'CoinGecko', fetch: fetchFromCoinGecko },      // Rate-limited fallback
   ];
 
   for (const api of apis) {
