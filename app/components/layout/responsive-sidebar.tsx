@@ -24,7 +24,7 @@ const sidebarItems = [
   { title: 'Dashboard', href: '/', icon: Home },
   { title: 'Dash Agentic', href: '/dash-agentic', icon: Sparkles },
   { title: 'Agentic Trading', href: '/agentic-trading', icon: Zap },
-  { title: 'Wallet Tracker', href: '/wallet-tracker', icon: Wallet },
+  { title: 'Agent Performance', href: '/agent-performance', icon: Activity },
   { title: 'Smart Money', href: '/smart-money-tracker', icon: Brain },
   { title: 'Whale Tracker', href: '/whale-tracker', icon: Activity },
   { title: 'Exchange Flows', href: '/exchange-flows', icon: Building2 },

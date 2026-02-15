@@ -37,8 +37,8 @@ const sidebarItems = [
     icon: Video,
   },
   {
-    title: 'Wallet Tracker',
-    href: '/wallet-tracker',
+    title: 'Agent Performance',
+    href: '/agent-performance',
     icon: Target,
   },
   {

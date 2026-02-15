@@ -44,9 +44,9 @@ const sidebarItems = [
     icon: Zap,
   },
   {
-    title: 'Wallet Tracker',
-    href: '/wallet-tracker',
-    icon: Wallet,
+    title: 'Agent Performance',
+    href: '/agent-performance',
+    icon: Activity,
   },
   {
     title: 'Smart Money',
